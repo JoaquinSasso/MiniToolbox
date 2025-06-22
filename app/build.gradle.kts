@@ -1,3 +1,5 @@
+// app/build.gradle.kts
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -40,27 +42,39 @@ android {
 }
 
 dependencies {
+    // 1) Compose BOM for version alignment
     implementation(platform(libs.androidx.compose.bom))
+
+    // 2) Core Compose UI
     implementation(libs.androidx.ui)
-    implementation(libs.androidx.material3)
+
+    // 3) Compose Material 3
+    implementation("androidx.compose.material3:material3:1.3.2")
+
+
+    // 4) Icons, Activity & Navigation
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.navigation.compose.v280)  // Predictive back support
+
+    // 5) Glance (AppWidget + Material3)
     implementation(libs.androidx.glance.appwidget)
     implementation(libs.androidx.glance.material3)
-    implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.navigation.compose.v280) // Predictive back soporte
-    implementation(libs.androidx.activity)            // Soporte OnBackPressedDispatcher actualizado
-    implementation(libs.material3)   // Material3 con animaciones predictivas
 
-    // Core + Lifecycle
+    // 6) Core Android
+    implementation(libs.androidx.activity)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    // Test
+
+    // 7) Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
+
+    // 8) Debug
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }

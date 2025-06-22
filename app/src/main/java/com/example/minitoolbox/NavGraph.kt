@@ -1,29 +1,45 @@
+// app/src/main/java/com/example/minitoolbox/NavGraph.kt
 package com.example.minitoolbox
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.minitoolbox.CategoriesScreen
-import com.example.minitoolbox.tools.generadores.RandomColorGeneratorScreen
+import com.example.minitoolbox.tools.ToolRegistry
+import com.example.minitoolbox.tools.calculadoras.*
+import com.example.minitoolbox.tools.generadores.*
+import com.example.minitoolbox.tools.juegos.*
+import com.example.minitoolbox.nav.Screen
 
 @Composable
-fun NavGraph(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = "categories") {
-        composable("categories") {
-            CategoriesScreen(onToolSelected = { tool ->
-                when (tool) {
-                    "Generador de colores" -> navController.navigate("random_color_generator")
-                    // acá podés agregar más navegación para otras herramientas
+fun MiniToolboxNavGraph(navController: NavHostController) {
+    NavHost(
+        navController    = navController,
+        startDestination = Screen.Categories.route
+    ) {
+        composable(Screen.Categories.route) {
+            CategoriesScreen(
+                tools       = ToolRegistry.tools,
+                onToolClick = { tool ->
+                    // Navegamos usando la ruta definida en Screen, no el objeto Tool
+                    navController.navigate(tool.screen.route)
                 }
-            })
+            )
         }
-        composable("random_color_generator") {
-            RandomColorGeneratorScreen(onBack = {
-                navController.popBackStack()
-            })
+        composable(Screen.RandomColor.route) {
+            RandomColorGeneratorScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.GroupSelector.route) {
+            GroupSelectorScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.CoinFlip.route) {
+            CoinFlipScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.DecimalBinaryConverter.route) {
+            DecimalBinaryConverterScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.TextBinaryConverter.route) {
+            TextBinaryConverterScreen(onBack = { navController.popBackStack() })
         }
     }
 }
-
-

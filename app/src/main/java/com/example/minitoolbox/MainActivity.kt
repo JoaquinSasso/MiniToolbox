@@ -1,3 +1,4 @@
+// app/src/main/java/com/example/minitoolbox/MainActivity.kt
 package com.example.minitoolbox
 
 import android.os.Bundle
@@ -13,9 +14,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MiniToolboxTheme {
-                Surface(color = MaterialTheme.colorScheme.background) {
-                    val navController = rememberNavController()
-                    NavGraph(navController = navController)
+                val navController = rememberNavController()
+                Surface(
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    MiniToolboxNavGraph(navController = navController)
                 }
             }
         }

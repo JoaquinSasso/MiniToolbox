@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">MiniToolbox</string>
+    <string name="categories_title">Categorías</string>
+    <string name="random_color_title">Generador de Colores</string>
+    <string name="group_selector_title">Selector de Grupos</string>
+    <string name="coin_flip_title">Cara o Cruz</string>
+    <string name="category_generadores">Herramientas</string>
+    <string name="category_calculadoras">Calculadoras</string>
+    <string name="category_juegos">Minijuegos</string>
+    <string name="decimal_binary_converter_title">Decimal / Binario</string>
+    <string name="text_binary_converter_title">Texto / Binario</string>
+
 </resources>

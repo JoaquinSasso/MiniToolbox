@@ -1,88 +1,120 @@
+// app/src/main/java/com/example/minitoolbox/CategoriesScreen.kt
 package com.example.minitoolbox
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Build
-import androidx.compose.material.icons.filled.Functions
-import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-
-data class Category(
-    val name: String,
-    val icon: ImageVector,
-    val tools: List<String>
-)
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.minitoolbox.tools.Tool
+import com.example.minitoolbox.tools.ToolCategory
+import com.example.minitoolbox.viewmodel.CategoryViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CategoriesScreen(onToolSelected: (String) -> Unit) {
-    val categories = listOf(
-        Category(
-            name = "Herramientas",
-            icon = Icons.Default.Build,
-            tools = listOf("Generador de colores", "Selector de grupos", "Ruleta selectora")
-        ),
-        Category(
-            name = "Calculadoras",
-            icon = Icons.Default.Functions,
-            tools = listOf("Calculadora de edad", "Calculadora de propina")
-        ),
-        Category(
-            name = "Minijuegos",
-            icon = Icons.Default.SportsEsports,
-            tools = listOf("Medidor de reacción", "Contador de clics")
-        )
-    )
+fun CategoriesScreen(
+    tools: List<Tool>,
+    onToolClick: (Tool) -> Unit,
+    vm: CategoryViewModel = viewModel()
+) {
+    // Estado de la categoría seleccionada
+    val selectedCategory by vm.selectedCategory
+    // Haptic feedback
+    val haptic = LocalHapticFeedback.current
 
-    var selectedCategoryIndex by remember { mutableStateOf(0) }
-    val selectedCategory = categories[selectedCategoryIndex]
+    // Lista hardcodeada de categorías para evitar nulos
+    val categories = listOf(
+        ToolCategory.Generadores,
+        ToolCategory.Calculadoras,
+        ToolCategory.Juegos
+    )
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(selectedCategory.name) }
+                title = { Text(stringResource(selectedCategory.titleRes)) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor    = MaterialTheme.colorScheme.surfaceVariant,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                )
             )
         },
         bottomBar = {
-            NavigationBar {
-                categories.forEachIndexed { index, category ->
+            NavigationBar(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            ) {
+                categories.forEach { category ->
+                    val isSelected = category == selectedCategory
                     NavigationBarItem(
-                        icon = { Icon(category.icon, contentDescription = category.name) },
-                        selected = index == selectedCategoryIndex,
-                        onClick = { selectedCategoryIndex = index },
-                        alwaysShowLabel = false
+                        selected        = isSelected,
+                        onClick         = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            vm.selectedCategory.value = category
+                        },
+                        icon            = {
+                            Icon(
+                                imageVector       = category.icon,
+                                contentDescription = stringResource(category.titleRes)
+                            )
+                        },
+                        alwaysShowLabel = false,
+                        colors          = NavigationBarItemDefaults.colors(
+                            selectedIconColor   = MaterialTheme.colorScheme.primary,
+                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            indicatorColor      = MaterialTheme.colorScheme.primaryContainer
+                        )
                     )
                 }
             }
         }
-    ) { paddingValues ->
+    ) { innerPadding ->
+        // Filtramos las herramientas por categoría
+        val filteredTools = tools.filter { it.category == selectedCategory }
+
         LazyColumn(
+            contentPadding = PaddingValues(
+                top    = innerPadding.calculateTopPadding(),
+                bottom = innerPadding.calculateBottomPadding()
+            ),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(horizontal = 16.dp)
         ) {
-            items(selectedCategory.tools) { tool ->
+            items(filteredTools) { tool ->
                 Card(
-                    onClick = { onToolSelected(tool) },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onToolClick(tool)
+                        },
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        contentColor   = MaterialTheme.colorScheme.onSurface
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                 ) {
-                    Text(
-                        text = tool,
-                        modifier = Modifier.padding(16.dp)
-                    )
+                    Row(
+                        modifier          = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = tool.icon,
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(Modifier.width(16.dp))
+                        Text(tool.name, style = MaterialTheme.typography.bodyLarge)
+                    }
                 }
             }
         }
