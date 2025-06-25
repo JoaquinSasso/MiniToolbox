@@ -1,4 +1,3 @@
-// BubbleLevelScreen.kt
 package com.example.minitoolbox.tools.medicion
 
 import android.content.Context
@@ -6,10 +5,15 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.media.AudioManager
+import android.media.ToneGenerator
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,16 +23,15 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import kotlinx.coroutines.delay
 import kotlin.math.*
-import android.media.AudioManager
-import android.media.ToneGenerator
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Info
-
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 
 enum class OrientationMode { FLAT, PORTRAIT, LANDSCAPE }
 
@@ -42,74 +45,73 @@ fun BubbleLevelScreen(onBack: () -> Unit) {
     val sensorManager = remember {
         context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     }
-    val accelerometer = remember {
-        sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+    val rotationSensor = remember {
+        sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
     }
 
     // Colores
     val guideColor = MaterialTheme.colorScheme.primary
+    val smallerGuideColor = Color(0xFF034907)
     val normalColor = MaterialTheme.colorScheme.onBackground
     val leveledColor = Color(0xFF4CAF50)
 
-    // Estados
-    var gravityX by remember { mutableStateOf(0f) }
-    var gravityY by remember { mutableStateOf(0f) }
-    var gravityZ by remember { mutableStateOf(0f) }
-    var rollDeg by remember { mutableStateOf(0f) }
-    var pitchDeg by remember { mutableStateOf(0f) }
-    var prevRollDeg by remember { mutableStateOf(0f) }
-    var prevPitchDeg by remember { mutableStateOf(0f) }
-    var currentMode by remember { mutableStateOf(OrientationMode.PORTRAIT) }
+    // Estado de bloqueo (hold)
+    var isLocked by remember { mutableStateOf(false) }
+    var lockedBubbleOffset by remember { mutableStateOf(Offset.Zero) }
+    var lockedInclinationDegX by remember { mutableStateOf(0f) }
+    var lockedInclinationDegY by remember { mutableStateOf(0f) }
 
-    // Burbuja "visible" (suavizada) y "real" (target)
+    // Estados
     var bubbleOffset by remember { mutableStateOf(Offset.Zero) }
     var rawBubbleOffset by remember { mutableStateOf(Offset.Zero) }
+    var currentMode by remember { mutableStateOf(OrientationMode.PORTRAIT) }
+    var inclinationX by remember { mutableStateOf(0f) }
+    var inclinationY by remember { mutableStateOf(0f) }
+    var inclinationDegX by remember { mutableStateOf(0f) }
+    var inclinationDegY by remember { mutableStateOf(0f) }
 
-    val alpha = 0.8f
-    val axisThresh = 0.015f
-    val flatRatio = 0.7f      // Ajusta si querés que sea más o menos sensible el modo plano
-    val orientAngle = 50f     // Ángulo de umbral entre portrait y landscape
-    val stretcher = 1.75f      //Aumenta la sensibilidad en el modo portrait para que la burbuja llegue mas cerca del borde
+    val axisThresh = 0.01f
+    val flatRatio = 0.75f
+    val orientAngle = 40f
+    val stretcher = 1.75f
 
+    // Beep
     val toneGen = remember { ToneGenerator(AudioManager.STREAM_MUSIC, 100) }
+    var isForeground by remember { mutableStateOf(true) }
+    val lifecycleOwner = LocalLifecycleOwner.current
 
-
-    fun gMag() = sqrt(gravityX * gravityX + gravityY * gravityY + gravityZ * gravityZ)
-
-    // Normaliza ángulos a [-180,180]
-    fun normalizeAngle(deg: Float): Float {
-        var a = deg % 360f
-        if (a > 180f) a -= 360f
-        if (a < -180f) a += 360f
-        return a
-    }
-
-    // Interpola para evitar saltos bruscos en el paso ±180°
-    fun smoothAngle(prev: Float, current: Float): Float {
-        val delta = normalizeAngle(current - prev)
-        return prev + delta
-    }
+    // El valor que realmente se usa (puede estar congelado)
+    val displayBubbleOffset = if (isLocked) lockedBubbleOffset else bubbleOffset
+    val displayInclinationDegX = if (isLocked) lockedInclinationDegX else inclinationDegX
+    val displayInclinationDegY = if (isLocked) lockedInclinationDegY else inclinationDegY
 
     val isLevel by derivedStateOf {
         when (currentMode) {
-            OrientationMode.FLAT -> sqrt(bubbleOffset.x * bubbleOffset.x + bubbleOffset.y * bubbleOffset.y) <= axisThresh
-            OrientationMode.PORTRAIT -> abs(bubbleOffset.x) <= axisThresh
-            OrientationMode.LANDSCAPE -> abs(bubbleOffset.y) <= axisThresh
+            OrientationMode.FLAT      -> sqrt(displayBubbleOffset.x * displayBubbleOffset.x + displayBubbleOffset.y * displayBubbleOffset.y) <= axisThresh
+            OrientationMode.PORTRAIT  -> abs(displayBubbleOffset.x) <= axisThresh
+            OrientationMode.LANDSCAPE -> abs(displayBubbleOffset.y) <= axisThresh
         }
     }
 
-    LaunchedEffect(isLevel) {
-        while (isLevel) {
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            isForeground = event == Lifecycle.Event.ON_RESUME
+        }
+        val lifecycle = lifecycleOwner.lifecycle
+        lifecycle.addObserver(observer)
+        onDispose { lifecycle.removeObserver(observer) }
+    }
+
+    LaunchedEffect(isLevel, isForeground, isLocked) {
+        while (isLevel && isForeground && !isLocked) {
             toneGen.startTone(ToneGenerator.TONE_PROP_BEEP, 200)
-            // Espera un poco antes de repetir (ajusta el intervalo a gusto)
             delay(250)
         }
     }
 
-
-
-    // Suavizado de burbuja (interpolación animada)
-    LaunchedEffect(rawBubbleOffset) {
+    // Suavizado animado de burbuja
+    LaunchedEffect(rawBubbleOffset, isLocked) {
+        if (isLocked) return@LaunchedEffect
         val steps = 6
         val delayMs = 8L
         repeat(steps) {
@@ -122,47 +124,24 @@ fun BubbleLevelScreen(onBack: () -> Unit) {
         bubbleOffset = rawBubbleOffset
     }
 
-    DisposableEffect(sensorManager, accelerometer) {
-        var firstEvent = true
+    // SENSADO
+    DisposableEffect(sensorManager, rotationSensor) {
+        val rotationMatrix = FloatArray(9)
         val listener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent) {
-                if (event.sensor.type != Sensor.TYPE_ACCELEROMETER) return
+                // Convierte el vector de rotación (cuaternión) a matriz de rotación
+                SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values)
+                // El vector "arriba" del dispositivo en coordenadas del mundo (proyección en el plano XY)
+                val upX = -rotationMatrix[6]
+                val upY = -rotationMatrix[7]
+                val upZ = -rotationMatrix[8]
 
-                // Inicializa gravity rápido al arrancar
-                if (firstEvent) {
-                    gravityX = event.values[0]
-                    gravityY = event.values[1]
-                    gravityZ = event.values[2]
-                    firstEvent = false
-                } else {
-                    gravityX = alpha * gravityX + (1 - alpha) * event.values[0]
-                    gravityY = alpha * gravityY + (1 - alpha) * event.values[1]
-                    gravityZ = alpha * gravityZ + (1 - alpha) * event.values[2]
-                }
+                val gm = sqrt(upX * upX + upY * upY + upZ * upZ)
+                val flat = gm > 0f && abs(upZ) / gm > flatRatio
+                val degX = Math.toDegrees(asin(upX.toDouble())).toFloat()
+                val degY = Math.toDegrees(asin(upY.toDouble())).toFloat()
 
-                // Roll/pitch en radianes
-                val rollRad = atan2(gravityY, gravityZ)
-                val pitchRad = atan2(
-                    -gravityX,
-                    sqrt(gravityY * gravityY + gravityZ * gravityZ)
-                )
-
-                // A grados
-                val rawRoll = Math.toDegrees(rollRad.toDouble()).toFloat()
-                val rawPitch = Math.toDegrees(pitchRad.toDouble()).toFloat()
-
-                // Normalizar y suavizar para evitar saltos
-                val normRoll = normalizeAngle(rawRoll)
-                val normPitch = normalizeAngle(rawPitch)
-                rollDeg = smoothAngle(prevRollDeg, normRoll)
-                pitchDeg = smoothAngle(prevPitchDeg, normPitch)
-                prevRollDeg = rollDeg
-                prevPitchDeg = pitchDeg
-
-                // Calculo del modo: SOLO UNO activo a la vez, con prioridad a flat
-                val gm = sqrt(gravityX * gravityX + gravityY * gravityY + gravityZ * gravityZ)
-                val flat = gm > 0f && abs(gravityZ) / gm > flatRatio
-                val landscape = !flat && (abs(pitchDeg) > orientAngle)
+                val landscape = !flat && (abs(degX) > orientAngle)
                 val mode = when {
                     flat -> OrientationMode.FLAT
                     landscape -> OrientationMode.LANDSCAPE
@@ -170,34 +149,37 @@ fun BubbleLevelScreen(onBack: () -> Unit) {
                 }
                 currentMode = mode
 
-                // Calculo del offset según modo (rawBubbleOffset, para suavizar luego)
-                when (mode) {
-                    OrientationMode.FLAT -> {
-                        // x = pitch (adelante/atrás), y = roll (izquierda/derecha)
-                        val x = (pitchRad / (PI/4)).toFloat().coerceIn(-1f, 1f)
-                        val y = (rollRad / (PI/4)).toFloat().coerceIn(-1f, 1f)
-                        rawBubbleOffset = Offset(x, y)
-                    }
-                    OrientationMode.PORTRAIT -> {
-                        // Solo se mueve horizontal: pitch
-                        val x = (pitchRad / (PI/2)).toFloat().coerceIn(-1f, 1f)
-                        rawBubbleOffset = Offset(x, 0f)
-                    }
-                    OrientationMode.LANDSCAPE -> {
-                        // Solo se mueve vertical: roll
-                        val y = (rollRad / (PI/2)).toFloat().coerceIn(-1f, 1f)
-                        rawBubbleOffset = Offset(0f, y)
-                    }
+                // Offset (normalizado a -1..1)
+                val newBubbleOffset = when (mode) {
+                    OrientationMode.FLAT -> Offset(upX.coerceIn(-1f, 1f), upY.coerceIn(-1f, 1f))
+                    OrientationMode.PORTRAIT -> Offset(upX.coerceIn(-1f, 1f), 0f)
+                    OrientationMode.LANDSCAPE -> Offset(0f, upY.coerceIn(-1f, 1f))
+                }
+
+                if (!isLocked) {
+                    rawBubbleOffset = newBubbleOffset
+                    inclinationX = upX
+                    inclinationY = upY
+                    inclinationDegX = degX
+                    inclinationDegY = degY
                 }
             }
-
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
         }
-
-        sensorManager.registerListener(listener, accelerometer, SensorManager.SENSOR_DELAY_UI)
-        onDispose { sensorManager.unregisterListener(listener)
+        sensorManager.registerListener(listener, rotationSensor, SensorManager.SENSOR_DELAY_UI)
+        onDispose {
             sensorManager.unregisterListener(listener)
-            toneGen.release()}
+            toneGen.release()
+        }
+    }
+
+    // Al bloquear, guardamos la posición "congelada"
+    LaunchedEffect(isLocked) {
+        if (isLocked) {
+            lockedBubbleOffset = bubbleOffset
+            lockedInclinationDegX = inclinationDegX
+            lockedInclinationDegY = inclinationDegY
+        }
     }
 
     Scaffold(
@@ -210,6 +192,13 @@ fun BubbleLevelScreen(onBack: () -> Unit) {
                     }
                 },
                 actions = {
+                    // Botón de hold/bloqueo
+                    IconButton(onClick = { isLocked = !isLocked }) {
+                        Icon(
+                            imageVector = if (isLocked) Icons.Filled.PlayArrow else Icons.Filled.Pause,
+                            contentDescription = if (isLocked) "Desbloquear burbuja" else "Bloquear burbuja"
+                        )
+                    }
                     IconButton(onClick = { showInfo = true }) {
                         Icon(Icons.Filled.Info, contentDescription = "Información")
                     }
@@ -235,25 +224,66 @@ fun BubbleLevelScreen(onBack: () -> Unit) {
                 when (currentMode) {
                     OrientationMode.FLAT -> {
                         val radius = min(w, h) / 3f
+                        val center = Offset(w / 2f, h / 2f)
+
+                        // Anillos concéntricos
                         drawCircle(
                             color = guideColor,
                             radius = radius,
-                            center = Offset(w / 2f, h / 2f),
+                            center = center,
                             style = Stroke(width = 4.dp.toPx())
                         )
-                        val x = w / 2f - bubbleOffset.x * (radius - bubbleR)
-                        val y = h / 2f - bubbleOffset.y * (radius - bubbleR)
+                        drawCircle(
+                            color = smallerGuideColor,
+                            radius = radius / 5f,
+                            center = center,
+                            style = Stroke(width = 2.dp.toPx())
+                        )
+                        drawCircle(
+                            color = smallerGuideColor,
+                            radius = radius / 2f,
+                            center = center,
+                            style = Stroke(width = 2.dp.toPx())
+                        )
+                        drawCircle(
+                            color = smallerGuideColor,
+                            radius = radius / 1.3f,
+                            center = center,
+                            style = Stroke(width = 2.dp.toPx())
+                        )
+
+                        // Línea horizontal (centro)
+                        drawLine(
+                            color = smallerGuideColor,
+                            start = Offset(center.x - radius, center.y),
+                            end = Offset(center.x + radius, center.y),
+                            strokeWidth = 2.dp.toPx()
+                        )
+                        // Línea vertical (centro)
+                        drawLine(
+                            color = smallerGuideColor,
+                            start = Offset(center.x, center.y - radius),
+                            end = Offset(center.x, center.y + radius),
+                            strokeWidth = 2.dp.toPx()
+                        )
+
+                        // Burbuja
+                        val x = center.x + displayBubbleOffset.x * (radius - bubbleR)
+                        val y = center.y + displayBubbleOffset.y * (radius - bubbleR)
                         drawCircle(
                             color = if (isLevel) leveledColor else normalColor,
-                            radius = bubbleR, center = Offset(x, y)
+                            radius = bubbleR, center = Offset(x, y),
+                            alpha = 0.7f
                         )
                     }
+
                     OrientationMode.PORTRAIT -> {
                         val rectW = w * 0.8f
                         val rectH = 40.dp.toPx()
                         val left = (w - rectW) / 2f
                         val top = (h - rectH) / 2f
                         val rr = CornerRadius(x = rectH / 2f, y = rectH / 2f)
+                        // Guia mayor
                         drawRoundRect(
                             color = guideColor,
                             topLeft = Offset(left, top),
@@ -261,19 +291,34 @@ fun BubbleLevelScreen(onBack: () -> Unit) {
                             cornerRadius = rr,
                             style = Stroke(width = 4.dp.toPx())
                         )
-                        val x = left + rectW / 2f - (bubbleOffset.x * (rectW / 2f - bubbleR)) * stretcher
+                        // Guia menor (centrada)
+                        val minorW = rectW / 6f
+                        val minorLeft = left + (rectW - minorW) / 2f
+                        drawRoundRect(
+                            color = smallerGuideColor,
+                            topLeft = Offset(minorLeft, top),
+                            size = Size(minorW, rectH),
+                            cornerRadius = rr,
+                            style = Stroke(width = 3.dp.toPx())
+                        )
+                        // Burbuja
+                        val x =
+                            left + rectW / 2f + (displayBubbleOffset.x * (rectW / 2f - bubbleR)) * stretcher
                         val y = top + rectH / 2f
                         drawCircle(
                             color = if (isLevel) leveledColor else normalColor,
-                            radius = bubbleR, center = Offset(x, y)
+                            radius = bubbleR, center = Offset(x, y),
+                            alpha = 0.7f
                         )
                     }
+
                     OrientationMode.LANDSCAPE -> {
                         val rectH = h * 0.8f
                         val rectW = 40.dp.toPx()
                         val left = (w - rectW) / 2f
                         val top = (h - rectH) / 2f
                         val rr = CornerRadius(x = rectW / 2f, y = rectW / 2f)
+                        // Guia mayor
                         drawRoundRect(
                             color = guideColor,
                             topLeft = Offset(left, top),
@@ -281,11 +326,23 @@ fun BubbleLevelScreen(onBack: () -> Unit) {
                             cornerRadius = rr,
                             style = Stroke(width = 4.dp.toPx())
                         )
+                        // Guia menor (centrada)
+                        val minorH = rectH / 10f
+                        val minorTop = top + (rectH - minorH) / 2f
+                        drawRoundRect(
+                            color = smallerGuideColor,
+                            topLeft = Offset(left, minorTop),
+                            size = Size(rectW, minorH),
+                            cornerRadius = rr,
+                            style = Stroke(width = 3.dp.toPx())
+                        )
+                        // Burbuja
                         val x = left + rectW / 2f
-                        val y = top + rectH / 2f - bubbleOffset.y * (rectH / 2f - bubbleR)
+                        val y = top + rectH / 2f + displayBubbleOffset.y * (rectH / 2f - bubbleR)
                         drawCircle(
                             color = if (isLevel) leveledColor else normalColor,
-                            radius = bubbleR, center = Offset(x, y)
+                            radius = bubbleR, center = Offset(x, y),
+                            alpha = 0.7f
                         )
                     }
                 }
@@ -293,13 +350,26 @@ fun BubbleLevelScreen(onBack: () -> Unit) {
 
             Spacer(Modifier.height(16.dp))
 
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Text("Inclinación horizontal: ${"%.1f".format(pitchDeg)}°")
-                Text("Inclinación vertical:   ${"%.1f".format(rollDeg)}°")
+            val landscapeRotation = when {
+                currentMode == OrientationMode.LANDSCAPE && displayInclinationDegX > orientAngle  ->  -90f
+                currentMode == OrientationMode.LANDSCAPE && displayInclinationDegX < -orientAngle -> 90f
+                else -> 0f
             }
+
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.graphicsLayer(rotationZ = landscapeRotation)
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text("X: ${"%.2f".format(displayInclinationDegX)}°", fontSize = 22.sp)
+                    Text("Y: ${"%.2f".format(displayInclinationDegY)}°", fontSize = 22.sp)
+                }
+            }
+
+            Spacer(Modifier.height(25.dp))
         }
     }
     if (showInfo) {
@@ -315,6 +385,7 @@ fun BubbleLevelScreen(onBack: () -> Unit) {
                     Text("   – Puedes utilizar los modos Flat, Portrait y Landscape para medir inclinación en diferentes posiciones del dispositivo.")
                     Text("   – Flat (plano) detecta nivel en ambas direcciones.")
                     Text("   – Portrait y Landscape miden nivel en una sola dirección.")
+                    Text("   – Usa el botón con el icono de pausa para congelar/retener la burbuja y los valores.")
                 }
             },
             confirmButton = {
@@ -325,4 +396,3 @@ fun BubbleLevelScreen(onBack: () -> Unit) {
         )
     }
 }
-
