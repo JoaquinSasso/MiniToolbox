@@ -1,5 +1,6 @@
 [versions]
 agp = "8.10.1"
+datastorePreferences = "1.1.7"
 kotlin = "2.0.21"
 coreKtx = "1.16.0"
 junit = "4.13.2"
@@ -16,6 +17,8 @@ navigationCompose = "2.8.0"
 [libraries]
 androidx-activity = { module = "androidx.activity:activity", version.ref = "activityCompose" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
+androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleRuntimeKtx" }
 androidx-material3-v140alpha15 = { module = "androidx.compose.material3:material3", version.ref = "material3Version" }
 androidx-navigation-compose-v280 = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

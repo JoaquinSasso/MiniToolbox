@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,6 +27,7 @@ fun GroupSelectorScreen(onBack: () -> Unit) {
     var showError by remember { mutableStateOf(false) }
     var teams by remember { mutableStateOf<Map<PointerId, Int>>(emptyMap()) }
     val haptic = LocalHapticFeedback.current
+    var showInfo    by remember { mutableStateOf(false) }
     val teamColors = remember {
         listOf(
             Color(0xFF2196F3), // Azul
@@ -36,8 +38,10 @@ fun GroupSelectorScreen(onBack: () -> Unit) {
         )
     }
 
+    // Nueva variable para controlar si ya se reprodujo la vibración
+    var hasVibrated by remember { mutableStateOf(false) }
+
     // Agrupa los dedos en equipos cuando hay dedos y el número es divisible
-    // Solo depende de los IDs, no de las posiciones
     val fingerIds = fingerPositions.keys.toList()
 
     LaunchedEffect(fingerIds, selectedSize) {
@@ -45,6 +49,7 @@ fun GroupSelectorScreen(onBack: () -> Unit) {
         if (count > 0) {
             if (count % selectedSize == 0) {
                 showError = false
+                hasVibrated = false // Reseteamos la vibración cuando el error ya no es necesario
                 delay(1000)
                 if (fingerPositions.keys.toSet() == fingerIds.toSet()) {
                     val shuffledIds = fingerIds.shuffled()
@@ -63,15 +68,19 @@ fun GroupSelectorScreen(onBack: () -> Unit) {
                 if (
                     fingerPositions.size == count &&
                     fingerPositions.keys.toSet() == fingerIds.toSet() &&
-                    count % selectedSize != 0
+                    count % selectedSize != 0 && !hasVibrated
                 ) {
                     showError = true
+                    // Solo vibramos una vez
+                    haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                    hasVibrated = true // Indicamos que ya se reprodujo el feedback
                 }
                 teams = emptyMap()
             }
         } else {
             showError = false
             teams = emptyMap()
+            hasVibrated = false // Reseteamos el estado de vibración si no hay dedos
         }
     }
 
@@ -81,16 +90,15 @@ fun GroupSelectorScreen(onBack: () -> Unit) {
                 title = { Text("Selector de grupos") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Volver",
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
+                actions = {
+                    IconButton(onClick = { showInfo = true }) {
+                        Icon(Icons.Filled.Info, contentDescription = "Información")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface)
             )
         }
     ) { padding ->
@@ -116,7 +124,7 @@ fun GroupSelectorScreen(onBack: () -> Unit) {
                 (2..5).forEach { size ->
                     Button(
                         onClick = { selectedSize = size
-                                  haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)},
+                            haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)},
                         colors = ButtonDefaults.buttonColors(
                             containerColor = if (selectedSize == size) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
                             contentColor = if (selectedSize == size) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
@@ -174,14 +182,41 @@ fun GroupSelectorScreen(onBack: () -> Unit) {
                     )
                 }
                 if (showError) {
-                    haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .background(Color(0x55FF0000))
                     )
+                    Text(
+                        text = "Cantidad de jugadores incorrecta",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
                 }
             }
         }
     }
+    if (showInfo) {
+        AlertDialog(
+            onDismissRequest = { showInfo = false },
+            title = { Text("Acerca de Selector de Grupos") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("• Para qué sirve: Distribuye participantes en equipos de tamaño fijo de forma aleatoria y táctil.")
+                    Text("• Guía rápida:")
+                    Text("   – Selecciona el tamaño de equipo (2–5).")
+                    Text("   – Cada jugador debe colocar un dedo en la pantalla. Si el número de dedos no es divisible, verás un aviso de error.")
+                    Text("   – Los círculos de colores debajo de los dedos de cada jugador indican los equipos asignados.")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showInfo = false }) {
+                    Text("Cerrar")
+                }
+            }
+        )
+    }
 }
+
+

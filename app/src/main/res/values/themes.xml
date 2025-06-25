@@ -1,5 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-
-    <style name="Theme.MiniToolbox" parent="android:Theme.Material.Light.NoActionBar" />
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Base application theme -->
+    <style name="Theme.MiniToolbox" parent="Theme.Material3.DayNight">
+        <!-- No necesitas especificar los colores aquí, ya que el sistema se encargará de ello -->
+    </style>
 </resources>

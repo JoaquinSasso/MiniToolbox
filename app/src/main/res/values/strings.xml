@@ -7,7 +7,15 @@
     <string name="category_generadores">Herramientas</string>
     <string name="category_calculadoras">Calculadoras</string>
     <string name="category_juegos">Minijuegos</string>
+    <string name="category_informacion">Información</string>
+    <string name="category_recordatorios">Recordatorios</string>
+    <string name="category_medicion">Medición</string>
     <string name="decimal_binary_converter_title">Decimal / Binario</string>
     <string name="text_binary_converter_title">Texto / Binario</string>
+    <string name="truco_score_board_title">Anotador Truco</string>
+    <string name="age_calculator_title">Calculadora de Edad</string>
+    <string name="zodiac_sign_title">Signo del Zodíaco</string>
+    <string name="pomodoro_title">Temporizador Pomodoro</string>
+    <string name="bubble_level_title">Nivel Burbuja</string>
 
 </resources>

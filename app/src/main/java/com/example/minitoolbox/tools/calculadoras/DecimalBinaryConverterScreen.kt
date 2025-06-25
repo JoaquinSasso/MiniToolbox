@@ -6,6 +6,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -24,6 +25,7 @@ fun DecimalBinaryConverterScreen(onBack: () -> Unit) {
     var binaryInput by remember { mutableStateOf("") }
     val clipboard = LocalClipboardManager.current
     val haptic = LocalHapticFeedback.current
+    var showInfo    by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -34,9 +36,12 @@ fun DecimalBinaryConverterScreen(onBack: () -> Unit) {
                         Icon(Icons.Filled.ArrowBack, contentDescription = "Volver")
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                )
+                actions = {
+                    IconButton(onClick = { showInfo = true }) {
+                        Icon(Icons.Filled.Info, contentDescription = "Información")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             )
         }
     ) { inner ->
@@ -121,5 +126,25 @@ fun DecimalBinaryConverterScreen(onBack: () -> Unit) {
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
         }
+    }
+    if (showInfo) {
+        AlertDialog(
+            onDismissRequest = { showInfo = false },
+            title = { Text("Acerca de Decimal ↔ Binario") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("• Para qué sirve: Convierte entre números decimales y su representación binaria.")
+                    Text("• Guía rápida:")
+                    Text("   – Ingresa un número decimal para ver su representación en binario.")
+                    Text("   – También puedes ingresar un número binario para ver su representación decimal.")
+                    Text("   – Pulsa 📋 para copiar el resultado.")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showInfo = false }) {
+                    Text("Cerrar")
+                }
+            }
+        )
     }
 }

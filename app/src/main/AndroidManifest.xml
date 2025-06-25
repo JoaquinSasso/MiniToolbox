@@ -1,21 +1,35 @@
-
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.minitoolbox">
-    <uses-permission android:name="android.permission.VIBRATE"/>
+
+    <!-- Permisos para servicios en primer plano -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+
+    <!-- Otros permisos -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:allowBackup="true"
         android:label="MiniToolbox"
+        android:icon="@drawable/ic_launcher"
         android:theme="@style/Theme.MiniToolbox"
         android:enableOnBackInvokedCallback="true">
+
         <activity
             android:name=".MainActivity"
-            android:exported="true"
-            android:label="MiniToolbox">
+            android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-    </application>
 
+        <!-- Servicio Pomodoro con tipo dataSync -->
+        <service
+            android:name=".tools.pomodoro.PomodoroService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
+    </application>
 </manifest>

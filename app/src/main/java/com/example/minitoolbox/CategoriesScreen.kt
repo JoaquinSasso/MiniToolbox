@@ -34,7 +34,10 @@ fun CategoriesScreen(
     val categories = listOf(
         ToolCategory.Generadores,
         ToolCategory.Calculadoras,
-        ToolCategory.Juegos
+        ToolCategory.Juegos,
+        ToolCategory.Informacion,
+        ToolCategory.Recordatorios,
+        ToolCategory.Medicion
     )
 
     Scaffold(
@@ -44,7 +47,8 @@ fun CategoriesScreen(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor    = MaterialTheme.colorScheme.surfaceVariant,
                     titleContentColor = MaterialTheme.colorScheme.onSurface
-                )
+                ),
+                modifier = Modifier.fillMaxWidth()
             )
         },
         bottomBar = {
@@ -67,7 +71,7 @@ fun CategoriesScreen(
                         },
                         alwaysShowLabel = false,
                         colors          = NavigationBarItemDefaults.colors(
-                            selectedIconColor   = MaterialTheme.colorScheme.primary,
+                            selectedIconColor   = MaterialTheme.colorScheme.onPrimary,
                             unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
                             indicatorColor      = MaterialTheme.colorScheme.primaryContainer
                         )
@@ -81,14 +85,16 @@ fun CategoriesScreen(
 
         LazyColumn(
             contentPadding = PaddingValues(
-                top    = innerPadding.calculateTopPadding(),
+                top    = innerPadding.calculateTopPadding(),  // Esto garantiza que el contenido no se sobreponga
                 bottom = innerPadding.calculateBottomPadding()
             ),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 16.dp)
-        ) {
+                .padding(horizontal = 16.dp, vertical = 15.dp)
+        )
+
+        {
             items(filteredTools) { tool ->
                 Card(
                     modifier = Modifier
@@ -98,7 +104,7 @@ fun CategoriesScreen(
                             onToolClick(tool)
                         },
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
                         contentColor   = MaterialTheme.colorScheme.onSurface
                     ),
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)

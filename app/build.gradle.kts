@@ -29,13 +29,16 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = "11"
     }
+
     buildFeatures {
         compose = true
     }
@@ -48,9 +51,9 @@ dependencies {
     // 2) Core Compose UI
     implementation(libs.androidx.ui)
 
-    // 3) Compose Material 3
+    // 3) Compose Material 3 (Actualización a Material3)
     implementation("androidx.compose.material3:material3:1.3.2")
-
+    implementation("com.google.android.material:material:1.12.0")
 
     // 4) Icons, Activity & Navigation
     implementation(libs.androidx.material.icons.extended)
@@ -66,6 +69,10 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+
+
 
     // 7) Testing
     testImplementation(libs.junit)
@@ -77,4 +84,7 @@ dependencies {
     // 8) Debug
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    // Si aún decides usar alguna versión de Material que no sea Material3, agrega:
+    // implementation 'com.google.android.material:material:1.6.0'
 }
