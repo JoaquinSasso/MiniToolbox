@@ -32,6 +32,8 @@ import kotlinx.coroutines.delay
 import kotlin.math.*
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 
 enum class OrientationMode { FLAT, PORTRAIT, LANDSCAPE }
 
@@ -40,6 +42,7 @@ fun lerp(a: Float, b: Float, t: Float) = a + (b - a) * t
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BubbleLevelScreen(onBack: () -> Unit) {
+    val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
     var showInfo by remember { mutableStateOf(false) }
     val sensorManager = remember {
@@ -51,7 +54,7 @@ fun BubbleLevelScreen(onBack: () -> Unit) {
 
     // Colores
     val guideColor = MaterialTheme.colorScheme.primary
-    val smallerGuideColor = Color(0xFF034907)
+    val smallerGuideColor = Color(0xFF00FF1B)
     val normalColor = MaterialTheme.colorScheme.onBackground
     val leveledColor = Color(0xFF4CAF50)
 
@@ -87,8 +90,8 @@ fun BubbleLevelScreen(onBack: () -> Unit) {
 
     val isLevel by derivedStateOf {
         when (currentMode) {
-            OrientationMode.FLAT      -> sqrt(displayBubbleOffset.x * displayBubbleOffset.x + displayBubbleOffset.y * displayBubbleOffset.y) <= axisThresh
-            OrientationMode.PORTRAIT  -> abs(displayBubbleOffset.x) <= axisThresh
+            OrientationMode.FLAT -> sqrt(displayBubbleOffset.x * displayBubbleOffset.x + displayBubbleOffset.y * displayBubbleOffset.y) <= axisThresh
+            OrientationMode.PORTRAIT -> abs(displayBubbleOffset.x) <= axisThresh
             OrientationMode.LANDSCAPE -> abs(displayBubbleOffset.y) <= axisThresh
         }
     }
@@ -110,7 +113,8 @@ fun BubbleLevelScreen(onBack: () -> Unit) {
     }
 
     // Suavizado animado de burbuja
-    LaunchedEffect(rawBubbleOffset, isLocked) {
+    // Suavizado solo si NO está bloqueado
+    LaunchedEffect(rawBubbleOffset) {
         if (isLocked) return@LaunchedEffect
         val steps = 6
         val delayMs = 8L
@@ -123,6 +127,16 @@ fun BubbleLevelScreen(onBack: () -> Unit) {
         }
         bubbleOffset = rawBubbleOffset
     }
+
+// Cuando bloqueás, guarda el valor SUAVIZADO al instante
+    LaunchedEffect(isLocked) {
+        if (isLocked) {
+            lockedBubbleOffset = bubbleOffset
+            lockedInclinationDegX = inclinationDegX
+            lockedInclinationDegY = inclinationDegY
+        }
+    }
+
 
     // SENSADO
     DisposableEffect(sensorManager, rotationSensor) {
@@ -164,6 +178,7 @@ fun BubbleLevelScreen(onBack: () -> Unit) {
                     inclinationDegY = degY
                 }
             }
+
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
         }
         sensorManager.registerListener(listener, rotationSensor, SensorManager.SENSOR_DELAY_UI)
@@ -192,14 +207,10 @@ fun BubbleLevelScreen(onBack: () -> Unit) {
                     }
                 },
                 actions = {
-                    // Botón de hold/bloqueo
-                    IconButton(onClick = { isLocked = !isLocked }) {
-                        Icon(
-                            imageVector = if (isLocked) Icons.Filled.PlayArrow else Icons.Filled.Pause,
-                            contentDescription = if (isLocked) "Desbloquear burbuja" else "Bloquear burbuja"
-                        )
-                    }
-                    IconButton(onClick = { showInfo = true }) {
+                    IconButton(onClick = {
+                        showInfo = true
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    }) {
                         Icon(Icons.Filled.Info, contentDescription = "Información")
                     }
                 },
@@ -211,188 +222,220 @@ fun BubbleLevelScreen(onBack: () -> Unit) {
             Modifier.fillMaxSize().padding(padding),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Canvas(
-                Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .padding(24.dp)
+
+            Spacer(Modifier.height(8.dp))
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
             ) {
-                val w = size.width
-                val h = size.height
-                val bubbleR = 20.dp.toPx()
-
-                when (currentMode) {
-                    OrientationMode.FLAT -> {
-                        val radius = min(w, h) / 3f
-                        val center = Offset(w / 2f, h / 2f)
-
-                        // Anillos concéntricos
-                        drawCircle(
-                            color = guideColor,
-                            radius = radius,
-                            center = center,
-                            style = Stroke(width = 4.dp.toPx())
-                        )
-                        drawCircle(
-                            color = smallerGuideColor,
-                            radius = radius / 5f,
-                            center = center,
-                            style = Stroke(width = 2.dp.toPx())
-                        )
-                        drawCircle(
-                            color = smallerGuideColor,
-                            radius = radius / 2f,
-                            center = center,
-                            style = Stroke(width = 2.dp.toPx())
-                        )
-                        drawCircle(
-                            color = smallerGuideColor,
-                            radius = radius / 1.3f,
-                            center = center,
-                            style = Stroke(width = 2.dp.toPx())
-                        )
-
-                        // Línea horizontal (centro)
-                        drawLine(
-                            color = smallerGuideColor,
-                            start = Offset(center.x - radius, center.y),
-                            end = Offset(center.x + radius, center.y),
-                            strokeWidth = 2.dp.toPx()
-                        )
-                        // Línea vertical (centro)
-                        drawLine(
-                            color = smallerGuideColor,
-                            start = Offset(center.x, center.y - radius),
-                            end = Offset(center.x, center.y + radius),
-                            strokeWidth = 2.dp.toPx()
-                        )
-
-                        // Burbuja
-                        val x = center.x + displayBubbleOffset.x * (radius - bubbleR)
-                        val y = center.y + displayBubbleOffset.y * (radius - bubbleR)
-                        drawCircle(
-                            color = if (isLevel) leveledColor else normalColor,
-                            radius = bubbleR, center = Offset(x, y),
-                            alpha = 0.7f
-                        )
-                    }
-
-                    OrientationMode.PORTRAIT -> {
-                        val rectW = w * 0.8f
-                        val rectH = 40.dp.toPx()
-                        val left = (w - rectW) / 2f
-                        val top = (h - rectH) / 2f
-                        val rr = CornerRadius(x = rectH / 2f, y = rectH / 2f)
-                        // Guia mayor
-                        drawRoundRect(
-                            color = guideColor,
-                            topLeft = Offset(left, top),
-                            size = Size(rectW, rectH),
-                            cornerRadius = rr,
-                            style = Stroke(width = 4.dp.toPx())
-                        )
-                        // Guia menor (centrada)
-                        val minorW = rectW / 6f
-                        val minorLeft = left + (rectW - minorW) / 2f
-                        drawRoundRect(
-                            color = smallerGuideColor,
-                            topLeft = Offset(minorLeft, top),
-                            size = Size(minorW, rectH),
-                            cornerRadius = rr,
-                            style = Stroke(width = 3.dp.toPx())
-                        )
-                        // Burbuja
-                        val x =
-                            left + rectW / 2f + (displayBubbleOffset.x * (rectW / 2f - bubbleR)) * stretcher
-                        val y = top + rectH / 2f
-                        drawCircle(
-                            color = if (isLevel) leveledColor else normalColor,
-                            radius = bubbleR, center = Offset(x, y),
-                            alpha = 0.7f
-                        )
-                    }
-
-                    OrientationMode.LANDSCAPE -> {
-                        val rectH = h * 0.8f
-                        val rectW = 40.dp.toPx()
-                        val left = (w - rectW) / 2f
-                        val top = (h - rectH) / 2f
-                        val rr = CornerRadius(x = rectW / 2f, y = rectW / 2f)
-                        // Guia mayor
-                        drawRoundRect(
-                            color = guideColor,
-                            topLeft = Offset(left, top),
-                            size = Size(rectW, rectH),
-                            cornerRadius = rr,
-                            style = Stroke(width = 4.dp.toPx())
-                        )
-                        // Guia menor (centrada)
-                        val minorH = rectH / 10f
-                        val minorTop = top + (rectH - minorH) / 2f
-                        drawRoundRect(
-                            color = smallerGuideColor,
-                            topLeft = Offset(left, minorTop),
-                            size = Size(rectW, minorH),
-                            cornerRadius = rr,
-                            style = Stroke(width = 3.dp.toPx())
-                        )
-                        // Burbuja
-                        val x = left + rectW / 2f
-                        val y = top + rectH / 2f + displayBubbleOffset.y * (rectH / 2f - bubbleR)
-                        drawCircle(
-                            color = if (isLevel) leveledColor else normalColor,
-                            radius = bubbleR, center = Offset(x, y),
-                            alpha = 0.7f
-                        )
-                    }
-                }
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            val landscapeRotation = when {
-                currentMode == OrientationMode.LANDSCAPE && displayInclinationDegX > orientAngle  ->  -90f
-                currentMode == OrientationMode.LANDSCAPE && displayInclinationDegX < -orientAngle -> 90f
-                else -> 0f
-            }
-
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.graphicsLayer(rotationZ = landscapeRotation)
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                Button(
+                    onClick = { isLocked = !isLocked }
                 ) {
-                    Text("X: ${"%.2f".format(displayInclinationDegX)}°", fontSize = 22.sp)
-                    Text("Y: ${"%.2f".format(displayInclinationDegY)}°", fontSize = 22.sp)
+                    Icon(
+                        imageVector = if (isLocked) Icons.Filled.PlayArrow else Icons.Filled.Pause,
+                        contentDescription = if (isLocked) "Desbloquear burbuja" else "Bloquear burbuja",
+                        modifier = Modifier.size(22.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        if (isLocked) "Desbloquear burbuja" else "Bloquear burbuja",
+                        fontSize = 16.sp
+                    )
                 }
             }
+            Spacer(Modifier.height(8.dp))
+            Column(
+                Modifier.fillMaxSize().padding(padding),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Canvas(
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .padding(24.dp)
+                ) {
+                    val w = size.width
+                    val h = size.height
+                    val bubbleR = 20.dp.toPx()
 
-            Spacer(Modifier.height(25.dp))
+                    when (currentMode) {
+                        OrientationMode.FLAT -> {
+                            val radius = min(w, h) / 3f
+                            val center = Offset(w / 2f, h / 2f)
+
+                            // Anillos concéntricos
+                            drawCircle(
+                                color = guideColor,
+                                radius = radius,
+                                center = center,
+                                style = Stroke(width = 4.dp.toPx())
+                            )
+                            drawCircle(
+                                color = smallerGuideColor,
+                                radius = radius / 5f,
+                                center = center,
+                                style = Stroke(width = 2.dp.toPx())
+                            )
+                            drawCircle(
+                                color = smallerGuideColor,
+                                radius = radius / 2f,
+                                center = center,
+                                style = Stroke(width = 2.dp.toPx())
+                            )
+                            drawCircle(
+                                color = smallerGuideColor,
+                                radius = radius / 1.3f,
+                                center = center,
+                                style = Stroke(width = 2.dp.toPx())
+                            )
+
+                            // Línea horizontal (centro)
+                            drawLine(
+                                color = smallerGuideColor,
+                                start = Offset(center.x - radius, center.y),
+                                end = Offset(center.x + radius, center.y),
+                                strokeWidth = 2.dp.toPx()
+                            )
+                            // Línea vertical (centro)
+                            drawLine(
+                                color = smallerGuideColor,
+                                start = Offset(center.x, center.y - radius),
+                                end = Offset(center.x, center.y + radius),
+                                strokeWidth = 2.dp.toPx()
+                            )
+
+                            // Burbuja
+                            val x = center.x + displayBubbleOffset.x * (radius - bubbleR)
+                            val y = center.y + displayBubbleOffset.y * (radius - bubbleR)
+                            drawCircle(
+                                color = if (isLevel) leveledColor else normalColor,
+                                radius = bubbleR, center = Offset(x, y),
+                                alpha = 0.7f
+                            )
+                        }
+
+                        OrientationMode.PORTRAIT -> {
+                            val rectW = w * 0.8f
+                            val rectH = 40.dp.toPx()
+                            val left = (w - rectW) / 2f
+                            val top = (h - rectH) / 2f
+                            val rr = CornerRadius(x = rectH / 2f, y = rectH / 2f)
+                            // Guia mayor
+                            drawRoundRect(
+                                color = guideColor,
+                                topLeft = Offset(left, top),
+                                size = Size(rectW, rectH),
+                                cornerRadius = rr,
+                                style = Stroke(width = 4.dp.toPx())
+                            )
+                            // Guia menor (centrada)
+                            val minorW = rectW / 6f
+                            val minorLeft = left + (rectW - minorW) / 2f
+                            drawRoundRect(
+                                color = smallerGuideColor,
+                                topLeft = Offset(minorLeft, top),
+                                size = Size(minorW, rectH),
+                                cornerRadius = rr,
+                                style = Stroke(width = 3.dp.toPx())
+                            )
+                            // Burbuja
+                            val x =
+                                left + rectW / 2f + (displayBubbleOffset.x * (rectW / 2f - bubbleR)) * stretcher
+                            val y = top + rectH / 2f
+                            drawCircle(
+                                color = if (isLevel) leveledColor else normalColor,
+                                radius = bubbleR, center = Offset(x, y),
+                                alpha = 0.7f
+                            )
+                        }
+
+                        OrientationMode.LANDSCAPE -> {
+                            val rectH = h * 0.8f
+                            val rectW = 40.dp.toPx()
+                            val left = (w - rectW) / 2f
+                            val top = (h - rectH) / 2f
+                            val rr = CornerRadius(x = rectW / 2f, y = rectW / 2f)
+                            // Guia mayor
+                            drawRoundRect(
+                                color = guideColor,
+                                topLeft = Offset(left, top),
+                                size = Size(rectW, rectH),
+                                cornerRadius = rr,
+                                style = Stroke(width = 4.dp.toPx())
+                            )
+                            // Guia menor (centrada)
+                            val minorH = rectH / 10f
+                            val minorTop = top + (rectH - minorH) / 2f
+                            drawRoundRect(
+                                color = smallerGuideColor,
+                                topLeft = Offset(left, minorTop),
+                                size = Size(rectW, minorH),
+                                cornerRadius = rr,
+                                style = Stroke(width = 3.dp.toPx())
+                            )
+                            // Burbuja
+                            val x = left + rectW / 2f
+                            val y =
+                                top + rectH / 2f + displayBubbleOffset.y * (rectH / 2f - bubbleR)
+                            drawCircle(
+                                color = if (isLevel) leveledColor else normalColor,
+                                radius = bubbleR, center = Offset(x, y),
+                                alpha = 0.7f
+                            )
+                        }
+                    }
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                val landscapeRotation = when {
+                    currentMode == OrientationMode.LANDSCAPE && displayInclinationDegX > orientAngle -> -90f
+                    currentMode == OrientationMode.LANDSCAPE && displayInclinationDegX < -orientAngle -> 90f
+                    else -> 0f
+                }
+
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.graphicsLayer(rotationZ = landscapeRotation)
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text("X: ${"%.2f".format(displayInclinationDegX)}°", fontSize = 22.sp)
+                        Text("Y: ${"%.2f".format(displayInclinationDegY)}°", fontSize = 22.sp)
+                    }
+                }
+
+                Spacer(Modifier.height(100.dp))
+            }
+        }
+        if (showInfo) {
+            AlertDialog(
+                onDismissRequest = { showInfo = false },
+                title = { Text("Acerca de Nivel Burbuja") },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("• Para qué sirve: Permite ver la inclinación horizontal y vertical del dispositivo, como un nivel de burbuja real.")
+                        Text("• Guía rápida:")
+                        Text("   – Coloca el dispositivo sobre la superficie que quieres nivelar.")
+                        Text("   – Ajusta la inclinación de la superficie. Cuando escuches un pitido y la burbuja se ponga verde, significa que está nivelada.")
+                        Text("   – Puedes utilizar los modos Flat, Portrait y Landscape para medir inclinación en diferentes posiciones del dispositivo.")
+                        Text("   – Flat (plano) detecta nivel en ambas direcciones.")
+                        Text("   – Portrait y Landscape miden nivel en una sola dirección.")
+                        Text("   – Usa el botón con el icono de pausa para congelar/retener la burbuja y los valores.")
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showInfo = false
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    }) {
+                        Text("Cerrar")
+                    }
+                }
+            )
         }
     }
-    if (showInfo) {
-        AlertDialog(
-            onDismissRequest = { showInfo = false },
-            title = { Text("Acerca de Nivel Burbuja") },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Para qué sirve: Permite ver la inclinación horizontal y vertical del dispositivo, como un nivel de burbuja real.")
-                    Text("• Guía rápida:")
-                    Text("   – Coloca el dispositivo sobre la superficie que quieres nivelar.")
-                    Text("   – Ajusta la inclinación de la superficie. Cuando escuches un pitido y la burbuja se ponga verde, significa que está nivelada.")
-                    Text("   – Puedes utilizar los modos Flat, Portrait y Landscape para medir inclinación en diferentes posiciones del dispositivo.")
-                    Text("   – Flat (plano) detecta nivel en ambas direcciones.")
-                    Text("   – Portrait y Landscape miden nivel en una sola dirección.")
-                    Text("   – Usa el botón con el icono de pausa para congelar/retener la burbuja y los valores.")
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showInfo = false }) {
-                    Text("Cerrar")
-                }
-            }
-        )
-    }
 }
+

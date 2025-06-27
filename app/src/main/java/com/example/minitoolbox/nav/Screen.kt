@@ -18,6 +18,17 @@ sealed class Screen(val route: String, @StringRes val titleRes: Int) {
     object ZodiacSign                   : Screen("zodiac_sign", R.string.zodiac_sign_title)
     object Pomodoro                     : Screen("pomodoro", R.string.pomodoro_title)
     object BubbleLevel                  : Screen("bubble_level", R.string.bubble_level_title)
+    object Porcentaje                   : Screen("porcentaje", R.string.porcentaje_title)
+    object ConversorHoras               : Screen("conversor_horas", R.string.conversor_horas_title)
+    object CalculadoraDeIMC             : Screen("calculadora_de_imc", R.string.calculadora_de_imc_title)
+    object ConversorRomanos             : Screen("conversor_romanos", R.string.conversor_romanos_title)
+    object ConversorUnidades            : Screen("conversor_unidades", R.string.conversor_unidades_title)
+    object GeneradorContrasena          : Screen("generador_contrasena", R.string.generador_contrasena_title)
+    object SugeridorActividades        : Screen("sugeridor_actividades", R.string.sugeridor_actividades_title)
+    object GeneradorNombres            : Screen("generador_nombres", R.string.generador_nombres_title)
+    object GeneradorQR                 : Screen("generador_qr", R.string.generador_qr_title)
+    object GeneradorVCard              : Screen("generador_vcard", R.string.generador_vcard_title)
+    object LoremIpsum                   : Screen("lorem_ipsum", R.string.lorem_ipsum_title)
 
     // Añade aquí nuevos objetos para cada herramienta…
 }

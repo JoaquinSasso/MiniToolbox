@@ -112,7 +112,10 @@ fun PomodoroScreen(onBack: () -> Unit) {
                     }
                 },
                 actions = {
-                    IconButton(onClick = { showInfo = true }) {
+                    IconButton(onClick = {
+                        showInfo = true
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                    }) {
                         Icon(Icons.Filled.Info, contentDescription = "Información")
                     }
                 }
@@ -244,7 +247,10 @@ fun PomodoroScreen(onBack: () -> Unit) {
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showInfo = false }) {
+                TextButton(onClick = {
+                    showInfo = false
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                }) {
                     Text("Cerrar")
                 }
             }

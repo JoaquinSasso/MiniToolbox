@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MiniToolbox</string>
+    <string name="app_name" translatable="false">MiniToolbox</string>
     <string name="categories_title">Categorías</string>
     <string name="random_color_title">Generador de Colores</string>
     <string name="group_selector_title">Selector de Grupos</string>
@@ -17,5 +17,16 @@
     <string name="zodiac_sign_title">Signo del Zodíaco</string>
     <string name="pomodoro_title">Temporizador Pomodoro</string>
     <string name="bubble_level_title">Nivel Burbuja</string>
+    <string name="porcentaje_title">Calculadora de Porcentaje</string>
+    <string name="conversor_horas_title">Conversor de Horas</string>
+    <string name="calculadora_de_imc_title">Calculadora de IMC</string>
+    <string name="conversor_romanos_title">Conversor Romano / Arábigo</string>
+    <string name="conversor_unidades_title">Conversor de Unidades</string>
+    <string name="generador_contrasena_title">Generador de Contraseñas</string>
+    <string name="sugeridor_actividades_title">Sugeridor de Actividades</string>
+    <string name="generador_nombres_title">Generador de Nombres</string>
+    <string name="generador_qr_title">Generador de QR</string>
+    <string name="generador_vcard_title">Generador de QR de Contacto (VCard)</string>
+    <string name="lorem_ipsum_title">Generador de Lorem Ipsum</string>
 
 </resources>

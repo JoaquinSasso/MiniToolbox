@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.PointerId
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
@@ -94,7 +95,10 @@ fun GroupSelectorScreen(onBack: () -> Unit) {
                     }
                 },
                 actions = {
-                    IconButton(onClick = { showInfo = true }) {
+                    IconButton(onClick = {
+                        showInfo = true
+                        haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                    }) {
                         Icon(Icons.Filled.Info, contentDescription = "Información")
                     }
                 },
@@ -107,7 +111,6 @@ fun GroupSelectorScreen(onBack: () -> Unit) {
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            Spacer(Modifier.height(24.dp))
             Text(
                 text = "Tamaño de equipo",
                 style = MaterialTheme.typography.titleMedium,
@@ -211,7 +214,10 @@ fun GroupSelectorScreen(onBack: () -> Unit) {
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showInfo = false }) {
+                TextButton(onClick = {
+                    showInfo = false
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                }) {
                     Text("Cerrar")
                 }
             }

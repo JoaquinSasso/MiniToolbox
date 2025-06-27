@@ -1,6 +1,7 @@
 // app/src/main/java/com/example/minitoolbox/NavGraph.kt
 package com.example.minitoolbox
 
+import GeneradorQrContactoScreen
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
@@ -61,6 +62,39 @@ fun MiniToolboxNavGraph(navController: NavHostController) {
         }
         composable(Screen.BubbleLevel.route) {
             BubbleLevelScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.Porcentaje.route) {
+            PorcentajeScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.ConversorHoras.route) {
+            ConversorHorasScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.CalculadoraDeIMC.route) {
+            IMCScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.ConversorRomanos.route) {
+            ConversorRomanosScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.ConversorUnidades.route) {
+            ConversorUnidadesScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.GeneradorContrasena.route) {
+            GeneradorContrasenaScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.SugeridorActividades.route) {
+            SugeridorActividadScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.GeneradorNombres.route) {
+            GeneradorNombresScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.GeneradorQR.route){
+            GeneradorQrScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.GeneradorVCard.route){
+            GeneradorQrContactoScreen (onBack = {navController.popBackStack() })
+        }
+        composable(Screen.LoremIpsum.route){
+            GeneradorLoremIpsumScreen(onBack = {navController.popBackStack() })
         }
     }
 }

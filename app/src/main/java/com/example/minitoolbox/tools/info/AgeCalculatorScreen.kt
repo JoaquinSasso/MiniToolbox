@@ -18,6 +18,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import java.text.NumberFormat
 import java.util.*
 import java.util.Calendar
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 
 class DateVisualTransformation : VisualTransformation {
     override fun filter(text: AnnotatedString): TransformedText {
@@ -49,6 +51,8 @@ class DateVisualTransformation : VisualTransformation {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AgeCalculatorScreen(onBack: () -> Unit) {
+    val haptic = LocalHapticFeedback.current
+
     val formatter   = remember { NumberFormat.getInstance(Locale("es", "AR")) }
     val scrollState = rememberScrollState()
     var showInfo    by remember { mutableStateOf(false) }
@@ -137,7 +141,10 @@ fun AgeCalculatorScreen(onBack: () -> Unit) {
                     }
                 },
                 actions = {
-                    IconButton(onClick = { showInfo = true }) {
+                    IconButton(onClick = {
+                        showInfo = true
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    }) {
                         Icon(Icons.Filled.Info, contentDescription = "Información")
                     }
                 }
@@ -246,7 +253,10 @@ fun AgeCalculatorScreen(onBack: () -> Unit) {
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showInfo = false }) {
+                TextButton(onClick = {
+                    showInfo = false
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                }) {
                     Text("Cerrar")
                 }
             }

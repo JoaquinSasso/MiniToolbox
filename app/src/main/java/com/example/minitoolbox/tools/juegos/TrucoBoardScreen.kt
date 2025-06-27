@@ -4,14 +4,12 @@ package com.example.minitoolbox.tools.truco
 import android.os.VibrationEffect
 import android.os.Vibrator
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.*
@@ -25,8 +23,10 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
 import com.example.minitoolbox.tools.juegos.ScoreRepository
+import kotlinx.coroutines.launch
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 
 @Composable
 fun PointCounter(points: Int, color: Color) {
@@ -87,6 +87,7 @@ fun Square(color: Color, points: Int) {
 fun TrucoScoreBoardScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val vibrator = context.getSystemService(Vibrator::class.java)
+    val haptic = LocalHapticFeedback.current
     val scoreRepo = remember { ScoreRepository(context) }
     val scope = rememberCoroutineScope()
 
@@ -134,7 +135,10 @@ fun TrucoScoreBoardScreen(onBack: () -> Unit) {
                     }
                 },
                 actions = {
-                    IconButton(onClick = { showInfo = true }) {
+                    IconButton(onClick = {
+                        showInfo = true
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    }) {
                         Icon(Icons.Filled.Info, contentDescription = "Información")
                     }
                 },
@@ -244,7 +248,10 @@ fun TrucoScoreBoardScreen(onBack: () -> Unit) {
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showInfo = false }) {
+                TextButton(onClick = {
+                    showInfo = false
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                }) {
                     Text("Cerrar")
                 }
             }

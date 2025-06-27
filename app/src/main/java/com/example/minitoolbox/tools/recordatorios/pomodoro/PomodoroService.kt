@@ -1,5 +1,6 @@
 package com.example.minitoolbox.tools.pomodoro
 
+import android.Manifest
 import android.app.Service
 import android.content.Intent
 import android.media.AudioAttributes
@@ -9,6 +10,7 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.IBinder
 import android.util.Log
+import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationManagerCompat
 import kotlinx.coroutines.*
 
@@ -45,6 +47,8 @@ class PomodoroService : Service() {
                     }
                     return START_NOT_STICKY
                 }
+
+                else -> {}
             }
         }
 
@@ -69,30 +73,44 @@ class PomodoroService : Service() {
         return START_STICKY
     }
 
+    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     private suspend fun runPhase(name: String, minutes: Int) {
         // Descontar 5 segundos de heads-up del siguiente ciclo
         val pauseSec = 5L
         val totalSec = if (cycleCount > 0) minutes * 60L - pauseSec
         else                 minutes * 60L
 
+        val startMs = System.currentTimeMillis()
+        val endMs = startMs + totalSec * 1000L
+
         // Guardar estado
-        val endMs = System.currentTimeMillis() + totalSec * 1000L
         stateRepo.updatePhase(name, endMs, totalSec)
 
         // Vibrar breve al inicio de fase
         getSystemService(Vibrator::class.java)
             ?.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE))
 
-        // Conteo por segundo (solo bandeja)
-        for (sec in totalSec downTo 1) {
-            val mm = sec / 60
-            val ss = sec % 60
+        // Loop de actualización de notificación por tiempo real
+        while (true) {
+            val now = System.currentTimeMillis()
+            val remainingMs = endMs - now
+            val remainingSec = (remainingMs / 1000L).coerceAtLeast(0L)
+
+            // Mostrar tiempo en la notificación
+            val mm = remainingSec / 60
+            val ss = remainingSec % 60
             NotificationManagerCompat.from(this)
                 .notify(
                     NOTIFICATION_ID,
                     buildCountdownNotification(this, "⏳ $name", "%02d:%02d".format(mm, ss))
                 )
-            delay(1000L)
+
+            // Salir si se acabó el tiempo (o lo sobrepasó)
+            if (remainingMs <= 0) break
+
+            // Esperar solo hasta el siguiente segundo, pero sin confiar en delay exacto
+            val delayMs = (remainingMs % 1000L).let { if (it > 0) it else 1000L }
+            delay(delayMs)
         }
 
         // Heads-up de fin de fase
@@ -107,7 +125,7 @@ class PomodoroService : Service() {
             ?.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE))
         playSound()
 
-        // Mantener heads-up visible al menos 5 s
+        // Mantener heads-up visible al menos 5 s (esto sí puede ser delay)
         delay(5_000L)
     }
 

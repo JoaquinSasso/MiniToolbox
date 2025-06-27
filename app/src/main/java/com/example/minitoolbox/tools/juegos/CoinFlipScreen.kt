@@ -24,12 +24,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.random.Random
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CoinFlipScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val vibrator = context.getSystemService(Vibrator::class.java)
+    val haptic = LocalHapticFeedback.current
     var showInfo by remember { mutableStateOf(false) }
 
     var result by remember { mutableStateOf("Cara") }
@@ -74,7 +77,10 @@ fun CoinFlipScreen(onBack: () -> Unit) {
                     }
                 },
                 actions = {
-                    IconButton(onClick = { showInfo = true }) {
+                    IconButton(onClick = {
+                        showInfo = true
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    }) {
                         Icon(Icons.Filled.Info, contentDescription = "Información")
                     }
                 },
@@ -144,7 +150,10 @@ fun CoinFlipScreen(onBack: () -> Unit) {
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showInfo = false }) {
+                TextButton(onClick = {
+                    showInfo = false
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                }) {
                     Text("Cerrar")
                 }
             }

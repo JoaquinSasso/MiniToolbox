@@ -8,12 +8,12 @@ plugins {
 
 android {
     namespace = "com.example.minitoolbox"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.minitoolbox"
         minSdk = 28
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -52,14 +52,16 @@ dependencies {
     implementation(libs.androidx.ui)
 
     // 3) Compose Material 3 (Actualización a Material3)
-    implementation("androidx.compose.material3:material3:1.3.2")
-    implementation("com.google.android.material:material:1.12.0")
+    implementation(libs.material3)
+    implementation(libs.material)
+
 
     // 4) Icons, Activity & Navigation
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.compose.v280)  // Predictive back support
+    implementation("com.lightspark:compose-qr-code:1.0.1")
 
     // 5) Glance (AppWidget + Material3)
     implementation(libs.androidx.glance.appwidget)
