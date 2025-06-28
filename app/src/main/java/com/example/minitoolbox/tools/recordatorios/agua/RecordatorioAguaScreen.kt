@@ -236,7 +236,16 @@ fun RecordatorioAguaScreen(
                 "${(totalAgua / 1000f).let { "%.2f".format(it) }} L / ${(objetivoML / 1000f).let { "%.2f".format(it) }} L",
                 fontSize = 20.sp
             )
-
+            Button(
+                onClick = {
+                    scope.launch {
+                        cargarDatosSemanaFake(context)
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+            ) {
+                Text("Cargar semana de prueba")
+            }
 
             // --- Recordatorio ---
             HorizontalDivider(
@@ -424,4 +433,19 @@ fun cancelarRecordatorioAgua(context: Context) {
         intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
     alarmManager.cancel(pendingIntent)
+}
+
+suspend fun cargarDatosSemanaFake(context: Context) {
+    val hoy = LocalDate.now()
+    context.aguaDataStore.edit { prefs ->
+        // Borra claves viejas de agua
+        val clavesBorrar = prefs.asMap().keys.filter { it.toString().contains("agua_ml_") }
+        clavesBorrar.forEach { prefs.remove(it) }
+        // Carga 7 días de datos artificiales
+        repeat(7) { i ->
+            val fecha = hoy.minusDays((6 - i).toLong())
+            val key = intPreferencesKey("agua_ml_$fecha")
+            prefs[key] = 1000 + i * 350
+        }
+    }
 }

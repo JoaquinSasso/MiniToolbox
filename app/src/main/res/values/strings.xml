@@ -34,5 +34,8 @@
     <string name="rachas_title">Rachas</string>
     <string name="agua_title">Recordatorio de Beber Agua</string>
     <string name="estadisticas_agua_title">Estadísticas de Beber Agua</string>
+    <string name="category_herramientas">Herramientas</string>
+    <string name="category_organizacion">Organización</string>
+    <string name="category_entretenimiento">Entretenimiento</string>
 
 </resources>

@@ -2,20 +2,13 @@
 package com.example.minitoolbox.tools
 
 import androidx.annotation.StringRes
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Article
-import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.filled.Alarm
-import androidx.compose.material.icons.filled.Article
-import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Build
-import androidx.compose.material.icons.filled.Calculate
-import androidx.compose.material.icons.filled.Casino
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.SportsEsports
-import androidx.compose.material.icons.filled.Straighten
+import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.minitoolbox.R
 
 /**
@@ -26,21 +19,36 @@ sealed class ToolCategory(
     @StringRes val titleRes: Int,
     val icon: ImageVector
 ) {
-    object Generadores  : ToolCategory("generadores",  R.string.category_generadores,  Icons.Filled.Casino)
-    object Calculadoras : ToolCategory("calculadoras", R.string.category_calculadoras, Icons.Filled.Calculate)
-    object Juegos       : ToolCategory("juegos",       R.string.category_juegos,       Icons.Filled.SportsEsports)
-    object Informacion : ToolCategory("informacion",  R.string.category_informacion, Icons.AutoMirrored.Filled.Article)
-    object Recordatorios : ToolCategory("recordatorios",  R.string.category_recordatorios, Icons.Filled.Alarm)
-    object Herramientas : ToolCategory("herramientas",  R.string.category_medicion, Icons.Filled.Build)
+    object Herramientas :
+        ToolCategory("herramientas", R.string.category_herramientas, Icons.Filled.Build)
+
+    init {
+        println(">>> Herramientas initialized")
+    }
+
+    object Organizacion :
+        ToolCategory("organizacion", R.string.category_organizacion, Icons.Filled.CheckCircle)
+
+    init {
+        println(">>> Organizacion initialized")
+    }
+
+    object Informacion :
+        ToolCategory("informacion", R.string.category_informacion, Icons.Filled.Info)
+
+    object Entretenimiento : ToolCategory(
+        "entretenimiento",
+        R.string.category_entretenimiento,
+        Icons.Filled.SportsEsports
+    )
 
     companion object {
-        /** Lista garantizada sin nulos */
-        val all: List<ToolCategory> = listOf(
-            Generadores,
-            Calculadoras,
-            Juegos,
-            Informacion,
-            Herramientas
-        )
+        val all: List<ToolCategory>
+            get() = listOf(
+                Herramientas,
+                Organizacion,
+                Informacion,
+                Entretenimiento
+            )
     }
 }

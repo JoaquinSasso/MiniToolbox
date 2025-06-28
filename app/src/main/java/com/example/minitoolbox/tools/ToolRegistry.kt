@@ -14,130 +14,149 @@ object ToolRegistry {
         Tool(
             name = "Generador de Colores",
             screen = Screen.RandomColor,
-            category = ToolCategory.Generadores, // <--- Debe ser exactamente este objeto
+            category = ToolCategory.Herramientas,
+            subCategory = "Generadores",
             icon = Icons.Filled.ColorLens
         ),
         Tool(
             name = "Selector de Grupos",
             screen = Screen.GroupSelector,
-            category = ToolCategory.Generadores, // <--- Igual aquí
+            category = ToolCategory.Herramientas,
+            subCategory = "Generadores",
             icon = Icons.Filled.Groups
         ),
         Tool(
             name = "Cara o Cruz",
             screen = Screen.CoinFlip,
-            category = ToolCategory.Juegos,
+            category = ToolCategory.Entretenimiento,
+            subCategory = "Juegos",
             icon = Icons.Filled.Casino
         ),
-
-        // Nueva herramienta:
         Tool(
             name = "Conversor Decimal / Binario",
             screen = Screen.DecimalBinaryConverter,
-            category = ToolCategory.Calculadoras,
+            category = ToolCategory.Herramientas,
+            subCategory = "Calculadoras",
             icon = Icons.Filled.Code
         ),
         Tool(
             name = "Conversor Texto / Binario",
             screen = Screen.TextBinaryConverter,
-            category = ToolCategory.Calculadoras,
+            category = ToolCategory.Herramientas,
+            subCategory = "Calculadoras",
             icon = Icons.Filled.TextFields
         ),
         Tool(
             name = "Anotador Truco",
             screen = Screen.TrucoScoreBoard,
-            category = ToolCategory.Juegos,
+            category = ToolCategory.Entretenimiento,
+            subCategory = "Juegos",
             icon = Icons.Filled.BrowserNotSupported
         ),
         Tool(
             name = "Calculadora de Edad",
             screen = Screen.AgeCalculator,
             category = ToolCategory.Informacion,
+            subCategory = "Fechas",
             icon = Icons.Filled.CalendarMonth
     ),
         Tool(
             name = "Signo del Zodíaco",
             screen = Screen.ZodiacSign,
             category = ToolCategory.Informacion,
+            subCategory = "Fechas",
             icon = Icons.Filled.DateRange
     ),
         Tool(
             name = "Temporizador Pomodoro",
             screen = Screen.Pomodoro,
-            category = ToolCategory.Recordatorios,
+            category = ToolCategory.Organizacion,
+            subCategory = "Temporizadores",
             icon = Icons.Filled.Timer
     ),
         Tool(
             name = "Nivel Burbuja",
             screen = Screen.BubbleLevel,
             category = ToolCategory.Herramientas,
+            subCategory = "Instrumentos",
             icon = Icons.Filled.BubbleChart
     ),
         Tool(
             name = "Calculadora de Porcentaje",
             screen = Screen.Porcentaje,
-            category = ToolCategory.Calculadoras,
+            category = ToolCategory.Herramientas,
+            subCategory = "Calculadoras",
             icon = Icons.Filled.Percent
     ),
         Tool(
-            name = "Conversor de Horas",
+            name = "Conversor de Horas 12h / 24h",
             screen = Screen.ConversorHoras,
-            category = ToolCategory.Calculadoras,
+            category = ToolCategory.Herramientas,
+            subCategory = "Calculadoras",
             icon = Icons.Filled.BrowseGallery
     ),
         Tool(
             name = "Calculadora de IMC",
             screen = Screen.CalculadoraDeIMC,
-            category = ToolCategory.Calculadoras,
+            category = ToolCategory.Herramientas,
+            subCategory = "Calculadoras",
             icon = Icons.Filled.Scale
     ),
         Tool(
             name = "Conversor Romano / Arábigo",
             screen = Screen.ConversorRomanos,
-            category = ToolCategory.Calculadoras,
+            category = ToolCategory.Herramientas,
+            subCategory = "Calculadoras",
             icon = Icons.Filled.TypeSpecimen
         ),
 
         Tool(
             name = "Conversor de Unidades",
             screen = Screen.ConversorUnidades,
-            category = ToolCategory.Calculadoras,
+            category = ToolCategory.Herramientas,
+            subCategory = "Calculadoras",
             icon = Icons.Filled.SwapHoriz
         ),
         Tool(
             name = "Generador de Contraseñas",
             screen = Screen.GeneradorContrasena,
-            category = ToolCategory.Generadores,
+            category = ToolCategory.Herramientas,
+            subCategory = "Generadores",
             icon = Icons.Filled.Password
         ),
         Tool(
             name = "Sugeridor de Actividades",
             screen = Screen.SugeridorActividades,
-            category = ToolCategory.Generadores,
+            category = ToolCategory.Organizacion,
+            subCategory = "Hábitos y Actividades",
             icon = Icons.Filled.Lightbulb
         ),
         Tool(
             name = "Generador de Nombres",
             screen = Screen.GeneradorNombres,
-            category = ToolCategory.Generadores,
+            category = ToolCategory.Herramientas,
+            subCategory = "Generadores",
             icon = Icons.Filled.Person
     ),
         Tool(
             name = "Generador de QR",
             screen = Screen.GeneradorQR,
-            category = ToolCategory.Generadores,
+            category = ToolCategory.Herramientas,
+            subCategory = "Generadores",
             icon = Icons.Filled.QrCode
     ),
         Tool(
             name = "Generador de QR de Contacto (vCard)",
             screen = Screen.GeneradorVCard,
-            category = ToolCategory.Generadores,
+            category = ToolCategory.Herramientas,
+            subCategory = "Generadores",
             icon = Icons.Filled.Contacts
         ),
         Tool(
             name = "Generador de Lorem Ipsum",
             screen = Screen.LoremIpsum,
-            category = ToolCategory.Generadores,
+            category = ToolCategory.Herramientas,
+            subCategory = "Generadores",
             icon = Icons.AutoMirrored.Filled.ShortText
 
         ),
@@ -145,32 +164,37 @@ object ToolRegistry {
             name = "Regla",
             screen = Screen.Regla,
             category = ToolCategory.Herramientas,
+            subCategory = "Instrumentos",
             icon = Icons.Filled.Straighten
         ),
         Tool(
             name = "Medidor de Luz",
             screen = Screen.MedidorLuz,
             category = ToolCategory.Herramientas,
+            subCategory = "Instrumentos",
             icon = Icons.Filled.WbSunny
         ),
         Tool(
             name = "Linterna",
             screen = Screen.Linterna,
             category = ToolCategory.Herramientas,
+            subCategory = "Instrumentos",
             icon = Icons.Filled.FlashlightOn
 
         ),
         Tool(
-            name = "Contador de dias en Racha",
+            name = "Seguimiento de Hábitos",
             screen = Screen.Rachas,
-            category = ToolCategory.Recordatorios,
+            category = ToolCategory.Organizacion,
+            subCategory = "Hábitos y Actividades",
             icon = Icons.Filled.Timelapse
 
         ),
         Tool(
             name = "Recordatorio de Beber Agua",
             screen = Screen.Agua,
-            category = ToolCategory.Recordatorios,
+            category = ToolCategory.Organizacion,
+            subCategory = "Hábitos y Actividades",
             icon = Icons.Filled.WaterDrop
         )
     )

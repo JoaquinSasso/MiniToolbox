@@ -8,6 +8,6 @@ import com.example.minitoolbox.tools.ToolCategory
 
 /** Mantiene la categoría actualmente seleccionada */
 class CategoryViewModel : ViewModel() {
-    val selectedCategory: MutableState<ToolCategory> =
-        mutableStateOf(ToolCategory.Generadores)
+    val selectedCategory = mutableStateOf<ToolCategory>(ToolCategory.Herramientas)
 }
+

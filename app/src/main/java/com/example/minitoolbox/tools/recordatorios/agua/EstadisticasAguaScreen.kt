@@ -128,16 +128,6 @@ fun AguaEstadisticasScreen(
                 Text("Aún no has registrado consumo de agua.")
             } else {
                 historico.sortedByDescending { it.first }.forEach { (fecha, ml) ->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = if (ml >= objetivoML) MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
-                            else MaterialTheme.colorScheme.surfaceVariant
-                        ),
-                        elevation = CardDefaults.cardElevation(2.dp)
-                    ) {
                         Row(
                             Modifier
                                 .fillMaxWidth()
@@ -156,7 +146,7 @@ fun AguaEstadisticasScreen(
                                 color = if (ml >= objetivoML) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-                    }
+                        HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
                 }
 
             }
