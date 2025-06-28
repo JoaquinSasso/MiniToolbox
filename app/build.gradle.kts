@@ -61,7 +61,6 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.compose.v280)  // Predictive back support
-    implementation("com.lightspark:compose-qr-code:1.0.1")
 
     // 5) Glance (AppWidget + Material3)
     implementation(libs.androidx.glance.appwidget)
@@ -74,6 +73,8 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.lifecycle.runtime.compose)
 
+    //Funcionalidades
+    implementation("com.lightspark:compose-qr-code:1.0.1")
 
 
     // 7) Testing

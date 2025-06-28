@@ -30,6 +30,6 @@
             android:name=".tools.pomodoro.PomodoroService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
-
+        <receiver android:name=".tools.recordatorios.agua.WaterReminderReceiver" />
     </application>
 </manifest>

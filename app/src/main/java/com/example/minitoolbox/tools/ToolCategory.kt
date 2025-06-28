@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.Article
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Calculate
+import androidx.compose.material.icons.filled.Casino
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.SportsEsports
@@ -25,12 +26,12 @@ sealed class ToolCategory(
     @StringRes val titleRes: Int,
     val icon: ImageVector
 ) {
-    object Generadores  : ToolCategory("generadores",  R.string.category_generadores,  Icons.Filled.Build)
+    object Generadores  : ToolCategory("generadores",  R.string.category_generadores,  Icons.Filled.Casino)
     object Calculadoras : ToolCategory("calculadoras", R.string.category_calculadoras, Icons.Filled.Calculate)
     object Juegos       : ToolCategory("juegos",       R.string.category_juegos,       Icons.Filled.SportsEsports)
     object Informacion : ToolCategory("informacion",  R.string.category_informacion, Icons.AutoMirrored.Filled.Article)
     object Recordatorios : ToolCategory("recordatorios",  R.string.category_recordatorios, Icons.Filled.Alarm)
-    object Medicion : ToolCategory("medicion",  R.string.category_medicion, Icons.Filled.Straighten)
+    object Herramientas : ToolCategory("herramientas",  R.string.category_medicion, Icons.Filled.Build)
 
     companion object {
         /** Lista garantizada sin nulos */
@@ -39,7 +40,7 @@ sealed class ToolCategory(
             Calculadoras,
             Juegos,
             Informacion,
-            Medicion
+            Herramientas
         )
     }
 }

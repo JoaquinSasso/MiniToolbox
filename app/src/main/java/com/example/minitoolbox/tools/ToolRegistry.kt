@@ -70,7 +70,7 @@ object ToolRegistry {
         Tool(
             name = "Nivel Burbuja",
             screen = Screen.BubbleLevel,
-            category = ToolCategory.Medicion,
+            category = ToolCategory.Herramientas,
             icon = Icons.Filled.BubbleChart
     ),
         Tool(
@@ -140,6 +140,38 @@ object ToolRegistry {
             category = ToolCategory.Generadores,
             icon = Icons.AutoMirrored.Filled.ShortText
 
+        ),
+        Tool(
+            name = "Regla",
+            screen = Screen.Regla,
+            category = ToolCategory.Herramientas,
+            icon = Icons.Filled.Straighten
+        ),
+        Tool(
+            name = "Medidor de Luz",
+            screen = Screen.MedidorLuz,
+            category = ToolCategory.Herramientas,
+            icon = Icons.Filled.WbSunny
+        ),
+        Tool(
+            name = "Linterna",
+            screen = Screen.Linterna,
+            category = ToolCategory.Herramientas,
+            icon = Icons.Filled.FlashlightOn
+
+        ),
+        Tool(
+            name = "Contador de dias en Racha",
+            screen = Screen.Rachas,
+            category = ToolCategory.Recordatorios,
+            icon = Icons.Filled.Timelapse
+
+        ),
+        Tool(
+            name = "Recordatorio de Beber Agua",
+            screen = Screen.Agua,
+            category = ToolCategory.Recordatorios,
+            icon = Icons.Filled.WaterDrop
         )
     )
 }

@@ -4,12 +4,12 @@
     <string name="random_color_title">Generador de Colores</string>
     <string name="group_selector_title">Selector de Grupos</string>
     <string name="coin_flip_title">Cara o Cruz</string>
-    <string name="category_generadores">Herramientas</string>
+    <string name="category_generadores">Generadores</string>
     <string name="category_calculadoras">Calculadoras</string>
     <string name="category_juegos">Minijuegos</string>
     <string name="category_informacion">Información</string>
     <string name="category_recordatorios">Recordatorios</string>
-    <string name="category_medicion">Medición</string>
+    <string name="category_medicion">Herramientas</string>
     <string name="decimal_binary_converter_title">Decimal / Binario</string>
     <string name="text_binary_converter_title">Texto / Binario</string>
     <string name="truco_score_board_title">Anotador Truco</string>
@@ -28,5 +28,11 @@
     <string name="generador_qr_title">Generador de QR</string>
     <string name="generador_vcard_title">Generador de QR de Contacto (VCard)</string>
     <string name="lorem_ipsum_title">Generador de Lorem Ipsum</string>
+    <string name="regla_title">Regla</string>
+    <string name="medidor_luz_title">Medidor de Luz</string>
+    <string name="linterna_title">Linterna</string>"
+    <string name="rachas_title">Rachas</string>
+    <string name="agua_title">Recordatorio de Beber Agua</string>
+    <string name="estadisticas_agua_title">Estadísticas de Beber Agua</string>
 
 </resources>

@@ -29,6 +29,12 @@ sealed class Screen(val route: String, @StringRes val titleRes: Int) {
     object GeneradorQR                 : Screen("generador_qr", R.string.generador_qr_title)
     object GeneradorVCard              : Screen("generador_vcard", R.string.generador_vcard_title)
     object LoremIpsum                   : Screen("lorem_ipsum", R.string.lorem_ipsum_title)
+    object Regla               : Screen("regla", R.string.regla_title)
+    object MedidorLuz               : Screen("medidor_luz", R.string.medidor_luz_title)
+    object Linterna               : Screen("linterna", R.string.linterna_title)
+    object Rachas               : Screen("rachas", R.string.rachas_title)
+    object Agua               : Screen("agua", R.string.agua_title)
+    object EstadisticasAgua               : Screen("estadisticas_agua", R.string.estadisticas_agua_title)
 
     // Añade aquí nuevos objetos para cada herramienta…
 }

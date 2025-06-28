@@ -37,7 +37,7 @@ fun CategoriesScreen(
         ToolCategory.Juegos,
         ToolCategory.Informacion,
         ToolCategory.Recordatorios,
-        ToolCategory.Medicion
+        ToolCategory.Herramientas
     )
 
     Scaffold(

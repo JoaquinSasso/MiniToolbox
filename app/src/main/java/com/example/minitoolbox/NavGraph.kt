@@ -14,7 +14,13 @@ import com.example.minitoolbox.tools.generadores.*
 import com.example.minitoolbox.tools.juegos.*
 import com.example.minitoolbox.nav.Screen
 import com.example.minitoolbox.tools.medicion.BubbleLevelScreen
+import com.example.minitoolbox.tools.medicion.LinternaScreen
+import com.example.minitoolbox.tools.medicion.MedidorLuzScreen
+import com.example.minitoolbox.tools.medicion.ReglaScreen
 import com.example.minitoolbox.tools.pomodoro.PomodoroScreen
+import com.example.minitoolbox.tools.recordatorios.ContadorRachaScreen
+import com.example.minitoolbox.tools.recordatorios.agua.AguaEstadisticasScreen
+import com.example.minitoolbox.tools.recordatorios.agua.RecordatorioAguaScreen
 import com.example.minitoolbox.tools.truco.TrucoScoreBoardScreen
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -96,5 +102,30 @@ fun MiniToolboxNavGraph(navController: NavHostController) {
         composable(Screen.LoremIpsum.route){
             GeneradorLoremIpsumScreen(onBack = {navController.popBackStack() })
         }
+        composable(Screen.Regla.route){
+            ReglaScreen(onBack = {navController.popBackStack() })
+        }
+        composable(Screen.MedidorLuz.route){
+            MedidorLuzScreen(onBack = {navController.popBackStack() })
+        }
+        composable(Screen.Linterna.route){
+            LinternaScreen(onBack = {navController.popBackStack() })
+        }
+        composable(Screen.Rachas.route){
+            ContadorRachaScreen(onBack = {navController.popBackStack() })
+        }
+        composable(Screen.Agua.route){
+            RecordatorioAguaScreen(
+                onBack = { navController.popBackStack() },
+                onShowEstadisticas = {
+                    navController.navigate(Screen.EstadisticasAgua.route)
+                }
+            )
+        }
+
+        composable(Screen.EstadisticasAgua.route){
+            AguaEstadisticasScreen(onBack = {navController.popBackStack() })
+        }
+
     }
 }
