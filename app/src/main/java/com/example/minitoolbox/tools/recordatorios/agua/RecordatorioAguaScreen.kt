@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -55,17 +54,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
-import com.example.minitoolbox.R
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -166,13 +163,6 @@ fun RecordatorioAguaScreen(
                 },
                 actions = {
                     IconButton(onClick = {
-                        programarRecordatorioAgua(context, 0, totalAgua, objetivoML) // lanza ya
-                        scope.launch { snackbarHostState.showSnackbar("Prueba: notificación en breve") }
-                    }) {
-                        Icon(Icons.Filled.NotificationAdd, contentDescription = "Prueba notificación")
-                    }
-
-                    IconButton(onClick = {
                         showInfo = true
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     }) {
@@ -193,22 +183,27 @@ fun RecordatorioAguaScreen(
             verticalArrangement = Arrangement.spacedBy(18.dp, Alignment.Top),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(Modifier.height(14.dp))
+            Spacer(Modifier.height(16.dp))
+            Text(
+                "${(totalAgua / 1000f).let { "%.2f".format(it) }} L / ${(objetivoML / 1000f).let { "%.2f".format(it) }} L",
+                fontSize = 20.sp
+            )
+            // --- Visual de progreso ---
+            AguaLevelBar(totalAgua, objetivoML)
+
             // --- Selector de objetivo ---
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Meta diaria:", fontSize = 16.sp)
+                Text("Meta diaria: ${(objetivoML / 1000f).let { "%.2f".format(it) }}L", fontSize = 16.sp)
                 Spacer(Modifier.width(6.dp))
 
-                // Slider con muchos pasos intermedios
                 var lastSliderValue by remember { mutableFloatStateOf(objetivoML.toFloat()) }
                 Slider(
                     value = objetivoML / 1000f,
                     onValueChange = { valor ->
-                        // Solo permite valores múltiplos de 0.25L
                         val step = 0.25f
                         val newValue = (valor / step).roundToInt() * step
                         objetivoML = (newValue * 1000).roundToInt()
@@ -217,13 +212,12 @@ fun RecordatorioAguaScreen(
                             lastSliderValue = newValue
                         }
                     },
-                    valueRange = 1f..4f,
-                    steps = ((4f - 1f) / 0.25f).toInt() - 1,
+                    valueRange = 1.5f..3f,
+                    steps = ((3f - 1.5f) / 0.25f).toInt() - 1,
                     modifier = Modifier.weight(1f)
                 )
-                Spacer(Modifier.width(6.dp))
-                Text("${(objetivoML / 1000f).let { "%.2f".format(it) }}L")
             }
+            Text("Agregar agua", fontSize = 17.sp, color = MaterialTheme.colorScheme.primary)
             // --- Botón de agregar agua ---
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -244,6 +238,62 @@ fun RecordatorioAguaScreen(
                     onClick = { showDialogVaso = true }
                 ) { Text("Cambiar cantidad") }
             }
+
+            // --- Recordatorio ---
+            HorizontalDivider(
+                Modifier.padding(vertical = 10.dp),
+                DividerDefaults.Thickness,
+                DividerDefaults.color
+            )
+            Text("Recordatorio de beber agua", fontSize = 17.sp, color = MaterialTheme.colorScheme.primary)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Notificaciones", fontSize = 16.sp)
+                Switch(
+                    checked = notifDS,
+                    onCheckedChange = { checked ->
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        scope.launch {
+                            context.guardarNotificacionesActivas(checked)
+                            if (checked) {
+                                programarRecordatorioAgua(context, freqMinDS, totalAgua, objetivoML)
+                                snackbarHostState.currentSnackbarData?.dismiss()
+                                snackbarHostState.showSnackbar("Notificaciones activadas")
+                            } else {
+                                cancelarRecordatorioAgua(context)
+                                snackbarHostState.currentSnackbarData?.dismiss()
+                                snackbarHostState.showSnackbar("Notificaciones desactivadas")
+                            }
+                        }
+                    }
+                )
+            }
+            if (notifDS) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    Text("Frecuencia: $freqMinDS min", fontSize = 16.sp)
+                    Slider(
+                        value = freqMinDS.toFloat(),
+                        onValueChange = { minutos ->
+                            scope.launch {
+                                context.guardarFrecuenciaMinutos(minutos.toInt())
+                            }
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        },
+                        valueRange = 30f..180f,
+                        steps = 5,  // 30, 60, 90, 120, 150, 180 → 6 posiciones = 5 pasos
+                        modifier = Modifier.width(200.dp)
+                    )
+                }
+            }
+            Spacer(Modifier.weight(1f))
 
             // --- Reset y estadísticas ---
             Row(
@@ -272,67 +322,6 @@ fun RecordatorioAguaScreen(
                     Icon(Icons.Filled.BarChart, contentDescription = "Estadísticas")
                     Spacer(Modifier.width(6.dp))
                     Text("Estadísticas")
-                }
-            }
-
-            // --- Visual de progreso ---
-            AguaLevelBar(totalAgua, objetivoML)
-            Spacer(Modifier.height(6.dp))
-            Text(
-                "${(totalAgua / 1000f).let { "%.2f".format(it) }} L / ${(objetivoML / 1000f).let { "%.2f".format(it) }} L",
-                fontSize = 20.sp
-            )
-
-            // --- Recordatorio ---
-            HorizontalDivider(
-                Modifier.padding(vertical = 10.dp),
-                DividerDefaults.Thickness,
-                DividerDefaults.color
-            )
-            Text("Recordatorio de beber agua", fontSize = 17.sp, color = MaterialTheme.colorScheme.primary)
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Notificaciones: $notifDS", fontSize = 16.sp)
-                Switch(
-                    checked = notifDS,
-                    onCheckedChange = { checked ->
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        scope.launch {
-                            context.guardarNotificacionesActivas(checked)
-                            if (checked) {
-                                programarRecordatorioAgua(context, freqMinDS, totalAgua, objetivoML)
-                                snackbarHostState.showSnackbar("Notificaciones activadas")
-                            } else {
-                                cancelarRecordatorioAgua(context)
-                                snackbarHostState.showSnackbar("Notificaciones desactivadas")
-                            }
-                        }
-                    }
-                )
-            }
-            if (notifDS) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Frecuencia (horas)", fontSize = 16.sp)
-                    Slider(
-                        value = freqMinDS.toFloat(),
-                        onValueChange = { minutos ->
-                            scope.launch {
-                                context.guardarFrecuenciaMinutos(minutos.toInt())
-                            }
-                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        },
-                        valueRange = 30f..180f,
-                        steps = 5,  // 30, 60, 90, 120, 150, 180 → 6 posiciones = 5 pasos
-                        modifier = Modifier.width(200.dp)
-                    )
-                    Text("$freqMinDS min")
                 }
             }
         }
@@ -382,6 +371,7 @@ fun RecordatorioAguaScreen(
                     Text("• Si activas las notificaciones, la app te recordará tomar agua según el intervalo elegido.")
                     Text("• La notificación indica tu avance (por ejemplo, 1.3L/3L).")
                     Text("• Todo se almacena localmente y no se comparte fuera de tu dispositivo.")
+                    Text("💧 Recomendación: un adulto debe consumir entre 1.5 y 3 litros de agua pura al día. La meta diaria sugerida es de 2 litros, pero puedes ajustarla según tus necesidades, actividad y clima.")
                 }
             },
             confirmButton = {
@@ -397,16 +387,20 @@ fun RecordatorioAguaScreen(
 // --- Barra de nivel visual ---
 @Composable
 fun AguaLevelBar(ml: Int, objetivo: Int) {
-    val colorFondo = MaterialTheme.colorScheme.surfaceVariant
-    val AguaAzul = Color(0xFF2196F3)
-    val ColorGota = MaterialTheme.colorScheme.onSurfaceVariant
+    val colorFondo = MaterialTheme.colorScheme.surfaceBright
+    val colorProgreso = MaterialTheme.colorScheme.primary
+    val colorClaro = MaterialTheme.colorScheme.onSurfaceVariant
+    val colorOscuro = MaterialTheme.colorScheme.onPrimary
     val grosor = 38.dp
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(grosor)
     ) {
-        // Fondo gris claro
+        val frac = (ml / objetivo.toFloat()).coerceIn(0f, 1f)
+
+        // Fondo
         Canvas(modifier = Modifier.matchParentSize()) {
             drawRoundRect(
                 color = colorFondo,
@@ -414,28 +408,31 @@ fun AguaLevelBar(ml: Int, objetivo: Int) {
                 cornerRadius = androidx.compose.ui.geometry.CornerRadius(18f, 18f)
             )
         }
-        // Barra azul proporcional al progreso
-        val frac = (ml / objetivo.toFloat()).coerceIn(0f, 1f)
+
+        // Progreso
         Canvas(modifier = Modifier.matchParentSize()) {
             drawRoundRect(
-                color = AguaAzul,
+                color = colorProgreso,
                 size = androidx.compose.ui.geometry.Size(width = size.width * frac, height = size.height),
                 cornerRadius = androidx.compose.ui.geometry.CornerRadius(18f, 18f)
             )
         }
-        // Gota (opcional, decorativa)
-        Icon(
-            painter = painterResource(id = R.drawable.ic_water),
-            contentDescription = "Gota decorativa",
-            tint = ColorGota,
+
+        // Texto de porcentaje
+        val porcentaje = (frac * 100).roundToInt()
+        val textColor = if (frac > 0.9f) colorOscuro else colorClaro
+
+        Text(
+            text = "$porcentaje%",
+            color = textColor,
+            fontSize = 14.sp,
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .padding(end = 8.dp)
-                .size(24.dp)
         )
-
     }
 }
+
 
 // --- Lógica de alarmas (receiver y canal deberías tenerlos ya) ---
 fun programarRecordatorioAgua(
@@ -458,8 +455,6 @@ fun programarRecordatorioAgua(
     )
 
     val triggerTime = System.currentTimeMillis() + frecuenciaMinutos * 60 * 1000L
-
-    println("Programando recordatorio inexacto para $frecuenciaMinutos min")
 
     alarmManager.cancel(pendingIntent)  // Cancela cualquier alarma previa
     alarmManager.setInexactRepeating(

@@ -12,6 +12,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -29,12 +30,13 @@ fun AguaEstadisticasScreen(
 ) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
-    val scope = rememberCoroutineScope()
     var showInfo by remember { mutableStateOf(false) }
     var historico by remember { mutableStateOf<List<Pair<LocalDate, Int>>>(emptyList()) }
     var promedioSemana by remember { mutableIntStateOf(0) }
     var objetivoML by remember { mutableIntStateOf(2000) }
 
+    val verdeSuave = Color(0xFF81C784)
+    val rojoSuave = Color(0xFFE57373)
     // Cargar datos de DataStore al entrar a la screen
     LaunchedEffect(Unit) {
         // Leer toda la DataStore
@@ -114,7 +116,7 @@ fun AguaEstadisticasScreen(
                 Text(
                     "Mejor día: " +
                             historico.maxByOrNull { it.second }?.let {
-                                "${it.first.dayOfMonth}/${it.first.monthValue} - ${(it.second/1000f).let { f-> "%.2f".format(f)}} L"
+                                "${it.first.dayOfMonth}/${it.first.monthValue} - ${(it.second/1000f).let { f-> "%.2f".format(f)}}L"
                             }.orEmpty(),
                     fontSize = 15.sp
                 )
@@ -143,7 +145,8 @@ fun AguaEstadisticasScreen(
                             Text(
                                 "${(ml / 1000f).let { "%.2f".format(it) }}L",
                                 fontSize = 18.sp,
-                                color = if (ml >= objetivoML) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                color = if (ml >= objetivoML) verdeSuave else rojoSuave
+
                             )
                         }
                         HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
@@ -160,9 +163,10 @@ fun AguaEstadisticasScreen(
             title = { Text("Sobre las estadísticas") },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Visualiza tu consumo diario de agua de la última semana y el promedio.")
-                    Text("• El gráfico muestra si alcanzaste tu objetivo cada día.")
-                    Text("• Solo se almacena en tu dispositivo, no en la nube.")
+                    Text("• El gráfico muestra tu consumo diario: las barras en verde indican que alcanzaste o superaste tu objetivo, y las barras en rojo indican que no lo alcanzaste.")
+                    Text("• En el historial, los litros consumidos aparecen en verde si ese día cumpliste tu meta, y en rojo si no.")
+                    Text("• El promedio semanal se calcula sobre los últimos 7 días registrados.")
+                    Text("• Todos los datos se guardan localmente en tu dispositivo.")
                 }
             },
             confirmButton = {
@@ -183,6 +187,8 @@ fun BarChartAguaSemana(
     datos: List<Pair<LocalDate, Int>>,
     objetivoML: Int
 ) {
+    val verdeSuave = Color(0xFF81C784)
+    val rojoSuave = Color(0xFFE57373)
     if (datos.isEmpty()) {
         Box(Modifier.height(72.dp), contentAlignment = Alignment.Center) {
             Text("Sin datos")
@@ -221,7 +227,7 @@ fun BarChartAguaSemana(
                     ) {
                         val barHeight = size.height * frac
                         drawRoundRect(
-                            color = if (ml >= objetivoML) colors.primary else colors.error,
+                            color = if (ml >= objetivoML) verdeSuave else rojoSuave,
                             topLeft = androidx.compose.ui.geometry.Offset(0f, size.height - barHeight),
                             size = androidx.compose.ui.geometry.Size(size.width, barHeight),
                             cornerRadius = androidx.compose.ui.geometry.CornerRadius(8f, 8f)
