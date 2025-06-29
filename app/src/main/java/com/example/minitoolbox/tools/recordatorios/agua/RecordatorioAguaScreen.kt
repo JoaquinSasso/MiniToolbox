@@ -5,36 +5,68 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocalDrink
+import androidx.compose.material.icons.filled.NotificationAdd
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DividerDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.runtime.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.intPreferencesKey
-import com.example.minitoolbox.nav.Screen
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.time.LocalDate
 import kotlin.math.roundToInt
+import com.example.minitoolbox.R
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,8 +89,11 @@ fun RecordatorioAguaScreen(
     var mlPorVaso by remember { mutableIntStateOf(porVasoDS) }
     var showInfo by remember { mutableStateOf(false) }
     var showDialogVaso by remember { mutableStateOf(false) }
-    var notificacionesActivas by remember { mutableStateOf(false) }
-    var frecuenciaHoras by remember { mutableIntStateOf(3) }
+
+    val notifDS by context.flujoNotificacionesActivas().collectAsState(initial = false)
+    val freqMinDS by context.flujoFrecuenciaMinutos().collectAsState(initial = 180)
+
+
 
     // --- Cuando DataStore cambia, sincroniza la UI ---
     LaunchedEffect(aguaHoy) { totalAgua = aguaHoy }
@@ -74,8 +109,8 @@ fun RecordatorioAguaScreen(
             snackbarHostState.currentSnackbarData?.dismiss()
             snackbarHostState.showSnackbar("Agregaste ${cantidad}ml 💧")
         }
-        if (notificacionesActivas) {
-            programarRecordatorioAgua(context, frecuenciaHoras, totalAgua, objetivoML)
+        if (notifDS) {
+            programarRecordatorioAgua(context, freqMinDS, totalAgua, objetivoML)
         }
     }
 
@@ -88,8 +123,8 @@ fun RecordatorioAguaScreen(
             snackbarHostState.currentSnackbarData?.dismiss()
             snackbarHostState.showSnackbar("¡Contador de agua reiniciado!")
         }
-        if (notificacionesActivas) {
-            programarRecordatorioAgua(context, frecuenciaHoras, totalAgua, objetivoML)
+        if (notifDS) {
+            programarRecordatorioAgua(context, freqMinDS, totalAgua, objetivoML)
         }
     }
 
@@ -97,8 +132,8 @@ fun RecordatorioAguaScreen(
     LaunchedEffect(objetivoML) {
         if (objetivoML != objetivoDS) {
             scope.launch { context.guardarObjetivo(objetivoML) }
-            if (notificacionesActivas) {
-                programarRecordatorioAgua(context, frecuenciaHoras, totalAgua, objetivoML)
+            if (notifDS) {
+                programarRecordatorioAgua(context, freqMinDS, totalAgua, objetivoML)
             }
         }
     }
@@ -112,6 +147,11 @@ fun RecordatorioAguaScreen(
         createWaterReminderChannel(context)
     }
 
+    LaunchedEffect(freqMinDS) {
+        if (notifDS) {
+            programarRecordatorioAgua(context, freqMinDS, totalAgua, objetivoML)
+        }
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -125,6 +165,13 @@ fun RecordatorioAguaScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = {
+                        programarRecordatorioAgua(context, 0, totalAgua, objetivoML) // lanza ya
+                        scope.launch { snackbarHostState.showSnackbar("Prueba: notificación en breve") }
+                    }) {
+                        Icon(Icons.Filled.NotificationAdd, contentDescription = "Prueba notificación")
+                    }
+
                     IconButton(onClick = {
                         showInfo = true
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -165,7 +212,6 @@ fun RecordatorioAguaScreen(
                         val step = 0.25f
                         val newValue = (valor / step).roundToInt() * step
                         objetivoML = (newValue * 1000).roundToInt()
-                        // Feedback solo cuando se detiene el slider o cambia de paso
                         if (newValue != lastSliderValue) {
                             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                             lastSliderValue = newValue
@@ -236,16 +282,6 @@ fun RecordatorioAguaScreen(
                 "${(totalAgua / 1000f).let { "%.2f".format(it) }} L / ${(objetivoML / 1000f).let { "%.2f".format(it) }} L",
                 fontSize = 20.sp
             )
-            Button(
-                onClick = {
-                    scope.launch {
-                        cargarDatosSemanaFake(context)
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
-            ) {
-                Text("Cargar semana de prueba")
-            }
 
             // --- Recordatorio ---
             HorizontalDivider(
@@ -259,25 +295,25 @@ fun RecordatorioAguaScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Notificaciones", fontSize = 16.sp)
+                Text("Notificaciones: $notifDS", fontSize = 16.sp)
                 Switch(
-                    checked = notificacionesActivas,
+                    checked = notifDS,
                     onCheckedChange = { checked ->
-                        notificacionesActivas = checked
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        if (checked) {
-                            programarRecordatorioAgua(context, frecuenciaHoras, totalAgua, objetivoML)
-                            snackbarHostState.currentSnackbarData?.dismiss()
-                            scope.launch { snackbarHostState.showSnackbar("Notificaciones activadas") }
-                        } else {
-                            cancelarRecordatorioAgua(context)
-                            snackbarHostState.currentSnackbarData?.dismiss()
-                            scope.launch { snackbarHostState.showSnackbar("Notificaciones desactivadas") }
+                        scope.launch {
+                            context.guardarNotificacionesActivas(checked)
+                            if (checked) {
+                                programarRecordatorioAgua(context, freqMinDS, totalAgua, objetivoML)
+                                snackbarHostState.showSnackbar("Notificaciones activadas")
+                            } else {
+                                cancelarRecordatorioAgua(context)
+                                snackbarHostState.showSnackbar("Notificaciones desactivadas")
+                            }
                         }
                     }
                 )
             }
-            if (notificacionesActivas) {
+            if (notifDS) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -285,22 +321,18 @@ fun RecordatorioAguaScreen(
                 ) {
                     Text("Frecuencia (horas)", fontSize = 16.sp)
                     Slider(
-                        value = frecuenciaHoras.toFloat(),
-                        onValueChange = {
-                            frecuenciaHoras = it.toInt()
+                        value = freqMinDS.toFloat(),
+                        onValueChange = { minutos ->
+                            scope.launch {
+                                context.guardarFrecuenciaMinutos(minutos.toInt())
+                            }
                             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         },
-                        onValueChangeFinished = {
-                            if (notificacionesActivas) {
-                                programarRecordatorioAgua(context, frecuenciaHoras, totalAgua, objetivoML)
-                                scope.launch { snackbarHostState.showSnackbar("Frecuencia actualizada") }
-                            }
-                        },
-                        valueRange = 1f..8f,
-                        steps = 7,
-                        modifier = Modifier.width(180.dp)
+                        valueRange = 30f..180f,
+                        steps = 5,  // 30, 60, 90, 120, 150, 180 → 6 posiciones = 5 pasos
+                        modifier = Modifier.width(200.dp)
                     )
-                    Text("$frecuenciaHoras h")
+                    Text("$freqMinDS min")
                 }
             }
         }
@@ -367,6 +399,7 @@ fun RecordatorioAguaScreen(
 fun AguaLevelBar(ml: Int, objetivo: Int) {
     val colorFondo = MaterialTheme.colorScheme.surfaceVariant
     val AguaAzul = Color(0xFF2196F3)
+    val ColorGota = MaterialTheme.colorScheme.onSurfaceVariant
     val grosor = 38.dp
     Box(
         modifier = Modifier
@@ -391,40 +424,54 @@ fun AguaLevelBar(ml: Int, objetivo: Int) {
             )
         }
         // Gota (opcional, decorativa)
-        Box(
+        Icon(
+            painter = painterResource(id = R.drawable.ic_water),
+            contentDescription = "Gota decorativa",
+            tint = ColorGota,
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .padding(end = 8.dp)
-                .size(20.dp)
-                .background(AguaAzul, CircleShape)
+                .size(24.dp)
         )
+
     }
 }
 
 // --- Lógica de alarmas (receiver y canal deberías tenerlos ya) ---
 fun programarRecordatorioAgua(
     context: Context,
-    horas: Int,
+    frecuenciaMinutos: Int,
     consumidoML: Int,
     objetivoML: Int
 ) {
     val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
     val intent = Intent(context, WaterReminderReceiver::class.java).apply {
         putExtra("agua_consumida_ml", consumidoML)
         putExtra("agua_objetivo_ml", objetivoML)
+        putExtra("frecuencia_minutos", frecuenciaMinutos)
     }
+
     val pendingIntent = PendingIntent.getBroadcast(
         context, 101,
         intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
-    val triggerTime = System.currentTimeMillis() + horas * 60 * 60 * 1000L
-    alarmManager.setRepeating(
+
+    val triggerTime = System.currentTimeMillis() + frecuenciaMinutos * 60 * 1000L
+
+    println("Programando recordatorio inexacto para $frecuenciaMinutos min")
+
+    alarmManager.cancel(pendingIntent)  // Cancela cualquier alarma previa
+    alarmManager.setInexactRepeating(
         AlarmManager.RTC_WAKEUP,
         triggerTime,
-        horas * 60 * 60 * 1000L,
+        frecuenciaMinutos * 60 * 1000L,
         pendingIntent
     )
 }
+
+
+
 fun cancelarRecordatorioAgua(context: Context) {
     val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
     val intent = Intent(context, WaterReminderReceiver::class.java)
@@ -433,19 +480,4 @@ fun cancelarRecordatorioAgua(context: Context) {
         intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
     alarmManager.cancel(pendingIntent)
-}
-
-suspend fun cargarDatosSemanaFake(context: Context) {
-    val hoy = LocalDate.now()
-    context.aguaDataStore.edit { prefs ->
-        // Borra claves viejas de agua
-        val clavesBorrar = prefs.asMap().keys.filter { it.toString().contains("agua_ml_") }
-        clavesBorrar.forEach { prefs.remove(it) }
-        // Carga 7 días de datos artificiales
-        repeat(7) { i ->
-            val fecha = hoy.minusDays((6 - i).toLong())
-            val key = intPreferencesKey("agua_ml_$fecha")
-            prefs[key] = 1000 + i * 350
-        }
-    }
 }

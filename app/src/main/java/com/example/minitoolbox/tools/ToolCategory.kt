@@ -22,16 +22,8 @@ sealed class ToolCategory(
     object Herramientas :
         ToolCategory("herramientas", R.string.category_herramientas, Icons.Filled.Build)
 
-    init {
-        println(">>> Herramientas initialized")
-    }
-
     object Organizacion :
         ToolCategory("organizacion", R.string.category_organizacion, Icons.Filled.CheckCircle)
-
-    init {
-        println(">>> Organizacion initialized")
-    }
 
     object Informacion :
         ToolCategory("informacion", R.string.category_informacion, Icons.Filled.Info)

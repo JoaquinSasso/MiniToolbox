@@ -1,15 +1,39 @@
 package com.example.minitoolbox.tools.recordatorios.agua
 
-import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.BroadcastReceiver
 import android.content.Context
-import android.os.Build
-import androidx.annotation.RequiresPermission
+import android.content.Intent
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.example.minitoolbox.R
+
+class WaterReminderReceiver : BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: Intent) {
+        val consumidoML = intent.getIntExtra("agua_consumida_ml", 0)
+        val objetivoML = intent.getIntExtra("agua_objetivo_ml", 2000)
+
+        showNotification(context, consumidoML, objetivoML)
+    }
+
+    private fun showNotification(context: Context, consumido: Int, objetivo: Int) {
+        val channelId = "agua_reminder_channel"
+        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        val channel = NotificationChannel(channelId, "Recordatorio de Agua", NotificationManager.IMPORTANCE_DEFAULT)
+        manager.createNotificationChannel(channel)
+
+        val notification = NotificationCompat.Builder(context, channelId)
+            .setContentTitle("Hora de beber agua 💧")
+            .setContentText("Has consumido ${(consumido / 1000f).let { "%.2f".format(it) }}L de ${(objetivo / 1000f).let { "%.2f".format(it) }}L")
+            .setSmallIcon(R.drawable.ic_water)
+            .setAutoCancel(true)
+            .build()
+
+        manager.notify(101, notification)
+    }
+}
 
 const val WATER_REMINDER_CHANNEL_ID = "water_reminder_channel"
 const val WATER_REMINDER_NOTIFICATION_ID = 2025
@@ -29,31 +53,4 @@ fun createWaterReminderChannel(context: Context) {
         setShowBadge(false)
     }
     mgr.createNotificationChannel(channel)
-}
-
-/**
- * Envía una notificación de recordatorio de agua indicando el progreso.
- * @param context Contexto de la app.
- * @param consumidoML Cantidad de agua consumida en mililitros.
- * @param objetivoML Objetivo diario en mililitros.
- */
-@RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
-fun sendWaterReminderNotification(
-    context: Context,
-    consumidoML: Int,
-    objetivoML: Int
-) {
-    // Formatea los litros: 1500 → 1.5L
-    fun formatoLitros(ml: Int) = "%.2f".format(ml / 1000f).trimEnd('0').trimEnd('.') + "L"
-
-    val progreso = "${formatoLitros(consumidoML)} / ${formatoLitros(objetivoML)}"
-    val builder = NotificationCompat.Builder(context, WATER_REMINDER_CHANNEL_ID)
-        .setSmallIcon(R.drawable.ic_water) // Usa tu propio ícono aquí
-        .setContentTitle("¡Hora de beber agua!")
-        .setContentText("Llevas $progreso hoy 💧")
-        .setPriority(NotificationCompat.PRIORITY_HIGH)
-        .setAutoCancel(true)
-
-    NotificationManagerCompat.from(context)
-        .notify(WATER_REMINDER_NOTIFICATION_ID, builder.build())
 }
