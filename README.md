@@ -56,6 +56,7 @@ Incluye calculadoras, generadores, minijuegos y utilidades cotidianas, desarroll
 <img src="Screenshots/estadisticas.png" width="400"/>
 <img src="Screenshots/agua.png" width="400"/>
 <img src="Screenshots/habitos.png" width="400"/>
+
 ---
 
 ## 🚀 Cómo compilar
