@@ -138,7 +138,7 @@ fun ContadorRachaScreen(onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Contador de dias en Racha") },
+                title = { Text("Seguimiento de Hábitos") },
                 navigationIcon = {
                     IconButton(onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
