@@ -3,14 +3,19 @@ package com.example.minitoolbox.tools.recordatorios
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -19,6 +24,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -56,6 +62,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.time.LocalDate
 import androidx.core.content.edit
+import kotlinx.coroutines.launch
 
 // ---- Data model ----
 data class RachaActividad(
@@ -106,6 +113,7 @@ object RachaPrefs {
 fun ContadorRachaScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
+    val scope = rememberCoroutineScope()
 
     var showInfo by remember { mutableStateOf(false) }
     var showAddDialog by remember { mutableStateOf(false) }
@@ -182,9 +190,12 @@ fun ContadorRachaScreen(onBack: () -> Unit) {
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(rachas) { racha ->
+                        val backgroundColor = getColorForDays(racha.dias)
+                        val textColor = getTextColorForCard(backgroundColor)
+
                         Card(
-                            Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(containerColor = getColorForDays(racha.dias))
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(containerColor = backgroundColor)
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -194,29 +205,82 @@ fun ContadorRachaScreen(onBack: () -> Unit) {
                                 Spacer(Modifier.width(18.dp))
                                 Column(Modifier.weight(1f)) {
                                     Text(
-                                        racha.nombre,
+                                        text = racha.nombre,
                                         fontSize = 20.sp,
-                                        color = Color.Black // Contraste máximo
+                                        color = textColor
                                     )
                                     Text(
-                                        rangoMotivador(racha.dias),
+                                        text = rangoMotivador(racha.dias),
                                         fontSize = 15.sp,
-                                        color = Color.Black.copy(alpha = 0.7f) // Suficiente contraste pero menos protagonista
+                                        color = textColor.copy(alpha = 0.7f)
                                     )
                                 }
-                                Spacer(Modifier.width(14.dp))
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Spacer(Modifier.width(12.dp))
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Bottom
+                                ) {
                                     Text(
-                                        "${racha.dias} días",
-                                        fontSize = 22.sp,
-                                        color = Color.Black
+                                        text = "${racha.dias} días",
+                                        fontSize = 26.sp,  // Más grande
+                                        color = textColor
                                     )
-                                    TextButton(
-                                        onClick = { /* ... */ }
+                                    Spacer(Modifier.height(4.dp))
+                                    Box(
+                                        modifier = Modifier.height(IntrinsicSize.Min) // Solo el espacio necesario
                                     ) {
-                                        Icon(Icons.Default.Delete, contentDescription = "Resetear")
-                                        Spacer(Modifier.width(4.dp))
-                                        Text("Resetear", color = Color.Black)
+                                        Column(
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalArrangement = Arrangement.spacedBy(0.dp)
+                                        ) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                modifier = Modifier
+                                                    .clickable {
+                                                        scope.launch {
+                                                            val confirmed = confirmResetDialog(context, racha.nombre, haptic)
+                                                            if (confirmed) {
+                                                                rachas = rachas.map {
+                                                                    if (it == racha) it.copy(dias = 0, ultimoDia = LocalDate.now().toString()) else it
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    .padding(2.dp) // mínimo padding para tocar bien
+                                            ) {
+                                                Icon(
+                                                    Icons.Default.Refresh,
+                                                    contentDescription = "Resetear",
+                                                    tint = textColor,
+                                                    modifier = Modifier.size(18.dp)
+                                                )
+                                                Spacer(Modifier.width(2.dp))
+                                                Text("Resetear", fontSize = 12.sp, color = textColor)
+                                            }
+
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                modifier = Modifier
+                                                    .clickable {
+                                                        scope.launch {
+                                                            val confirmed = confirmResetDialog(context, "Eliminar \"${racha.nombre}\"", haptic)
+                                                            if (confirmed) {
+                                                                rachas = rachas - racha
+                                                            }
+                                                        }
+                                                    }
+                                                    .padding(2.dp)
+                                            ) {
+                                                Icon(
+                                                    Icons.Default.Delete,
+                                                    contentDescription = "Eliminar",
+                                                    tint = textColor,
+                                                    modifier = Modifier.size(18.dp)
+                                                )
+                                                Spacer(Modifier.width(2.dp))
+                                                Text("Eliminar", fontSize = 12.sp, color = textColor)
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -359,9 +423,6 @@ suspend fun confirmResetDialog(
             cont.resume(false) {}
             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
         }
-        .setOnDismissListener {
-            cont.resume(false) {}
-        }
         .create()
     dialog.show()
 }
@@ -398,4 +459,9 @@ fun getColorForDays(dias: Int): Color = when {
     dias < 90 -> Color(0xFFFFE0B2)
     dias < 365 -> Color(0xFFFFCCBC)
     else     -> Color(0xFFD1C4E9)
+}
+
+fun getTextColorForCard(background: Color): Color {
+    val luminancia = (0.299 * background.red + 0.587 * background.green + 0.114 * background.blue)
+    return if (luminancia < 0.5) Color.White else Color.Black
 }
