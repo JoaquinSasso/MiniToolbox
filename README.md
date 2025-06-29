@@ -57,7 +57,7 @@ Por ejemplo:
 ![Selector de grupos](Screenshots/equipos.png)  
 ![Estadísticas de consumo de agua](Screenshots/estadisticas.png)
 ![Recordatorio de consumo de agua](Screenshots/agua.png)
-![Seguimiento de Hábitos](Screenshots/habitoss.png)
+![Seguimiento de Hábitos](Screenshots/habitos.png)
 ![Nivel Burbuja](Screenshots/burbuja.png)
 ---
 
