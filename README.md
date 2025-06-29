@@ -52,13 +52,13 @@ Incluye calculadoras, generadores, minijuegos y utilidades cotidianas, desarroll
 
 ## 📱 Capturas de pantalla
  
-<img src="screenshots/menu.png" width="400"/>
-<img src="screenshots/estadisticas.png" width="400"/>
-<img src="screenshots/agua.png" width="400"/>
-<img src="screenshots/habitos.png" width="400"/>
-<img src="screenshots/burbuja.png" width="400"/>
-<img src="screenshots/equipos.png" width="400"/>
-<img src="screenshots/edad.png" width="400"/>
+<img src="Screenshots/menu.png" width="400"/>
+<img src="Screenshots/estadisticas.png" width="400"/>
+<img src="Screenshots/agua.png" width="400"/>
+<img src="Screenshots/habitos.png" width="400"/>
+<img src="Screenshots/burbuja.png" width="400"/>
+<img src="Screenshots/equipos.png" width="400"/>
+<img src="Screenshots/edad.png" width="400"/>
 ---
 
 ## 🚀 Cómo compilar
