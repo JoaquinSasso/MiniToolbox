@@ -53,12 +53,12 @@ Incluye calculadoras, generadores, minijuegos y utilidades cotidianas, desarroll
 ## 📱 Capturas de pantalla
 
 Por ejemplo:  
-![Pantalla principal](screenshots/menu.png)  
-![Selector de grupos](screenshots/equipos.png)  
-![Estadísticas de consumo de agua](screenshots/estadisticas.png)
-![Recordatorio de consumo de agua](screenshots/agua.png)
-![Seguimiento de Hábitos](screenshots/habitoss.png)
-![Nivel Burbuja](screenshots/burbuja.png)
+![Pantalla principal](Screenshots/menu.png)  
+![Selector de grupos](Screenshots/equipos.png)  
+![Estadísticas de consumo de agua](Screenshots/estadisticas.png)
+![Recordatorio de consumo de agua](Screenshots/agua.png)
+![Seguimiento de Hábitos](Screenshots/habitoss.png)
+![Nivel Burbuja](Screenshots/burbuja.png)
 ---
 
 ## 🚀 Cómo compilar
