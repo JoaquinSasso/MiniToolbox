@@ -1,9 +1,14 @@
 package com.example.minitoolbox.tools.recordatorios.agua
 
+import android.Manifest
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -60,6 +65,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.appwidget.updateAll
@@ -70,7 +76,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,6 +92,8 @@ fun RecordatorioAguaScreen(
     val aguaHoy by context.flujoAguaHoy().collectAsState(initial = 0)
     val objetivoDS by context.flujoObjetivo().collectAsState(initial = 2000)
     val porVasoDS by context.flujoPorVaso().collectAsState(initial = 250)
+    val notifDS by context.flujoNotificacionesActivas().collectAsState(initial = false)
+    val freqMinDS by context.flujoFrecuenciaMinutos().collectAsState(initial = 180)
 
     var totalAgua by remember { mutableIntStateOf(aguaHoy) }
     var objetivoML by remember { mutableIntStateOf(objetivoDS) }
@@ -94,12 +101,24 @@ fun RecordatorioAguaScreen(
     var showInfo by remember { mutableStateOf(false) }
     var showDialogVaso by remember { mutableStateOf(false) }
 
-    val notifDS by context.flujoNotificacionesActivas().collectAsState(initial = false)
-    val freqMinDS by context.flujoFrecuenciaMinutos().collectAsState(initial = 180)
+    // Lista de valores posibles para la frecuencia en minutos
+    val minutosList = listOf(30, 60, 90, 120, 150, 180)
 
+    // Inicializa el índice del slider acorde al valor actual, o usa el más cercano si no está en la lista
+    var sliderIndex by remember { mutableIntStateOf(minutosList.indexOf(freqMinDS).takeIf { it >= 0 } ?: 0) }
 
+    // --- Lanzador de permiso de notificaciones ---
+    val notifLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (!granted) {
+            scope.launch {
+                snackbarHostState.showSnackbar("No se otorgó permiso para notificaciones.")
+            }
+        }
+    }
 
-    // --- Cuando DataStore cambia, sincroniza la UI ---
+    // --- Sincronizar estados locales con DataStore ---
     LaunchedEffect(aguaHoy) { totalAgua = aguaHoy }
     LaunchedEffect(objetivoDS) { objetivoML = objetivoDS }
     LaunchedEffect(porVasoDS) { mlPorVaso = porVasoDS }
@@ -145,8 +164,10 @@ fun RecordatorioAguaScreen(
     // -- Cuando cambian objetivo o porVaso, guarda en DataStore --
     LaunchedEffect(objetivoML) {
         if (objetivoML != objetivoDS) {
-            scope.launch { context.guardarObjetivo(objetivoML)
-                actualizarWidgetAgua(context)}
+            scope.launch {
+                context.guardarObjetivo(objetivoML)
+                actualizarWidgetAgua(context)
+            }
             if (notifDS) {
                 programarRecordatorioAgua(context, freqMinDS, totalAgua, objetivoML)
             }
@@ -154,8 +175,10 @@ fun RecordatorioAguaScreen(
     }
     LaunchedEffect(mlPorVaso) {
         if (mlPorVaso != porVasoDS) {
-            scope.launch { context.guardarPorVaso(mlPorVaso)
-                actualizarWidgetAgua(context)}
+            scope.launch {
+                context.guardarPorVaso(mlPorVaso)
+                actualizarWidgetAgua(context)
+            }
         }
     }
 
@@ -168,6 +191,7 @@ fun RecordatorioAguaScreen(
             programarRecordatorioAgua(context, freqMinDS, totalAgua, objetivoML)
         }
     }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -242,11 +266,9 @@ fun RecordatorioAguaScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.fillMaxWidth()
-            ){// --- Botón de agregar agua ---
+            ) {
                 Button(
-                    onClick = {
-                        agregarAgua(mlPorVaso)
-                    }
+                    onClick = { agregarAgua(mlPorVaso) }
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.water_full),
@@ -257,11 +279,8 @@ fun RecordatorioAguaScreen(
                     Text("+$mlPorVaso ml", fontSize = 18.sp)
                 }
                 Spacer(Modifier.width(32.dp))
-                // --- Botón de quitar agua ---
                 Button(
-                    onClick = {
-                        agregarAgua(-mlPorVaso)
-                    }
+                    onClick = { agregarAgua(-mlPorVaso) }
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.water_loss),
@@ -276,7 +295,7 @@ fun RecordatorioAguaScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.fillMaxWidth()
-            ){
+            ) {
                 TextButton(
                     onClick = { showDialogVaso = true }
                 ) { Text("Cambiar cantidad del vaso") }
@@ -298,6 +317,15 @@ fun RecordatorioAguaScreen(
                 Switch(
                     checked = notifDS,
                     onCheckedChange = { checked ->
+                        // Si el usuario activa el switch, pedir permiso en Android 13+
+                        if (checked && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            if (ContextCompat.checkSelfPermission(
+                                    context, Manifest.permission.POST_NOTIFICATIONS
+                                ) != PackageManager.PERMISSION_GRANTED
+                            ) {
+                                notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            }
+                        }
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         scope.launch {
                             context.guardarNotificacionesActivas(checked)
@@ -318,20 +346,22 @@ fun RecordatorioAguaScreen(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier
-                        .fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Frecuencia: $freqMinDS min", fontSize = 16.sp)
+                    Text("Frecuencia: ${minutosList[sliderIndex]} min", fontSize = 16.sp)
                     Slider(
-                        value = freqMinDS.toFloat(),
-                        onValueChange = { minutos ->
-                            scope.launch {
-                                context.guardarFrecuenciaMinutos(minutos.toInt())
-                            }
+                        value = sliderIndex.toFloat(),
+                        onValueChange = { value ->
+                            sliderIndex = value.roundToInt().coerceIn(0, minutosList.size - 1)
                             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         },
-                        valueRange = 30f..180f,
-                        steps = 5,  // 30, 60, 90, 120, 150, 180 → 6 posiciones = 5 pasos
+                        onValueChangeFinished = {
+                            val minutosSeleccionados = minutosList[sliderIndex]
+                            scope.launch { context.guardarFrecuenciaMinutos(minutosSeleccionados) }
+                            // Si usás alarmas, podés actualizar acá también
+                        },
+                        valueRange = 0f..(minutosList.size - 1).toFloat(),
+                        steps = minutosList.size - 2, // Para 6 valores: 4 pasos intermedios
                         modifier = Modifier.width(200.dp)
                     )
                 }
@@ -403,6 +433,7 @@ fun RecordatorioAguaScreen(
     }
 
     // --- Información ---
+    // --- Información ---
     if (showInfo) {
         AlertDialog(
             onDismissRequest = { showInfo = false },
@@ -412,8 +443,8 @@ fun RecordatorioAguaScreen(
                     Text("• Lleva el control de la cantidad de agua que consumes a diario.")
                     Text("• Puedes configurar tu meta diaria y la cantidad que sumas con cada botón.")
                     Text("• Si activas las notificaciones, la app te recordará tomar agua según el intervalo elegido.")
-                    Text("• La notificación indica tu avance (por ejemplo, 1.3L/3L).")
                     Text("• Todo se almacena localmente y no se comparte fuera de tu dispositivo.")
+                    Text("• Puedes agregar el widget a tu pantalla de inicio para ver tu progreso diario y sumar o restar agua rápidamente sin abrir la app.")
                     Text("💧 Recomendación: un adulto debe consumir entre 1.5 y 3 litros de agua pura al día. La meta diaria sugerida es de 2 litros, pero puedes ajustarla según tus necesidades, actividad y clima.")
                 }
             },
@@ -425,6 +456,7 @@ fun RecordatorioAguaScreen(
             }
         )
     }
+
 }
 
 // --- Barra de nivel visual ---
