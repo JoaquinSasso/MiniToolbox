@@ -13,7 +13,6 @@ class WaterReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val consumidoML = intent.getIntExtra("agua_consumida_ml", 0)
         val objetivoML = intent.getIntExtra("agua_objetivo_ml", 2000)
-
         showNotification(context, consumidoML, objetivoML)
     }
 
@@ -23,7 +22,6 @@ class WaterReminderReceiver : BroadcastReceiver() {
 
         val channel = NotificationChannel(channelId, "Recordatorio de Agua", NotificationManager.IMPORTANCE_DEFAULT)
         manager.createNotificationChannel(channel)
-
         val notification = NotificationCompat.Builder(context, channelId)
             .setContentTitle("Hora de beber agua 💧")
             .setContentText("Has consumido ${(consumido / 1000f).let { "%.2f".format(it) }}L de ${(objetivo / 1000f).let { "%.2f".format(it) }}L")
