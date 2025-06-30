@@ -14,13 +14,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.LocalDrink
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -56,12 +56,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.glance.appwidget.updateAll
+import com.example.minitoolbox.R
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -98,12 +100,22 @@ fun RecordatorioAguaScreen(
 
     // -- Lógica agregar agua --
     fun agregarAgua(cantidad: Int) {
+        if (totalAgua == 0 && cantidad < 0){
+            scope.launch {
+                snackbarHostState.currentSnackbarData?.dismiss()
+                snackbarHostState.showSnackbar("Ya no hay agua")
+            }
+            return
+        }
         totalAgua += cantidad
         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+        val text = if (cantidad > 0) "Agregaste $cantidad ml 💧" else "Quitaste $cantidad ml 💧"
         scope.launch {
-            context.guardarAguaHoy(totalAgua)
+            context.guardarAguaHoy(totalAgua.coerceAtLeast(0))
             snackbarHostState.currentSnackbarData?.dismiss()
-            snackbarHostState.showSnackbar("Agregaste ${cantidad}ml 💧")
+            snackbarHostState.showSnackbar(text)
+
+            AguaWidget().updateAll(context) // ACTUALIZA EL WIDGET
         }
         if (notifDS) {
             programarRecordatorioAgua(context, freqMinDS, totalAgua, objetivoML)
@@ -118,6 +130,7 @@ fun RecordatorioAguaScreen(
             context.guardarAguaHoy(0)
             snackbarHostState.currentSnackbarData?.dismiss()
             snackbarHostState.showSnackbar("¡Contador de agua reiniciado!")
+            AguaWidget().updateAll(context) // ACTUALIZA EL WIDGET
         }
         if (notifDS) {
             programarRecordatorioAgua(context, freqMinDS, totalAgua, objetivoML)
@@ -217,28 +230,52 @@ fun RecordatorioAguaScreen(
                 )
             }
             Text("Agregar agua", fontSize = 17.sp, color = MaterialTheme.colorScheme.primary)
-            // --- Botón de agregar agua ---
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.fillMaxWidth()
-            ) {
+            ){// --- Botón de agregar agua ---
                 Button(
                     onClick = {
                         agregarAgua(mlPorVaso)
                     }
                 ) {
-                    Icon(Icons.Filled.LocalDrink, contentDescription = "Agregar agua")
+                    Icon(
+                        painter = painterResource(id = R.drawable.water_full),
+                        contentDescription = "Agregar agua",
+                        Modifier.size(18.dp)
+                    )
                     Spacer(Modifier.width(6.dp))
-                    Text("+$mlPorVaso ml")
+                    Text("+$mlPorVaso ml", fontSize = 18.sp)
                 }
-                Spacer(Modifier.width(16.dp))
+                Spacer(Modifier.width(32.dp))
+                // --- Botón de quitar agua ---
+                Button(
+                    onClick = {
+                        agregarAgua(-mlPorVaso)
+                    }
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.water_loss),
+                        contentDescription = "Quitar agua",
+                        Modifier.size(18.dp)
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text("-$mlPorVaso ml", fontSize = 18.sp)
+                }
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
+            ){
                 TextButton(
                     onClick = { showDialogVaso = true }
-                ) { Text("Cambiar cantidad") }
+                ) { Text("Cambiar cantidad del vaso") }
             }
 
-            // --- Recordatorio ---
+            // --- Area de Notificaciones ---
             HorizontalDivider(
                 Modifier.padding(vertical = 10.dp),
                 DividerDefaults.Thickness,
