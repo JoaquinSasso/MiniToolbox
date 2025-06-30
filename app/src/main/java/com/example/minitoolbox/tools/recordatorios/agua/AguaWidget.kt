@@ -1,6 +1,9 @@
 package com.example.minitoolbox.tools.recordatorios.agua
 
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.Preferences
@@ -8,9 +11,11 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.glance.Button
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
+import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.action.actionRunCallback
+import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
@@ -28,6 +33,7 @@ import androidx.glance.layout.width
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
+import com.example.minitoolbox.MainActivity
 
 class AguaWidget : GlanceAppWidget() {
 
@@ -44,12 +50,23 @@ class AguaWidget : GlanceAppWidget() {
             val objetivo = prefs[KEY_OBJETIVO] ?: 2000
             val porVaso = prefs[KEY_POR_VASO] ?: 250
 
+            val launchIntent = Intent(context, MainActivity::class.java).apply {
+                putExtra("startRoute", "agua")
+            }
+            val pendingIntent = PendingIntent.getActivity(
+                context,
+                0,
+                launchIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
             Box(
                 modifier = GlanceModifier
                     .fillMaxSize()
                     .background(ColorProvider(day = Color(0xFFE0F7FA), night = Color(0xFF263238)))
                     .cornerRadius(16.dp)
-                    .padding(12.dp)
+                    .padding(6.dp)
+                    .clickable(actionStartActivity(launchIntent))
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -63,6 +80,7 @@ class AguaWidget : GlanceAppWidget() {
                             color = ColorProvider(day = Color.Black, night = Color.White)
                         )
                     )
+                    ProgressBarWidget(agua, objetivo)
                     Spacer(GlanceModifier.height(8.dp))
                     Row(horizontalAlignment = Alignment.CenterHorizontally) {
                         Button(
@@ -80,6 +98,33 @@ class AguaWidget : GlanceAppWidget() {
         }
     }
 }
+
+@Composable
+fun ProgressBarWidget(ml: Int, objetivo: Int) {
+    val frac = (ml / objetivo.toFloat()).coerceIn(0f, 1f)
+    val totalWidth = 120.dp // ancho de la barra
+    val altura = 22.dp
+
+    Box(
+        modifier = GlanceModifier
+            .width(totalWidth)
+            .height(altura)
+            .cornerRadius(12.dp)
+            .background(ColorProvider(day = Color(0xFF0D47A1), night = Color(0xFF0D47A1))),
+        contentAlignment = Alignment.CenterStart
+    ) {
+        // Barra de progreso
+        Box(
+            modifier = GlanceModifier
+                .width(totalWidth * frac)
+                .height(altura)
+                .cornerRadius(12.dp)
+                .background(ColorProvider(day = Color(0xFF90CAF9), night = Color(0xFF90CAF9)))
+        ) { }
+
+    }
+}
+
 class AguaWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = AguaWidget()
 }

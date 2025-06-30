@@ -30,6 +30,12 @@ class MainActivity : ComponentActivity() {
                             popUpTo("home") { inclusive = false }
                         }
                     }
+                    if (startRoute == "agua") {
+                        navController.navigate("agua") {
+                            // opcional: popUpTo para limpiar la pila
+                            popUpTo("home") { inclusive = false }
+                        }
+                    }
                 }
                 // 4. Tu Surface + NavGraph exactamente como antes
                 Surface(color = MaterialTheme.colorScheme.background) {

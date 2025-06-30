@@ -60,8 +60,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.glance.appwidget.GlanceAppWidgetManager
+import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.appwidget.updateAll
+import androidx.glance.state.PreferencesGlanceStateDefinition
 import com.example.minitoolbox.R
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -112,10 +118,9 @@ fun RecordatorioAguaScreen(
         val text = if (cantidad > 0) "Agregaste $cantidad ml 💧" else "Quitaste $cantidad ml 💧"
         scope.launch {
             context.guardarAguaHoy(totalAgua.coerceAtLeast(0))
+            actualizarWidgetAgua(context)
             snackbarHostState.currentSnackbarData?.dismiss()
             snackbarHostState.showSnackbar(text)
-
-            AguaWidget().updateAll(context) // ACTUALIZA EL WIDGET
         }
         if (notifDS) {
             programarRecordatorioAgua(context, freqMinDS, totalAgua, objetivoML)
@@ -128,9 +133,9 @@ fun RecordatorioAguaScreen(
         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
         scope.launch {
             context.guardarAguaHoy(0)
+            actualizarWidgetAgua(context)
             snackbarHostState.currentSnackbarData?.dismiss()
             snackbarHostState.showSnackbar("¡Contador de agua reiniciado!")
-            AguaWidget().updateAll(context) // ACTUALIZA EL WIDGET
         }
         if (notifDS) {
             programarRecordatorioAgua(context, freqMinDS, totalAgua, objetivoML)
@@ -140,7 +145,8 @@ fun RecordatorioAguaScreen(
     // -- Cuando cambian objetivo o porVaso, guarda en DataStore --
     LaunchedEffect(objetivoML) {
         if (objetivoML != objetivoDS) {
-            scope.launch { context.guardarObjetivo(objetivoML) }
+            scope.launch { context.guardarObjetivo(objetivoML)
+                actualizarWidgetAgua(context)}
             if (notifDS) {
                 programarRecordatorioAgua(context, freqMinDS, totalAgua, objetivoML)
             }
@@ -148,7 +154,8 @@ fun RecordatorioAguaScreen(
     }
     LaunchedEffect(mlPorVaso) {
         if (mlPorVaso != porVasoDS) {
-            scope.launch { context.guardarPorVaso(mlPorVaso) }
+            scope.launch { context.guardarPorVaso(mlPorVaso)
+                actualizarWidgetAgua(context)}
         }
     }
 
@@ -422,52 +429,52 @@ fun RecordatorioAguaScreen(
 
 // --- Barra de nivel visual ---
 @Composable
-fun AguaLevelBar(ml: Int, objetivo: Int) {
-    val colorFondo = MaterialTheme.colorScheme.surfaceBright
-    val colorProgreso = MaterialTheme.colorScheme.primary
-    val colorClaro = MaterialTheme.colorScheme.onSurfaceVariant
-    val colorOscuro = MaterialTheme.colorScheme.onPrimary
-    val grosor = 38.dp
+    fun AguaLevelBar(ml: Int, objetivo: Int) {
+        val colorFondo = MaterialTheme.colorScheme.surfaceBright
+        val colorProgreso = MaterialTheme.colorScheme.primary
+        val colorClaro = MaterialTheme.colorScheme.onSurfaceVariant
+        val colorOscuro = MaterialTheme.colorScheme.onPrimary
+        val grosor = 38.dp
 
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(grosor)
-    ) {
-        val frac = (ml / objetivo.toFloat()).coerceIn(0f, 1f)
-
-        // Fondo
-        Canvas(modifier = Modifier.matchParentSize()) {
-            drawRoundRect(
-                color = colorFondo,
-                size = size,
-                cornerRadius = androidx.compose.ui.geometry.CornerRadius(18f, 18f)
-            )
-        }
-
-        // Progreso
-        Canvas(modifier = Modifier.matchParentSize()) {
-            drawRoundRect(
-                color = colorProgreso,
-                size = androidx.compose.ui.geometry.Size(width = size.width * frac, height = size.height),
-                cornerRadius = androidx.compose.ui.geometry.CornerRadius(18f, 18f)
-            )
-        }
-
-        // Texto de porcentaje
-        val porcentaje = (frac * 100).roundToInt()
-        val textColor = if (frac > 0.9f) colorOscuro else colorClaro
-
-        Text(
-            text = "$porcentaje%",
-            color = textColor,
-            fontSize = 14.sp,
+        Box(
             modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(end = 8.dp)
-        )
+                .fillMaxWidth()
+                .height(grosor)
+        ) {
+            val frac = (ml / objetivo.toFloat()).coerceIn(0f, 1f)
+
+            // Fondo
+            Canvas(modifier = Modifier.matchParentSize()) {
+                drawRoundRect(
+                    color = colorFondo,
+                    size = size,
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(18f, 18f)
+                )
+            }
+
+            // Progreso
+            Canvas(modifier = Modifier.matchParentSize()) {
+                drawRoundRect(
+                    color = colorProgreso,
+                    size = androidx.compose.ui.geometry.Size(width = size.width * frac, height = size.height),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(18f, 18f)
+                )
+            }
+
+            // Texto de porcentaje
+            val porcentaje = (frac * 100).roundToInt()
+            val textColor = if (frac > 0.9f) colorOscuro else colorClaro
+
+            Text(
+                text = "$porcentaje%",
+                color = textColor,
+                fontSize = 14.sp,
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 8.dp)
+            )
+        }
     }
-}
 
 
 // --- Lógica de alarmas (receiver y canal deberías tenerlos ya) ---
@@ -511,4 +518,23 @@ fun cancelarRecordatorioAgua(context: Context) {
         intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
     alarmManager.cancel(pendingIntent)
+}
+
+fun actualizarWidgetAgua(context: Context) {
+    // Lanza la actualización en un hilo de fondo
+    CoroutineScope(Dispatchers.IO).launch {
+        val glanceManager = GlanceAppWidgetManager(context)
+        val glanceIds = glanceManager.getGlanceIds(AguaWidget::class.java)
+
+        glanceIds.forEach { glanceId ->
+            updateAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId) { prefs ->
+                prefs.toMutablePreferences().apply {
+                    this[AguaWidget.KEY_AGUA] = context.flujoAguaHoy().first()
+                    this[AguaWidget.KEY_OBJETIVO] = context.flujoObjetivo().first()
+                    this[AguaWidget.KEY_POR_VASO] = context.flujoPorVaso().first()
+                }
+            }
+        }
+        AguaWidget().updateAll(context)
+    }
 }
