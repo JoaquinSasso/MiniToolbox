@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.minitoolbox"
+    namespace = "com.joasasso.minitoolbox"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.minitoolbox"
+        applicationId = "com.joasasso.minitoolbox"
         minSdk = 28
         targetSdk = 36
         versionCode = 1
