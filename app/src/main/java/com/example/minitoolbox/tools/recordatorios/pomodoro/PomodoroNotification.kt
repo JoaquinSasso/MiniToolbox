@@ -1,4 +1,4 @@
-package com.example.minitoolbox.tools.pomodoro
+package com.example.minitoolbox.tools.recordatorios.pomodoro
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -52,7 +52,6 @@ fun buildCountdownNotification(context: Context, title: String, timeLeft: String
     // Intent que abre PomodoroScreen
     val intent = Intent(context, MainActivity::class.java).apply {
         putExtra("startRoute", "pomodoro")
-        flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
     }
     val pi = PendingIntent.getActivity(
         context, 0, intent,

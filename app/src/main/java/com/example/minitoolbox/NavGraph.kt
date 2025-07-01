@@ -1,27 +1,41 @@
 // app/src/main/java/com/example/minitoolbox/NavGraph.kt
 package com.example.minitoolbox
 
-import GeneradorQrContactoScreen
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.minitoolbox.tools.ToolRegistry
-import com.example.minitoolbox.tools.calculadoras.*
-import com.example.minitoolbox.tools.generadores.*
-import com.example.minitoolbox.tools.juegos.*
 import com.example.minitoolbox.nav.Screen
+import com.example.minitoolbox.tools.ToolRegistry
+import com.example.minitoolbox.tools.calculadoras.AgeCalculatorScreen
+import com.example.minitoolbox.tools.calculadoras.ConversorHorasScreen
+import com.example.minitoolbox.tools.calculadoras.ConversorRomanosScreen
+import com.example.minitoolbox.tools.calculadoras.ConversorUnidadesScreen
+import com.example.minitoolbox.tools.calculadoras.DecimalBinaryConverterScreen
+import com.example.minitoolbox.tools.calculadoras.IMCScreen
+import com.example.minitoolbox.tools.calculadoras.PorcentajeScreen
+import com.example.minitoolbox.tools.calculadoras.TextBinaryConverterScreen
+import com.example.minitoolbox.tools.calculadoras.ZodiacSignScreen
+import com.example.minitoolbox.tools.generadores.GeneradorContrasenaScreen
+import com.example.minitoolbox.tools.generadores.GeneradorLoremIpsumScreen
+import com.example.minitoolbox.tools.generadores.GeneradorNombresScreen
+import com.example.minitoolbox.tools.generadores.GeneradorQrContactoScreen
+import com.example.minitoolbox.tools.generadores.GeneradorQrScreen
+import com.example.minitoolbox.tools.generadores.GroupSelectorScreen
+import com.example.minitoolbox.tools.generadores.RandomColorGeneratorScreen
+import com.example.minitoolbox.tools.generadores.SugeridorActividadScreen
+import com.example.minitoolbox.tools.juegos.CoinFlipScreen
+import com.example.minitoolbox.tools.juegos.TrucoScoreBoardScreen
 import com.example.minitoolbox.tools.medicion.BubbleLevelScreen
 import com.example.minitoolbox.tools.medicion.LinternaScreen
 import com.example.minitoolbox.tools.medicion.MedidorLuzScreen
 import com.example.minitoolbox.tools.medicion.ReglaScreen
-import com.example.minitoolbox.tools.pomodoro.PomodoroScreen
 import com.example.minitoolbox.tools.recordatorios.ContadorRachaScreen
 import com.example.minitoolbox.tools.recordatorios.agua.AguaEstadisticasScreen
 import com.example.minitoolbox.tools.recordatorios.agua.RecordatorioAguaScreen
-import com.example.minitoolbox.tools.truco.TrucoScoreBoardScreen
+import com.example.minitoolbox.tools.recordatorios.pomodoro.PomodoroScreen
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable

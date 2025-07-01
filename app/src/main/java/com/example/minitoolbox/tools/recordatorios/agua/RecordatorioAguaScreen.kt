@@ -9,6 +9,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -77,6 +78,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecordatorioAguaScreen(
@@ -102,7 +104,7 @@ fun RecordatorioAguaScreen(
     var showDialogVaso by remember { mutableStateOf(false) }
 
     // Lista de valores posibles para la frecuencia en minutos
-    val minutosList = listOf(30, 60, 90, 120, 150, 180)
+    val minutosList = listOf(30, 60, 90, 120, 150, 180, 210, 240)
 
     // Inicializa el índice del slider acorde al valor actual, o usa el más cercano si no está en la lista
     var sliderIndex by remember { mutableIntStateOf(minutosList.indexOf(freqMinDS).takeIf { it >= 0 } ?: 0) }
@@ -318,13 +320,11 @@ fun RecordatorioAguaScreen(
                     checked = notifDS,
                     onCheckedChange = { checked ->
                         // Si el usuario activa el switch, pedir permiso en Android 13+
-                        if (checked && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            if (ContextCompat.checkSelfPermission(
-                                    context, Manifest.permission.POST_NOTIFICATIONS
-                                ) != PackageManager.PERMISSION_GRANTED
-                            ) {
-                                notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                            }
+                        if (ContextCompat.checkSelfPermission(
+                                context, Manifest.permission.POST_NOTIFICATIONS
+                            ) != PackageManager.PERMISSION_GRANTED
+                        ) {
+                            notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                         }
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         scope.launch {
@@ -342,13 +342,14 @@ fun RecordatorioAguaScreen(
                     }
                 )
             }
+            //Si el usuario activa las notificaciones se le pregunta la frecuencia de estas
             if (notifDS) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Frecuencia: ${minutosList[sliderIndex]} min", fontSize = 16.sp)
+                    Text("Frecuencia: ${minutosList[sliderIndex] / 60f} hs", fontSize = 16.sp)
                     Slider(
                         value = sliderIndex.toFloat(),
                         onValueChange = { value ->
@@ -397,6 +398,7 @@ fun RecordatorioAguaScreen(
                     Text("Estadísticas")
                 }
             }
+            Spacer(Modifier.height(45.dp))
         }
     }
 
@@ -432,8 +434,7 @@ fun RecordatorioAguaScreen(
         )
     }
 
-    // --- Información ---
-    // --- Información ---
+    //Menú de ayuda con información sobre la tool
     if (showInfo) {
         AlertDialog(
             onDismissRequest = { showInfo = false },
@@ -459,7 +460,7 @@ fun RecordatorioAguaScreen(
 
 }
 
-// --- Barra de nivel visual ---
+/** Funcion para dibujar la barra de progreso de consumo de agua, debe llamarse dentro de Scaffold*/
 @Composable
     fun AguaLevelBar(ml: Int, objetivo: Int) {
         val colorFondo = MaterialTheme.colorScheme.surfaceBright
@@ -508,8 +509,7 @@ fun RecordatorioAguaScreen(
         }
     }
 
-
-// --- Lógica de alarmas (receiver y canal deberías tenerlos ya) ---
+/**Funcion para re/programar el recordatorio de agua cada vez que cambia el progreso de consumo de agua*/
 fun programarRecordatorioAgua(
     context: Context,
     frecuenciaMinutos: Int,
@@ -541,7 +541,7 @@ fun programarRecordatorioAgua(
 }
 
 
-
+/**Funcion para cancelar el recordatorio de agua cuando se desactivan las notificaciones*/
 fun cancelarRecordatorioAgua(context: Context) {
     val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
     val intent = Intent(context, WaterReminderReceiver::class.java)
@@ -552,6 +552,7 @@ fun cancelarRecordatorioAgua(context: Context) {
     alarmManager.cancel(pendingIntent)
 }
 
+/**Funcion para actualizar el progreso del consumo de agua en el widget desde la app*/
 fun actualizarWidgetAgua(context: Context) {
     // Lanza la actualización en un hilo de fondo
     CoroutineScope(Dispatchers.IO).launch {

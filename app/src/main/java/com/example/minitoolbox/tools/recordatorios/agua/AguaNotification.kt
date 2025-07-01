@@ -8,11 +8,13 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.example.minitoolbox.R
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 
 class WaterReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        val consumidoML = intent.getIntExtra("agua_consumida_ml", 0)
-        val objetivoML = intent.getIntExtra("agua_objetivo_ml", 2000)
+        val consumidoML = runBlocking { context.flujoAguaHoy().first() }
+        val objetivoML = runBlocking { context.flujoObjetivo().first() }
         showNotification(context, consumidoML, objetivoML)
     }
 
@@ -34,7 +36,6 @@ class WaterReminderReceiver : BroadcastReceiver() {
 }
 
 const val WATER_REMINDER_CHANNEL_ID = "water_reminder_channel"
-const val WATER_REMINDER_NOTIFICATION_ID = 2025
 
 /** Crea el canal de notificación para el recordatorio de agua */
 fun createWaterReminderChannel(context: Context) {

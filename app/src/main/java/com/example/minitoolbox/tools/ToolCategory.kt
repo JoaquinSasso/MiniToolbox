@@ -1,10 +1,8 @@
 // app/src/main/java/com/example/minitoolbox/tools/ToolCategory.kt
 package com.example.minitoolbox.tools
 
-import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.SportsEsports
@@ -15,21 +13,19 @@ import com.example.minitoolbox.R
  * Categorías que aparecen en la barra inferior.
  */
 sealed class ToolCategory(
-    val key: String,
-    @StringRes val titleRes: Int,
+    val titleRes: Int,
     val icon: ImageVector
 ) {
     object Herramientas :
-        ToolCategory("herramientas", R.string.category_herramientas, Icons.Filled.Build)
+        ToolCategory(R.string.category_herramientas, Icons.Filled.Build)
 
     object Organizacion :
-        ToolCategory("organizacion", R.string.category_organizacion, Icons.Filled.CheckCircle)
+        ToolCategory(R.string.category_organizacion, Icons.Filled.CheckCircle)
 
     object Informacion :
-        ToolCategory("informacion", R.string.category_informacion, Icons.Filled.Info)
+        ToolCategory(R.string.category_informacion, Icons.Filled.Info)
 
     object Entretenimiento : ToolCategory(
-        "entretenimiento",
         R.string.category_entretenimiento,
         Icons.Filled.SportsEsports
     )

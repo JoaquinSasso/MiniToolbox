@@ -9,12 +9,14 @@ import androidx.glance.state.PreferencesGlanceStateDefinition
 import kotlinx.coroutines.flow.first
 
 class AgregarAguaCallback : ActionCallback {
+    //Obtener el valor actual de agua desde el dataStore
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
         val porVaso = context.flujoPorVaso().first()
         val actual = context.flujoAguaHoy().first()
         val nuevo = actual + porVaso
         context.guardarAguaHoy(nuevo)
 
+        //Actualizar los datos del widget
         updateAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId) { prefs ->
             prefs.toMutablePreferences().apply {
                 this[AguaWidget.KEY_AGUA] = nuevo
@@ -22,18 +24,24 @@ class AgregarAguaCallback : ActionCallback {
                 this[AguaWidget.KEY_POR_VASO] = porVaso
             }
         }
-
         AguaWidget().update(context, glanceId)
+
+        //Reprogramar la notificacion para beber agua
+        val frecuenciaMinutos = context.flujoFrecuenciaMinutos().first()
+        val objetivo = context.flujoObjetivo().first()
+        programarRecordatorioAgua(context, frecuenciaMinutos, nuevo, objetivo)
     }
 }
 
 class QuitarAguaCallback : ActionCallback {
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
+        //Obtener el valor actual de agua desde el dataStore
         val porVaso = context.flujoPorVaso().first()
         val actual = context.flujoAguaHoy().first()
         val nuevo = (actual - porVaso).coerceAtLeast(0)
         context.guardarAguaHoy(nuevo)
 
+        //Actualizar los datos del widget
         updateAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId) { prefs ->
             prefs.toMutablePreferences().apply {
                 this[AguaWidget.KEY_AGUA] = nuevo
@@ -41,8 +49,12 @@ class QuitarAguaCallback : ActionCallback {
                 this[AguaWidget.KEY_POR_VASO] = porVaso
             }
         }
-
         AguaWidget().update(context, glanceId)
+
+        //Reprogramar la notificacion para beber agua
+        val frecuenciaMinutos = context.flujoFrecuenciaMinutos().first()
+        val objetivo = context.flujoObjetivo().first()
+        programarRecordatorioAgua(context, frecuenciaMinutos, nuevo, objetivo)
     }
 }
 

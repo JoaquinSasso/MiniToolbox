@@ -8,14 +8,42 @@ import android.hardware.SensorManager
 import android.media.AudioManager
 import android.media.ToneGenerator
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -24,16 +52,19 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import kotlinx.coroutines.delay
-import kotlin.math.*
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import kotlinx.coroutines.delay
+import kotlin.math.abs
+import kotlin.math.asin
+import kotlin.math.min
+import kotlin.math.sqrt
 
 enum class OrientationMode { FLAT, PORTRAIT, LANDSCAPE }
 
@@ -61,17 +92,15 @@ fun BubbleLevelScreen(onBack: () -> Unit) {
     // Estado de bloqueo (hold)
     var isLocked by remember { mutableStateOf(false) }
     var lockedBubbleOffset by remember { mutableStateOf(Offset.Zero) }
-    var lockedInclinationDegX by remember { mutableStateOf(0f) }
-    var lockedInclinationDegY by remember { mutableStateOf(0f) }
+    var lockedInclinationDegX by remember { mutableFloatStateOf(0f) }
+    var lockedInclinationDegY by remember { mutableFloatStateOf(0f) }
 
     // Estados
     var bubbleOffset by remember { mutableStateOf(Offset.Zero) }
     var rawBubbleOffset by remember { mutableStateOf(Offset.Zero) }
     var currentMode by remember { mutableStateOf(OrientationMode.PORTRAIT) }
-    var inclinationX by remember { mutableStateOf(0f) }
-    var inclinationY by remember { mutableStateOf(0f) }
-    var inclinationDegX by remember { mutableStateOf(0f) }
-    var inclinationDegY by remember { mutableStateOf(0f) }
+    var inclinationDegX by remember { mutableFloatStateOf(0f) }
+    var inclinationDegY by remember { mutableFloatStateOf(0f) }
 
     val axisThresh = 0.01f
     val flatRatio = 0.75f
@@ -88,14 +117,18 @@ fun BubbleLevelScreen(onBack: () -> Unit) {
     val displayInclinationDegX = if (isLocked) lockedInclinationDegX else inclinationDegX
     val displayInclinationDegY = if (isLocked) lockedInclinationDegY else inclinationDegY
 
-    val isLevel by derivedStateOf {
-        when (currentMode) {
-            OrientationMode.FLAT -> sqrt(displayBubbleOffset.x * displayBubbleOffset.x + displayBubbleOffset.y * displayBubbleOffset.y) <= axisThresh
-            OrientationMode.PORTRAIT -> abs(displayBubbleOffset.x) <= axisThresh
-            OrientationMode.LANDSCAPE -> abs(displayBubbleOffset.y) <= axisThresh
+    // Valores que determinan si la burbuja está nivelada en cada modo
+    val isLevel by remember(currentMode, displayBubbleOffset, axisThresh) {
+        derivedStateOf {
+            when (currentMode) {
+                OrientationMode.FLAT -> sqrt(displayBubbleOffset.x * displayBubbleOffset.x + displayBubbleOffset.y * displayBubbleOffset.y) <= axisThresh
+                OrientationMode.PORTRAIT -> abs(displayBubbleOffset.x) <= axisThresh
+                OrientationMode.LANDSCAPE -> abs(displayBubbleOffset.y) <= axisThresh
+            }
         }
     }
 
+    // Se comprueba si la app no está en primer plano (background) para evitar reproducir el pitido
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             isForeground = event == Lifecycle.Event.ON_RESUME
@@ -105,6 +138,7 @@ fun BubbleLevelScreen(onBack: () -> Unit) {
         onDispose { lifecycle.removeObserver(observer) }
     }
 
+    // Se reproduce el pitido si la burbuja está nivelada
     LaunchedEffect(isLevel, isForeground, isLocked) {
         while (isLevel && isForeground && !isLocked) {
             toneGen.startTone(ToneGenerator.TONE_PROP_BEEP, 200)
@@ -172,8 +206,6 @@ fun BubbleLevelScreen(onBack: () -> Unit) {
 
                 if (!isLocked) {
                     rawBubbleOffset = newBubbleOffset
-                    inclinationX = upX
-                    inclinationY = upY
                     inclinationDegX = degX
                     inclinationDegY = degY
                 }
@@ -259,6 +291,7 @@ fun BubbleLevelScreen(onBack: () -> Unit) {
                     val bubbleR = 20.dp.toPx()
 
                     when (currentMode) {
+                        // Modo plano (flat), modo que ocurre cuando el telefono esta con la pantalla hacia arriba o abajo
                         OrientationMode.FLAT -> {
                             val radius = min(w, h) / 3f
                             val center = Offset(w / 2f, h / 2f)
@@ -314,6 +347,7 @@ fun BubbleLevelScreen(onBack: () -> Unit) {
                             )
                         }
 
+                        // Modo vertical (portrait), ocurre cuando el telefono tiene el puerto de carga hacia abajo o arriba
                         OrientationMode.PORTRAIT -> {
                             val rectW = w * 0.8f
                             val rectH = 40.dp.toPx()
@@ -349,6 +383,7 @@ fun BubbleLevelScreen(onBack: () -> Unit) {
                             )
                         }
 
+                        // Modo horizontal (landscape), ocurre cuando el telefono tiene el puerto de carga hacia la derecha o izquierda
                         OrientationMode.LANDSCAPE -> {
                             val rectH = h * 0.8f
                             val rectW = 40.dp.toPx()
@@ -410,6 +445,8 @@ fun BubbleLevelScreen(onBack: () -> Unit) {
                 Spacer(Modifier.height(100.dp))
             }
         }
+
+        //Menu de ayuda con información sobre la tool
         if (showInfo) {
             AlertDialog(
                 onDismissRequest = { showInfo = false },

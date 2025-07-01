@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -56,13 +55,13 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.edit
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.json.JSONArray
 import org.json.JSONObject
 import java.time.LocalDate
-import androidx.core.content.edit
-import kotlinx.coroutines.launch
 
 // ---- Data model ----
 data class RachaActividad(
@@ -307,7 +306,7 @@ fun ContadorRachaScreen(onBack: () -> Unit) {
         )
     }
 
-    // Info
+    //Menu de ayuda con información sobre la tool
     if (showInfo) {
         AlertDialog(
             onDismissRequest = {
@@ -428,28 +427,28 @@ suspend fun confirmResetDialog(
 }
 
 // Frases motivacionales/niveles según días
-fun rangoMotivador(dias: Int): String = when {
-    dias == 0  -> "¡Hoy arranca la racha! 🏁"
-    dias == 1  -> "¡Sobreviviste el primer día! 🥳"
-    dias == 2  -> "¡Dos días! ¡Ya es tendencia! 📈"
-    dias == 3  -> "¡Tres días! ¡Esto va en serio! 😎"
-    dias in 4..6  -> "¡Casi una semana! Ya puedes dar consejos. 👏"
-    dias in 7..9  -> "¡Una semana entera! Tu familia estaría orgullosa. 👨‍👩‍👧‍👦"
-    dias in 10..13 -> "¡Doble dígito! Ahora ya puedes presumir. 💬"
-    dias in 14..20 -> "¡Dos semanas! Dicen que ya es hábito... ¿Será? 🤔"
-    dias in 21..29 -> "¡Tres semanas! ¡Mira esa constancia! 🚴"
-    dias in 30..44 -> "¡Un mes! ¡Eres una máquina! 🤖"
-    dias in 45..59 -> "¡Ya perdí la cuenta! ¿Quién eres? 👀"
-    dias in 60..89 -> "¡Dos meses! ¡Esto dura más que mi serie favorita! 📺"
-    dias in 90..179 -> "¡Tres meses! Leyenda en progreso. 🏅"
-    dias in 180..364 -> "¡Medio año! Ya puedes darte el lujo de olvidar cómo era antes. 🧠"
-    dias in 365..729 -> "¡Un año! Si hubiera un club, ya serías presidente. 🏅"
-    dias in 730..1094 -> "¡Dos años! Seguro ya eres una leyenda urbana. 🕵️‍♂️"
+fun rangoMotivador(dias: Int): String = when (dias) {
+    0 -> "¡Hoy arranca la racha! 🏁"
+    1 -> "¡Sobreviviste el primer día! 🥳"
+    2 -> "¡Dos días! ¡Ya es tendencia! 📈"
+    3 -> "¡Tres días! ¡Esto va en serio! 😎"
+    in 4..6 -> "¡Casi una semana! Ya puedes dar consejos. 👏"
+    in 7..9 -> "¡Una semana entera! Tu familia estaría orgullosa. 👨‍👩‍👧‍👦"
+    in 10..13 -> "¡Doble dígito! Ahora ya puedes presumir. 💬"
+    in 14..20 -> "¡Dos semanas! Dicen que ya es hábito... ¿Será? 🤔"
+    in 21..29 -> "¡Tres semanas! ¡Mira esa constancia! 🚴"
+    in 30..44 -> "¡Un mes! ¡Eres una máquina! 🤖"
+    in 45..59 -> "¡Ya perdí la cuenta! ¿Quién eres? 👀"
+    in 60..89 -> "¡Dos meses! ¡Esto dura más que mi serie favorita! 📺"
+    in 90..179 -> "¡Tres meses! Leyenda en progreso. 🏅"
+    in 180..364 -> "¡Medio año! Ya puedes darte el lujo de olvidar cómo era antes. 🧠"
+    in 365..729 -> "¡Un año! Si hubiera un club, ya serías presidente. 🏅"
+    in 730..1094 -> "¡Dos años! Seguro ya eres una leyenda urbana. 🕵️‍♂️"
     else -> "¡Racha épica! ¿Ya te hiciste famoso? 🦸"
 }
 
 
-// Cambia color del card según días (progresivo)
+/** Cambia color del card según días (progresivo) */
 fun getColorForDays(dias: Int): Color = when {
     dias == 0 -> Color(0xFFEEEFF1)
     dias < 3  -> Color(0xFFB3E5FC)
@@ -461,6 +460,7 @@ fun getColorForDays(dias: Int): Color = when {
     else     -> Color(0xFFD1C4E9)
 }
 
+/** Cambia el color del texto según el fondo */
 fun getTextColorForCard(background: Color): Color {
     val luminancia = (0.299 * background.red + 0.587 * background.green + 0.114 * background.blue)
     return if (luminancia < 0.5) Color.White else Color.Black
