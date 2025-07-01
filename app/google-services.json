@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1015193088250",
+    "project_id": "minitoolbox-7ab7d",
+    "storage_bucket": "minitoolbox-7ab7d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1015193088250:android:52ec16cb5ca6d221769943",
+        "android_client_info": {
+          "package_name": "com.joasasso.minitoolbox"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBoEdo-I2UXWmGO2odl0ZvjBkQNHj9R6T4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

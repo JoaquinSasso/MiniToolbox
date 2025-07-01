@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -74,7 +75,11 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
 
     //Funcionalidades
-    implementation("com.lightspark:compose-qr-code:1.0.1")
+    implementation(libs.compose.qr.code)
+
+    //Firebase
+    implementation(platform("com.google.firebase:firebase-bom:33.16.0"))
+    implementation("com.google.firebase:firebase-firestore-ktx")
 
 
     // 7) Testing

@@ -15,7 +15,7 @@
 
         <!-- Actividad principal -->
         <activity
-            android:name="com.joasasso.com.joasasso.minitoolbox.MainActivity"
+            android:name="com.joasasso.minitoolbox.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -25,18 +25,18 @@
 
         <!-- Servicio Pomodoro -->
         <service
-            android:name="com.joasasso.com.joasasso.minitoolbox.tools.recordatorios.pomodoro.PomodoroService"
+            android:name="com.joasasso.minitoolbox.tools.recordatorios.pomodoro.PomodoroService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
 
         <!-- Receiver para recordatorio de agua -->
         <receiver
-            android:name="com.joasasso.com.joasasso.minitoolbox.tools.recordatorios.agua.WaterReminderReceiver"
+            android:name="com.joasasso.minitoolbox.tools.recordatorios.agua.WaterReminderReceiver"
             android:exported="false" />
 
         <!-- Widget de agua -->
         <receiver
-            android:name="com.joasasso.com.joasasso.minitoolbox.tools.recordatorios.agua.AguaWidgetReceiver"
+            android:name="com.joasasso.minitoolbox.tools.recordatorios.agua.AguaWidgetReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
