@@ -2,12 +2,34 @@ package com.example.minitoolbox.tools.medicion
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
@@ -102,7 +124,7 @@ fun ReglaScreen(onBack: () -> Unit) {
                                 drawContext.canvas.nativeCanvas.apply {
                                     val num = i / stepsPerUnidad
                                     drawText(
-                                        "$num${if (isCm) " cm" else "\""}",
+                                        "$num${if (isCm) "cm" else "\""}",
                                         lineLength + 8f,
                                         y + 12f,
                                         android.graphics.Paint().apply {
@@ -143,6 +165,7 @@ fun ReglaScreen(onBack: () -> Unit) {
         }
     }
 
+    //Menu de ayuda con información sobre la tool
     if (showInfo) {
         AlertDialog(
             onDismissRequest = {

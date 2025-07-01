@@ -44,8 +44,6 @@ import kotlin.random.Random
 fun RandomColorGeneratorScreen(onBack: () -> Unit) {
     var color by remember { mutableStateOf(generateRandomColor()) }
     val clipboardManager = LocalClipboardManager.current
-    val textColor = if (color.isDark()) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondary
-    val iconTint = textColor
     val hex = color.toHex()
     val contrastColor = if (color.isDark()) Color.White else Color.Black
     val haptic = LocalHapticFeedback.current

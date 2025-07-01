@@ -1,6 +1,5 @@
 package com.example.minitoolbox.tools.recordatorios.agua
 
-import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.compose.runtime.Composable
@@ -53,12 +52,6 @@ class AguaWidget : GlanceAppWidget() {
             val launchIntent = Intent(context, MainActivity::class.java).apply {
                 putExtra("startRoute", "agua")
             }
-            val pendingIntent = PendingIntent.getActivity(
-                context,
-                0,
-                launchIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
 
             Box(
                 modifier = GlanceModifier

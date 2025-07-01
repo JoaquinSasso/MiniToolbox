@@ -1,5 +1,5 @@
 // app/src/main/java/com/example/minitoolbox/tools/pomodoro/PomodoroScreen.kt
-package com.example.minitoolbox.tools.pomodoro
+package com.example.minitoolbox.tools.recordatorios.pomodoro
 
 import android.Manifest
 import android.content.Intent
@@ -36,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -60,7 +61,7 @@ fun PomodoroScreen(onBack: () -> Unit) {
     var showInfo    by remember { mutableStateOf(false) }
 
     val settingsRepo = remember { PomodoroSettingsRepository(context) }
-    val stateRepo    = remember { PomodoroStateRepository   (context) }
+    val stateRepo    = remember { PomodoroStateRepository(context) }
 
     // Permiso notificaciones Android13+
     val notifLauncher = rememberLauncherForActivityResult(
@@ -95,10 +96,12 @@ fun PomodoroScreen(onBack: () -> Unit) {
     val phaseTotal by stateRepo.phaseTotalFlow.collectAsState(initial = 0L)
 
     var isRunning by remember { mutableStateOf(phaseEnd > System.currentTimeMillis()) }
-    var remaining by remember { mutableStateOf(
-        if (phaseEnd > System.currentTimeMillis())
-            (phaseEnd - System.currentTimeMillis()) / 1000L else 0L
-    ) }
+    var remaining by remember {
+        mutableLongStateOf(
+            if (phaseEnd > System.currentTimeMillis())
+                (phaseEnd - System.currentTimeMillis()) / 1000L else 0L
+        )
+    }
 
     // Reconstruir estado cuando cambie phaseEnd
     LaunchedEffect(phaseEnd) {
@@ -167,6 +170,7 @@ fun PomodoroScreen(onBack: () -> Unit) {
                         putExtra("WORK_MINUTES", workInput.toIntOrNull() ?: workMin)
                         putExtra("SHORT_BREAK",  shortInput.toIntOrNull() ?: shortMin)
                         putExtra("LONG_BREAK",   longInput.toIntOrNull() ?: longMin)
+                        putExtra("RUNNING",   true)
                     }.also {
                         ContextCompat.startForegroundService(context, it)
                     }
@@ -177,10 +181,13 @@ fun PomodoroScreen(onBack: () -> Unit) {
                 Button(onClick = {
                     haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                     // Detener servicio
-                    Intent(context, PomodoroService::class.java).apply {
-                        action = ACTION_STOP
-                    }.also {
-                        ContextCompat.startForegroundService(context, it)
+                    if (isRunning) {
+                        isRunning = false
+                        Intent(context, PomodoroService::class.java).apply {
+                            action = ACTION_STOP
+                        }.also {
+                            ContextCompat.startForegroundService(context, it)
+                        }
                     }
                 }) {
                     Text("Detener")
@@ -259,6 +266,7 @@ fun PomodoroScreen(onBack: () -> Unit) {
             }
         }
     }
+    //Menu de ayuda con información sobre la tool
     if (showInfo) {
         AlertDialog(
             onDismissRequest = { showInfo = false },

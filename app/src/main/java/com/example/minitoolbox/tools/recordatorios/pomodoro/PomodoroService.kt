@@ -1,4 +1,4 @@
-package com.example.minitoolbox.tools.pomodoro
+package com.example.minitoolbox.tools.recordatorios.pomodoro
 
 import android.Manifest
 import android.app.Service
@@ -6,13 +6,19 @@ import android.content.Intent
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.media.RingtoneManager
+import android.os.IBinder
 import android.os.VibrationEffect
 import android.os.Vibrator
-import android.os.IBinder
 import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationManagerCompat
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 const val ACTION_STOP    = "STOP_POMODORO"
 const val ACTION_SILENCE = "SILENCE_ALARM"
@@ -63,12 +69,15 @@ class PomodoroService : Service() {
         )
 
         scope.launch {
-            while (isActive) {
-                runPhase("Trabajo", workMin)
-                cycleCount++
-                if (cycleCount % 4 == 0) runPhase("Descanso largo", longMin)
-                else                    runPhase("Descanso corto", shortMin)
+            try {
+                while (isActive) {
+                    runPhase("Trabajo", workMin)
+                    cycleCount++
+                    if (cycleCount % 4 == 0) runPhase("Descanso largo", longMin)
+                    else                    runPhase("Descanso corto", shortMin)
+                }
             }
+            catch (e: SecurityException) { }
         }
         return START_STICKY
     }

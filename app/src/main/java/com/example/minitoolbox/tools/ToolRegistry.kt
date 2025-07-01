@@ -3,10 +3,32 @@ package com.example.minitoolbox.tools
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ShortText
-import androidx.compose.material.icons.filled.*          // ya lo tienes
+import androidx.compose.material.icons.filled.BrowseGallery
+import androidx.compose.material.icons.filled.BrowserNotSupported
+import androidx.compose.material.icons.filled.BubbleChart
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Casino
+import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.ColorLens
+import androidx.compose.material.icons.filled.Contacts
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.FlashlightOn
+import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.Password
+import androidx.compose.material.icons.filled.Percent
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.QrCode
+import androidx.compose.material.icons.filled.Scale
+import androidx.compose.material.icons.filled.Straighten
+import androidx.compose.material.icons.filled.SwapHoriz
+import androidx.compose.material.icons.filled.TextFields
+import androidx.compose.material.icons.filled.Timelapse
+import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.TypeSpecimen
+import androidx.compose.material.icons.filled.WaterDrop
+import androidx.compose.material.icons.filled.WbSunny
 import com.example.minitoolbox.nav.Screen
-import androidx.compose.material.icons.filled.*
-
 
 
 object ToolRegistry {
