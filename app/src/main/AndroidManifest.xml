@@ -11,6 +11,7 @@
         android:allowBackup="true"
         android:label="MiniToolbox"
         android:icon="@drawable/ic_launcher"
+        android:theme="@style/Theme.MiniToolbox"
         android:enableOnBackInvokedCallback="true">
 
         <!-- Actividad principal -->
@@ -45,6 +46,5 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/agua_widget_info" />
         </receiver>
-
     </application>
 </manifest>

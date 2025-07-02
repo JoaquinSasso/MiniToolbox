@@ -4,7 +4,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("com.google.gms.google-services")
 }
 
 android {
@@ -77,11 +76,6 @@ dependencies {
     //Funcionalidades
     implementation(libs.compose.qr.code)
 
-    //Firebase
-    implementation(platform("com.google.firebase:firebase-bom:33.16.0"))
-    implementation("com.google.firebase:firebase-firestore-ktx")
-
-
     // 7) Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -92,7 +86,4 @@ dependencies {
     // 8) Debug
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
-    // Si aún decides usar alguna versión de Material que no sea Material3, agrega:
-    // implementation 'com.google.android.material:material:1.6.0'
 }
