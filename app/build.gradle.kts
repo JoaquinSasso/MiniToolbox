@@ -76,11 +76,8 @@ dependencies {
     //Funcionalidades
     implementation(libs.compose.qr.code)
 
-    //Moshi para consumir APIs y JSON
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
-    implementation("com.squareup.moshi:moshi:1.14.0")
-    implementation("com.squareup.moshi:moshi-kotlin:1.14.0")
+    //Gson para parsear JSON
+    implementation("com.google.code.gson:gson:2.10.1")
 
     // 7) Testing
     testImplementation(libs.junit)
