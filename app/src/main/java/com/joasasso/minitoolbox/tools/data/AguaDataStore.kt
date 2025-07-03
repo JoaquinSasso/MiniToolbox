@@ -1,4 +1,4 @@
-package com.joasasso.minitoolbox.tools.recordatorios.agua
+package com.joasasso.minitoolbox.tools.data
 
 import android.content.Context
 import androidx.datastore.preferences.core.Preferences

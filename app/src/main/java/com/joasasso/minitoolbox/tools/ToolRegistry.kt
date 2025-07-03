@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.FlashlightOn
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.HourglassBottom
 import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.LocationCity
 import androidx.compose.material.icons.filled.Password
 import androidx.compose.material.icons.filled.Percent
 import androidx.compose.material.icons.filled.Person
@@ -226,6 +227,13 @@ object ToolRegistry {
             category = ToolCategory.Informacion,
             subCategory = "Fechas",
             icon = Icons.Filled.HourglassBottom
+        ),
+        Tool(
+            name = "Información de Países",
+            screen = Screen.PaisesInfo,
+            category = ToolCategory.Informacion,
+            subCategory = "General",
+            icon = Icons.Filled.LocationCity
         )
     )
 }

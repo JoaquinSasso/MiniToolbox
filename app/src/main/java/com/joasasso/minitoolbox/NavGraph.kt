@@ -25,6 +25,7 @@ import com.joasasso.minitoolbox.tools.generadores.GroupSelectorScreen
 import com.joasasso.minitoolbox.tools.generadores.RandomColorGeneratorScreen
 import com.joasasso.minitoolbox.tools.generadores.SugeridorActividadScreen
 import com.joasasso.minitoolbox.tools.info.AgeCalculatorScreen
+import com.joasasso.minitoolbox.tools.info.PaisesInfoScreen
 import com.joasasso.minitoolbox.tools.info.TextBinaryConverterScreen
 import com.joasasso.minitoolbox.tools.info.TiempoHasta
 import com.joasasso.minitoolbox.tools.juegos.CoinFlipScreen
@@ -142,6 +143,10 @@ fun MiniToolboxNavGraph(navController: NavHostController) {
 
         composable(Screen.EstadisticasAgua.route){
             AguaEstadisticasScreen(onBack = {navController.popBackStack() })
+        }
+
+        composable(Screen.PaisesInfo.route){
+            PaisesInfoScreen(onBack = { navController.popBackStack() })
         }
 
     }

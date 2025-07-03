@@ -42,6 +42,8 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import com.joasasso.minitoolbox.tools.data.PomodoroSettingsRepository
+import com.joasasso.minitoolbox.tools.data.PomodoroStateRepository
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -80,7 +82,7 @@ fun PomodoroScreen(onBack: () -> Unit) {
     var shortInput by remember { mutableStateOf(shortMin.toString()) }
     var longInput  by remember { mutableStateOf(longMin.toString())  }
 
-    // Sin cambios aquí: campos se actualizan automáticamente
+    //Se guardan los cambios de las preferencias
     LaunchedEffect(workMin)  { workInput  = workMin.toString()  }
     LaunchedEffect(shortMin) { shortInput = shortMin.toString() }
     LaunchedEffect(longMin)  { longInput  = longMin.toString()  }
@@ -193,23 +195,40 @@ fun PomodoroScreen(onBack: () -> Unit) {
         ) {
             OutlinedTextField(
                 value = workInput,
-                onValueChange = { workInput = it },
+                onValueChange = { new ->
+                    workInput = new
+                    scope.launch {
+                        settingsRepo.updateWorkMin(new.toIntOrNull() ?: workMin)
+                    }
+                },
                 label = { Text("Trabajo (min)") },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth()
             )
+
             OutlinedTextField(
                 value = shortInput,
-                onValueChange = { shortInput = it },
+                onValueChange = { new ->
+                    shortInput = new
+                    scope.launch {
+                        settingsRepo.updateShortBreak(new.toIntOrNull() ?: shortMin)
+                    }
+                },
                 label = { Text("Descanso corto (min)") },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth()
             )
+
             OutlinedTextField(
                 value = longInput,
-                onValueChange = { longInput = it },
+                onValueChange = { new ->
+                    longInput = new
+                    scope.launch {
+                        settingsRepo.updateLongBreak(new.toIntOrNull() ?: longMin)
+                    }
+                },
                 label = { Text("Descanso largo (min)") },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
