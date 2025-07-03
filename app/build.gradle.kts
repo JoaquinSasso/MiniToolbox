@@ -78,6 +78,7 @@ dependencies {
 
     //Gson para parsear JSON
     implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.google.protobuf:protobuf-java:4.31.1")
 
     // 7) Testing
     testImplementation(libs.junit)

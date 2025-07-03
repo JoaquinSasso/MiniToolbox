@@ -1,6 +1,5 @@
 package com.joasasso.minitoolbox.tools.info
 
-import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,13 +33,9 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import com.joasasso.minitoolbox.tools.data.CountryOuterClass
 import com.joasasso.minitoolbox.tools.data.CountryResponse
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.text.NumberFormat
@@ -49,8 +44,8 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PaisesInfoScreen(onBack: () -> Unit) {
-    val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
+    val haptic = LocalHapticFeedback.current
     val formatter = remember { NumberFormat.getInstance(Locale("es", "AR")) }
 
     var countries by remember { mutableStateOf<List<CountryResponse>>(emptyList()) }
@@ -59,19 +54,35 @@ fun PaisesInfoScreen(onBack: () -> Unit) {
     var showInfo by remember { mutableStateOf(false) }
     var showList by remember { mutableStateOf(true) }
 
-    LaunchedEffect(true) {
-        val startLoad = System.currentTimeMillis()
+    LaunchedEffect(Unit) {
+        val t0 = System.currentTimeMillis()
         countries = withContext(Dispatchers.IO) {
-            val startParse = System.currentTimeMillis()
-            val result = loadCountriesFromAssetsGson(context)
-            val endParse = System.currentTimeMillis()
-            Log.d("CountryLoad", "Parseo JSON: ${endParse - startParse} ms")
-            result
-        }
-        val endLoad = System.currentTimeMillis()
-        Log.d("CountryLoad", "Carga + parseo total: ${endLoad - startLoad} ms")
-    }
+            val tRead0 = System.currentTimeMillis()
+            val bytes = context.assets.open("countries_dataset.pb").readBytes()
+            val tRead1 = System.currentTimeMillis()
+            Log.d("CountryLoad", "Lectura binaria: ${tRead1 - tRead0} ms")
 
+            val tParse0 = System.currentTimeMillis()
+            val protoList = CountryOuterClass.CountryList.parseFrom(bytes)
+            val tParse1 = System.currentTimeMillis()
+            Log.d("CountryLoad", "Parseo binario: ${tParse1 - tParse0} ms")
+
+            protoList.countriesList.map {
+                CountryResponse(
+                    name = it.name,
+                    official = it.official,
+                    native = it.native,
+                    currency = it.currency,
+                    capital = it.capitalList,
+                    phoneCode = it.phoneCode,
+                    flag = it.flag,
+                    population = it.population
+                )
+            }
+        }
+        val t1 = System.currentTimeMillis()
+        Log.d("CountryLoad", "Carga + parseo total: ${t1 - t0} ms")
+    }
 
     Scaffold(
         topBar = { TopBarReusable("Información de Países", onBack, { showInfo = true }) }
@@ -90,23 +101,19 @@ fun PaisesInfoScreen(onBack: () -> Unit) {
             } else {
                 OutlinedTextField(
                     value = search,
-                    onValueChange = { new ->
-                        search = new
+                    onValueChange = {
+                        search = it
                         showList = true
-                        if (new.text.isEmpty()) {
-                            selectedCountry = null
-                        }
+                        if (it.text.isEmpty()) selectedCountry = null
                     },
                     label = { Text("Buscar país") },
                     modifier = Modifier.fillMaxWidth()
                 )
-                val renderStart = remember { System.currentTimeMillis() }
+
                 val filtered = countries
-                    .filter { country ->
-                        val common = country.name
-                        val official = country.official
-                        common.contains(search.text, ignoreCase = true) ||
-                                official.contains(search.text, ignoreCase = true)
+                    .filter {
+                        it.name.contains(search.text, ignoreCase = true) ||
+                                it.official.contains(search.text, ignoreCase = true)
                     }
                     .sortedBy { it.name }
 
@@ -136,19 +143,16 @@ fun PaisesInfoScreen(onBack: () -> Unit) {
                     }
                 }
 
-                val renderEnd = remember { System.currentTimeMillis() }
-                Log.d("CountryRender", "Render LazyColumn: ${renderEnd - renderStart} ms con ${filtered.size} items")
-            }
-
-            selectedCountry?.let { country ->
-                Spacer(Modifier.height(16.dp))
-                Text("🌍 Nombre (ES): ${country.name}", style = MaterialTheme.typography.titleMedium)
-                Text("🌐 Nombre oficial: ${country.official}")
-                Text("📝 Nombre nativo: ${country.native}")
-                Text("🏛️ Capital: ${if (country.capital.isNotEmpty()) country.capital.joinToString() else "N/A"}")
-                Text("💰 Moneda: ${country.currency}")
-                Text("📞 Código tel.: ${country.phoneCode}")
-                Text("👥 Población: ${formatter.format(country.population)}")
+                selectedCountry?.let { country ->
+                    Spacer(Modifier.height(16.dp))
+                    Text("🌍 Nombre (ES): ${country.name}", style = MaterialTheme.typography.titleMedium)
+                    Text("🌐 Nombre oficial: ${country.official}")
+                    Text("📝 Nombre nativo: ${country.native}")
+                    Text("🏛️ Capital: ${if (country.capital.isNotEmpty()) country.capital.joinToString() else "N/A"}")
+                    Text("💰 Moneda: ${country.currency}")
+                    Text("📞 Código tel.: ${country.phoneCode}")
+                    Text("👥 Población: ${formatter.format(country.population)}")
+                }
             }
         }
     }
@@ -159,11 +163,9 @@ fun PaisesInfoScreen(onBack: () -> Unit) {
             title = { Text("Acerca de Información de Países") },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Para qué sirve: Consulta rápidamente datos básicos de todos los países: nombre en español, oficial, nativo, capital, moneda, idioma, teléfono y población.")
-                    Text("• Fuente de datos: Dataset local (offline), actualizado al 2 de Julio de 2025.")
-                    Text("• Guía rápida:")
-                    Text("   – Ingresá texto para buscar un país.")
-                    Text("   – Seleccioná un país para ver su información detallada.")
+                    Text("• Consulta rápida de países (offline, binario Protobuf).")
+                    Text("• Carga optimizada del dataset binario.")
+                    Text("• Seleccioná un país para ver su información detallada.")
                 }
             },
             confirmButton = {
@@ -176,28 +178,4 @@ fun PaisesInfoScreen(onBack: () -> Unit) {
             }
         )
     }
-}
-
-fun loadCountriesFromAssets(context: Context): List<CountryResponse> {
-    val moshi = Moshi.Builder()
-        .add(KotlinJsonAdapterFactory())
-        .build()
-
-    val type = Types.newParameterizedType(List::class.java, CountryResponse::class.java)
-    val adapter = moshi.adapter<List<CountryResponse>>(type)
-
-    val json = context.assets.open("countries_dataset.json")
-        .bufferedReader().use { it.readText() }
-
-    return adapter.fromJson(json) ?: emptyList()
-}
-
-
-
-fun loadCountriesFromAssetsGson(context: Context): List<CountryResponse> {
-    val json = context.assets.open("countries_dataset.json")
-        .bufferedReader().use { it.readText() }
-
-    val type = object : TypeToken<List<CountryResponse>>() {}.type
-    return Gson().fromJson(json, type) ?: emptyList()
 }

@@ -1,0 +1,17 @@
+syntax = "proto3";
+package com.joasasso.minitoolbox.tools.data;
+
+message Country {
+  string name = 1;
+  string official = 2;
+  string native = 3;
+  string currency = 4;
+  repeated string capital = 5;
+  string phoneCode = 6;
+  string flag = 7;
+  int64 population = 8;
+}
+
+message CountryList {
+  repeated Country countries = 1;
+}
