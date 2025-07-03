@@ -70,6 +70,12 @@ git clone https://github.com/JoaquinSasso/MiniToolbox.git
 
 ---
 
+## 📊 Performance
+El proyecto incluye pruebas de optimización sobre el dataset local de países.
+👉 Ver detalles en [docs/performance_tests.md](docs/performance_tests.md)
+
+---
+
 ## 🤝 Contribuciones
 
 Este proyecto está abierto a sugerencias y mejoras.  
