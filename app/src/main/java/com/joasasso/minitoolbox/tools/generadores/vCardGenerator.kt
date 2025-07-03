@@ -48,6 +48,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.joasasso.minitoolbox.tools.data.QrContacto
+import com.joasasso.minitoolbox.tools.data.QrContactoDataStore
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import com.lightspark.composeqr.QrCodeView
 import kotlinx.coroutines.launch
@@ -81,9 +83,9 @@ fun GeneradorQrContactoScreen(onBack: () -> Unit) {
         scope.launch {
             dataStore.guardar(
                 QrContacto(
-                    nombre    = nombre,
-                    telefono  = telefono,
-                    email     = email
+                    nombre = nombre,
+                    telefono = telefono,
+                    email = email
                 )
             )
         }

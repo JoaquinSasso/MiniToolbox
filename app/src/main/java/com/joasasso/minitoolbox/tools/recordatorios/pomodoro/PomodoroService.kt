@@ -12,6 +12,7 @@ import android.os.Vibrator
 import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationManagerCompat
+import com.joasasso.minitoolbox.tools.data.PomodoroStateRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

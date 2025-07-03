@@ -34,5 +34,8 @@ sealed class Screen(val route: String) {
     object EstadisticasAgua               : Screen("estadisticas_agua")
     object TiempoHasta               : Screen("tiempo_hasta")
 
+    object PaisesInfo               : Screen("paises_info")
+
+
     // Añade aquí nuevos objetos para cada herramienta…
 }
