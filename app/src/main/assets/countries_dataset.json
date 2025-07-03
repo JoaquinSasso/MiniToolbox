@@ -1,0 +1,2997 @@
+[
+  {
+    "name": "Togo",
+    "official": "Togolese Republic",
+    "native": "Togo",
+    "currency": "West African CFA franc (XOF)",
+    "capital": [
+      "Lomé"
+    ],
+    "phoneCode": "+228",
+    "flag": "🇹🇬",
+    "population": 8278737
+  },
+  {
+    "name": "Reunión",
+    "official": "Department of Mayotte",
+    "native": "Mayotte",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Mamoudzou"
+    ],
+    "phoneCode": "+262",
+    "flag": "🇾🇹",
+    "population": 226915
+  },
+  {
+    "name": "Georgia",
+    "official": "Georgia",
+    "native": "საქართველო",
+    "currency": "lari (GEL)",
+    "capital": [
+      "Tbilisi"
+    ],
+    "phoneCode": "+995",
+    "flag": "🇬🇪",
+    "population": 3714000
+  },
+  {
+    "name": "Vanuatu",
+    "official": "Republic of Vanuatu",
+    "native": "Vanuatu",
+    "currency": "Vanuatu vatu (VUV)",
+    "capital": [
+      "Port Vila"
+    ],
+    "phoneCode": "+678",
+    "flag": "🇻🇺",
+    "population": 307150
+  },
+  {
+    "name": "Kirguistán",
+    "official": "Kyrgyz Republic",
+    "native": "Кыргызстан",
+    "currency": "Kyrgyzstani som (KGS)",
+    "capital": [
+      "Bishkek"
+    ],
+    "phoneCode": "+996",
+    "flag": "🇰🇬",
+    "population": 6591600
+  },
+  {
+    "name": "Niger",
+    "official": "Republic of Niger",
+    "native": "Niger",
+    "currency": "West African CFA franc (XOF)",
+    "capital": [
+      "Niamey"
+    ],
+    "phoneCode": "+227",
+    "flag": "🇳🇪",
+    "population": 24206636
+  },
+  {
+    "name": "China",
+    "official": "People's Republic of China",
+    "native": "中国",
+    "currency": "Chinese yuan (CNY)",
+    "capital": [
+      "Beijing"
+    ],
+    "phoneCode": "+86",
+    "flag": "🇨🇳",
+    "population": 1402112000
+  },
+  {
+    "name": "Tuvalu",
+    "official": "Tuvalu",
+    "native": "Tuvalu",
+    "currency": "Australian dollar (AUD)",
+    "capital": [
+      "Funafuti"
+    ],
+    "phoneCode": "+688",
+    "flag": "🇹🇻",
+    "population": 11792
+  },
+  {
+    "name": "Comoras",
+    "official": "Union of the Comoros",
+    "native": "القمر‎",
+    "currency": "Comorian franc (KMF)",
+    "capital": [
+      "Moroni"
+    ],
+    "phoneCode": "+269",
+    "flag": "🇰🇲",
+    "population": 869595
+  },
+  {
+    "name": "Bosnia y Herzegovina",
+    "official": "Bosnia and Herzegovina",
+    "native": "Bosna i Hercegovina",
+    "currency": "Bosnia and Herzegovina convertible mark (BAM)",
+    "capital": [
+      "Sarajevo"
+    ],
+    "phoneCode": "+387",
+    "flag": "🇧🇦",
+    "population": 3280815
+  },
+  {
+    "name": "Bahrein",
+    "official": "Kingdom of Bahrain",
+    "native": "‏البحرين",
+    "currency": "Bahraini dinar (BHD)",
+    "capital": [
+      "Manama"
+    ],
+    "phoneCode": "+973",
+    "flag": "🇧🇭",
+    "population": 1701583
+  },
+  {
+    "name": "Somalia",
+    "official": "Federal Republic of Somalia",
+    "native": "الصومال‎‎",
+    "currency": "Somali shilling (SOS)",
+    "capital": [
+      "Mogadishu"
+    ],
+    "phoneCode": "+252",
+    "flag": "🇸🇴",
+    "population": 15893219
+  },
+  {
+    "name": "San Bartolomé",
+    "official": "Collectivity of Saint Barthélemy",
+    "native": "Saint-Barthélemy",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Gustavia"
+    ],
+    "phoneCode": "+590",
+    "flag": "🇧🇱",
+    "population": 4255
+  },
+  {
+    "name": "Letonia",
+    "official": "Republic of Latvia",
+    "native": "Latvija",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Riga"
+    ],
+    "phoneCode": "+371",
+    "flag": "🇱🇻",
+    "population": 1901548
+  },
+  {
+    "name": "Islas Caimán",
+    "official": "Cayman Islands",
+    "native": "Cayman Islands",
+    "currency": "Cayman Islands dollar (KYD)",
+    "capital": [
+      "George Town"
+    ],
+    "phoneCode": "+1345",
+    "flag": "🇰🇾",
+    "population": 65720
+  },
+  {
+    "name": "Países Bajos",
+    "official": "Kingdom of the Netherlands",
+    "native": "Nederland",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Amsterdam"
+    ],
+    "phoneCode": "+31",
+    "flag": "🇳🇱",
+    "population": 16655799
+  },
+  {
+    "name": "Lesoto",
+    "official": "Kingdom of Lesotho",
+    "native": "Lesotho",
+    "currency": "Lesotho loti (LSL)",
+    "capital": [
+      "Maseru"
+    ],
+    "phoneCode": "+266",
+    "flag": "🇱🇸",
+    "population": 2142252
+  },
+  {
+    "name": "Venezuela",
+    "official": "Bolivarian Republic of Venezuela",
+    "native": "Venezuela",
+    "currency": "Venezuelan bolívar soberano (VES)",
+    "capital": [
+      "Caracas"
+    ],
+    "phoneCode": "+58",
+    "flag": "🇻🇪",
+    "population": 28435943
+  },
+  {
+    "name": "Kenia",
+    "official": "Republic of Kenya",
+    "native": "Kenya",
+    "currency": "Kenyan shilling (KES)",
+    "capital": [
+      "Nairobi"
+    ],
+    "phoneCode": "+254",
+    "flag": "🇰🇪",
+    "population": 53771300
+  },
+  {
+    "name": "Turquía",
+    "official": "Republic of Turkey",
+    "native": "Türkiye",
+    "currency": "Turkish lira (TRY)",
+    "capital": [
+      "Ankara"
+    ],
+    "phoneCode": "+90",
+    "flag": "🇹🇷",
+    "population": 84339067
+  },
+  {
+    "name": "Fiyi",
+    "official": "Republic of Fiji",
+    "native": "Fiji",
+    "currency": "Fijian dollar (FJD)",
+    "capital": [
+      "Suva"
+    ],
+    "phoneCode": "+679",
+    "flag": "🇫🇯",
+    "population": 896444
+  },
+  {
+    "name": "Trinidad y Tobago",
+    "official": "Republic of Trinidad and Tobago",
+    "native": "Trinidad and Tobago",
+    "currency": "Trinidad and Tobago dollar (TTD)",
+    "capital": [
+      "Port of Spain"
+    ],
+    "phoneCode": "+1868",
+    "flag": "🇹🇹",
+    "population": 1399491
+  },
+  {
+    "name": "Honduras",
+    "official": "Republic of Honduras",
+    "native": "Honduras",
+    "currency": "Honduran lempira (HNL)",
+    "capital": [
+      "Tegucigalpa"
+    ],
+    "phoneCode": "+504",
+    "flag": "🇭🇳",
+    "population": 9904608
+  },
+  {
+    "name": "Reino Unido",
+    "official": "Bailiwick of Jersey",
+    "native": "Jersey",
+    "currency": "British pound (GBP)",
+    "capital": [
+      "Saint Helier"
+    ],
+    "phoneCode": "+44",
+    "flag": "🇯🇪",
+    "population": 100800
+  },
+  {
+    "name": "Yibuti",
+    "official": "Republic of Djibouti",
+    "native": "جيبوتي‎",
+    "currency": "Djiboutian franc (DJF)",
+    "capital": [
+      "Djibouti"
+    ],
+    "phoneCode": "+253",
+    "flag": "🇩🇯",
+    "population": 988002
+  },
+  {
+    "name": "Reunión",
+    "official": "Réunion Island",
+    "native": "La Réunion",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Saint-Denis"
+    ],
+    "phoneCode": "+262",
+    "flag": "🇷🇪",
+    "population": 840974
+  },
+  {
+    "name": "Swazilandia",
+    "official": "Kingdom of Eswatini",
+    "native": "Eswatini",
+    "currency": "Swazi lilangeni (SZL)",
+    "capital": [
+      "Mbabane"
+    ],
+    "phoneCode": "+268",
+    "flag": "🇸🇿",
+    "population": 1160164
+  },
+  {
+    "name": "Tayikistán",
+    "official": "Republic of Tajikistan",
+    "native": "Таджикистан",
+    "currency": "Tajikistani somoni (TJS)",
+    "capital": [
+      "Dushanbe"
+    ],
+    "phoneCode": "+992",
+    "flag": "🇹🇯",
+    "population": 9537642
+  },
+  {
+    "name": "Arabia Saudita",
+    "official": "Kingdom of Saudi Arabia",
+    "native": "العربية السعودية",
+    "currency": "Saudi riyal (SAR)",
+    "capital": [
+      "Riyadh"
+    ],
+    "phoneCode": "+966",
+    "flag": "🇸🇦",
+    "population": 34813867
+  },
+  {
+    "name": "Bermudas",
+    "official": "Bermuda",
+    "native": "Bermuda",
+    "currency": "Bermudian dollar (BMD)",
+    "capital": [
+      "Hamilton"
+    ],
+    "phoneCode": "+1441",
+    "flag": "🇧🇲",
+    "population": 63903
+  },
+  {
+    "name": "Nueva Zelanda",
+    "official": "New Zealand",
+    "native": "New Zealand",
+    "currency": "New Zealand dollar (NZD)",
+    "capital": [
+      "Wellington"
+    ],
+    "phoneCode": "+64",
+    "flag": "🇳🇿",
+    "population": 5084300
+  },
+  {
+    "name": "Bielorrusia",
+    "official": "Republic of Belarus",
+    "native": "Белару́сь",
+    "currency": "Belarusian ruble (BYN)",
+    "capital": [
+      "Minsk"
+    ],
+    "phoneCode": "+375",
+    "flag": "🇧🇾",
+    "population": 9398861
+  },
+  {
+    "name": "Islas Cocos (Keeling)",
+    "official": "Territory of Christmas Island",
+    "native": "Christmas Island",
+    "currency": "Australian dollar (AUD)",
+    "capital": [
+      "Flying Fish Cove"
+    ],
+    "phoneCode": "+61",
+    "flag": "🇨🇽",
+    "population": 2072
+  },
+  {
+    "name": "Gambia",
+    "official": "Republic of the Gambia",
+    "native": "Gambia",
+    "currency": "dalasi (GMD)",
+    "capital": [
+      "Banjul"
+    ],
+    "phoneCode": "+220",
+    "flag": "🇬🇲",
+    "population": 2416664
+  },
+  {
+    "name": "Polinesia Francesa",
+    "official": "French Polynesia",
+    "native": "Polynésie française",
+    "currency": "CFP franc (XPF)",
+    "capital": [
+      "Papeetē"
+    ],
+    "phoneCode": "+689",
+    "flag": "🇵🇫",
+    "population": 280904
+  },
+  {
+    "name": "República Democrática del Congo",
+    "official": "Democratic Republic of the Congo",
+    "native": "RD Congo",
+    "currency": "Congolese franc (CDF)",
+    "capital": [
+      "Kinshasa"
+    ],
+    "phoneCode": "+243",
+    "flag": "🇨🇩",
+    "population": 108407721
+  },
+  {
+    "name": "Costa Rica",
+    "official": "Republic of Costa Rica",
+    "native": "Costa Rica",
+    "currency": "Costa Rican colón (CRC)",
+    "capital": [
+      "San José"
+    ],
+    "phoneCode": "+506",
+    "flag": "🇨🇷",
+    "population": 5094114
+  },
+  {
+    "name": "Malawi",
+    "official": "Republic of Malawi",
+    "native": "Malawi",
+    "currency": "Malawian kwacha (MWK)",
+    "capital": [
+      "Lilongwe"
+    ],
+    "phoneCode": "+265",
+    "flag": "🇲🇼",
+    "population": 19129955
+  },
+  {
+    "name": "República del Congo",
+    "official": "Republic of the Congo",
+    "native": "République du Congo",
+    "currency": "Central African CFA franc (XAF)",
+    "capital": [
+      "Brazzaville"
+    ],
+    "phoneCode": "+242",
+    "flag": "🇨🇬",
+    "population": 5657000
+  },
+  {
+    "name": "Omán",
+    "official": "Sultanate of Oman",
+    "native": "عمان",
+    "currency": "Omani rial (OMR)",
+    "capital": [
+      "Muscat"
+    ],
+    "phoneCode": "+968",
+    "flag": "🇴🇲",
+    "population": 5106622
+  },
+  {
+    "name": "Irak",
+    "official": "Republic of Iraq",
+    "native": "العراق",
+    "currency": "Iraqi dinar (IQD)",
+    "capital": [
+      "Baghdad"
+    ],
+    "phoneCode": "+964",
+    "flag": "🇮🇶",
+    "population": 40222503
+  },
+  {
+    "name": "Niue",
+    "official": "Niue",
+    "native": "Niue",
+    "currency": "New Zealand dollar (NZD)",
+    "capital": [
+      "Alofi"
+    ],
+    "phoneCode": "+683",
+    "flag": "🇳🇺",
+    "population": 1470
+  },
+  {
+    "name": "Senegal",
+    "official": "Republic of Senegal",
+    "native": "Sénégal",
+    "currency": "West African CFA franc (XOF)",
+    "capital": [
+      "Dakar"
+    ],
+    "phoneCode": "+221",
+    "flag": "🇸🇳",
+    "population": 16743930
+  },
+  {
+    "name": "Líbano",
+    "official": "Lebanese Republic",
+    "native": "لبنان",
+    "currency": "Lebanese pound (LBP)",
+    "capital": [
+      "Beirut"
+    ],
+    "phoneCode": "+961",
+    "flag": "🇱🇧",
+    "population": 6825442
+  },
+  {
+    "name": "Angola",
+    "official": "Republic of Angola",
+    "native": "Angola",
+    "currency": "Angolan kwanza (AOA)",
+    "capital": [
+      "Luanda"
+    ],
+    "phoneCode": "+244",
+    "flag": "🇦🇴",
+    "population": 32866268
+  },
+  {
+    "name": "Irán",
+    "official": "Islamic Republic of Iran",
+    "native": "ایران",
+    "currency": "Iranian rial (IRR)",
+    "capital": [
+      "Tehran"
+    ],
+    "phoneCode": "+98",
+    "flag": "🇮🇷",
+    "population": 83992953
+  },
+  {
+    "name": "Ecuador",
+    "official": "Republic of Ecuador",
+    "native": "Ecuador",
+    "currency": "United States dollar (USD)",
+    "capital": [
+      "Quito"
+    ],
+    "phoneCode": "+593",
+    "flag": "🇪🇨",
+    "population": 17643060
+  },
+  {
+    "name": "Laos",
+    "official": "Lao People's Democratic Republic",
+    "native": "ສປປລາວ",
+    "currency": "Lao kip (LAK)",
+    "capital": [
+      "Vientiane"
+    ],
+    "phoneCode": "+856",
+    "flag": "🇱🇦",
+    "population": 7275556
+  },
+  {
+    "name": "Sri lanka",
+    "official": "Democratic Socialist Republic of Sri Lanka",
+    "native": "ශ්‍රී ලංකාව",
+    "currency": "Sri Lankan rupee (LKR)",
+    "capital": [
+      "Sri Jayawardenepura Kotte"
+    ],
+    "phoneCode": "+94",
+    "flag": "🇱🇰",
+    "population": 21919000
+  },
+  {
+    "name": "Aruba",
+    "official": "Aruba",
+    "native": "Aruba",
+    "currency": "Aruban florin (AWG)",
+    "capital": [
+      "Oranjestad"
+    ],
+    "phoneCode": "+297",
+    "flag": "🇦🇼",
+    "population": 106766
+  },
+  {
+    "name": "Santo Tomé y Príncipe",
+    "official": "Democratic Republic of São Tomé and Príncipe",
+    "native": "São Tomé e Príncipe",
+    "currency": "São Tomé and Príncipe dobra (STN)",
+    "capital": [
+      "São Tomé"
+    ],
+    "phoneCode": "+239",
+    "flag": "🇸🇹",
+    "population": 219161
+  },
+  {
+    "name": "Granada",
+    "official": "Grenada",
+    "native": "Grenada",
+    "currency": "Eastern Caribbean dollar (XCD)",
+    "capital": [
+      "St. George's"
+    ],
+    "phoneCode": "+1473",
+    "flag": "🇬🇩",
+    "population": 112519
+  },
+  {
+    "name": "Montserrat",
+    "official": "Montserrat",
+    "native": "Montserrat",
+    "currency": "Eastern Caribbean dollar (XCD)",
+    "capital": [
+      "Plymouth"
+    ],
+    "phoneCode": "+1664",
+    "flag": "🇲🇸",
+    "population": 4922
+  },
+  {
+    "name": "Sahara Occidental",
+    "official": "Sahrawi Arab Democratic Republic",
+    "native": "Western Sahara",
+    "currency": "Algerian dinar (DZD)",
+    "capital": [
+      "El Aaiún"
+    ],
+    "phoneCode": "+2125288",
+    "flag": "🇪🇭",
+    "population": 510713
+  },
+  {
+    "name": "Guinea",
+    "official": "Republic of Guinea",
+    "native": "Guinée",
+    "currency": "Guinean franc (GNF)",
+    "capital": [
+      "Conakry"
+    ],
+    "phoneCode": "+224",
+    "flag": "🇬🇳",
+    "population": 13132792
+  },
+  {
+    "name": "Islas Vírgenes Británicas",
+    "official": "Virgin Islands",
+    "native": "British Virgin Islands",
+    "currency": "United States dollar (USD)",
+    "capital": [
+      "Road Town"
+    ],
+    "phoneCode": "+1284",
+    "flag": "🇻🇬",
+    "population": 30237
+  },
+  {
+    "name": "Panamá",
+    "official": "Republic of Panama",
+    "native": "Panamá",
+    "currency": "Panamanian balboa (PAB)",
+    "capital": [
+      "Panama City"
+    ],
+    "phoneCode": "+507",
+    "flag": "🇵🇦",
+    "population": 4314768
+  },
+  {
+    "name": "Yemen",
+    "official": "Republic of Yemen",
+    "native": "اليَمَن",
+    "currency": "Yemeni rial (YER)",
+    "capital": [
+      "Sana'a"
+    ],
+    "phoneCode": "+967",
+    "flag": "🇾🇪",
+    "population": 29825968
+  },
+  {
+    "name": "Estonia",
+    "official": "Republic of Estonia",
+    "native": "Eesti",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Tallinn"
+    ],
+    "phoneCode": "+372",
+    "flag": "🇪🇪",
+    "population": 1331057
+  },
+  {
+    "name": "Guyana",
+    "official": "Co-operative Republic of Guyana",
+    "native": "Guyana",
+    "currency": "Guyanese dollar (GYD)",
+    "capital": [
+      "Georgetown"
+    ],
+    "phoneCode": "+592",
+    "flag": "🇬🇾",
+    "population": 786559
+  },
+  {
+    "name": "Luxemburgo",
+    "official": "Grand Duchy of Luxembourg",
+    "native": "Luxemburg",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Luxembourg"
+    ],
+    "phoneCode": "+352",
+    "flag": "🇱🇺",
+    "population": 632275
+  },
+  {
+    "name": "Namibia",
+    "official": "Republic of Namibia",
+    "native": "Namibië",
+    "currency": "Namibian dollar (NAD)",
+    "capital": [
+      "Windhoek"
+    ],
+    "phoneCode": "+264",
+    "flag": "🇳🇦",
+    "population": 2540916
+  },
+  {
+    "name": "Kosovo",
+    "official": "Republic of Kosovo",
+    "native": "Kosova",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Pristina"
+    ],
+    "phoneCode": "+383",
+    "flag": "🇽🇰",
+    "population": 1775378
+  },
+  {
+    "name": "Nueva Caledonia",
+    "official": "New Caledonia",
+    "native": "Nouvelle-Calédonie",
+    "currency": "CFP franc (XPF)",
+    "capital": [
+      "Nouméa"
+    ],
+    "phoneCode": "+687",
+    "flag": "🇳🇨",
+    "population": 271960
+  },
+  {
+    "name": "San Pedro y Miquelón",
+    "official": "Saint Pierre and Miquelon",
+    "native": "Saint-Pierre-et-Miquelon",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Saint-Pierre"
+    ],
+    "phoneCode": "+508",
+    "flag": "🇵🇲",
+    "population": 6069
+  },
+  {
+    "name": "Libia",
+    "official": "State of Libya",
+    "native": "‏ليبيا",
+    "currency": "Libyan dinar (LYD)",
+    "capital": [
+      "Tripoli"
+    ],
+    "phoneCode": "+218",
+    "flag": "🇱🇾",
+    "population": 6871287
+  },
+  {
+    "name": "Birmania",
+    "official": "Republic of the Union of Myanmar",
+    "native": "မြန်မာ",
+    "currency": "Burmese kyat (MMK)",
+    "capital": [
+      "Naypyidaw"
+    ],
+    "phoneCode": "+95",
+    "flag": "🇲🇲",
+    "population": 54409794
+  },
+  {
+    "name": "Israel",
+    "official": "State of Israel",
+    "native": "إسرائيل",
+    "currency": "Israeli new shekel (ILS)",
+    "capital": [
+      "Jerusalem"
+    ],
+    "phoneCode": "+972",
+    "flag": "🇮🇱",
+    "population": 9216900
+  },
+  {
+    "name": "Mali",
+    "official": "Republic of Mali",
+    "native": "Mali",
+    "currency": "West African CFA franc (XOF)",
+    "capital": [
+      "Bamako"
+    ],
+    "phoneCode": "+223",
+    "flag": "🇲🇱",
+    "population": 20250834
+  },
+  {
+    "name": "Argentina",
+    "official": "Argentine Republic",
+    "native": "Argentina",
+    "currency": "Argentine peso (ARS)",
+    "capital": [
+      "Buenos Aires"
+    ],
+    "phoneCode": "+54",
+    "flag": "🇦🇷",
+    "population": 45376763
+  },
+  {
+    "name": "Guayana Francesa",
+    "official": "Guiana",
+    "native": "Guyane française",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Cayenne"
+    ],
+    "phoneCode": "+594",
+    "flag": "🇬🇫",
+    "population": 254541
+  },
+  {
+    "name": "Uganda",
+    "official": "Republic of Uganda",
+    "native": "Uganda",
+    "currency": "Ugandan shilling (UGX)",
+    "capital": [
+      "Kampala"
+    ],
+    "phoneCode": "+256",
+    "flag": "🇺🇬",
+    "population": 45741000
+  },
+  {
+    "name": "Malasia",
+    "official": "Malaysia",
+    "native": "Malaysia",
+    "currency": "Malaysian ringgit (MYR)",
+    "capital": [
+      "Kuala Lumpur"
+    ],
+    "phoneCode": "+60",
+    "flag": "🇲🇾",
+    "population": 32365998
+  },
+  {
+    "name": "Zambia",
+    "official": "Republic of Zambia",
+    "native": "Zambia",
+    "currency": "Zambian kwacha (ZMW)",
+    "capital": [
+      "Lusaka"
+    ],
+    "phoneCode": "+260",
+    "flag": "🇿🇲",
+    "population": 18383956
+  },
+  {
+    "name": "Micronesia",
+    "official": "Federated States of Micronesia",
+    "native": "Micronesia",
+    "currency": "United States dollar (USD)",
+    "capital": [
+      "Palikir"
+    ],
+    "phoneCode": "+691",
+    "flag": "🇫🇲",
+    "population": 115021
+  },
+  {
+    "name": "Eslovaquia",
+    "official": "Slovak Republic",
+    "native": "Slovensko",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Bratislava"
+    ],
+    "phoneCode": "+421",
+    "flag": "🇸🇰",
+    "population": 5458827
+  },
+  {
+    "name": "Burundi",
+    "official": "Republic of Burundi",
+    "native": "Burundi",
+    "currency": "Burundian franc (BIF)",
+    "capital": [
+      "Gitega"
+    ],
+    "phoneCode": "+257",
+    "flag": "🇧🇮",
+    "population": 11890781
+  },
+  {
+    "name": "Serbia",
+    "official": "Republic of Serbia",
+    "native": "Србија",
+    "currency": "Serbian dinar (RSD)",
+    "capital": [
+      "Belgrade"
+    ],
+    "phoneCode": "+381",
+    "flag": "🇷🇸",
+    "population": 6908224
+  },
+  {
+    "name": "Turkmenistán",
+    "official": "Turkmenistan",
+    "native": "Туркмения",
+    "currency": "Turkmenistan manat (TMT)",
+    "capital": [
+      "Ashgabat"
+    ],
+    "phoneCode": "+993",
+    "flag": "🇹🇲",
+    "population": 6031187
+  },
+  {
+    "name": "Sudáfrica",
+    "official": "Republic of South Africa",
+    "native": "South Africa",
+    "currency": "South African rand (ZAR)",
+    "capital": [
+      "Pretoria",
+      "Bloemfontein",
+      "Cape Town"
+    ],
+    "phoneCode": "+27",
+    "flag": "🇿🇦",
+    "population": 59308690
+  },
+  {
+    "name": "Kazajistán",
+    "official": "Republic of Kazakhstan",
+    "native": "Қазақстан",
+    "currency": "Kazakhstani tenge (KZT)",
+    "capital": [
+      "Astana"
+    ],
+    "phoneCode": "+76",
+    "flag": "🇰🇿",
+    "population": 18754440
+  },
+  {
+    "name": "Puerto Rico",
+    "official": "Canada",
+    "native": "Canada",
+    "currency": "Canadian dollar (CAD)",
+    "capital": [
+      "Ottawa"
+    ],
+    "phoneCode": "+1",
+    "flag": "🇨🇦",
+    "population": 38005238
+  },
+  {
+    "name": "Polonia",
+    "official": "Republic of Poland",
+    "native": "Polska",
+    "currency": "Polish złoty (PLN)",
+    "capital": [
+      "Warsaw"
+    ],
+    "phoneCode": "+48",
+    "flag": "🇵🇱",
+    "population": 37950802
+  },
+  {
+    "name": "Puerto Rico",
+    "official": "Commonwealth of Puerto Rico",
+    "native": "Puerto Rico",
+    "currency": "United States dollar (USD)",
+    "capital": [
+      "San Juan"
+    ],
+    "phoneCode": "+1787",
+    "flag": "🇵🇷",
+    "population": 3194034
+  },
+  {
+    "name": "Islas Cocos (Keeling)",
+    "official": "Territory of the Cocos (Keeling) Islands",
+    "native": "Cocos (Keeling) Islands",
+    "currency": "Australian dollar (AUD)",
+    "capital": [
+      "West Island"
+    ],
+    "phoneCode": "+61",
+    "flag": "🇨🇨",
+    "population": 544
+  },
+  {
+    "name": "San Marino",
+    "official": "Republic of San Marino",
+    "native": "San Marino",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "City of San Marino"
+    ],
+    "phoneCode": "+378",
+    "flag": "🇸🇲",
+    "population": 33938
+  },
+  {
+    "name": "Samoa Americana",
+    "official": "American Samoa",
+    "native": "American Samoa",
+    "currency": "United States dollar (USD)",
+    "capital": [
+      "Pago Pago"
+    ],
+    "phoneCode": "+1684",
+    "flag": "🇦🇸",
+    "population": 55197
+  },
+  {
+    "name": "Qatar",
+    "official": "State of Qatar",
+    "native": "قطر",
+    "currency": "Qatari riyal (QAR)",
+    "capital": [
+      "Doha"
+    ],
+    "phoneCode": "+974",
+    "flag": "🇶🇦",
+    "population": 2881060
+  },
+  {
+    "name": "Gibraltar",
+    "official": "Gibraltar",
+    "native": "Gibraltar",
+    "currency": "Gibraltar pound (GIP)",
+    "capital": [
+      "Gibraltar"
+    ],
+    "phoneCode": "+350",
+    "flag": "🇬🇮",
+    "population": 33691
+  },
+  {
+    "name": "Croacia",
+    "official": "Republic of Croatia",
+    "native": "Hrvatska",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Zagreb"
+    ],
+    "phoneCode": "+385",
+    "flag": "🇭🇷",
+    "population": 4047200
+  },
+  {
+    "name": "Svalbard y Jan Mayen",
+    "official": "Svalbard og Jan Mayen",
+    "native": "Svalbard og Jan Mayen",
+    "currency": "krone (NOK)",
+    "capital": [
+      "Longyearbyen"
+    ],
+    "phoneCode": "+4779",
+    "flag": "🇸🇯",
+    "population": 2562
+  },
+  {
+    "name": "Reino Unido",
+    "official": "Isle of Man",
+    "native": "Isle of Man",
+    "currency": "British pound (GBP)",
+    "capital": [
+      "Douglas"
+    ],
+    "phoneCode": "+44",
+    "flag": "🇮🇲",
+    "population": 85032
+  },
+  {
+    "name": "Palestina",
+    "official": "State of Palestine",
+    "native": "فلسطين",
+    "currency": "Egyptian pound (EGP)",
+    "capital": [
+      "Ramallah",
+      "Jerusalem"
+    ],
+    "phoneCode": "+970",
+    "flag": "🇵🇸",
+    "population": 4803269
+  },
+  {
+    "name": "Mauricio",
+    "official": "Republic of Mauritius",
+    "native": "Mauritius",
+    "currency": "Mauritian rupee (MUR)",
+    "capital": [
+      "Port Louis"
+    ],
+    "phoneCode": "+230",
+    "flag": "🇲🇺",
+    "population": 1265740
+  },
+  {
+    "name": "San Bartolomé",
+    "official": "Saint Martin",
+    "native": "Saint-Martin",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Marigot"
+    ],
+    "phoneCode": "+590",
+    "flag": "🇲🇫",
+    "population": 38659
+  },
+  {
+    "name": "Sierra Leona",
+    "official": "Republic of Sierra Leone",
+    "native": "Sierra Leone",
+    "currency": "Leone (SLE)",
+    "capital": [
+      "Freetown"
+    ],
+    "phoneCode": "+232",
+    "flag": "🇸🇱",
+    "population": 7976985
+  },
+  {
+    "name": "San Cristóbal y Nieves",
+    "official": "Federation of Saint Christopher and Nevis",
+    "native": "Saint Kitts and Nevis",
+    "currency": "Eastern Caribbean dollar (XCD)",
+    "capital": [
+      "Basseterre"
+    ],
+    "phoneCode": "+1869",
+    "flag": "🇰🇳",
+    "population": 53192
+  },
+  {
+    "name": "Islandia",
+    "official": "Iceland",
+    "native": "Ísland",
+    "currency": "Icelandic króna (ISK)",
+    "capital": [
+      "Reykjavik"
+    ],
+    "phoneCode": "+354",
+    "flag": "🇮🇸",
+    "population": 366425
+  },
+  {
+    "name": "Islas Heard y McDonald",
+    "official": "Heard Island and McDonald Islands",
+    "native": "Heard Island and McDonald Islands",
+    "currency": "N/A",
+    "capital": [],
+    "phoneCode": "N/A",
+    "flag": "🇭🇲",
+    "population": 0
+  },
+  {
+    "name": "Kuwait",
+    "official": "State of Kuwait",
+    "native": "الكويت",
+    "currency": "Kuwaiti dinar (KWD)",
+    "capital": [
+      "Kuwait City"
+    ],
+    "phoneCode": "+965",
+    "flag": "🇰🇼",
+    "population": 4270563
+  },
+  {
+    "name": "Taiwán",
+    "official": "Republic of China (Taiwan)",
+    "native": "台灣",
+    "currency": "New Taiwan dollar (TWD)",
+    "capital": [
+      "Taipei"
+    ],
+    "phoneCode": "+886",
+    "flag": "🇹🇼",
+    "population": 23503349
+  },
+  {
+    "name": "Camerún",
+    "official": "Republic of Cameroon",
+    "native": "Cameroon",
+    "currency": "Central African CFA franc (XAF)",
+    "capital": [
+      "Yaoundé"
+    ],
+    "phoneCode": "+237",
+    "flag": "🇨🇲",
+    "population": 26545864
+  },
+  {
+    "name": "El Salvador",
+    "official": "Republic of El Salvador",
+    "native": "El Salvador",
+    "currency": "United States dollar (USD)",
+    "capital": [
+      "San Salvador"
+    ],
+    "phoneCode": "+503",
+    "flag": "🇸🇻",
+    "population": 6486201
+  },
+  {
+    "name": "Macao",
+    "official": "Macao Special Administrative Region of the People's Republic of China",
+    "native": "Macau",
+    "currency": "Macanese pataca (MOP)",
+    "capital": [],
+    "phoneCode": "+853",
+    "flag": "🇲🇴",
+    "population": 649342
+  },
+  {
+    "name": "Cuba",
+    "official": "Republic of Cuba",
+    "native": "Cuba",
+    "currency": "Cuban convertible peso (CUC)",
+    "capital": [
+      "Havana"
+    ],
+    "phoneCode": "+53",
+    "flag": "🇨🇺",
+    "population": 11326616
+  },
+  {
+    "name": "Brasil",
+    "official": "Federative Republic of Brazil",
+    "native": "Brasil",
+    "currency": "Brazilian real (BRL)",
+    "capital": [
+      "Brasília"
+    ],
+    "phoneCode": "+55",
+    "flag": "🇧🇷",
+    "population": 212559409
+  },
+  {
+    "name": "Islas Salomón",
+    "official": "Solomon Islands",
+    "native": "Solomon Islands",
+    "currency": "Solomon Islands dollar (SBD)",
+    "capital": [
+      "Honiara"
+    ],
+    "phoneCode": "+677",
+    "flag": "🇸🇧",
+    "population": 686878
+  },
+  {
+    "name": "Grecia",
+    "official": "Hellenic Republic",
+    "native": "Ελλάδα",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Athens"
+    ],
+    "phoneCode": "+30",
+    "flag": "🇬🇷",
+    "population": 10715549
+  },
+  {
+    "name": "Svalbard y Jan Mayen",
+    "official": "Kingdom of Norway",
+    "native": "Noreg",
+    "currency": "Norwegian krone (NOK)",
+    "capital": [
+      "Oslo"
+    ],
+    "phoneCode": "+47",
+    "flag": "🇳🇴",
+    "population": 5379475
+  },
+  {
+    "name": "Jamaica",
+    "official": "Jamaica",
+    "native": "Jamaica",
+    "currency": "Jamaican dollar (JMD)",
+    "capital": [
+      "Kingston"
+    ],
+    "phoneCode": "+1876",
+    "flag": "🇯🇲",
+    "population": 2961161
+  },
+  {
+    "name": "Tanzania",
+    "official": "United Republic of Tanzania",
+    "native": "Tanzania",
+    "currency": "Tanzanian shilling (TZS)",
+    "capital": [
+      "Dodoma"
+    ],
+    "phoneCode": "+255",
+    "flag": "🇹🇿",
+    "population": 59734213
+  },
+  {
+    "name": "Bolivia",
+    "official": "Plurinational State of Bolivia",
+    "native": "Wuliwya",
+    "currency": "Bolivian boliviano (BOB)",
+    "capital": [
+      "Sucre"
+    ],
+    "phoneCode": "+591",
+    "flag": "🇧🇴",
+    "population": 11673029
+  },
+  {
+    "name": "Chipre",
+    "official": "Republic of Cyprus",
+    "native": "Κύπρος",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Nicosia"
+    ],
+    "phoneCode": "+357",
+    "flag": "🇨🇾",
+    "population": 1207361
+  },
+  {
+    "name": "Mongolia",
+    "official": "Mongolia",
+    "native": "Монгол улс",
+    "currency": "Mongolian tögrög (MNT)",
+    "capital": [
+      "Ulan Bator"
+    ],
+    "phoneCode": "+976",
+    "flag": "🇲🇳",
+    "population": 3278292
+  },
+  {
+    "name": "Mónaco",
+    "official": "Principality of Monaco",
+    "native": "Monaco",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Monaco"
+    ],
+    "phoneCode": "+377",
+    "flag": "🇲🇨",
+    "population": 39244
+  },
+  {
+    "name": "Tunez",
+    "official": "Tunisian Republic",
+    "native": "تونس",
+    "currency": "Tunisian dinar (TND)",
+    "capital": [
+      "Tunis"
+    ],
+    "phoneCode": "+216",
+    "flag": "🇹🇳",
+    "population": 11818618
+  },
+  {
+    "name": "Reunión",
+    "official": "Territory of the French Southern and Antarctic Lands",
+    "native": "Terres australes et antarctiques françaises",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Port-aux-Français"
+    ],
+    "phoneCode": "+262",
+    "flag": "🇹🇫",
+    "population": 400
+  },
+  {
+    "name": "Siria",
+    "official": "Syrian Arab Republic",
+    "native": "سوريا",
+    "currency": "Syrian pound (SYP)",
+    "capital": [
+      "Damascus"
+    ],
+    "phoneCode": "+963",
+    "flag": "🇸🇾",
+    "population": 17500657
+  },
+  {
+    "name": "Chile",
+    "official": "Republic of Chile",
+    "native": "Chile",
+    "currency": "Chilean peso (CLP)",
+    "capital": [
+      "Santiago"
+    ],
+    "phoneCode": "+56",
+    "flag": "🇨🇱",
+    "population": 19116209
+  },
+  {
+    "name": "Azerbaiyán",
+    "official": "Republic of Azerbaijan",
+    "native": "Azərbaycan",
+    "currency": "Azerbaijani manat (AZN)",
+    "capital": [
+      "Baku"
+    ],
+    "phoneCode": "+994",
+    "flag": "🇦🇿",
+    "population": 10110116
+  },
+  {
+    "name": "Francia",
+    "official": "French Republic",
+    "native": "France",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Paris"
+    ],
+    "phoneCode": "+33",
+    "flag": "🇫🇷",
+    "population": 67391582
+  },
+  {
+    "name": "Corea del Sur",
+    "official": "Republic of Korea",
+    "native": "한국",
+    "currency": "South Korean won (KRW)",
+    "capital": [
+      "Seoul"
+    ],
+    "phoneCode": "+82",
+    "flag": "🇰🇷",
+    "population": 51780579
+  },
+  {
+    "name": "Ghana",
+    "official": "Republic of Ghana",
+    "native": "Ghana",
+    "currency": "Ghanaian cedi (GHS)",
+    "capital": [
+      "Accra"
+    ],
+    "phoneCode": "+233",
+    "flag": "🇬🇭",
+    "population": 31072945
+  },
+  {
+    "name": "Dinamarca",
+    "official": "Kingdom of Denmark",
+    "native": "Danmark",
+    "currency": "Danish krone (DKK)",
+    "capital": [
+      "Copenhagen"
+    ],
+    "phoneCode": "+45",
+    "flag": "🇩🇰",
+    "population": 5831404
+  },
+  {
+    "name": "Sint Maarten",
+    "official": "Sint Maarten",
+    "native": "Sint Maarten",
+    "currency": "Netherlands Antillean guilder (ANG)",
+    "capital": [
+      "Philipsburg"
+    ],
+    "phoneCode": "+1721",
+    "flag": "🇸🇽",
+    "population": 40812
+  },
+  {
+    "name": "Andorra",
+    "official": "Principality of Andorra",
+    "native": "Andorra",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Andorra la Vella"
+    ],
+    "phoneCode": "+376",
+    "flag": "🇦🇩",
+    "population": 77265
+  },
+  {
+    "name": "Curazao",
+    "official": "Country of Curaçao",
+    "native": "Curaçao",
+    "currency": "Netherlands Antillean guilder (ANG)",
+    "capital": [
+      "Willemstad"
+    ],
+    "phoneCode": "+599",
+    "flag": "🇨🇼",
+    "population": 155014
+  },
+  {
+    "name": "Suiza",
+    "official": "Swiss Confederation",
+    "native": "Suisse",
+    "currency": "Swiss franc (CHF)",
+    "capital": [
+      "Bern"
+    ],
+    "phoneCode": "+41",
+    "flag": "🇨🇭",
+    "population": 8654622
+  },
+  {
+    "name": "Macedônia",
+    "official": "Republic of North Macedonia",
+    "native": "Македонија",
+    "currency": "denar (MKD)",
+    "capital": [
+      "Skopje"
+    ],
+    "phoneCode": "+389",
+    "flag": "🇲🇰",
+    "population": 2077132
+  },
+  {
+    "name": "República de Sudán del Sur",
+    "official": "Republic of South Sudan",
+    "native": "South Sudan",
+    "currency": "South Sudanese pound (SSP)",
+    "capital": [
+      "Juba"
+    ],
+    "phoneCode": "+211",
+    "flag": "🇸🇸",
+    "population": 11193729
+  },
+  {
+    "name": "Haití",
+    "official": "Republic of Haiti",
+    "native": "Haïti",
+    "currency": "Haitian gourde (HTG)",
+    "capital": [
+      "Port-au-Prince"
+    ],
+    "phoneCode": "+509",
+    "flag": "🇭🇹",
+    "population": 11402533
+  },
+  {
+    "name": "Perú",
+    "official": "Republic of Peru",
+    "native": "Piruw",
+    "currency": "Peruvian sol (PEN)",
+    "capital": [
+      "Lima"
+    ],
+    "phoneCode": "+51",
+    "flag": "🇵🇪",
+    "population": 32971846
+  },
+  {
+    "name": "Guinea-Bissau",
+    "official": "Republic of Guinea-Bissau",
+    "native": "Guiné-Bissau",
+    "currency": "West African CFA franc (XOF)",
+    "capital": [
+      "Bissau"
+    ],
+    "phoneCode": "+245",
+    "flag": "🇬🇼",
+    "population": 1967998
+  },
+  {
+    "name": "República Checa",
+    "official": "Czech Republic",
+    "native": "Česko",
+    "currency": "Czech koruna (CZK)",
+    "capital": [
+      "Prague"
+    ],
+    "phoneCode": "+420",
+    "flag": "🇨🇿",
+    "population": 10698896
+  },
+  {
+    "name": "Portugal",
+    "official": "Portuguese Republic",
+    "native": "Portugal",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Lisbon"
+    ],
+    "phoneCode": "+351",
+    "flag": "🇵🇹",
+    "population": 10305564
+  },
+  {
+    "name": "Gabón",
+    "official": "Gabonese Republic",
+    "native": "Gabon",
+    "currency": "Central African CFA franc (XAF)",
+    "capital": [
+      "Libreville"
+    ],
+    "phoneCode": "+241",
+    "flag": "🇬🇦",
+    "population": 2225728
+  },
+  {
+    "name": "México",
+    "official": "United Mexican States",
+    "native": "México",
+    "currency": "Mexican peso (MXN)",
+    "capital": [
+      "Mexico City"
+    ],
+    "phoneCode": "+52",
+    "flag": "🇲🇽",
+    "population": 128932753
+  },
+  {
+    "name": "Italia",
+    "official": "Italian Republic",
+    "native": "Italia",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Rome"
+    ],
+    "phoneCode": "+39",
+    "flag": "🇮🇹",
+    "population": 59554023
+  },
+  {
+    "name": "Islas de Åland",
+    "official": "Republic of Finland",
+    "native": "Suomi",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Helsinki"
+    ],
+    "phoneCode": "+358",
+    "flag": "🇫🇮",
+    "population": 5530719
+  },
+  {
+    "name": "Zimbabue",
+    "official": "Republic of Zimbabwe",
+    "native": "Zimbabwe",
+    "currency": "Zimbabwean dollar (ZWL)",
+    "capital": [
+      "Harare"
+    ],
+    "phoneCode": "+263",
+    "flag": "🇿🇼",
+    "population": 14862927
+  },
+  {
+    "name": "España",
+    "official": "Kingdom of Spain",
+    "native": "España",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Madrid"
+    ],
+    "phoneCode": "+34",
+    "flag": "🇪🇸",
+    "population": 47351567
+  },
+  {
+    "name": "Japón",
+    "official": "Japan",
+    "native": "日本",
+    "currency": "Japanese yen (JPY)",
+    "capital": [
+      "Tokyo"
+    ],
+    "phoneCode": "+81",
+    "flag": "🇯🇵",
+    "population": 125836021
+  },
+  {
+    "name": "Seychelles",
+    "official": "Republic of Seychelles",
+    "native": "Sesel",
+    "currency": "Seychellois rupee (SCR)",
+    "capital": [
+      "Victoria"
+    ],
+    "phoneCode": "+248",
+    "flag": "🇸🇨",
+    "population": 98462
+  },
+  {
+    "name": "Albania",
+    "official": "Republic of Albania",
+    "native": "Shqipëria",
+    "currency": "Albanian lek (ALL)",
+    "capital": [
+      "Tirana"
+    ],
+    "phoneCode": "+355",
+    "flag": "🇦🇱",
+    "population": 2837743
+  },
+  {
+    "name": "Moldavia",
+    "official": "Republic of Moldova",
+    "native": "Moldova",
+    "currency": "Moldovan leu (MDL)",
+    "capital": [
+      "Chișinău"
+    ],
+    "phoneCode": "+373",
+    "flag": "🇲🇩",
+    "population": 2617820
+  },
+  {
+    "name": "Guatemala",
+    "official": "Republic of Guatemala",
+    "native": "Guatemala",
+    "currency": "Guatemalan quetzal (GTQ)",
+    "capital": [
+      "Guatemala City"
+    ],
+    "phoneCode": "+502",
+    "flag": "🇬🇹",
+    "population": 16858333
+  },
+  {
+    "name": "Alemania",
+    "official": "Federal Republic of Germany",
+    "native": "Deutschland",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Berlin"
+    ],
+    "phoneCode": "+49",
+    "flag": "🇩🇪",
+    "population": 83240525
+  },
+  {
+    "name": "San Bartolomé",
+    "official": "Guadeloupe",
+    "native": "Guadeloupe",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Basse-Terre"
+    ],
+    "phoneCode": "+590",
+    "flag": "🇬🇵",
+    "population": 400132
+  },
+  {
+    "name": "Bulgaria",
+    "official": "Republic of Bulgaria",
+    "native": "България",
+    "currency": "Bulgarian lev (BGN)",
+    "capital": [
+      "Sofia"
+    ],
+    "phoneCode": "+359",
+    "flag": "🇧🇬",
+    "population": 6927288
+  },
+  {
+    "name": "Paraguay",
+    "official": "Republic of Paraguay",
+    "native": "Paraguái",
+    "currency": "Paraguayan guaraní (PYG)",
+    "capital": [
+      "Asunción"
+    ],
+    "phoneCode": "+595",
+    "flag": "🇵🇾",
+    "population": 7132530
+  },
+  {
+    "name": "Eritrea",
+    "official": "State of Eritrea",
+    "native": "إرتريا‎",
+    "currency": "Eritrean nakfa (ERN)",
+    "capital": [
+      "Asmara"
+    ],
+    "phoneCode": "+291",
+    "flag": "🇪🇷",
+    "population": 5352000
+  },
+  {
+    "name": "Sudán",
+    "official": "Republic of the Sudan",
+    "native": "السودان",
+    "currency": "Sudanese pound (SDG)",
+    "capital": [
+      "Khartoum"
+    ],
+    "phoneCode": "+249",
+    "flag": "🇸🇩",
+    "population": 43849269
+  },
+  {
+    "name": "Guinea Ecuatorial",
+    "official": "Republic of Equatorial Guinea",
+    "native": "Guinée équatoriale",
+    "currency": "Central African CFA franc (XAF)",
+    "capital": [
+      "Malabo"
+    ],
+    "phoneCode": "+240",
+    "flag": "🇬🇶",
+    "population": 1402985
+  },
+  {
+    "name": "Colombia",
+    "official": "Republic of Colombia",
+    "native": "Colombia",
+    "currency": "Colombian peso (COP)",
+    "capital": [
+      "Bogotá"
+    ],
+    "phoneCode": "+57",
+    "flag": "🇨🇴",
+    "population": 50882884
+  },
+  {
+    "name": "Nigeria",
+    "official": "Federal Republic of Nigeria",
+    "native": "Nigeria",
+    "currency": "Nigerian naira (NGN)",
+    "capital": [
+      "Abuja"
+    ],
+    "phoneCode": "+234",
+    "flag": "🇳🇬",
+    "population": 206139587
+  },
+  {
+    "name": "Montenegro",
+    "official": "Montenegro",
+    "native": "Црна Гора",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Podgorica"
+    ],
+    "phoneCode": "+382",
+    "flag": "🇲🇪",
+    "population": 621718
+  },
+  {
+    "name": "Nepal",
+    "official": "Federal Democratic Republic of Nepal",
+    "native": "नेपाल",
+    "currency": "Nepalese rupee (NPR)",
+    "capital": [
+      "Kathmandu"
+    ],
+    "phoneCode": "+977",
+    "flag": "🇳🇵",
+    "population": 29136808
+  },
+  {
+    "name": "Brunéi",
+    "official": "Nation of Brunei, Abode of Peace",
+    "native": "Negara Brunei Darussalam",
+    "currency": "Brunei dollar (BND)",
+    "capital": [
+      "Bandar Seri Begawan"
+    ],
+    "phoneCode": "+673",
+    "flag": "🇧🇳",
+    "population": 437483
+  },
+  {
+    "name": "Austria",
+    "official": "Republic of Austria",
+    "native": "Österreich",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Vienna"
+    ],
+    "phoneCode": "+43",
+    "flag": "🇦🇹",
+    "population": 8917205
+  },
+  {
+    "name": "Islas Turcas y Caicos",
+    "official": "Turks and Caicos Islands",
+    "native": "Turks and Caicos Islands",
+    "currency": "United States dollar (USD)",
+    "capital": [
+      "Cockburn Town"
+    ],
+    "phoneCode": "+1649",
+    "flag": "🇹🇨",
+    "population": 38718
+  },
+  {
+    "name": "Bahamas",
+    "official": "Commonwealth of the Bahamas",
+    "native": "Bahamas",
+    "currency": "Bahamian dollar (BSD)",
+    "capital": [
+      "Nassau"
+    ],
+    "phoneCode": "+1242",
+    "flag": "🇧🇸",
+    "population": 393248
+  },
+  {
+    "name": "Reino Unido",
+    "official": "United Kingdom of Great Britain and Northern Ireland",
+    "native": "United Kingdom",
+    "currency": "British pound (GBP)",
+    "capital": [
+      "London"
+    ],
+    "phoneCode": "+44",
+    "flag": "🇬🇧",
+    "population": 67215293
+  },
+  {
+    "name": "Territorio Británico del Océano Índico",
+    "official": "British Indian Ocean Territory",
+    "native": "British Indian Ocean Territory",
+    "currency": "United States dollar (USD)",
+    "capital": [
+      "Diego Garcia"
+    ],
+    "phoneCode": "+246",
+    "flag": "🇮🇴",
+    "population": 3000
+  },
+  {
+    "name": "Liberia",
+    "official": "Republic of Liberia",
+    "native": "Liberia",
+    "currency": "Liberian dollar (LRD)",
+    "capital": [
+      "Monrovia"
+    ],
+    "phoneCode": "+231",
+    "flag": "🇱🇷",
+    "population": 5057677
+  },
+  {
+    "name": "Anguilla",
+    "official": "Anguilla",
+    "native": "Anguilla",
+    "currency": "Eastern Caribbean dollar (XCD)",
+    "capital": [
+      "The Valley"
+    ],
+    "phoneCode": "+1264",
+    "flag": "🇦🇮",
+    "population": 13452
+  },
+  {
+    "name": "República Centroafricana",
+    "official": "Central African Republic",
+    "native": "République centrafricaine",
+    "currency": "Central African CFA franc (XAF)",
+    "capital": [
+      "Bangui"
+    ],
+    "phoneCode": "+236",
+    "flag": "🇨🇫",
+    "population": 4829764
+  },
+  {
+    "name": "Argelia",
+    "official": "People's Democratic Republic of Algeria",
+    "native": "الجزائر",
+    "currency": "Algerian dinar (DZD)",
+    "capital": [
+      "Algiers"
+    ],
+    "phoneCode": "+213",
+    "flag": "🇩🇿",
+    "population": 44700000
+  },
+  {
+    "name": "Santa Lucía",
+    "official": "Saint Lucia",
+    "native": "Saint Lucia",
+    "currency": "Eastern Caribbean dollar (XCD)",
+    "capital": [
+      "Castries"
+    ],
+    "phoneCode": "+1758",
+    "flag": "🇱🇨",
+    "population": 183629
+  },
+  {
+    "name": "Rumanía",
+    "official": "Romania",
+    "native": "România",
+    "currency": "Romanian leu (RON)",
+    "capital": [
+      "Bucharest"
+    ],
+    "phoneCode": "+40",
+    "flag": "🇷🇴",
+    "population": 19286123
+  },
+  {
+    "name": "Emiratos Árabes Unidos",
+    "official": "United Arab Emirates",
+    "native": "دولة الإمارات العربية المتحدة",
+    "currency": "United Arab Emirates dirham (AED)",
+    "capital": [
+      "Abu Dhabi"
+    ],
+    "phoneCode": "+971",
+    "flag": "🇦🇪",
+    "population": 9890400
+  },
+  {
+    "name": "Sahara Occidental",
+    "official": "Kingdom of Morocco",
+    "native": "المغرب",
+    "currency": "Moroccan dirham (MAD)",
+    "capital": [
+      "Rabat"
+    ],
+    "phoneCode": "+212",
+    "flag": "🇲🇦",
+    "population": 36910558
+  },
+  {
+    "name": "Islas Marianas del Norte",
+    "official": "Commonwealth of the Northern Mariana Islands",
+    "native": "Northern Mariana Islands",
+    "currency": "United States dollar (USD)",
+    "capital": [
+      "Saipan"
+    ],
+    "phoneCode": "+1670",
+    "flag": "🇲🇵",
+    "population": 57557
+  },
+  {
+    "name": "Swazilandia",
+    "official": "United States Minor Outlying Islands",
+    "native": "United States Minor Outlying Islands",
+    "currency": "United States dollar (USD)",
+    "capital": [
+      "Washington DC"
+    ],
+    "phoneCode": "+268",
+    "flag": "🇺🇲",
+    "population": 300
+  },
+  {
+    "name": "Botsuana",
+    "official": "Republic of Botswana",
+    "native": "Botswana",
+    "currency": "Botswana pula (BWP)",
+    "capital": [
+      "Gaborone"
+    ],
+    "phoneCode": "+267",
+    "flag": "🇧🇼",
+    "population": 2351625
+  },
+  {
+    "name": "Lituania",
+    "official": "Republic of Lithuania",
+    "native": "Lietuva",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Vilnius"
+    ],
+    "phoneCode": "+370",
+    "flag": "🇱🇹",
+    "population": 2794700
+  },
+  {
+    "name": "Caribe Neerlandés",
+    "official": "Bonaire, Sint Eustatius and Saba",
+    "native": "Caribisch Nederland",
+    "currency": "United States dollar (USD)",
+    "capital": [
+      "Kralendijk"
+    ],
+    "phoneCode": "+599",
+    "flag": "🇧🇶",
+    "population": 25987
+  },
+  {
+    "name": "Cabo Verde",
+    "official": "Republic of Cabo Verde",
+    "native": "Cabo Verde",
+    "currency": "Cape Verdean escudo (CVE)",
+    "capital": [
+      "Praia"
+    ],
+    "phoneCode": "+238",
+    "flag": "🇨🇻",
+    "population": 555988
+  },
+  {
+    "name": "Estados Unidos",
+    "official": "United States of America",
+    "native": "United States",
+    "currency": "United States dollar (USD)",
+    "capital": [
+      "Washington, D.C."
+    ],
+    "phoneCode": "+1201",
+    "flag": "🇺🇸",
+    "population": 329484123
+  },
+  {
+    "name": "Islas Cocos (Keeling)",
+    "official": "Commonwealth of Australia",
+    "native": "Australia",
+    "currency": "Australian dollar (AUD)",
+    "capital": [
+      "Canberra"
+    ],
+    "phoneCode": "+61",
+    "flag": "🇦🇺",
+    "population": 25687041
+  },
+  {
+    "name": "Guam",
+    "official": "Guam",
+    "native": "Guåhån",
+    "currency": "United States dollar (USD)",
+    "capital": [
+      "Hagåtña"
+    ],
+    "phoneCode": "+1671",
+    "flag": "🇬🇺",
+    "population": 168783
+  },
+  {
+    "name": "Tonga",
+    "official": "Kingdom of Tonga",
+    "native": "Tonga",
+    "currency": "Tongan paʻanga (TOP)",
+    "capital": [
+      "Nuku'alofa"
+    ],
+    "phoneCode": "+676",
+    "flag": "🇹🇴",
+    "population": 105697
+  },
+  {
+    "name": "Afganistán",
+    "official": "Islamic Republic of Afghanistan",
+    "native": "افغانستان",
+    "currency": "Afghan afghani (AFN)",
+    "capital": [
+      "Kabul"
+    ],
+    "phoneCode": "+93",
+    "flag": "🇦🇫",
+    "population": 40218234
+  },
+  {
+    "name": "Islas Malvinas",
+    "official": "Falkland Islands",
+    "native": "Falkland Islands",
+    "currency": "Falkland Islands pound (FKP)",
+    "capital": [
+      "Stanley"
+    ],
+    "phoneCode": "+500",
+    "flag": "🇫🇰",
+    "population": 2563
+  },
+  {
+    "name": "Nauru",
+    "official": "Republic of Nauru",
+    "native": "Nauru",
+    "currency": "Australian dollar (AUD)",
+    "capital": [
+      "Yaren"
+    ],
+    "phoneCode": "+674",
+    "flag": "🇳🇷",
+    "population": 10834
+  },
+  {
+    "name": "Islas Cook",
+    "official": "Cook Islands",
+    "native": "Cook Islands",
+    "currency": "Cook Islands dollar (CKD)",
+    "capital": [
+      "Avarua"
+    ],
+    "phoneCode": "+682",
+    "flag": "🇨🇰",
+    "population": 18100
+  },
+  {
+    "name": "Hungría",
+    "official": "Hungary",
+    "native": "Magyarország",
+    "currency": "Hungarian forint (HUF)",
+    "capital": [
+      "Budapest"
+    ],
+    "phoneCode": "+36",
+    "flag": "🇭🇺",
+    "population": 9749763
+  },
+  {
+    "name": "Mauritania",
+    "official": "Islamic Republic of Mauritania",
+    "native": "موريتانيا",
+    "currency": "Mauritanian ouguiya (MRU)",
+    "capital": [
+      "Nouakchott"
+    ],
+    "phoneCode": "+222",
+    "flag": "🇲🇷",
+    "population": 4649660
+  },
+  {
+    "name": "Eslovenia",
+    "official": "Republic of Slovenia",
+    "native": "Slovenija",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Ljubljana"
+    ],
+    "phoneCode": "+386",
+    "flag": "🇸🇮",
+    "population": 2100126
+  },
+  {
+    "name": "Chad",
+    "official": "Republic of Chad",
+    "native": "تشاد‎",
+    "currency": "Central African CFA franc (XAF)",
+    "capital": [
+      "N'Djamena"
+    ],
+    "phoneCode": "+235",
+    "flag": "🇹🇩",
+    "population": 16425859
+  },
+  {
+    "name": "Ciudad del Vaticano",
+    "official": "Vatican City State",
+    "native": "Vaticano",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Vatican City"
+    ],
+    "phoneCode": "+3906698",
+    "flag": "🇻🇦",
+    "population": 451
+  },
+  {
+    "name": "Benín",
+    "official": "Republic of Benin",
+    "native": "Bénin",
+    "currency": "West African CFA franc (XOF)",
+    "capital": [
+      "Porto-Novo"
+    ],
+    "phoneCode": "+229",
+    "flag": "🇧🇯",
+    "population": 12123198
+  },
+  {
+    "name": "Singapur",
+    "official": "Republic of Singapore",
+    "native": "Singapore",
+    "currency": "Singapore dollar (SGD)",
+    "capital": [
+      "Singapore"
+    ],
+    "phoneCode": "+65",
+    "flag": "🇸🇬",
+    "population": 5685807
+  },
+  {
+    "name": "Malta",
+    "official": "Republic of Malta",
+    "native": "Malta",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Valletta"
+    ],
+    "phoneCode": "+356",
+    "flag": "🇲🇹",
+    "population": 525285
+  },
+  {
+    "name": "Saint Vincent and the Grenadines",
+    "official": "Saint Vincent and the Grenadines",
+    "native": "Saint Vincent and the Grenadines",
+    "currency": "Eastern Caribbean dollar (XCD)",
+    "capital": [
+      "Kingstown"
+    ],
+    "phoneCode": "+1784",
+    "flag": "🇻🇨",
+    "population": 110947
+  },
+  {
+    "name": "Islas Marshall",
+    "official": "Republic of the Marshall Islands",
+    "native": "Marshall Islands",
+    "currency": "United States dollar (USD)",
+    "capital": [
+      "Majuro"
+    ],
+    "phoneCode": "+692",
+    "flag": "🇲🇭",
+    "population": 59194
+  },
+  {
+    "name": "Tailandia",
+    "official": "Kingdom of Thailand",
+    "native": "ประเทศไทย",
+    "currency": "Thai baht (THB)",
+    "capital": [
+      "Bangkok"
+    ],
+    "phoneCode": "+66",
+    "flag": "🇹🇭",
+    "population": 69799978
+  },
+  {
+    "name": "Liechtenstein",
+    "official": "Principality of Liechtenstein",
+    "native": "Liechtenstein",
+    "currency": "Swiss franc (CHF)",
+    "capital": [
+      "Vaduz"
+    ],
+    "phoneCode": "+423",
+    "flag": "🇱🇮",
+    "population": 38137
+  },
+  {
+    "name": "Irlanda",
+    "official": "Republic of Ireland",
+    "native": "Ireland",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Dublin"
+    ],
+    "phoneCode": "+353",
+    "flag": "🇮🇪",
+    "population": 4994724
+  },
+  {
+    "name": "Islas Maldivas",
+    "official": "Republic of the Maldives",
+    "native": "ދިވެހިރާއްޖޭގެ",
+    "currency": "Maldivian rufiyaa (MVR)",
+    "capital": [
+      "Malé"
+    ],
+    "phoneCode": "+960",
+    "flag": "🇲🇻",
+    "population": 540542
+  },
+  {
+    "name": "Vietnam",
+    "official": "Socialist Republic of Vietnam",
+    "native": "Việt Nam",
+    "currency": "Vietnamese đồng (VND)",
+    "capital": [
+      "Hanoi"
+    ],
+    "phoneCode": "+84",
+    "flag": "🇻🇳",
+    "population": 97338583
+  },
+  {
+    "name": "Armenia",
+    "official": "Republic of Armenia",
+    "native": "Հայաստան",
+    "currency": "Armenian dram (AMD)",
+    "capital": [
+      "Yerevan"
+    ],
+    "phoneCode": "+374",
+    "flag": "🇦🇲",
+    "population": 2963234
+  },
+  {
+    "name": "Pakistán",
+    "official": "Islamic Republic of Pakistan",
+    "native": "Pakistan",
+    "currency": "Pakistani rupee (PKR)",
+    "capital": [
+      "Islamabad"
+    ],
+    "phoneCode": "+92",
+    "flag": "🇵🇰",
+    "population": 220892331
+  },
+  {
+    "name": "Costa de Marfil",
+    "official": "Republic of Côte d'Ivoire",
+    "native": "Côte d'Ivoire",
+    "currency": "West African CFA franc (XOF)",
+    "capital": [
+      "Yamoussoukro"
+    ],
+    "phoneCode": "+225",
+    "flag": "🇨🇮",
+    "population": 26378275
+  },
+  {
+    "name": "Rusia",
+    "official": "Russian Federation",
+    "native": "Россия",
+    "currency": "Russian ruble (RUB)",
+    "capital": [
+      "Moscow"
+    ],
+    "phoneCode": "+73",
+    "flag": "🇷🇺",
+    "population": 144104080
+  },
+  {
+    "name": "Martinica",
+    "official": "Martinique",
+    "native": "Martinique",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Fort-de-France"
+    ],
+    "phoneCode": "+596",
+    "flag": "🇲🇶",
+    "population": 378243
+  },
+  {
+    "name": "Svalbard y Jan Mayen",
+    "official": "Bouvet Island",
+    "native": "Bouvetøya",
+    "currency": "N/A",
+    "capital": [],
+    "phoneCode": "+47",
+    "flag": "🇧🇻",
+    "population": 0
+  },
+  {
+    "name": "Timor Oriental",
+    "official": "Democratic Republic of Timor-Leste",
+    "native": "Timor-Leste",
+    "currency": "United States dollar (USD)",
+    "capital": [
+      "Dili"
+    ],
+    "phoneCode": "+670",
+    "flag": "🇹🇱",
+    "population": 1318442
+  },
+  {
+    "name": "Nicaragua",
+    "official": "Republic of Nicaragua",
+    "native": "Nicaragua",
+    "currency": "Nicaraguan córdoba (NIO)",
+    "capital": [
+      "Managua"
+    ],
+    "phoneCode": "+505",
+    "flag": "🇳🇮",
+    "population": 6624554
+  },
+  {
+    "name": "Papúa Nueva Guinea",
+    "official": "Independent State of Papua New Guinea",
+    "native": "Papua New Guinea",
+    "currency": "Papua New Guinean kina (PGK)",
+    "capital": [
+      "Port Moresby"
+    ],
+    "phoneCode": "+675",
+    "flag": "🇵🇬",
+    "population": 8947027
+  },
+  {
+    "name": "Egipto",
+    "official": "Arab Republic of Egypt",
+    "native": "مصر",
+    "currency": "Egyptian pound (EGP)",
+    "capital": [
+      "Cairo"
+    ],
+    "phoneCode": "+20",
+    "flag": "🇪🇬",
+    "population": 102334403
+  },
+  {
+    "name": "Jordania",
+    "official": "Hashemite Kingdom of Jordan",
+    "native": "الأردن",
+    "currency": "Jordanian dinar (JOD)",
+    "capital": [
+      "Amman"
+    ],
+    "phoneCode": "+962",
+    "flag": "🇯🇴",
+    "population": 10203140
+  },
+  {
+    "name": "Uruguay",
+    "official": "Oriental Republic of Uruguay",
+    "native": "Uruguay",
+    "currency": "Uruguayan peso (UYU)",
+    "capital": [
+      "Montevideo"
+    ],
+    "phoneCode": "+598",
+    "flag": "🇺🇾",
+    "population": 3473727
+  },
+  {
+    "name": "Burkina Faso",
+    "official": "Burkina Faso",
+    "native": "Burkina Faso",
+    "currency": "West African CFA franc (XOF)",
+    "capital": [
+      "Ouagadougou"
+    ],
+    "phoneCode": "+226",
+    "flag": "🇧🇫",
+    "population": 20903278
+  },
+  {
+    "name": "Camboya",
+    "official": "Kingdom of Cambodia",
+    "native": "Kâmpŭchéa",
+    "currency": "Cambodian riel (KHR)",
+    "capital": [
+      "Phnom Penh"
+    ],
+    "phoneCode": "+855",
+    "flag": "🇰🇭",
+    "population": 16718971
+  },
+  {
+    "name": "Etiopía",
+    "official": "Federal Democratic Republic of Ethiopia",
+    "native": "ኢትዮጵያ",
+    "currency": "Ethiopian birr (ETB)",
+    "capital": [
+      "Addis Ababa"
+    ],
+    "phoneCode": "+251",
+    "flag": "🇪🇹",
+    "population": 114963583
+  },
+  {
+    "name": "Kiribati",
+    "official": "Independent and Sovereign Republic of Kiribati",
+    "native": "Kiribati",
+    "currency": "Australian dollar (AUD)",
+    "capital": [
+      "South Tarawa"
+    ],
+    "phoneCode": "+686",
+    "flag": "🇰🇮",
+    "population": 119446
+  },
+  {
+    "name": "Bhután",
+    "official": "Kingdom of Bhutan",
+    "native": "འབྲུག་ཡུལ་",
+    "currency": "Bhutanese ngultrum (BTN)",
+    "capital": [
+      "Thimphu"
+    ],
+    "phoneCode": "+975",
+    "flag": "🇧🇹",
+    "population": 771612
+  },
+  {
+    "name": "República Dominicana",
+    "official": "Dominican Republic",
+    "native": "República Dominicana",
+    "currency": "Dominican peso (DOP)",
+    "capital": [
+      "Santo Domingo"
+    ],
+    "phoneCode": "+1809",
+    "flag": "🇩🇴",
+    "population": 10847904
+  },
+  {
+    "name": "Surinám",
+    "official": "Republic of Suriname",
+    "native": "Suriname",
+    "currency": "Surinamese dollar (SRD)",
+    "capital": [
+      "Paramaribo"
+    ],
+    "phoneCode": "+597",
+    "flag": "🇸🇷",
+    "population": 586634
+  },
+  {
+    "name": "Bangladesh",
+    "official": "People's Republic of Bangladesh",
+    "native": "বাংলাদেশ",
+    "currency": "Bangladeshi taka (BDT)",
+    "capital": [
+      "Dhaka"
+    ],
+    "phoneCode": "+880",
+    "flag": "🇧🇩",
+    "population": 164689383
+  },
+  {
+    "name": "Barbados",
+    "official": "Barbados",
+    "native": "Barbados",
+    "currency": "Barbadian dollar (BBD)",
+    "capital": [
+      "Bridgetown"
+    ],
+    "phoneCode": "+1246",
+    "flag": "🇧🇧",
+    "population": 287371
+  },
+  {
+    "name": "Corea del Norte",
+    "official": "Democratic People's Republic of Korea",
+    "native": "조선",
+    "currency": "North Korean won (KPW)",
+    "capital": [
+      "Pyongyang"
+    ],
+    "phoneCode": "+850",
+    "flag": "🇰🇵",
+    "population": 25778815
+  },
+  {
+    "name": "Groenlandia",
+    "official": "Greenland",
+    "native": "Kalaallit Nunaat",
+    "currency": "krone (DKK)",
+    "capital": [
+      "Nuuk"
+    ],
+    "phoneCode": "+299",
+    "flag": "🇬🇱",
+    "population": 56367
+  },
+  {
+    "name": "Bélgica",
+    "official": "Kingdom of Belgium",
+    "native": "Belgien",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Brussels"
+    ],
+    "phoneCode": "+32",
+    "flag": "🇧🇪",
+    "population": 11555997
+  },
+  {
+    "name": "Palau",
+    "official": "Republic of Palau",
+    "native": "Palau",
+    "currency": "United States dollar (USD)",
+    "capital": [
+      "Ngerulmud"
+    ],
+    "phoneCode": "+680",
+    "flag": "🇵🇼",
+    "population": 18092
+  },
+  {
+    "name": "Isla Norfolk",
+    "official": "Territory of Norfolk Island",
+    "native": "Norfolk Island",
+    "currency": "Australian dollar (AUD)",
+    "capital": [
+      "Kingston"
+    ],
+    "phoneCode": "+672",
+    "flag": "🇳🇫",
+    "population": 2302
+  },
+  {
+    "name": "Islas Malvinas",
+    "official": "South Georgia and the South Sandwich Islands",
+    "native": "South Georgia",
+    "currency": "British pound (GBP)",
+    "capital": [
+      "King Edward Point"
+    ],
+    "phoneCode": "+500",
+    "flag": "🇬🇸",
+    "population": 30
+  },
+  {
+    "name": "Filipinas",
+    "official": "Republic of the Philippines",
+    "native": "Philippines",
+    "currency": "Philippine peso (PHP)",
+    "capital": [
+      "Manila"
+    ],
+    "phoneCode": "+63",
+    "flag": "🇵🇭",
+    "population": 109581085
+  },
+  {
+    "name": "India",
+    "official": "Republic of India",
+    "native": "India",
+    "currency": "Indian rupee (INR)",
+    "capital": [
+      "New Delhi"
+    ],
+    "phoneCode": "+91",
+    "flag": "🇮🇳",
+    "population": 1380004385
+  },
+  {
+    "name": "Indonesia",
+    "official": "Republic of Indonesia",
+    "native": "Indonesia",
+    "currency": "Indonesian rupiah (IDR)",
+    "capital": [
+      "Jakarta"
+    ],
+    "phoneCode": "+62",
+    "flag": "🇮🇩",
+    "population": 273523621
+  },
+  {
+    "name": "Islas Vírgenes de los Estados Unidos",
+    "official": "Virgin Islands of the United States",
+    "native": "United States Virgin Islands",
+    "currency": "United States dollar (USD)",
+    "capital": [
+      "Charlotte Amalie"
+    ],
+    "phoneCode": "+1340",
+    "flag": "🇻🇮",
+    "population": 106290
+  },
+  {
+    "name": "Dominica",
+    "official": "Commonwealth of Dominica",
+    "native": "Dominica",
+    "currency": "Eastern Caribbean dollar (XCD)",
+    "capital": [
+      "Roseau"
+    ],
+    "phoneCode": "+1767",
+    "flag": "🇩🇲",
+    "population": 71991
+  },
+  {
+    "name": "Ruanda",
+    "official": "Republic of Rwanda",
+    "native": "Rwanda",
+    "currency": "Rwandan franc (RWF)",
+    "capital": [
+      "Kigali"
+    ],
+    "phoneCode": "+250",
+    "flag": "🇷🇼",
+    "population": 12952209
+  },
+  {
+    "name": "Madagascar",
+    "official": "Republic of Madagascar",
+    "native": "Madagascar",
+    "currency": "Malagasy ariary (MGA)",
+    "capital": [
+      "Antananarivo"
+    ],
+    "phoneCode": "+261",
+    "flag": "🇲🇬",
+    "population": 27691019
+  },
+  {
+    "name": "Hong kong",
+    "official": "Hong Kong Special Administrative Region of the People's Republic of China",
+    "native": "Hong Kong",
+    "currency": "Hong Kong dollar (HKD)",
+    "capital": [
+      "City of Victoria"
+    ],
+    "phoneCode": "+852",
+    "flag": "🇭🇰",
+    "population": 7500700
+  },
+  {
+    "name": "Samoa",
+    "official": "Independent State of Samoa",
+    "native": "Samoa",
+    "currency": "Samoan tālā (WST)",
+    "capital": [
+      "Apia"
+    ],
+    "phoneCode": "+685",
+    "flag": "🇼🇸",
+    "population": 198410
+  },
+  {
+    "name": "Islas Feroe",
+    "official": "Faroe Islands",
+    "native": "Færøerne",
+    "currency": "Danish krone (DKK)",
+    "capital": [
+      "Tórshavn"
+    ],
+    "phoneCode": "+298",
+    "flag": "🇫🇴",
+    "population": 48865
+  },
+  {
+    "name": "Nueva Zelanda",
+    "official": "Pitcairn Group of Islands",
+    "native": "Pitcairn Islands",
+    "currency": "New Zealand dollar (NZD)",
+    "capital": [
+      "Adamstown"
+    ],
+    "phoneCode": "+64",
+    "flag": "🇵🇳",
+    "population": 56
+  },
+  {
+    "name": "Antigua y Barbuda",
+    "official": "Antigua and Barbuda",
+    "native": "Antigua and Barbuda",
+    "currency": "Eastern Caribbean dollar (XCD)",
+    "capital": [
+      "Saint John's"
+    ],
+    "phoneCode": "+1268",
+    "flag": "🇦🇬",
+    "population": 97928
+  },
+  {
+    "name": "Islas Åland",
+    "official": "Åland Islands",
+    "native": "Åland",
+    "currency": "Euro (EUR)",
+    "capital": [
+      "Mariehamn"
+    ],
+    "phoneCode": "+35818",
+    "flag": "🇦🇽",
+    "population": 29458
+  },
+  {
+    "name": "Suecia",
+    "official": "Kingdom of Sweden",
+    "native": "Sverige",
+    "currency": "Swedish krona (SEK)",
+    "capital": [
+      "Stockholm"
+    ],
+    "phoneCode": "+46",
+    "flag": "🇸🇪",
+    "population": 10353442
+  },
+  {
+    "name": "Mozambique",
+    "official": "Republic of Mozambique",
+    "native": "Moçambique",
+    "currency": "Mozambican metical (MZN)",
+    "capital": [
+      "Maputo"
+    ],
+    "phoneCode": "+258",
+    "flag": "🇲🇿",
+    "population": 31255435
+  },
+  {
+    "name": "Uzbekistán",
+    "official": "Republic of Uzbekistan",
+    "native": "Узбекистан",
+    "currency": "Uzbekistani soʻm (UZS)",
+    "capital": [
+      "Tashkent"
+    ],
+    "phoneCode": "+998",
+    "flag": "🇺🇿",
+    "population": 34232050
+  },
+  {
+    "name": "Antártida",
+    "official": "Antarctica",
+    "native": "N/A",
+    "currency": "N/A",
+    "capital": [],
+    "phoneCode": "N/A",
+    "flag": "🇦🇶",
+    "population": 1000
+  },
+  {
+    "name": "Wallis y Futuna",
+    "official": "Territory of the Wallis and Futuna Islands",
+    "native": "Wallis et Futuna",
+    "currency": "CFP franc (XPF)",
+    "capital": [
+      "Mata-Utu"
+    ],
+    "phoneCode": "+681",
+    "flag": "🇼🇫",
+    "population": 11750
+  },
+  {
+    "name": "Ucrania",
+    "official": "Ukraine",
+    "native": "Україна",
+    "currency": "Ukrainian hryvnia (UAH)",
+    "capital": [
+      "Kyiv"
+    ],
+    "phoneCode": "+380",
+    "flag": "🇺🇦",
+    "population": 44134693
+  },
+  {
+    "name": "Belice",
+    "official": "Belize",
+    "native": "Belize",
+    "currency": "Belize dollar (BZD)",
+    "capital": [
+      "Belmopan"
+    ],
+    "phoneCode": "+501",
+    "flag": "🇧🇿",
+    "population": 397621
+  },
+  {
+    "name": "Santa Elena",
+    "official": "Saint Helena, Ascension and Tristan da Cunha",
+    "native": "Saint Helena, Ascension and Tristan da Cunha",
+    "currency": "Pound sterling (GBP)",
+    "capital": [
+      "Jamestown"
+    ],
+    "phoneCode": "+290",
+    "flag": "🇸🇭",
+    "population": 53192
+  },
+  {
+    "name": "Reino Unido",
+    "official": "Bailiwick of Guernsey",
+    "native": "Guernsey",
+    "currency": "British pound (GBP)",
+    "capital": [
+      "St. Peter Port"
+    ],
+    "phoneCode": "+44",
+    "flag": "🇬🇬",
+    "population": 62999
+  },
+  {
+    "name": "Tokelau",
+    "official": "Tokelau",
+    "native": "Tokelau",
+    "currency": "New Zealand dollar (NZD)",
+    "capital": [
+      "Fakaofo"
+    ],
+    "phoneCode": "+690",
+    "flag": "🇹🇰",
+    "population": 1411
+  }
+]
