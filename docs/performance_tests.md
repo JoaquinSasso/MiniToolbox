@@ -19,7 +19,7 @@ Se realizaron pruebas de carga y parseo de un dataset local de países (~250 ele
 
 ## ⚡ Observaciones
 - **API RestCountries**: Consultar la API en tiempo real demoraba aproximadamente 3 segundos, dependiendo de la conexión. Esto impactaba negativamente en la experiencia de usuario.
-- **JSON + Moshi**: El parseo resultó considerablemente más lento (445 ms). Esto puede deberse a cómo se mapearon los modelos o la configuración usada (Moshi suele ser más eficiente en modelos simples).
+- **JSON + Moshi**: El parseo resultó considerablemente más lento (445 ms) respecto a Gson. Esto puede deberse a cómo se mapearon los modelos o la configuración usada (Moshi suele ser más eficiente en modelos simples).
 - **JSON + Gson**: Rendimiento aceptable (~70 ms de parseo), mejor que Moshi en este caso.
 - **Protobuf Lite**: Redujo significativamente el tamaño del archivo y los tiempos de parseo (~40 ms). El binario es más compacto y eficiente para lectura.
 
