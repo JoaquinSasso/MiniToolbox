@@ -12,7 +12,7 @@
     "population": 8278737
   },
   {
-    "name": "Reunión",
+    "name": "Mayotte",
     "official": "Department of Mayotte",
     "native": "Mayotte",
     "currency": "Euro (EUR)",
@@ -276,7 +276,7 @@
     "population": 9904608
   },
   {
-    "name": "Reino Unido",
+    "name": "Bailía de Jersey",
     "official": "Bailiwick of Jersey",
     "native": "Jersey",
     "currency": "British pound (GBP)",
@@ -382,18 +382,6 @@
     "phoneCode": "+375",
     "flag": "🇧🇾",
     "population": 9398861
-  },
-  {
-    "name": "Islas Cocos (Keeling)",
-    "official": "Territory of Christmas Island",
-    "native": "Christmas Island",
-    "currency": "Australian dollar (AUD)",
-    "capital": [
-      "Flying Fish Cove"
-    ],
-    "phoneCode": "+61",
-    "flag": "🇨🇽",
-    "population": 2072
   },
   {
     "name": "Gambia",
@@ -974,18 +962,6 @@
     "population": 18754440
   },
   {
-    "name": "Puerto Rico",
-    "official": "Canada",
-    "native": "Canada",
-    "currency": "Canadian dollar (CAD)",
-    "capital": [
-      "Ottawa"
-    ],
-    "phoneCode": "+1",
-    "flag": "🇨🇦",
-    "population": 38005238
-  },
-  {
     "name": "Polonia",
     "official": "Republic of Poland",
     "native": "Polska",
@@ -1094,7 +1070,7 @@
     "population": 2562
   },
   {
-    "name": "Reino Unido",
+    "name": "Isla de Man",
     "official": "Isle of Man",
     "native": "Isle of Man",
     "currency": "British pound (GBP)",
@@ -1131,7 +1107,7 @@
     "population": 1265740
   },
   {
-    "name": "San Bartolomé",
+    "name": "Isla de San Martín",
     "official": "Saint Martin",
     "native": "Saint-Martin",
     "currency": "Euro (EUR)",
@@ -1295,7 +1271,7 @@
     "population": 10715549
   },
   {
-    "name": "Svalbard y Jan Mayen",
+    "name": "Noruega",
     "official": "Kingdom of Norway",
     "native": "Noreg",
     "currency": "Norwegian krone (NOK)",
@@ -1391,7 +1367,7 @@
     "population": 11818618
   },
   {
-    "name": "Reunión",
+    "name": "Territorios Australes Franceses",
     "official": "Territory of the French Southern and Antarctic Lands",
     "native": "Terres australes et antarctiques françaises",
     "currency": "Euro (EUR)",
@@ -1763,7 +1739,7 @@
     "population": 83240525
   },
   {
-    "name": "San Bartolomé",
+    "name": "Guadalupe",
     "official": "Guadeloupe",
     "native": "Guadeloupe",
     "currency": "Euro (EUR)",
@@ -2039,7 +2015,7 @@
     "population": 9890400
   },
   {
-    "name": "Sahara Occidental",
+    "name": "Marruecos",
     "official": "Kingdom of Morocco",
     "native": "المغرب",
     "currency": "Moroccan dirham (MAD)",
@@ -2063,7 +2039,7 @@
     "population": 57557
   },
   {
-    "name": "Swazilandia",
+    "name": "Islas Ultramarinas Menores de Estados Unidos",
     "official": "United States Minor Outlying Islands",
     "native": "United States Minor Outlying Islands",
     "currency": "United States dollar (USD)",
@@ -2133,18 +2109,6 @@
     "phoneCode": "+1201",
     "flag": "🇺🇸",
     "population": 329484123
-  },
-  {
-    "name": "Islas Cocos (Keeling)",
-    "official": "Commonwealth of Australia",
-    "native": "Australia",
-    "currency": "Australian dollar (AUD)",
-    "capital": [
-      "Canberra"
-    ],
-    "phoneCode": "+61",
-    "flag": "🇦🇺",
-    "population": 25687041
   },
   {
     "name": "Guam",
@@ -2459,7 +2423,7 @@
     "population": 378243
   },
   {
-    "name": "Svalbard y Jan Mayen",
+    "name": "Isla Bouvet",
     "official": "Bouvet Island",
     "native": "Bouvetøya",
     "currency": "N/A",
@@ -2709,18 +2673,6 @@
     "population": 2302
   },
   {
-    "name": "Islas Malvinas",
-    "official": "South Georgia and the South Sandwich Islands",
-    "native": "South Georgia",
-    "currency": "British pound (GBP)",
-    "capital": [
-      "King Edward Point"
-    ],
-    "phoneCode": "+500",
-    "flag": "🇬🇸",
-    "population": 30
-  },
-  {
     "name": "Filipinas",
     "official": "Republic of the Philippines",
     "native": "Philippines",
@@ -2841,18 +2793,6 @@
     "population": 48865
   },
   {
-    "name": "Nueva Zelanda",
-    "official": "Pitcairn Group of Islands",
-    "native": "Pitcairn Islands",
-    "currency": "New Zealand dollar (NZD)",
-    "capital": [
-      "Adamstown"
-    ],
-    "phoneCode": "+64",
-    "flag": "🇵🇳",
-    "population": 56
-  },
-  {
     "name": "Antigua y Barbuda",
     "official": "Antigua and Barbuda",
     "native": "Antigua and Barbuda",
@@ -2971,7 +2911,7 @@
     "population": 53192
   },
   {
-    "name": "Reino Unido",
+    "name": "Bailía de Guernsey",
     "official": "Bailiwick of Guernsey",
     "native": "Guernsey",
     "currency": "British pound (GBP)",
