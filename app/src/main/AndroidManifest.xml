@@ -35,6 +35,10 @@
             android:name="com.joasasso.minitoolbox.tools.recordatorios.agua.WaterReminderReceiver"
             android:exported="false" />
 
+        <receiver
+            android:name=".tools.recordatorios.agua.ResetAguaReceiver"
+            android:exported="false" />
+
         <!-- Widget de agua -->
         <receiver
             android:name="com.joasasso.minitoolbox.tools.recordatorios.agua.AguaWidgetReceiver"

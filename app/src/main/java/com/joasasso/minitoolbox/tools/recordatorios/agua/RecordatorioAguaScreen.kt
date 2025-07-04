@@ -82,6 +82,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.util.Calendar
 import kotlin.math.roundToInt
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -168,8 +169,7 @@ fun RecordatorioAguaScreen(
             programarRecordatorioAgua(context, freqMinDS, totalAgua, objetivoML)
         }
     }
-
-    // -- Cuando cambian objetivo o porVaso, guarda en DataStore --
+    //Actualizar widget y DataStore si cambia el objetivo
     LaunchedEffect(objetivoML) {
         if (objetivoML != objetivoDS) {
             scope.launch {
@@ -181,6 +181,7 @@ fun RecordatorioAguaScreen(
             }
         }
     }
+    //Actualizar widget y DataStore si cambia la cantidad del vaso
     LaunchedEffect(mlPorVaso) {
         if (mlPorVaso != porVasoDS) {
             scope.launch {
@@ -190,10 +191,13 @@ fun RecordatorioAguaScreen(
         }
     }
 
+    //Crear canal de notificaciones y programar actualizacion diaria del widget
     LaunchedEffect(Unit) {
         createWaterReminderChannel(context)
+        programarResetAguaDiario(context)
     }
 
+    //Reprogramar recordatorio si se activa las notificaciones
     LaunchedEffect(freqMinDS) {
         if (notifDS) {
             programarRecordatorioAgua(context, freqMinDS, totalAgua, objetivoML)
@@ -383,7 +387,15 @@ fun RecordatorioAguaScreen(
                     Text("Estadísticas")
                 }
             }
-            Spacer(Modifier.height(45.dp))
+            Spacer(Modifier.height(16.dp))
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            )
+            {
+                Text("Puedes agregar el widget a tu pantalla de inicio para registrar tu consumo de agua más fácilmente.")
+            }
         }
     }
 
@@ -555,4 +567,31 @@ fun actualizarWidgetAgua(context: Context) {
         }
         AguaWidget().updateAll(context)
     }
+}
+
+fun programarResetAguaDiario(context: Context) {
+    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    val intent = Intent(context, ResetAguaReceiver::class.java)
+    val pendingIntent = PendingIntent.getBroadcast(
+        context, 0, intent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
+
+    val calendar = Calendar.getInstance().apply {
+        timeInMillis = System.currentTimeMillis()
+        set(Calendar.HOUR_OF_DAY, 0)
+        set(Calendar.MINUTE, 1)
+        set(Calendar.SECOND, 0)
+        set(Calendar.MILLISECOND, 0)
+        if (before(Calendar.getInstance())) {
+            add(Calendar.DAY_OF_MONTH, 1)
+        }
+    }
+
+    alarmManager.setRepeating(
+        AlarmManager.RTC_WAKEUP,
+        calendar.timeInMillis,
+        AlarmManager.INTERVAL_DAY,
+        pendingIntent
+    )
 }
