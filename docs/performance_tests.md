@@ -12,12 +12,14 @@ Se realizaron pruebas de carga y parseo de un dataset local de países (~250 ele
 
 | Formato            | Tamaño archivo | Lectura (ms) | Parseo (ms) | Total (ms) |
 |--------------------|----------------|--------------|-------------|------------|
+| API RestCountries   | -               | -            | -           | ~3000 ms   |
 | JSON + Moshi        | 132 KB          | 5 ms         | 445 ms      | ~451 ms    |
 | JSON + Gson         | 132 KB          | 5 ms         | 70 ms       | ~75 ms     |
 | Protobuf Lite (bin) | 26 KB           | 1 ms         | 40 ms       | ~45 ms     |
 
 ## ⚡ Observaciones
-- **JSON + Moshi**: El parseo resultó considerablemente más lento (445 ms). Esto puede deberse a cómo se mapearon los modelos o la configuración usada (Moshi suele ser más eficiente en modelos simples).
+- **API RestCountries**: Consultar la API en tiempo real demoraba aproximadamente 3 segundos, dependiendo de la conexión. Esto impactaba negativamente en la experiencia de usuario.
+- **JSON + Moshi**: El parseo resultó considerablemente más lento (445 ms) respecto a Gson. Esto puede deberse a cómo se mapearon los modelos o la configuración usada (Moshi suele ser más eficiente en modelos simples).
 - **JSON + Gson**: Rendimiento aceptable (~70 ms de parseo), mejor que Moshi en este caso.
 - **Protobuf Lite**: Redujo significativamente el tamaño del archivo y los tiempos de parseo (~40 ms). El binario es más compacto y eficiente para lectura.
 
@@ -26,9 +28,8 @@ Se eligió **Protobuf Lite** como formato final porque:
 - Achica el archivo de datos (de 132 KB a 26 KB).
 - Mejora los tiempos de carga y parseo (45 ms en el dispositivo de prueba).
 - Proporciona un formato binario portable y eficiente para un dataset estático.
+- Elimina la dependencia de conexión a internet, garantizando velocidad y disponibilidad.
 
 ## 📌 Notas
 - La optimización se consideró suficiente dado que el parseo ocurre una sola vez al abrir la herramienta.
 - Tecnologías como FlatBuffers o Cap’n Proto se descartaron por no justificar la complejidad adicional en este contexto.
-
----
