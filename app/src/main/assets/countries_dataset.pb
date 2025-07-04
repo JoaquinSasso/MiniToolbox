@@ -1,8 +1,8 @@
 
 Y
 TogoTogolese RepublicTogo"West African CFA franc (XOF)*Lomé2+228:🇹🇬@ѥ�
-U
-ReuniónDepartment of MayotteMayotte"
+T
+MayotteDepartment of MayotteMayotte"
 Euro (EUR)*	Mamoudzou2+262:🇾🇹@��
 \
 GeorgiaGeorgiaსაქართველო"
@@ -50,8 +50,8 @@ M
 Trinidad y TobagoRepublic of Trinidad and TobagoTrinidad and Tobago" Trinidad and Tobago dollar (TTD)*Port of Spain2+1868:🇹🇹@õU
 d
 HondurasRepublic of HondurasHonduras"Honduran lempira (HNL)*Tegucigalpa2+504:🇭🇳@���
-`
-Reino UnidoBailiwick of JerseyJersey"British pound (GBP)*Saint Helier2+44:🇯🇪@��
+f
+Bailía de JerseyBailiwick of JerseyJersey"British pound (GBP)*Saint Helier2+44:🇯🇪@��
 e
 YibutiRepublic of Djiboutiجيبوتي‎"Djiboutian franc (DJF)*Djibouti2+253:🇩🇯@�<
 U
@@ -70,8 +70,6 @@ c
 Wellington2+64:🇳🇿@���
 j
 BielorrusiaRepublic of BelarusБелару́сь"Belarusian ruble (BYN)*Minsk2+375:🇧🇾@�Խ
-�
-Islas Cocos (Keeling)Territory of Christmas IslandChristmas Island"Australian dollar (AUD)*Flying Fish Cove2+61:🇨🇽@�
 S
 GambiaRepublic of the GambiaGambia"dalasi (GMD)*Banjul2+220:🇬🇲@���
 l
@@ -192,8 +190,6 @@ j
 SudáfricaRepublic of South AfricaSouth Africa"South African rand (ZAR)*Pretoria*Bloemfontein*	Cape Town2+27:🇿🇦@���
 n
 KazajistánRepublic of KazakhstanҚазақстан"Kazakhstani tenge (KZT)*Astana2+76:🇰🇿@���
-O
-Puerto RicoCanadaCanada"Canadian dollar (CAD)*Ottawa2+1:🇨🇦@�ӏ
 V
 PoloniaRepublic of PolandPolska"Polish złoty (PLN)*Warsaw2+48:🇵🇱@Ҫ�
 s
@@ -217,14 +213,14 @@ Euro (EUR)*Zagreb2+385:🇭🇷@���
 s
 Svalbard y Jan MayenSvalbard og Jan MayenSvalbard og Jan Mayen"krone (NOK)*Longyearbyen2+4779:🇸🇯@�
 X
-Reino UnidoIsle of ManIsle of Man"British pound (GBP)*Douglas2+44:🇮🇲@��
+Isla de ManIsle of ManIsle of Man"British pound (GBP)*Douglas2+44:🇮🇲@��
 m
 	PalestinaState of Palestineفلسطين"Egyptian pound (EGP)*Ramallah*	Jerusalem2+970:🇵🇸@ŕ�
 c
 MauricioRepublic of Mauritius	Mauritius"Mauritian rupee (MUR)*
 Port Louis2+230:🇲🇺@̠M
-U
-San BartoloméSaint MartinSaint-Martin"
+Z
+Isla de San MartínSaint MartinSaint-Martin"
 Euro (EUR)*Marigot2+590:🇲🇫@��
 b
 Sierra LeonaRepublic of Sierra LeoneSierra Leone"Leone (SLE)*Freetown2+232:🇸🇱@���
@@ -254,8 +250,8 @@ m
 Q
 GreciaHellenic RepublicΕλλάδα"
 Euro (EUR)*Athens2+30:🇬🇷@���
-a
-Svalbard y Jan MayenKingdom of NorwayNoreg"Norwegian krone (NOK)*Oslo2+47:🇳🇴@���
+T
+NoruegaKingdom of NorwayNoreg"Norwegian krone (NOK)*Oslo2+47:🇳🇴@���
 R
 JamaicaJamaicaJamaica"Jamaican dollar (JMD)*Kingston2+1876:🇯🇲@�޴
 h
@@ -273,8 +269,8 @@ Q
 Euro (EUR)*Monaco2+377:🇲🇨@̲
 V
 TunezTunisian Republicتونس"Tunisian dinar (TND)*Tunis2+216:🇹🇳@���
-�
-Reunión4Territory of the French Southern and Antarctic Lands,Terres australes et antarctiques françaises"
+�
+Territorios Australes Franceses4Territory of the French Southern and Antarctic Lands,Terres australes et antarctiques françaises"
 Euro (EUR)*Port-aux-Français2+262:🇹🇫@�
 \
 SiriaSyrian Arab Republic
@@ -351,8 +347,8 @@ l
 \
 AlemaniaFederal Republic of GermanyDeutschland"
 Euro (EUR)*Berlin2+49:🇩🇪@���'
-U
-San Bartolomé
+P
+	Guadalupe
 Guadeloupe
 Guadeloupe"
 Euro (EUR)*Basse-Terre2+590:🇬🇵@��
@@ -405,12 +401,12 @@ P
 RumaníaRomaniaRomânia"Romanian leu (RON)*	Bucharest2+40:🇷🇴@됙	
 �
 Emiratos Árabes UnidosUnited Arab Emirates7دولة الإمارات العربية المتحدة"!United Arab Emirates dirham (AED)*	Abu Dhabi2+971:🇦🇪@���
-h
-Sahara OccidentalKingdom of Moroccoالمغرب"Moroccan dirham (MAD)*Rabat2+212:🇲🇦@���
+`
+	MarruecosKingdom of Moroccoالمغرب"Moroccan dirham (MAD)*Rabat2+212:🇲🇦@���
 �
 Islas Marianas del Norte,Commonwealth of the Northern Mariana IslandsNorthern Mariana Islands"United States dollar (USD)*Saipan2+1670:🇲🇵@��
-�
-Swazilandia$United States Minor Outlying Islands$United States Minor Outlying Islands"United States dollar (USD)*Washington DC2+268:🇺🇲@�
+�
+,Islas Ultramarinas Menores de Estados Unidos$United States Minor Outlying Islands$United States Minor Outlying Islands"United States dollar (USD)*Washington DC2+268:🇺🇲@�
 ^
 BotsuanaRepublic of BotswanaBotswana"Botswana pula (BWP)*Gaborone2+267:🇧🇼@�ď
 T
@@ -425,8 +421,6 @@ Cabo VerdeRepublic of Cabo Verde
 Cabo Verde"Cape Verdean escudo (CVE)*Praia2+238:🇨🇻@��!
 ~
 Estados UnidosUnited States of AmericaUnited States"United States dollar (USD)*Washington, D.C.2+1201:🇺🇸@ێ��
-t
-Islas Cocos (Keeling)Commonwealth of Australia	Australia"Australian dollar (AUD)*Canberra2+61:🇦🇺@��
 R
 GuamGuamGuåhån"United States dollar (USD)*	Hagåtña2+1671:🇬🇺@Ϧ
 
@@ -493,8 +487,8 @@ S
 Martinique
 Martinique"
 Euro (EUR)*Fort-de-France2+596:🇲🇶@��
-E
-Svalbard y Jan MayenBouvet Island
+<
+Isla BouvetBouvet Island
 Bouvetøya"N/A2+47:🇧🇻
 w
 Timor Oriental"Democratic Republic of Timor-LesteTimor-Leste"United States dollar (USD)*Dili2+670:🇹🇱@��P
@@ -542,8 +536,6 @@ Euro (EUR)*Brussels2+32:🇧🇪@���
 PalauRepublic of PalauPalau"United States dollar (USD)*	Ngerulmud2+680:🇵🇼@��
 q
 Isla NorfolkTerritory of Norfolk IslandNorfolk Island"Australian dollar (AUD)*Kingston2+672:🇳🇫@�
-�
-Islas Malvinas,South Georgia and the South Sandwich IslandsSouth Georgia"British pound (GBP)*King Edward Point2+500:🇬🇸@
 h
 	FilipinasRepublic of the PhilippinesPhilippines"Philippine peso (PHP)*Manila2+63:🇵🇭@���4
 U
@@ -567,8 +559,6 @@ Y
 [
 Islas FeroeFaroe Islands
 Færøerne"Danish krone (DKK)*	Tórshavn2+298:🇫🇴@��
-r
-Nueva ZelandaPitcairn Group of IslandsPitcairn Islands"New Zealand dollar (NZD)*	Adamstown2+64:🇵🇳@8
 �
 Antigua y BarbudaAntigua and BarbudaAntigua and Barbuda"Eastern Caribbean dollar (XCD)*Saint John's2+1268:🇦🇬@��
 S
@@ -593,7 +583,7 @@ K
 BeliceBelizeBelize"Belize dollar (BZD)*Belmopan2+501:🇧🇿@��
 �
 Santa Elena,Saint Helena, Ascension and Tristan da Cunha,Saint Helena, Ascension and Tristan da Cunha"Pound sterling (GBP)*	Jamestown2+290:🇸🇭@ȟ
-f
-Reino UnidoBailiwick of GuernseyGuernsey"British pound (GBP)*St. Peter Port2+44:🇬🇬@��
+n
+Bailía de GuernseyBailiwick of GuernseyGuernsey"British pound (GBP)*St. Peter Port2+44:🇬🇬@��
 Q
 TokelauTokelauTokelau"New Zealand dollar (NZD)*Fakaofo2+690:🇹🇰@�
