@@ -2,6 +2,7 @@
 package com.joasasso.minitoolbox.tools
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.RotateRight
 import androidx.compose.material.icons.automirrored.filled.ShortText
 import androidx.compose.material.icons.filled.BrowseGallery
 import androidx.compose.material.icons.filled.BrowserNotSupported
@@ -16,7 +17,6 @@ import androidx.compose.material.icons.filled.FlashlightOn
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.HourglassBottom
 import androidx.compose.material.icons.filled.Lightbulb
-import androidx.compose.material.icons.filled.LocationCity
 import androidx.compose.material.icons.filled.Password
 import androidx.compose.material.icons.filled.Percent
 import androidx.compose.material.icons.filled.Person
@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.filled.Timelapse
 import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.TravelExplore
 import androidx.compose.material.icons.filled.TypeSpecimen
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.WbSunny
@@ -53,7 +54,7 @@ object ToolRegistry {
             name = "Cara o Cruz",
             screen = Screen.CoinFlip,
             category = ToolCategory.Entretenimiento,
-            subCategory = "Juegos",
+            subCategory = "Aleatorio",
             icon = Icons.Filled.Casino
         ),
         Tool(
@@ -233,7 +234,14 @@ object ToolRegistry {
             screen = Screen.PaisesInfo,
             category = ToolCategory.Informacion,
             subCategory = "General",
-            icon = Icons.Filled.LocationCity
-        )
+            icon = Icons.Filled.TravelExplore
+        ),
+        Tool(
+            name = "Selector de Opciones",
+            screen = Screen.RuletaSelectora,
+            category = ToolCategory.Entretenimiento,
+            subCategory = "Aleatorio",
+            icon = Icons.AutoMirrored.Filled.RotateRight
+    )
     )
 }

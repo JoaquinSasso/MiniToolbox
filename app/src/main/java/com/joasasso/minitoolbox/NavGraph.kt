@@ -29,6 +29,7 @@ import com.joasasso.minitoolbox.tools.info.PaisesInfoScreen
 import com.joasasso.minitoolbox.tools.info.TextBinaryConverterScreen
 import com.joasasso.minitoolbox.tools.info.TiempoHasta
 import com.joasasso.minitoolbox.tools.juegos.CoinFlipScreen
+import com.joasasso.minitoolbox.tools.juegos.SelectorOpcionesScreen
 import com.joasasso.minitoolbox.tools.juegos.TrucoScoreBoardScreen
 import com.joasasso.minitoolbox.tools.medicion.BubbleLevelScreen
 import com.joasasso.minitoolbox.tools.medicion.LinternaScreen
@@ -147,6 +148,11 @@ fun MiniToolboxNavGraph(navController: NavHostController) {
 
         composable(Screen.PaisesInfo.route){
             PaisesInfoScreen(onBack = { navController.popBackStack() })
+        }
+
+        composable(Screen.RuletaSelectora.route)
+        {
+            SelectorOpcionesScreen(onBack = {navController.popBackStack()})
         }
 
     }
