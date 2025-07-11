@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.FlashlightOn
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.HourglassBottom
@@ -75,7 +76,7 @@ object ToolRegistry {
             name = "Anotador Truco",
             screen = Screen.TrucoScoreBoard,
             category = ToolCategory.Entretenimiento,
-            subCategory = "Juegos",
+            subCategory = "Marcadores",
             icon = Icons.Filled.BrowserNotSupported
         ),
         Tool(
@@ -242,6 +243,13 @@ object ToolRegistry {
             category = ToolCategory.Entretenimiento,
             subCategory = "Aleatorio",
             icon = Icons.AutoMirrored.Filled.RotateRight
+    ),
+        Tool(
+            name = "Adivina la Bandera",
+            screen = Screen.AdivinaBandera,
+            category = ToolCategory.Entretenimiento,
+            subCategory = "Minijuego",
+            icon = Icons.Filled.Flag
     )
     )
 }
