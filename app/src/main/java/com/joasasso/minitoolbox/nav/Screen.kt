@@ -35,6 +35,6 @@ sealed class Screen(val route: String) {
     object TiempoHasta               : Screen("tiempo_hasta")
     object PaisesInfo               : Screen("paises_info")
     object RuletaSelectora          : Screen("ruleta_selectora")
-
+    object AdivinaBandera          : Screen("adivina_bandera")
     // Añade aquí nuevos objetos para cada herramienta…
 }
