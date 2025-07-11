@@ -1,6 +1,8 @@
 package com.joasasso.minitoolbox.tools.juegos
 
 import android.content.Context
+import android.os.VibrationEffect
+import android.os.Vibrator
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -131,12 +133,7 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
                                         lastResult = null
                                     }
                                 } else {
-                                    scope.launch {
-                                        repeat(3) {
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        delay(150) // pequeño delay entre pulsos
-                                        }
-                                    }
+                                    vibrate(context, duration = 400, amplitude = 255)
 
                                     bgFlashColor = Color(0xFFC53737)
                                     lastResult = "¡Incorrecto! Tu puntuación se reinició."
@@ -231,3 +228,9 @@ private fun nextRound(
     val shuffled = options.shuffled()
     onSet(correct, options, shuffled)
 }
+
+fun vibrate(context: Context, duration: Long = 300, amplitude: Int = VibrationEffect.DEFAULT_AMPLITUDE) {
+    val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+    vibrator?.vibrate(VibrationEffect.createOneShot(duration, amplitude))
+}
+
