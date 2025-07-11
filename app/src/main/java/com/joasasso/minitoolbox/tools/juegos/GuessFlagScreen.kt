@@ -1,6 +1,8 @@
 package com.joasasso.minitoolbox.tools.juegos
 
 import android.content.Context
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -42,7 +44,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdivinaBanderaScreen(onBack: () -> Unit) {
@@ -64,8 +65,10 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
     var buttonsEnabled by remember { mutableStateOf(true) }
     var shuffledOptions by remember { mutableStateOf<List<MinimalCountry>>(emptyList()) }
 
+    val defaultBg = MaterialTheme.colorScheme.background
+    var bgFlashColor by remember { mutableStateOf(defaultBg) }
+    val animatedBgColor by animateColorAsState(targetValue = bgFlashColor, label = "bgColor")
 
-    // 1) Cargar países y generar la primera ronda
     LaunchedEffect(Unit) {
         countries = loadMinimalCountryDataset(context)
         nextRound(countries) { q, opts, shuffled ->
@@ -74,7 +77,6 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
         }
     }
 
-// 2) Observar cambios en el record
     LaunchedEffect(Unit) {
         FlagGameDataStore.getBestScore(context).collect { record = it }
     }
@@ -85,6 +87,7 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
         Column(
             Modifier
                 .fillMaxSize()
+                .background(animatedBgColor)
                 .padding(padding)
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -118,7 +121,7 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
                                 val correct = option.name == currentQuestion?.name
 
                                 if (correct) {
-                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     score++
                                     if (score > record) {
                                         record = score
@@ -128,13 +131,21 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
                                         lastResult = null
                                     }
                                 } else {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    scope.launch {
+                                        repeat(3) {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        delay(150) // pequeño delay entre pulsos
+                                        }
+                                    }
+
+                                    bgFlashColor = Color(0xFFC53737)
                                     lastResult = "¡Incorrecto! Tu puntuación se reinició."
                                     score = 0
                                 }
 
                                 scope.launch {
                                     delay(1000)
+                                    bgFlashColor = defaultBg
                                     selectedOption = null
                                     correctOption = null
                                     buttonsEnabled = true
@@ -149,7 +160,7 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
                                 .height(48.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = bgColor,
-                                disabledContainerColor = bgColor, // cuando está deshabilitado
+                                disabledContainerColor = bgColor,
                                 contentColor = Color.Black,
                                 disabledContentColor = Color.Black
                             ),
