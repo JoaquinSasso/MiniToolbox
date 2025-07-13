@@ -160,7 +160,7 @@ fun DetallesReunionScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { onAgregarGasto(reunionId) },
-                    colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primaryContainer)
+                    colors = CardDefaults.cardColors(MaterialTheme.colorScheme.secondaryContainer)
                 ) {
                     Box(Modifier.padding(16.dp), contentAlignment = Alignment.Center) {
                         Text("+ Agregar gasto")
@@ -233,7 +233,7 @@ fun DetallesReunionScreen(
                             nombreEditado = ""
                             cantidadEditada = "1"
                         },
-                    colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primaryContainer)
+                    colors = CardDefaults.cardColors(MaterialTheme.colorScheme.secondaryContainer)
                 ) {
                     Box(Modifier.padding(16.dp), contentAlignment = Alignment.Center) {
                         Text("+ Agregar integrante")
@@ -274,7 +274,8 @@ fun DetallesReunionScreen(
                                 )
                                 context.startActivity(shareIntent)
                             }
-                        }
+                        },
+                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondaryContainer)
                     ) {
                         Text("Compartir")
                     }
