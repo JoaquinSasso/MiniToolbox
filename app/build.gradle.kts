@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -57,13 +58,14 @@ dependencies {
     // 3) Compose Material 3 (Actualización a Material3)
     implementation(libs.material3)
     implementation(libs.material)
+    implementation("androidx.compose.foundation:foundation:1.8.3")
+
 
 
     // 4) Icons, Activity & Navigation
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.navigation.compose.v280)  // Predictive back support
 
     // 5) Glance (AppWidget + Material3)
     implementation(libs.androidx.glance.appwidget)
@@ -79,8 +81,10 @@ dependencies {
     //Funcionalidades
     implementation(libs.compose.qr.code)
 
-    //Gson para parsear JSON
-    implementation("com.google.protobuf:protobuf-java:4.31.1")
+    //Librerias para manejar datasets
+    implementation(libs.protobuf.java)
+    implementation(libs.kotlinx.serialization.json)
+
 
     // 7) Testing
     testImplementation(libs.junit)

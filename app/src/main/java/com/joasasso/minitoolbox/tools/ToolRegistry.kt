@@ -250,6 +250,13 @@ object ToolRegistry {
             category = ToolCategory.Entretenimiento,
             subCategory = "Minijuego",
             icon = Icons.Filled.Flag
-    )
+    ),
+        Tool(
+            name = "Divisor de Gastos",
+            screen = Screen.Reuniones,
+            category = ToolCategory.Organizacion,
+            subCategory = "Reuniones",
+            icon = Icons.Filled.Groups
+        )
     )
 }
