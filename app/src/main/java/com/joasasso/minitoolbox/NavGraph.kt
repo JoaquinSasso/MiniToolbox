@@ -5,6 +5,7 @@ import ZodiacSignScreen
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -16,6 +17,11 @@ import com.joasasso.minitoolbox.tools.calculadoras.ConversorUnidadesScreen
 import com.joasasso.minitoolbox.tools.calculadoras.DecimalBinaryConverterScreen
 import com.joasasso.minitoolbox.tools.calculadoras.IMCScreen
 import com.joasasso.minitoolbox.tools.calculadoras.PorcentajeScreen
+import com.joasasso.minitoolbox.tools.calculadoras.divisorGastos.AgregarGastoScreen
+import com.joasasso.minitoolbox.tools.calculadoras.divisorGastos.CrearReunionScreen
+import com.joasasso.minitoolbox.tools.calculadoras.divisorGastos.DetallesReunionScreen
+import com.joasasso.minitoolbox.tools.calculadoras.divisorGastos.EditarGastoScreen
+import com.joasasso.minitoolbox.tools.gastos.ReunionesScreen
 import com.joasasso.minitoolbox.tools.generadores.GeneradorContrasenaScreen
 import com.joasasso.minitoolbox.tools.generadores.GeneradorLoremIpsumScreen
 import com.joasasso.minitoolbox.tools.generadores.GeneradorNombresScreen
@@ -159,6 +165,53 @@ fun MiniToolboxNavGraph(navController: NavHostController) {
         {
             AdivinaBanderaScreen(onBack = {navController.popBackStack()})
         }
+        composable(Screen.Reuniones.route) {
+            ReunionesScreen(
+                onBack = { navController.popBackStack() },
+                onCrearReunion = { navController.navigate(Screen.CrearReunion.route) },
+                onReunionClick = { reunion ->
+                    navController.navigate(Screen.DetallesReunion.route + "/${reunion.id}")
+                }
+            )
+        }
+        composable(Screen.CrearReunion.route) {
+            CrearReunionScreen(
+                onBack = { navController.popBackStack() },
+                onReunionCreada = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.DetallesReunion.route + "/{reunionId}") {
+            val reunionId = it.arguments?.getString("reunionId") ?: ""
+            DetallesReunionScreen(
+                onBack = { navController.popBackStack() },
+                reunionId = reunionId,
+                onEditarGasto = { idReunion, idGasto ->
+                    navController.navigate(Screen.EditarGasto.route + "/$idReunion/$idGasto")
+                },
+                onAgregarGasto = { idReunion ->
+                    navController.navigate(Screen.AgregarGasto.route + "/$idReunion")
+                }
+            )
+        }
+        composable(Screen.EditarGasto.route + "/{reunionId}/{gastoId}") {
+            EditarGastoScreen(
+                reunionId = remember {
+                    it.arguments?.getString("reunionId") ?: ""
+                },
+                gastoId = remember {
+                    it.arguments?.getString("gastoId") ?: ""
+                },
+                onBack = { navController.popBackStack() })
+        }
+        composable(Screen.AgregarGasto.route + "/{reunionId}") {
+            val reunionId = it.arguments?.getString("reunionId") ?: ""
+            AgregarGastoScreen(
+                reunionId = reunionId,
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+
 
     }
 }
