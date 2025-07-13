@@ -10,13 +10,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -28,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.joasasso.minitoolbox.tools.data.Gasto
 import com.joasasso.minitoolbox.tools.data.Reunion
@@ -35,6 +36,8 @@ import com.joasasso.minitoolbox.tools.data.ReunionesRepository
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import java.text.NumberFormat
+import java.util.Locale
 
 @Composable
 fun EditarGastoScreen(
@@ -44,12 +47,12 @@ fun EditarGastoScreen(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val formatter = remember { NumberFormat.getInstance(Locale("es", "AR")) }
 
     var reunion by remember { mutableStateOf<Reunion?>(null) }
     var descripcion by remember { mutableStateOf("") }
-    var montoTotal by remember { mutableStateOf("") }
-    var pagadoPor by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
-    var consumidoPor by remember { mutableStateOf<Set<String>>(emptySet()) }
+    var aportes by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
+    var consumidores by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
 
     LaunchedEffect(Unit) {
         val reuniones = ReunionesRepository.flujoReuniones(context).firstOrNull().orEmpty()
@@ -58,11 +61,12 @@ fun EditarGastoScreen(
         if (r != null && gasto != null) {
             reunion = r
             descripcion = gasto.descripcion
-            montoTotal = gasto.monto.toString()
-            pagadoPor = gasto.aportesIndividuales.mapValues { it.value.toString() }
-            consumidoPor = gasto.consumidoPor.toSet()
+            aportes = gasto.aportesIndividuales.mapValues { it.value.toString() }
+            consumidores = gasto.consumidoPor.mapValues { it.value.toString() }
         }
     }
+
+    val montoTotal = aportes.values.sumOf { it.toDoubleOrNull() ?: 0.0 }
 
     Scaffold(
         topBar = { TopBarReusable("Editar gasto", onBack) }
@@ -84,20 +88,14 @@ fun EditarGastoScreen(
             }
 
             item {
-                OutlinedTextField(
-                    value = montoTotal,
-                    onValueChange = { montoTotal = it },
-                    label = { Text("Monto total") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
+                Text("Total: $${formatter.format(montoTotal)}", style = MaterialTheme.typography.titleMedium)
             }
 
             item {
                 Text("¿Quién pagó y cuánto?", style = MaterialTheme.typography.titleSmall)
             }
 
-            items(reunion?.integrantes.orEmpty()) { nombre ->
+            items(reunion?.integrantes.orEmpty()) { grupo ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
@@ -109,27 +107,28 @@ fun EditarGastoScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(nombre, modifier = Modifier.weight(1f))
+                        Text(grupo.nombre, modifier = Modifier.weight(1f))
                         OutlinedTextField(
-                            value = pagadoPor[nombre] ?: "",
+                            value = aportes[grupo.nombre] ?: "",
                             onValueChange = {
-                                pagadoPor = pagadoPor.toMutableMap().apply {
-                                    if (it.isNotBlank()) put(nombre, it) else remove(nombre)
+                                aportes = aportes.toMutableMap().apply {
+                                    if (it.isNotBlank()) put(grupo.nombre, it) else remove(grupo.nombre)
                                 }
                             },
                             modifier = Modifier.width(100.dp),
                             placeholder = { Text("0.0") },
-                            singleLine = true
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                         )
                     }
                 }
             }
 
             item {
-                Text("¿Quiénes consumieron?", style = MaterialTheme.typography.titleSmall)
+                Text("¿Cuántas personas consumieron por grupo?", style = MaterialTheme.typography.titleSmall)
             }
 
-            items(reunion?.integrantes.orEmpty()) { nombre ->
+            items(reunion?.integrantes.orEmpty()) { grupo ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
@@ -141,12 +140,18 @@ fun EditarGastoScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(nombre)
-                        Switch(
-                            checked = nombre in consumidoPor,
-                            onCheckedChange = {
-                                consumidoPor = if (it) consumidoPor + nombre else consumidoPor - nombre
-                            }
+                        Text(grupo.nombre, modifier = Modifier.weight(1f))
+                        OutlinedTextField(
+                            value = consumidores[grupo.nombre]?.toString() ?: "0",
+                            onValueChange = {
+                                consumidores = consumidores.toMutableMap().apply {
+                                    put(grupo.nombre, it)
+                                }
+                            },
+                            modifier = Modifier.width(100.dp),
+                            placeholder = { Text("0") },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                         )
                     }
                 }
@@ -156,18 +161,16 @@ fun EditarGastoScreen(
                 Spacer(Modifier.height(16.dp))
                 Button(
                     onClick = {
-                        val montoDouble = montoTotal.toDoubleOrNull() ?: 0.0
-                        val aporteValido = pagadoPor.filterValues { it.toDoubleOrNull() != null }
-                        val pagadores = aporteValido.keys.toList()
-                        val valores = aporteValido.mapValues { it.value.toDouble() }
+                        val aporteValido = aportes.filterValues { it.toDoubleOrNull() != null }
+                        val valoresAporte = aporteValido.mapValues { it.value.toDouble() }
+
+                        val consumidoresValidos = consumidores.mapValues { it.value.toIntOrNull() ?: 0 }
 
                         val nuevoGasto = Gasto(
                             id = gastoId,
                             descripcion = descripcion,
-                            monto = montoDouble,
-                            pagadoPor = pagadores,
-                            consumidoPor = consumidoPor.toList(),
-                            aportesIndividuales = valores
+                            aportesIndividuales = valoresAporte,
+                            consumidoPor = consumidoresValidos
                         )
 
                         val actualizada = reunion?.copy(

@@ -21,7 +21,7 @@ import com.joasasso.minitoolbox.tools.calculadoras.divisorGastos.AgregarGastoScr
 import com.joasasso.minitoolbox.tools.calculadoras.divisorGastos.CrearReunionScreen
 import com.joasasso.minitoolbox.tools.calculadoras.divisorGastos.DetallesReunionScreen
 import com.joasasso.minitoolbox.tools.calculadoras.divisorGastos.EditarGastoScreen
-import com.joasasso.minitoolbox.tools.gastos.ReunionesScreen
+import com.joasasso.minitoolbox.tools.calculadoras.divisorGastos.ReunionesScreen
 import com.joasasso.minitoolbox.tools.generadores.GeneradorContrasenaScreen
 import com.joasasso.minitoolbox.tools.generadores.GeneradorLoremIpsumScreen
 import com.joasasso.minitoolbox.tools.generadores.GeneradorNombresScreen

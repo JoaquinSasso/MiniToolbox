@@ -1,4 +1,4 @@
-package com.joasasso.minitoolbox.tools.gastos
+package com.joasasso.minitoolbox.tools.calculadoras.divisorGastos
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -86,6 +86,7 @@ fun ReunionesScreen(onBack: () -> Unit, onCrearReunion: () -> Unit, onReunionCli
 fun ReunionItem(reunion: Reunion, onClick: () -> Unit) {
     val formato = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
     val fechaTexto = formato.format(Date(reunion.fecha))
+    val integrantes = reunion.integrantes.map { it.nombre }
 
     ElevatedCard(
         modifier = Modifier
@@ -98,7 +99,7 @@ fun ReunionItem(reunion: Reunion, onClick: () -> Unit) {
             Text(reunion.nombre, style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.height(4.dp))
             Text("Fecha: $fechaTexto", style = MaterialTheme.typography.bodyMedium)
-            Text("Integrantes: ${reunion.integrantes.joinToString()}", style = MaterialTheme.typography.bodyMedium)
+            Text("Integrantes: ${integrantes.joinToString()}", style = MaterialTheme.typography.bodyMedium)
         }
     }
 }
