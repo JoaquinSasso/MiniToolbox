@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
@@ -40,9 +41,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.joasasso.minitoolbox.tools.data.Grupo
 import com.joasasso.minitoolbox.tools.data.Reunion
 import com.joasasso.minitoolbox.tools.data.ReunionesRepository
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
@@ -60,8 +62,9 @@ fun CrearReunionScreen(
     val scope = rememberCoroutineScope()
 
     var nombre by remember { mutableStateOf("") }
-    var nuevoIntegrante by remember { mutableStateOf("") }
-    val integrantes = remember { mutableStateListOf<String>() }
+    var nuevoGrupoNombre by remember { mutableStateOf("") }
+    var nuevaCantidad by remember { mutableStateOf("1") }
+    val grupos = remember { mutableStateListOf<Grupo>() }
     val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
@@ -70,9 +73,9 @@ fun CrearReunionScreen(
         bottomBar = {
             Button(
                 onClick = {
-                    if (nombre.isBlank() || integrantes.isEmpty()) {
+                    if (nombre.isBlank() || grupos.isEmpty()) {
                         scope.launch {
-                            snackbarHostState.showSnackbar("Completa el nombre y agrega al menos un integrante")
+                            snackbarHostState.showSnackbar("Completa el nombre y agrega al menos una persona / grupo")
                         }
                         return@Button
                     }
@@ -81,7 +84,7 @@ fun CrearReunionScreen(
                         id = UUID.randomUUID().toString(),
                         nombre = nombre,
                         fecha = System.currentTimeMillis(),
-                        integrantes = integrantes.toList(),
+                        integrantes = grupos.toList(),
                         gastos = emptyList()
                     )
 
@@ -104,7 +107,7 @@ fun CrearReunionScreen(
                 top = padding.calculateTopPadding(),
                 bottom = 100.dp
             ),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.fillMaxSize()
         ) {
             item {
@@ -122,27 +125,36 @@ fun CrearReunionScreen(
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     OutlinedTextField(
-                        value = nuevoIntegrante,
-                        onValueChange = { nuevoIntegrante = it },
-                        label = { Text("Agregar integrante") },
-                        modifier = Modifier.weight(1f),
-                        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done)
+                        value = nuevoGrupoNombre,
+                        onValueChange = { nuevoGrupoNombre = it },
+                        label = { Text("Nombre") },
+                        modifier = Modifier.weight(1f)
+                    )
+                    OutlinedTextField(
+                        value = nuevaCantidad,
+                        onValueChange = { nuevaCantidad = it },
+                        label = { Text("Personas") },
+                        modifier = Modifier.width(90.dp),
+                        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                     )
                     IconButton(
                         onClick = {
-                            if (nuevoIntegrante.isNotBlank()) {
-                                integrantes.add(nuevoIntegrante.trim())
-                                nuevoIntegrante = ""
+                            val nombreGrupo = nuevoGrupoNombre.trim()
+                            val cantidad = nuevaCantidad.toIntOrNull()?.coerceAtLeast(1) ?: 1
+                            if (nombreGrupo.isNotBlank()) {
+                                grupos.add(Grupo(nombreGrupo, cantidad))
+                                nuevoGrupoNombre = ""
+                                nuevaCantidad = "1"
                             }
                         },
-                        enabled = nuevoIntegrante.isNotBlank()
+                        enabled = nuevoGrupoNombre.isNotBlank()
                     ) {
-                        Icon(Icons.Default.PersonAdd, contentDescription = "Agregar")
+                        Icon(Icons.Default.PersonAdd, contentDescription = "Agregar integrante")
                     }
                 }
             }
 
-            items(integrantes, key = { it }) { integrante ->
+            items(grupos, key = { it.nombre }) { grupo ->
                 var visible by remember { mutableStateOf(true) }
 
                 AnimatedVisibility(
@@ -167,7 +179,7 @@ fun CrearReunionScreen(
                                 .padding(horizontal = 20.dp, vertical = 8.dp)
                         ) {
                             Text(
-                                text = integrante,
+                                text = "${grupo.nombre} (${grupo.cantidad} personas)",
                                 style = MaterialTheme.typography.bodyLarge,
                                 modifier = Modifier.weight(1f),
                                 maxLines = 1,
@@ -178,7 +190,7 @@ fun CrearReunionScreen(
                                 visible = false
                                 scope.launch {
                                     delay(300)
-                                    integrantes.remove(integrante)
+                                    grupos.remove(grupo)
                                 }
                             }) {
                                 Icon(
@@ -193,3 +205,4 @@ fun CrearReunionScreen(
         }
     }
 }
+

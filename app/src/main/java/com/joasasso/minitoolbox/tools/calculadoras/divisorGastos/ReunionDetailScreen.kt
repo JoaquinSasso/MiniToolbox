@@ -3,15 +3,16 @@ package com.joasasso.minitoolbox.tools.calculadoras.divisorGastos
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -37,12 +38,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.joasasso.minitoolbox.tools.data.Grupo
 import com.joasasso.minitoolbox.tools.data.Reunion
 import com.joasasso.minitoolbox.tools.data.ReunionesRepository
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -58,9 +62,10 @@ fun DetallesReunionScreen(
     val scope = rememberCoroutineScope()
 
     var reunion by remember { mutableStateOf<Reunion?>(null) }
+    var grupoAEditar by remember { mutableStateOf<Grupo?>(null) }
+    var nombreEditado by remember { mutableStateOf("") }
+    var cantidadEditada by remember { mutableStateOf("") }
     var textoCompartir by remember { mutableStateOf("") }
-    var nombreAEditar by remember { mutableStateOf<String?>(null) }
-    var nuevoNombre by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
         val reuniones = ReunionesRepository.flujoReuniones(context).firstOrNull().orEmpty()
@@ -70,27 +75,31 @@ fun DetallesReunionScreen(
         }
     }
 
-    fun actualizarNombre(nombreViejo: String, nuevo: String) {
+    fun actualizarGrupo(original: Grupo, nuevo: Grupo) {
         reunion?.let { r ->
-            val nuevosIntegrantes = r.integrantes.map { if (it == nombreViejo) nuevo else it }
-            val nuevosGastos = r.gastos.map { gasto ->
-                gasto.copy(
-                    pagadoPor = gasto.pagadoPor.map { if (it == nombreViejo) nuevo else it },
-                    consumidoPor = gasto.consumidoPor.map { if (it == nombreViejo) nuevo else it }
+            val nuevosGrupos = r.integrantes.map { if (it == original) nuevo else it }
+            val nuevosGastos = r.gastos.map { g ->
+                val nuevosAportes = g.aportesIndividuales.mapKeys {
+                    if (it.key == original.nombre) nuevo.nombre else it.key
+                }
+                val nuevosConsumidores = g.consumidoPor.mapKeys {
+                    if (it.key == original.nombre) nuevo.nombre else it.key
+                }
+                g.copy(
+                    aportesIndividuales = nuevosAportes,
+                    consumidoPor = nuevosConsumidores
                 )
             }
-            val nuevaReunion = r.copy(integrantes = nuevosIntegrantes, gastos = nuevosGastos)
+            val actualizada = r.copy(integrantes = nuevosGrupos, gastos = nuevosGastos)
             scope.launch {
-                ReunionesRepository.actualizarReunion(context, nuevaReunion)
-                reunion = nuevaReunion
-                nombreAEditar = null
+                ReunionesRepository.actualizarReunion(context, actualizada)
+                reunion = actualizada
+                grupoAEditar = null
             }
         }
     }
 
-    Scaffold(
-        topBar = { TopBarReusable(reunion?.nombre ?: "Reunión", onBack) }
-    ) { padding ->
+    Scaffold(topBar = { TopBarReusable(reunion?.nombre ?: "Reunión", onBack) }) { padding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -100,8 +109,8 @@ fun DetallesReunionScreen(
         ) {
             item {
                 reunion?.let { r ->
+                    val total = r.gastos.sumOf { it.aportesIndividuales.values.sum() }
                     Text("Fecha: ${formatearFecha(r.fecha)}")
-                    val total = r.gastos.sumOf { it.monto }
                     Text("Total gastado: $${"%.2f".format(total)}", style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.height(8.dp))
                     HorizontalDivider()
@@ -112,33 +121,34 @@ fun DetallesReunionScreen(
 
             items(reunion?.gastos ?: emptyList()) { gasto ->
                 Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onEditarGasto(reunionId, gasto.id) },
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                    elevation = CardDefaults.cardElevation(2.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surfaceVariant)
                 ) {
                     Row(
                         modifier = Modifier
-                            .padding(horizontal = 16.dp, vertical = 12.dp)
+                            .padding(16.dp)
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(gasto.descripcion)
-                        Row {
-                            Text("$${"%.2f".format(gasto.monto)}")
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ){
+                            Text("$${"%.2f".format(gasto.aportesIndividuales.values.sum())}")
+                            IconButton(onClick = { onEditarGasto(reunionId, gasto.id) }) {
+                                Icon(Icons.Default.Edit, contentDescription = "Editar gasto")
+                            }
                             IconButton(onClick = {
                                 reunion?.let {
-                                    val nuevos = it.gastos.filter { g -> g.id != gasto.id }
-                                    val actualizada = it.copy(gastos = nuevos)
+                                    val nueva = it.copy(gastos = it.gastos.filterNot { g -> g.id == gasto.id })
                                     scope.launch {
-                                        ReunionesRepository.actualizarReunion(context, actualizada)
-                                        reunion = actualizada
+                                        ReunionesRepository.actualizarReunion(context, nueva)
+                                        reunion = nueva
                                     }
                                 }
                             }) {
-                                Icon(Icons.Default.Delete, contentDescription = "Eliminar")
+                                Icon(Icons.Default.Delete, contentDescription = "Eliminar gasto")
                             }
                         }
                     }
@@ -150,13 +160,10 @@ fun DetallesReunionScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { onAgregarGasto(reunionId) },
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                    colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primaryContainer)
                 ) {
-                    Box(
-                        Modifier.padding(16.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("+ Agregar gasto", style = MaterialTheme.typography.bodyMedium)
+                    Box(Modifier.padding(16.dp), contentAlignment = Alignment.Center) {
+                        Text("+ Agregar gasto")
                     }
                 }
             }
@@ -167,52 +174,50 @@ fun DetallesReunionScreen(
                 Text("Integrantes", style = MaterialTheme.typography.titleSmall)
             }
 
-            items(reunion?.integrantes ?: emptyList()) { nombre ->
-                val pagado = reunion?.gastos
-                    ?.sumOf { it.aportesIndividuales[nombre] ?: 0.0 }
-
+            items(reunion?.integrantes ?: emptyList()) { grupo ->
+                val totalPagado = reunion?.gastos?.sumOf { it.aportesIndividuales[grupo.nombre] ?: 0.0 } ?: 0.0
 
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                    elevation = CardDefaults.cardElevation(2.dp)
+                    colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surfaceVariant)
                 ) {
                     Row(
                         modifier = Modifier
-                            .padding(horizontal = 16.dp, vertical = 12.dp)
+                            .padding(16.dp)
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(nombre)
+                        Text("${grupo.nombre} (${grupo.cantidad} personas)")
                         Row(
                             verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text("$${"%.2f".format(pagado)}")
-                            Spacer(Modifier.width(8.dp))
+                        ){
+                            Text("$${"%.2f".format(totalPagado)}")
                             IconButton(onClick = {
-                                nombreAEditar = nombre
-                                nuevoNombre = nombre
+                                grupoAEditar = grupo
+                                nombreEditado = grupo.nombre
+                                cantidadEditada = grupo.cantidad.toString()
                             }) {
-                                Icon(Icons.Default.Edit, contentDescription = "Editar nombre")
+                                Icon(Icons.Default.Edit, contentDescription = "Editar grupo")
                             }
                             IconButton(onClick = {
                                 reunion?.let {
-                                    val nuevaLista = it.integrantes - nombre
-                                    val nuevosGastos = it.gastos.map { g ->
-                                        g.copy(
-                                            pagadoPor = g.pagadoPor - nombre,
-                                            consumidoPor = g.consumidoPor - nombre
-                                        )
-                                    }
-                                    val actualizada = it.copy(integrantes = nuevaLista, gastos = nuevosGastos)
+                                    val actualizada = it.copy(
+                                        integrantes = it.integrantes - grupo,
+                                        gastos = it.gastos.map { gasto ->
+                                            gasto.copy(
+                                                aportesIndividuales = gasto.aportesIndividuales - grupo.nombre,
+                                                consumidoPor = gasto.consumidoPor - grupo.nombre
+                                            )
+                                        }
+                                    )
                                     scope.launch {
                                         ReunionesRepository.actualizarReunion(context, actualizada)
                                         reunion = actualizada
                                     }
                                 }
                             }) {
-                                Icon(Icons.Default.Delete, contentDescription = "Eliminar")
+                                Icon(Icons.Default.Delete, contentDescription = "Eliminar grupo")
                             }
                         }
                     }
@@ -224,20 +229,17 @@ fun DetallesReunionScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            nombreAEditar = ""
-                            nuevoNombre = ""
+                            grupoAEditar = Grupo("", 1)
+                            nombreEditado = ""
+                            cantidadEditada = "1"
                         },
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                    colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primaryContainer)
                 ) {
-                    Box(
-                        Modifier.padding(16.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("+ Agregar integrante", style = MaterialTheme.typography.bodyMedium)
+                    Box(Modifier.padding(16.dp), contentAlignment = Alignment.Center) {
+                        Text("+ Agregar integrante")
                     }
                 }
             }
-
 
             item {
                 HorizontalDivider()
@@ -248,14 +250,11 @@ fun DetallesReunionScreen(
             items(calcularDeudas(reunion ?: return@LazyColumn)) { deuda ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                    elevation = CardDefaults.cardElevation(2.dp)
-                ){
-                    Text(deuda, modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 16.dp))
+                    colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surfaceVariant)
+                ) {
+                    Text(deuda, modifier = Modifier.padding(16.dp))
                 }
-
             }
-
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -284,50 +283,51 @@ fun DetallesReunionScreen(
         }
     }
 
-    // Dialogo de edición de nombre
-    if (nombreAEditar != null) {
+    if (grupoAEditar != null) {
         AlertDialog(
-            onDismissRequest = { nombreAEditar = null },
-            title = { Text(if (nombreAEditar!!.isBlank()) "Nuevo integrante" else "Editar nombre") },
+            onDismissRequest = { grupoAEditar = null },
+            title = { Text(if (grupoAEditar!!.nombre.isBlank()) "Nuevo integrante" else "Editar integrante") },
             text = {
-                OutlinedTextField(
-                    value = nuevoNombre,
-                    onValueChange = { nuevoNombre = it },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Column {
+                    OutlinedTextField(
+                        value = nombreEditado,
+                        onValueChange = { nombreEditado = it },
+                        label = { Text("Nombre") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    OutlinedTextField(
+                        value = cantidadEditada,
+                        onValueChange = { cantidadEditada = it },
+                        label = { Text("Cantidad de personas") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    )
+                }
             },
             confirmButton = {
                 TextButton(onClick = {
-                    val nuevo = nuevoNombre.trim()
-                    if (nuevo.isNotBlank()) {
-                        if (nombreAEditar!!.isBlank()) {
-                            // Agregar nuevo
-                            reunion?.let {
-                                val actualizada = it.copy(integrantes = it.integrantes + nuevo)
-                                scope.launch {
-                                    ReunionesRepository.actualizarReunion(context, actualizada)
-                                    reunion = actualizada
-                                }
-                            }
-                        } else {
-                            actualizarNombre(nombreAEditar!!, nuevo)
-                        }
-                    }
-                    nombreAEditar = null
+                    val nombre = nombreEditado.trim()
+                    val cantidad = cantidadEditada.toIntOrNull()?.coerceAtLeast(1) ?: 1
+                    if (nombre.isNotBlank()) {
+                        val nuevo = Grupo(nombre, cantidad)
+                        actualizarGrupo(grupoAEditar!!, nuevo)
+                    } else grupoAEditar = null
                 }) {
                     Text("Guardar")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { nombreAEditar = null }) {
+                TextButton(onClick = { grupoAEditar = null }) {
                     Text("Cancelar")
                 }
             }
         )
     }
-
 }
+
+
 
 
 
@@ -337,23 +337,27 @@ fun formatearFecha(millis: Long): String {
 }
 
 fun generarTextoCompartible(reunion: Reunion): String {
+    val formatoMoneda = NumberFormat.getCurrencyInstance(Locale("es", "AR")).apply {
+        maximumFractionDigits = 2
+        minimumFractionDigits = 2
+    }
     val sb = StringBuilder()
     sb.appendLine("📋 Reunión: ${reunion.nombre}")
     sb.appendLine("📅 Fecha: ${formatearFecha(reunion.fecha)}")
-    sb.appendLine("💰 Total: $${"%.2f".format(reunion.gastos.sumOf { it.monto })}")
+    sb.appendLine("💰 Total: ${formatoMoneda.format(reunion.gastos.sumOf { it.aportesIndividuales.values.sum() })}")
     sb.appendLine()
 
     sb.appendLine("🧾 Gastos:")
     reunion.gastos.forEach {
-        sb.appendLine("- ${it.descripcion}: $${"%.2f".format(it.monto)}")
+        val monto = it.aportesIndividuales.values.sum()
+        sb.appendLine("- ${it.descripcion}: ${formatoMoneda.format(monto)}")
     }
 
     sb.appendLine()
     sb.appendLine("👥 Integrantes:")
-    reunion.integrantes.forEach { nombre ->
-        val pagado = reunion.gastos
-            .sumOf { it.aportesIndividuales[nombre] ?: 0.0 }
-        sb.appendLine("- $nombre pagó $${"%.2f".format(pagado)}")
+    reunion.integrantes.forEach { grupo ->
+        val pagado = reunion.gastos.sumOf { it.aportesIndividuales[grupo.nombre] ?: 0.0 }
+        sb.appendLine("- ${grupo.nombre} (${grupo.cantidad} personas) pagó ${formatoMoneda.format(pagado)}")
     }
 
     sb.appendLine()
@@ -364,29 +368,44 @@ fun generarTextoCompartible(reunion: Reunion): String {
 }
 
 fun calcularDeudas(reunion: Reunion): List<String> {
-    val deudaPorPersona = mutableMapOf<String, Double>()
-    reunion.integrantes.forEach { nombre -> deudaPorPersona[nombre] = 0.0 }
+    // Inicializar deudas por grupo
+    val deudaPorGrupo = reunion.integrantes.associate { it.nombre to 0.0 }.toMutableMap()
 
+    // Calcular cuánto debe cada grupo según los gastos que consumió
     for (gasto in reunion.gastos) {
-        val consumidores = gasto.consumidoPor
-        val montoPorConsumidor = if (consumidores.isNotEmpty()) gasto.monto / consumidores.size else 0.0
-        consumidores.forEach {
-            deudaPorPersona[it] = deudaPorPersona[it]!! + montoPorConsumidor
+        val totalPersonas = gasto.consumidoPor.values.sum()
+        if (totalPersonas == 0) continue
+
+        val montoTotal = gasto.aportesIndividuales.values.sum()
+        gasto.consumidoPor.forEach { (grupo, cantidad) ->
+            val monto = montoTotal * cantidad / totalPersonas
+            deudaPorGrupo[grupo] = deudaPorGrupo.getOrDefault(grupo, 0.0) + monto
         }
     }
 
-
-    val balancePorPersona = reunion.integrantes.associateWith { nombre ->
-        val pagado = reunion.gastos.sumOf { it.aportesIndividuales[nombre] ?: 0.0 }
-        val debe = deudaPorPersona[nombre] ?: 0.0
-        pagado - debe
+    // Calcular cuánto pagó cada grupo
+    val pagadoPorGrupo = reunion.integrantes.associate { grupo ->
+        grupo.nombre to reunion.gastos.sumOf { it.aportesIndividuales[grupo.nombre] ?: 0.0 }
     }
 
+    // Calcular balances
+    val balance = reunion.integrantes.associate { grupo ->
+        val pagado = pagadoPorGrupo[grupo.nombre] ?: 0.0
+        val debe = deudaPorGrupo[grupo.nombre] ?: 0.0
+        grupo.nombre to (pagado - debe)
+    }
 
-    val deudores = balancePorPersona.filterValues { it < -0.01 }.toMutableMap()
-    val acreedores = balancePorPersona.filterValues { it > 0.01 }.toMutableMap()
+    // Separar acreedores y deudores
+    val deudores = balance.filterValues { it < -0.01 }.toMutableMap()
+    val acreedores = balance.filterValues { it > 0.01 }.toMutableMap()
 
     val resultados = mutableListOf<String>()
+
+    // Formateador de moneda con puntos de miles y coma decimal
+    val formatoMoneda = NumberFormat.getCurrencyInstance(Locale("es", "AR")).apply {
+        maximumFractionDigits = 2
+        minimumFractionDigits = 2
+    }
 
     for ((deudor, deuda) in deudores) {
         var pendiente = -deuda
@@ -399,7 +418,7 @@ fun calcularDeudas(reunion: Reunion): List<String> {
             if (credito <= 0.01) continue
 
             val monto = minOf(pendiente, credito)
-            pagos.add("$deudor debe pagar $${"%.2f".format(monto)} a $acreedor")
+            pagos.add("$deudor debe pagar ${formatoMoneda.format(monto)} a $acreedor")
 
             pendiente -= monto
             acreedores[acreedor] = credito - monto
