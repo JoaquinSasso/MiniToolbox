@@ -34,7 +34,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import com.joasasso.minitoolbox.tools.data.Reunion
 import com.joasasso.minitoolbox.tools.data.ReunionesRepository
@@ -52,6 +54,7 @@ fun ReunionesScreen(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val haptic = LocalHapticFeedback.current
 
     var showInfo by remember { mutableStateOf(false) }
     var reuniones by remember { mutableStateOf<List<Reunion>>(emptyList()) }
@@ -94,8 +97,10 @@ fun ReunionesScreen(
                     items(reuniones) { reunion ->
                         ReunionItem(
                             reunion = reunion,
-                            onClick = { onReunionClick(reunion) },
-                            onDelete = { reunionAEliminar = reunion }
+                            onClick = { onReunionClick(reunion)
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)},
+                            onDelete = { reunionAEliminar = reunion
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)}
                         )
                     }
                 }
@@ -117,7 +122,8 @@ fun ReunionesScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showInfo = false }) {
+                TextButton(onClick = { showInfo = false
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)}) {
                     Text("Cerrar")
                 }
             }
@@ -132,6 +138,7 @@ fun ReunionesScreen(
             confirmButton = {
                 TextButton(onClick = {
                     scope.launch {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         ReunionesRepository.eliminarReunion(context, reunionAEliminar!!.id)
                         reunionAEliminar = null
                     }
@@ -140,7 +147,8 @@ fun ReunionesScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { reunionAEliminar = null }) {
+                TextButton(onClick = { reunionAEliminar = null
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)}) {
                     Text("Cancelar")
                 }
             }

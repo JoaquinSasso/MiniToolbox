@@ -36,6 +36,7 @@ import com.joasasso.minitoolbox.tools.info.TextBinaryConverterScreen
 import com.joasasso.minitoolbox.tools.info.TiempoHasta
 import com.joasasso.minitoolbox.tools.juegos.AdivinaBanderaScreen
 import com.joasasso.minitoolbox.tools.juegos.CoinFlipScreen
+import com.joasasso.minitoolbox.tools.juegos.LanzadorDadosScreen
 import com.joasasso.minitoolbox.tools.juegos.SelectorOpcionesScreen
 import com.joasasso.minitoolbox.tools.juegos.TrucoScoreBoardScreen
 import com.joasasso.minitoolbox.tools.medicion.BubbleLevelScreen
@@ -210,8 +211,9 @@ fun MiniToolboxNavGraph(navController: NavHostController) {
                 onBack = { navController.popBackStack() }
             )
         }
-
-
+        composable(Screen.Dados.route){
+            LanzadorDadosScreen(onBack = { navController.popBackStack() })
+        }
 
     }
 }
