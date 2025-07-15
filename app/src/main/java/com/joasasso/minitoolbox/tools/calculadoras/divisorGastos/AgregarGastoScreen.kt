@@ -1,6 +1,7 @@
 package com.joasasso.minitoolbox.tools.calculadoras.divisorGastos
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -18,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -49,6 +52,7 @@ fun AgregarGastoScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val formatter = remember { NumberFormat.getInstance(Locale("es", "AR")) }
+    var showInfo by remember { mutableStateOf(false) }
 
     var reunion by remember { mutableStateOf<Reunion?>(null) }
     var descripcion by remember { mutableStateOf("") }
@@ -70,7 +74,7 @@ fun AgregarGastoScreen(
     val montoTotal = aportes.values.sumOf { it.toDoubleOrNull() ?: 0.0 }
 
     Scaffold(
-        topBar = { TopBarReusable("Nuevo gasto", onBack) }
+        topBar = { TopBarReusable("Nuevo gasto", onBack, { showInfo = true }) }
     ) { padding ->
         LazyColumn(
             modifier = Modifier
@@ -191,6 +195,27 @@ fun AgregarGastoScreen(
             }
         }
     }
+    if (showInfo) {
+        AlertDialog(
+            onDismissRequest = { showInfo = false },
+            title = { Text("¿Cómo registrar un gasto?") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("• Escribe una breve descripción del gasto (por ejemplo: 'Pizza', 'Entrada', 'Coca-Cola').")
+                    Text("• Indica cuánto aportó cada grupo al gasto.")
+                    Text("• Luego, selecciona cuántas personas de cada grupo participaron como consumidores.")
+                    Text("• El total del gasto se calcula automáticamente a partir de los aportes.")
+                    Text("• El reparto se hará según el consumo proporcional de cada grupo.")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showInfo = false }) {
+                    Text("Cerrar")
+                }
+            }
+        )
+    }
+
 }
 
 
