@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FloatingActionButton
@@ -20,6 +21,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -40,6 +42,7 @@ import java.util.Locale
 @Composable
 fun ReunionesScreen(onBack: () -> Unit, onCrearReunion: () -> Unit, onReunionClick: (Reunion) -> Unit) {
     val context = LocalContext.current
+    var showInfo by remember { mutableStateOf(false) }
 
     var reuniones by remember { mutableStateOf<List<Reunion>>(emptyList()) }
 
@@ -50,7 +53,7 @@ fun ReunionesScreen(onBack: () -> Unit, onCrearReunion: () -> Unit, onReunionCli
         }
     }
     Scaffold(
-        topBar = { TopBarReusable("Divisor de Gastos", onBack) },
+        topBar = { TopBarReusable("Divisor de Gastos", onBack, { showInfo = true }) },
         floatingActionButton = {
             FloatingActionButton(onClick = onCrearReunion) {
                 Icon(Icons.Default.Add, contentDescription = "Nueva reunión")
@@ -80,6 +83,25 @@ fun ReunionesScreen(onBack: () -> Unit, onCrearReunion: () -> Unit, onReunionCli
             }
         }
     }
+    if (showInfo) {
+        AlertDialog(
+            onDismissRequest = { showInfo = false },
+            title = { Text("Acerca del divisor de gastos") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("• Aquí se muestran todas las reuniones que hayas creado, ordenadas por fecha.")
+                    Text("• Puedes tocar una reunión para ver sus detalles, editar gastos o modificar grupos.")
+                    Text("• Usa el botón '+' para crear una nueva reunión.")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showInfo = false }) {
+                    Text("Cerrar")
+                }
+            }
+        )
+    }
+
 }
 
 @Composable

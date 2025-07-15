@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,6 +20,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -31,6 +33,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -60,6 +63,7 @@ fun CrearReunionScreen(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    var showInfo by remember { mutableStateOf(false) }
 
     var nombre by remember { mutableStateOf("") }
     var nuevoGrupoNombre by remember { mutableStateOf("") }
@@ -68,7 +72,7 @@ fun CrearReunionScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
-        topBar = { TopBarReusable("Nueva Reunión", onBack) },
+        topBar = { TopBarReusable("Nueva Reunión", onBack, { showInfo = true }) },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         bottomBar = {
             Button(
@@ -203,6 +207,25 @@ fun CrearReunionScreen(
                 }
             }
         }
+    }
+    if (showInfo) {
+        AlertDialog(
+            onDismissRequest = { showInfo = false },
+            title = { Text("¿Cómo crear una reunión?") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("• Asigna un nombre para identificar la reunión y agrega los grupos que participarán (personas, familias, amigos, etc.).")
+                    Text("• Cada grupo puede tener un nombre y una cantidad de personas asociadas.")
+                    Text("• La cantidad de personas servirá luego para repartir los gastos proporcionalmente.")
+                    Text("• Podrás agregar y editar gastos una vez creada la reunión.")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showInfo = false }) {
+                    Text("Cerrar")
+                }
+            }
+        )
     }
 }
 

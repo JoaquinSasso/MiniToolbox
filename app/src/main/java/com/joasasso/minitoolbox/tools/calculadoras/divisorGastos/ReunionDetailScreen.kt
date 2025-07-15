@@ -60,6 +60,7 @@ fun DetallesReunionScreen(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    var showInfo by remember { mutableStateOf(false) }
 
     var reunion by remember { mutableStateOf<Reunion?>(null) }
     var grupoAEditar by remember { mutableStateOf<Grupo?>(null) }
@@ -99,7 +100,8 @@ fun DetallesReunionScreen(
         }
     }
 
-    Scaffold(topBar = { TopBarReusable(reunion?.nombre ?: "Reunión", onBack) }) { padding ->
+    Scaffold(topBar = { TopBarReusable(reunion?.nombre ?: "Reunión", onBack, { showInfo = true }) })
+    { padding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -322,6 +324,28 @@ fun DetallesReunionScreen(
             dismissButton = {
                 TextButton(onClick = { grupoAEditar = null }) {
                     Text("Cancelar")
+                }
+            }
+        )
+    }
+    if (showInfo) {
+        AlertDialog(
+            onDismissRequest = { showInfo = false },
+            title = { Text("Acerca de la reunión") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("• Aquí puedes ver el resumen de la reunión, con fecha, total gastado y lista de gastos.")
+                    Text("• Puedes editar o eliminar gastos, o agregar nuevos.")
+                    Text("• También puedes modificar los grupos: cambiar nombre, cantidad de personas o eliminar alguno.")
+                    Text("• En la sección de deudas se calcula quién debe pagar a quién, considerando cuánto aportó y cuánto consumió cada grupo.")
+                    Text("• El cálculo es automático y proporcional a la cantidad de personas que consumieron en cada grupo.")
+                    Text("• Puedes usar el botón de compartir para enviar un resumen por mensaje, email o cualquier app compatible. Ideal para dividir cuentas con amigos fácilmente.")
+
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showInfo = false }) {
+                    Text("Cerrar")
                 }
             }
         )
