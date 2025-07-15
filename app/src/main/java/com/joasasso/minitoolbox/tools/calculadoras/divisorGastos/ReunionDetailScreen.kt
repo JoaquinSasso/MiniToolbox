@@ -37,7 +37,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.joasasso.minitoolbox.tools.data.Grupo
@@ -61,6 +63,7 @@ fun DetallesReunionScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var showInfo by remember { mutableStateOf(false) }
+    val haptic = LocalHapticFeedback.current
 
     var reunion by remember { mutableStateOf<Reunion?>(null) }
     var grupoAEditar by remember { mutableStateOf<Grupo?>(null) }
@@ -264,6 +267,7 @@ fun DetallesReunionScreen(
                 ) {
                     Button(
                         onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             scope.launch {
                                 val sendIntent = android.content.Intent().apply {
                                     action = android.content.Intent.ACTION_SEND
@@ -311,6 +315,7 @@ fun DetallesReunionScreen(
             },
             confirmButton = {
                 TextButton(onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     val nombre = nombreEditado.trim()
                     val cantidad = cantidadEditada.toIntOrNull()?.coerceAtLeast(1) ?: 1
                     if (nombre.isNotBlank()) {
@@ -322,7 +327,8 @@ fun DetallesReunionScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { grupoAEditar = null }) {
+                TextButton(onClick = { grupoAEditar = null
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)}) {
                     Text("Cancelar")
                 }
             }
@@ -344,7 +350,8 @@ fun DetallesReunionScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showInfo = false }) {
+                TextButton(onClick = { showInfo = false
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress) }) {
                     Text("Cerrar")
                 }
             }

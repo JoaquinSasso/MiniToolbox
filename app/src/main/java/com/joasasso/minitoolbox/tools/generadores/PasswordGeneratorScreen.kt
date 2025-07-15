@@ -29,6 +29,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -48,12 +50,14 @@ import kotlin.random.Random
 @Composable
 fun GeneradorContrasenaScreen(onBack: () -> Unit) {
     var showInfo by remember { mutableStateOf(false) }
-    var longitud by remember { mutableStateOf(12) }
+    var longitud by remember { mutableIntStateOf(12) }
     var incluirMayusculas by remember { mutableStateOf(true) }
     var incluirMinusculas by remember { mutableStateOf(true) }
     var incluirNumeros by remember { mutableStateOf(true) }
     var incluirSimbolos by remember { mutableStateOf(true) }
     var contrasena by remember { mutableStateOf("") }
+    var sliderValue by remember { mutableFloatStateOf(longitud.toFloat()) }
+    var lastCantidad by remember { mutableIntStateOf(longitud) }
 
     val clipboardManager = LocalClipboardManager.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -140,12 +144,17 @@ fun GeneradorContrasenaScreen(onBack: () -> Unit) {
                 modifier = Modifier.fillMaxWidth(0.92f)
             ) {
                 Text("Longitud: $longitud", modifier = Modifier.padding(start = 4.dp))
+
                 Slider(
-                    value = longitud.toFloat(),
+                    value = sliderValue,
                     onValueChange = {
-                        longitud = it.toInt()
-                        generar()
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        sliderValue = it
+                        val nuevoValor = it.toInt()
+                        if (nuevoValor != lastCantidad) {
+                            longitud = nuevoValor
+                            lastCantidad = nuevoValor
+                            haptic.performHapticFeedback(HapticFeedbackType.SegmentTick)
+                        }
                     },
                     valueRange = 6f..32f,
                     steps = 26,

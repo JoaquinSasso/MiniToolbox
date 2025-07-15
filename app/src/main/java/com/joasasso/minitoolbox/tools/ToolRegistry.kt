@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.FlashlightOn
+import androidx.compose.material.icons.filled.FlipCameraAndroid
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.HourglassBottom
 import androidx.compose.material.icons.filled.Lightbulb
@@ -56,7 +57,7 @@ object ToolRegistry {
             screen = Screen.CoinFlip,
             category = ToolCategory.Entretenimiento,
             subCategory = "Aleatorio",
-            icon = Icons.Filled.Casino
+            icon = Icons.Filled.FlipCameraAndroid
         ),
         Tool(
             name = "Conversor Decimal / Binario",
@@ -257,6 +258,13 @@ object ToolRegistry {
             category = ToolCategory.Organizacion,
             subCategory = "Reuniones",
             icon = Icons.Filled.Groups
+        ),
+        Tool(
+            name = "Dados",
+            screen = Screen.Dados,
+            category = ToolCategory.Entretenimiento,
+            subCategory = "Aleatorio",
+            icon = Icons.Filled.Casino
         )
     )
 }
