@@ -73,40 +73,51 @@ fun PointCounter(points: Int, color: Color) {
 fun Square(color: Color, points: Int) {
     Box(
         modifier = Modifier
-            .size(80.dp)
+            .size(90.dp)
             .padding(10.dp),
-        contentAlignment = Alignment.CenterEnd
+        contentAlignment = Alignment.Center
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val squareSizePx = 60.dp.toPx()
+            val padding = 8.dp.toPx()
+            val startX = padding
+            val startY = padding
+            val endX = size.width - padding
+            val endY = size.height - padding
+
             val lines = listOf(
-                Offset(10f, 10f) to Offset(squareSizePx, 10f),
-                Offset(squareSizePx, 10f) to Offset(squareSizePx, squareSizePx),
-                Offset(squareSizePx, squareSizePx) to Offset(10f, squareSizePx),
-                Offset(10f, squareSizePx) to Offset(10f, 10f)
+                Offset(startX, startY) to Offset(endX, startY),   // Línea superior
+                Offset(endX, startY) to Offset(endX, endY),       // Derecha
+                Offset(endX, endY) to Offset(startX, endY),       // Inferior
+                Offset(startX, endY) to Offset(startX, startY)    // Izquierda
             )
+
+            // Dibujar hasta 4 lados del cuadrado
             for (i in 0 until points.coerceAtMost(4)) {
                 val (start, end) = lines[i]
                 drawLine(
                     color = color,
                     start = start,
                     end = end,
-                    strokeWidth = 6.dp.toPx(),
+                    strokeWidth = 4.dp.toPx(),
                     cap = StrokeCap.Round
                 )
             }
+
+            // Si hay 5 puntos, dibujar la línea diagonal
             if (points == 5) {
                 drawLine(
                     color = color,
-                    start = Offset(10f, 10f),
-                    end = Offset(size.width - 10f, size.height - 10f),
-                    strokeWidth = 5.dp.toPx(),
+                    start = Offset(startX, startY),
+                    end = Offset(endX, endY),
+                    strokeWidth = 3.dp.toPx(),
                     cap = StrokeCap.Round
                 )
             }
         }
     }
 }
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -190,7 +201,7 @@ fun TrucoScoreBoardScreen(onBack: () -> Unit) {
                 HorizontalDivider(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .absoluteOffset(y = 272.dp),
+                        .absoluteOffset(y = 300.dp),
                     thickness = 3.dp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -200,42 +211,42 @@ fun TrucoScoreBoardScreen(onBack: () -> Unit) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 32.dp),
+                    .padding(bottom = 50.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceAround
+                    horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    IconButton(onClick = { addPoints("our", 1) }) {
-                        Icon(Icons.Default.Add, contentDescription = "+1")
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        IconButton(onClick = { addPoints("our", 1) }) {
+                            Icon(Icons.Default.Add, contentDescription = "+1 Nuestras")
+                        }
+                        Spacer(Modifier.height(5.dp))
+                        IconButton(onClick = { addPoints("our", -1) }) {
+                            Icon(Icons.Default.Remove, contentDescription = "-1 Nuestras")
+                        }
                     }
-                    IconButton(onClick = { addPoints("their", 1) }) {
-                        Icon(Icons.Default.Add, contentDescription = "+1")
+                    Spacer(Modifier.width(16.dp))
+
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        IconButton(onClick = { addPoints("their", 1) }) {
+                            Icon(Icons.Default.Add, contentDescription = "+1 Suyas")
+                        }
+                        Spacer(Modifier.height(5.dp))
+                        IconButton(onClick = { addPoints("their", -1) }) {
+                            Icon(Icons.Default.Remove, contentDescription = "-1 Suyas")
+                        }
                     }
                 }
-                Spacer(Modifier.height(5.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceAround
-                ) {
-                    IconButton(onClick = { addPoints("our", -1) }) {
-                        Icon(Icons.Default.Remove, contentDescription = "-1")
-                    }
-                    IconButton(onClick = { addPoints("their", -1) }) {
-                        Icon(Icons.Default.Remove, contentDescription = "-1")
-                    }
-                }
-                Spacer(Modifier.height(15.dp))
-                Button(
-                    onClick = { resetPoints() },
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                ) {
+
+                Spacer(Modifier.height(12.dp))
+
+                Button(onClick = { resetPoints() }) {
                     Icon(Icons.Default.Refresh, contentDescription = "Reiniciar")
                     Spacer(Modifier.width(8.dp))
                     Text("Reiniciar")
                 }
-                Spacer(Modifier.height(40.dp))
             }
         }
     )

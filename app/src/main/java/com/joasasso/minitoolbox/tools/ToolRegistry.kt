@@ -5,6 +5,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ShortText
 import androidx.compose.material.icons.filled.BrowserNotSupported
 import androidx.compose.material.icons.filled.Cake
+import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.Casino
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.ColorLens
@@ -256,6 +257,13 @@ object ToolRegistry {
             category = ToolCategory.Entretenimiento,
             subCategory = "Aleatorio",
             icon = Icons.Filled.Casino
+        ),
+        Tool(
+            name = "Calculos rápidos",
+            screen = Screen.CalculosRapidos,
+            category = ToolCategory.Entretenimiento,
+            subCategory = "Minijuego",
+            icon = Icons.Filled.Calculate
         )
     )
 }
