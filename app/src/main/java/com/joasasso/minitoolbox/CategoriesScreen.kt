@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -138,7 +139,7 @@ fun CategoriesScreen(
                                 onToolClick(tool)
                             },
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
                             contentColor = MaterialTheme.colorScheme.onSurface
                         ),
                         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
@@ -147,11 +148,20 @@ fun CategoriesScreen(
                             modifier = Modifier.padding(16.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(
-                                imageVector = tool.icon,
-                                contentDescription = null,
-                                modifier = Modifier.size(28.dp)
-                            )
+                            if (tool.svgResId != null) {
+                                Icon(
+                                    painter = painterResource(id = tool.svgResId),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(28.dp)
+                                )
+                            } else if (tool.icon != null) {
+                                Icon(
+                                    imageVector = tool.icon,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(28.dp)
+                                )
+                            }
+
                             Spacer(Modifier.width(16.dp))
                             Text(
                                 text = tool.name,
