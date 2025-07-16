@@ -35,6 +35,7 @@ import com.joasasso.minitoolbox.tools.info.PaisesInfoScreen
 import com.joasasso.minitoolbox.tools.info.TextBinaryConverterScreen
 import com.joasasso.minitoolbox.tools.info.TiempoHasta
 import com.joasasso.minitoolbox.tools.juegos.AdivinaBanderaScreen
+import com.joasasso.minitoolbox.tools.juegos.CalculosRapidosScreen
 import com.joasasso.minitoolbox.tools.juegos.CoinFlipScreen
 import com.joasasso.minitoolbox.tools.juegos.LanzadorDadosScreen
 import com.joasasso.minitoolbox.tools.juegos.SelectorOpcionesScreen
@@ -213,6 +214,9 @@ fun MiniToolboxNavGraph(navController: NavHostController) {
         }
         composable(Screen.Dados.route){
             LanzadorDadosScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.CalculosRapidos.route){
+            CalculosRapidosScreen(onBack = { navController.popBackStack() })
         }
 
     }
