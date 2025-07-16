@@ -2,37 +2,28 @@
 package com.joasasso.minitoolbox.tools
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.RotateRight
 import androidx.compose.material.icons.automirrored.filled.ShortText
-import androidx.compose.material.icons.filled.BrowseGallery
 import androidx.compose.material.icons.filled.BrowserNotSupported
-import androidx.compose.material.icons.filled.BubbleChart
-import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Cake
 import androidx.compose.material.icons.filled.Casino
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.ColorLens
-import androidx.compose.material.icons.filled.Contacts
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.FlashlightOn
-import androidx.compose.material.icons.filled.FlipCameraAndroid
 import androidx.compose.material.icons.filled.Groups
-import androidx.compose.material.icons.filled.HourglassBottom
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Password
 import androidx.compose.material.icons.filled.Percent
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.QrCode
-import androidx.compose.material.icons.filled.Scale
+import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.Straighten
-import androidx.compose.material.icons.filled.SwapHoriz
-import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.filled.Timelapse
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.TravelExplore
-import androidx.compose.material.icons.filled.TypeSpecimen
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.WbSunny
+import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.nav.Screen
 
 
@@ -57,7 +48,7 @@ object ToolRegistry {
             screen = Screen.CoinFlip,
             category = ToolCategory.Entretenimiento,
             subCategory = "Aleatorio",
-            icon = Icons.Filled.FlipCameraAndroid
+            svgResId = R.drawable.coin
         ),
         Tool(
             name = "Conversor Decimal / Binario",
@@ -71,7 +62,7 @@ object ToolRegistry {
             screen = Screen.TextBinaryConverter,
             category = ToolCategory.Herramientas,
             subCategory = "Calculadoras",
-            icon = Icons.Filled.TextFields
+            svgResId = R.drawable.binary
         ),
         Tool(
             name = "Anotador Truco",
@@ -85,14 +76,14 @@ object ToolRegistry {
             screen = Screen.AgeCalculator,
             category = ToolCategory.Informacion,
             subCategory = "Fechas",
-            icon = Icons.Filled.CalendarMonth
+            icon = Icons.Filled.Cake
     ),
         Tool(
             name = "Signo del Zodíaco",
             screen = Screen.ZodiacSign,
             category = ToolCategory.Informacion,
             subCategory = "Fechas",
-            icon = Icons.Filled.DateRange
+            svgResId = R.drawable.zodiac_sign
     ),
         Tool(
             name = "Temporizador Pomodoro",
@@ -106,7 +97,7 @@ object ToolRegistry {
             screen = Screen.BubbleLevel,
             category = ToolCategory.Herramientas,
             subCategory = "Instrumentos",
-            icon = Icons.Filled.BubbleChart
+            svgResId = R.drawable.bubble_level
     ),
         Tool(
             name = "Calculadora de Porcentaje",
@@ -120,21 +111,21 @@ object ToolRegistry {
             screen = Screen.ConversorHoras,
             category = ToolCategory.Herramientas,
             subCategory = "Calculadoras",
-            icon = Icons.Filled.BrowseGallery
+            svgResId = R.drawable.clock_conversor
     ),
         Tool(
             name = "Calculadora de IMC",
             screen = Screen.CalculadoraDeIMC,
             category = ToolCategory.Herramientas,
             subCategory = "Calculadoras",
-            icon = Icons.Filled.Scale
+            svgResId = R.drawable.scale
     ),
         Tool(
             name = "Conversor Romano / Decimal",
             screen = Screen.ConversorRomanos,
             category = ToolCategory.Herramientas,
             subCategory = "Calculadoras",
-            icon = Icons.Filled.TypeSpecimen
+            svgResId = R.drawable.roman_pillar
         ),
 
         Tool(
@@ -142,7 +133,7 @@ object ToolRegistry {
             screen = Screen.ConversorUnidades,
             category = ToolCategory.Herramientas,
             subCategory = "Calculadoras",
-            icon = Icons.Filled.SwapHoriz
+            svgResId = R.drawable.unit_conversor
         ),
         Tool(
             name = "Generador de Contraseñas",
@@ -163,7 +154,7 @@ object ToolRegistry {
             screen = Screen.GeneradorNombres,
             category = ToolCategory.Herramientas,
             subCategory = "Generadores",
-            icon = Icons.Filled.Person
+            svgResId = R.drawable.id_card
     ),
         Tool(
             name = "Generador de QR",
@@ -177,7 +168,7 @@ object ToolRegistry {
             screen = Screen.GeneradorVCard,
             category = ToolCategory.Herramientas,
             subCategory = "Generadores",
-            icon = Icons.Filled.Contacts
+            icon = Icons.Filled.PersonAdd
         ),
         Tool(
             name = "Generador de Lorem Ipsum",
@@ -214,7 +205,7 @@ object ToolRegistry {
             screen = Screen.Rachas,
             category = ToolCategory.Organizacion,
             subCategory = "Hábitos y Actividades",
-            icon = Icons.Filled.Timelapse
+            svgResId = R.drawable.habits
 
         ),
         Tool(
@@ -229,7 +220,7 @@ object ToolRegistry {
             screen = Screen.TiempoHasta,
             category = ToolCategory.Informacion,
             subCategory = "Fechas",
-            icon = Icons.Filled.HourglassBottom
+            icon = Icons.Filled.Timelapse
         ),
         Tool(
             name = "Información de Países",
@@ -243,7 +234,7 @@ object ToolRegistry {
             screen = Screen.RuletaSelectora,
             category = ToolCategory.Entretenimiento,
             subCategory = "Aleatorio",
-            icon = Icons.AutoMirrored.Filled.RotateRight
+            svgResId = R.drawable.fortune_wheel
     ),
         Tool(
             name = "Adivina la Bandera",
@@ -257,10 +248,10 @@ object ToolRegistry {
             screen = Screen.Reuniones,
             category = ToolCategory.Organizacion,
             subCategory = "Reuniones",
-            icon = Icons.Filled.Groups
+            icon = Icons.Filled.Receipt
         ),
         Tool(
-            name = "Dados",
+            name = "Dados (D&D)",
             screen = Screen.Dados,
             category = ToolCategory.Entretenimiento,
             subCategory = "Aleatorio",

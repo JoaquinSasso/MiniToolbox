@@ -1,6 +1,7 @@
 // app/src/main/java/com/example/minitoolbox/tools/Tool.kt
 package com.joasasso.minitoolbox.tools
 
+import androidx.annotation.DrawableRes
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.joasasso.minitoolbox.nav.Screen
 
@@ -14,5 +15,6 @@ data class Tool(
     val screen: Screen,
     val category: ToolCategory,
     val subCategory: String,
-    val icon: ImageVector
+    val icon: ImageVector? = null,
+    @DrawableRes val svgResId: Int? = null
 )
