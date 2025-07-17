@@ -22,6 +22,7 @@ import com.joasasso.minitoolbox.tools.calculadoras.divisorGastos.CrearReunionScr
 import com.joasasso.minitoolbox.tools.calculadoras.divisorGastos.DetallesReunionScreen
 import com.joasasso.minitoolbox.tools.calculadoras.divisorGastos.EditarGastoScreen
 import com.joasasso.minitoolbox.tools.calculadoras.divisorGastos.ReunionesScreen
+import com.joasasso.minitoolbox.tools.frases.BasicPhrasesScreen
 import com.joasasso.minitoolbox.tools.generadores.GeneradorContrasenaScreen
 import com.joasasso.minitoolbox.tools.generadores.GeneradorLoremIpsumScreen
 import com.joasasso.minitoolbox.tools.generadores.GeneradorNombresScreen
@@ -217,6 +218,9 @@ fun MiniToolboxNavGraph(navController: NavHostController) {
         }
         composable(Screen.CalculosRapidos.route){
             CalculosRapidosScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.Frases.route){
+            BasicPhrasesScreen(onBack = { navController.popBackStack() })
         }
 
     }

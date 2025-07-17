@@ -264,6 +264,13 @@ object ToolRegistry {
             category = ToolCategory.Entretenimiento,
             subCategory = "Minijuego",
             icon = Icons.Filled.Calculate
+        ),
+        Tool(
+            name = "Frases básicas",
+            screen = Screen.Frases,
+            category = ToolCategory.Informacion,
+            subCategory = "General",
+            svgResId = R.drawable.phrases
         )
     )
 }
