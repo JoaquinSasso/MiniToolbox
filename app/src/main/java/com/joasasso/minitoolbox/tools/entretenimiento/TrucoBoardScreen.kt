@@ -1,5 +1,5 @@
 // app/src/main/java/com/example/minitoolbox/tools/truco/TrucoScoreBoardScreen.kt
-package com.joasasso.minitoolbox.tools.juegos
+package com.joasasso.minitoolbox.tools.entretenimiento
 
 import android.os.VibrationEffect
 import android.os.Vibrator

@@ -271,6 +271,13 @@ object ToolRegistry {
             category = ToolCategory.Informacion,
             subCategory = "General",
             svgResId = R.drawable.phrases
-        )
+        ),
+        Tool(
+            name = "Mi Yo del Multiverso",
+            screen = Screen.MiYoDelMultiverso,
+            category = ToolCategory.Entretenimiento,
+            subCategory = "Minijuego",
+            svgResId = R.drawable.planet_ringed
+        ),
     )
 }

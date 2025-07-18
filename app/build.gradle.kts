@@ -55,6 +55,8 @@ dependencies {
 
     // 2) Core Compose UI
     implementation(libs.androidx.ui)
+    implementation("androidx.compose.ui:ui")
+
 
     // 3) Compose Material 3 (Actualización a Material3)
     implementation(libs.material3)

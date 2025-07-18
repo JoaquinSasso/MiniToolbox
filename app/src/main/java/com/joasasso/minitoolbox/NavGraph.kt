@@ -22,6 +22,13 @@ import com.joasasso.minitoolbox.tools.calculadoras.divisorGastos.CrearReunionScr
 import com.joasasso.minitoolbox.tools.calculadoras.divisorGastos.DetallesReunionScreen
 import com.joasasso.minitoolbox.tools.calculadoras.divisorGastos.EditarGastoScreen
 import com.joasasso.minitoolbox.tools.calculadoras.divisorGastos.ReunionesScreen
+import com.joasasso.minitoolbox.tools.entretenimiento.AdivinaBanderaScreen
+import com.joasasso.minitoolbox.tools.entretenimiento.CalculosRapidosScreen
+import com.joasasso.minitoolbox.tools.entretenimiento.CoinFlipScreen
+import com.joasasso.minitoolbox.tools.entretenimiento.LanzadorDadosScreen
+import com.joasasso.minitoolbox.tools.entretenimiento.MiYoDelMultiversoScreen
+import com.joasasso.minitoolbox.tools.entretenimiento.SelectorOpcionesScreen
+import com.joasasso.minitoolbox.tools.entretenimiento.TrucoScoreBoardScreen
 import com.joasasso.minitoolbox.tools.frases.BasicPhrasesScreen
 import com.joasasso.minitoolbox.tools.generadores.GeneradorContrasenaScreen
 import com.joasasso.minitoolbox.tools.generadores.GeneradorLoremIpsumScreen
@@ -35,12 +42,6 @@ import com.joasasso.minitoolbox.tools.info.AgeCalculatorScreen
 import com.joasasso.minitoolbox.tools.info.PaisesInfoScreen
 import com.joasasso.minitoolbox.tools.info.TextBinaryConverterScreen
 import com.joasasso.minitoolbox.tools.info.TiempoHasta
-import com.joasasso.minitoolbox.tools.juegos.AdivinaBanderaScreen
-import com.joasasso.minitoolbox.tools.juegos.CalculosRapidosScreen
-import com.joasasso.minitoolbox.tools.juegos.CoinFlipScreen
-import com.joasasso.minitoolbox.tools.juegos.LanzadorDadosScreen
-import com.joasasso.minitoolbox.tools.juegos.SelectorOpcionesScreen
-import com.joasasso.minitoolbox.tools.juegos.TrucoScoreBoardScreen
 import com.joasasso.minitoolbox.tools.medicion.BubbleLevelScreen
 import com.joasasso.minitoolbox.tools.medicion.LinternaScreen
 import com.joasasso.minitoolbox.tools.medicion.MedidorLuzScreen
@@ -221,6 +222,9 @@ fun MiniToolboxNavGraph(navController: NavHostController) {
         }
         composable(Screen.Frases.route){
             BasicPhrasesScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.MiYoDelMultiverso.route){
+            MiYoDelMultiversoScreen(onBack = { navController.popBackStack() })
         }
 
     }

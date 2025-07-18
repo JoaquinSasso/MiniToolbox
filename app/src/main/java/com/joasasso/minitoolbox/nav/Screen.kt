@@ -44,6 +44,7 @@ sealed class Screen(val route: String) {
     object Dados          : Screen("dados")
     object CalculosRapidos          : Screen("calculos_rapidos")
     object Frases                   : Screen("frases")
+    object MiYoDelMultiverso          : Screen("mi_yo_del_multiverso")
 
     // Añade aquí nuevos objetos para cada herramienta…
 }
