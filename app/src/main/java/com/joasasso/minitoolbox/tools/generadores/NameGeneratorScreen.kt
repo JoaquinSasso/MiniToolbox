@@ -57,16 +57,18 @@ enum class NombreTipo(val display: String) {
 fun GeneradorNombresScreen(onBack: () -> Unit) {
     val nombresMasculinos = listOf(
         "Lucas", "Mateo", "Juan", "Santiago", "Benjamín", "Lautaro", "Martín", "Joaquín", "Tomás", "Facundo",
-        "Emiliano", "Franco", "Bruno", "Andrés", "Ramiro", "Nicolás", "Agustín", "Iván", "Matías", "Esteban"
+        "Emiliano", "Franco", "Bruno", "Andrés", "Ramiro", "Nicolás", "Agustín", "Iván", "Matías", "Esteban",
+        "Felipe", "Valentín", "Santino", "Ulises"
     )
     val nombresFemeninos = listOf(
         "Sofía", "Valentina", "Martina", "Camila", "Lucía", "Isabella", "Emilia", "Julieta", "Mía", "Agustina",
-        "Gabriela", "Aitana", "Milagros", "Paula", "Florencia", "Renata", "Jazmín", "Bianca", "Carolina", "Nicole"
+        "Gabriela", "Aitana", "Milagros", "Paula", "Florencia", "Renata", "Jazmín", "Bianca", "Carolina", "Nicole",
+        "Ana", "Laura", "Juliana", "María", "Guadalupe"
     )
     val apellidos = listOf(
         "Pérez", "Gómez", "Rodríguez", "Fernández", "López", "Díaz", "Martínez", "Romero", "Sosa", "Torres",
         "Álvarez", "Acosta", "Silva", "Suárez", "Castro", "Molina", "Ortiz", "Medina", "Herrera", "Gutiérrez",
-        "Cruz", "Moreno", "Reyes", "Ruiz", "Navarro", "Aguirre", "Rojas", "Vega", "Ibáñez", "Muñoz"
+        "Cruz", "Moreno", "Reyes", "Ruiz", "Navarro", "Aguirre", "Rojas", "Vega", "Ibáñez", "Muñoz", "Garcia"
     )
     val nombresGraciosos = listOf(
         "Elsa Pato",
