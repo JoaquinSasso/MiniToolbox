@@ -1,4 +1,4 @@
-package com.joasasso.minitoolbox.tools.juegos
+package com.joasasso.minitoolbox.tools.entretenimiento
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi

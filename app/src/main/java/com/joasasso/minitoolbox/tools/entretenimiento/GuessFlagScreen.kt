@@ -1,4 +1,4 @@
-package com.joasasso.minitoolbox.tools.juegos
+package com.joasasso.minitoolbox.tools.entretenimiento
 
 import android.content.Context
 import android.os.VibrationEffect
