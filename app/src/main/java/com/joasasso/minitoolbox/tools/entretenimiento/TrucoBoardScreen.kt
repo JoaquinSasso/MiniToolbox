@@ -1,8 +1,10 @@
 // app/src/main/java/com/example/minitoolbox/tools/truco/TrucoScoreBoardScreen.kt
 package com.joasasso.minitoolbox.tools.entretenimiento
 
+import android.content.Context
 import android.os.VibrationEffect
 import android.os.Vibrator
+import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -43,6 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -53,6 +56,8 @@ import androidx.compose.ui.unit.dp
 import com.joasasso.minitoolbox.tools.data.ScoreRepository
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 
 @Suppress("UnusedBoxWithConstraintsScope")
 @Composable
@@ -186,7 +191,12 @@ fun TrucoScoreBoardScreen(onBack: () -> Unit) {
     Scaffold(
         topBar = { TopBarReusable("Anotador de truco", onBack, { showInfo = true }) },
         floatingActionButton = {
-            Button(onClick = { resetPoints()}) {
+            Button(onClick = {
+                scope.launch {
+                    val confirm = confirmResetDialog(context, haptic)
+                    if (confirm) { resetPoints() }
+                }
+            }) {
                 Icon(modifier = Modifier.padding(8.dp) ,
                     imageVector = Icons.Default.Refresh, contentDescription = "Reiniciar")
             }
@@ -228,6 +238,7 @@ fun TrucoScoreBoardScreen(onBack: () -> Unit) {
                     modifier = Modifier
                         .weight(2f)
                         .fillMaxHeight()
+                        .padding(top = 8.dp)
                 ){
                     Column(
                         modifier = Modifier.weight(2f),
@@ -275,7 +286,7 @@ fun TrucoScoreBoardScreen(onBack: () -> Unit) {
                     Text("• Guía rápida:")
                     Text("   – Usa los botones +/– en los costados para sumar/restar puntos.")
                     Text("   – Toca en mitad izquierda o derecha de la pantalla para sumar rápido.")
-                    Text("   – Presiona “Reiniciar” para empezar una nueva partida.")
+                    Text("   – Presiona el boton abajo a la izquierda para empezar una nueva partida.")
                     Text("   – La partida se guarda automáticamente si sales y regresas más tarde.")
                 }
             },
@@ -289,5 +300,25 @@ fun TrucoScoreBoardScreen(onBack: () -> Unit) {
             }
         )
     }
+}
+
+suspend fun confirmResetDialog(
+    context: Context,
+    haptic: HapticFeedback
+): Boolean = suspendCancellableCoroutine { cont ->
+    val dialog = AlertDialog.Builder(context)
+        .setTitle("Empezar nueva partida")
+        .setMessage("¿Estás seguro de que quieres comenzar una nueva partida?\nEsto borrará los puntos actuales.")
+        .setPositiveButton("Sí") { _, _ ->
+            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            cont.resume(true)
+        }
+        .setNegativeButton("No") { _, _ ->
+            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            cont.resume(false)
+        }
+        .create()
+
+    dialog.show()
 }
 

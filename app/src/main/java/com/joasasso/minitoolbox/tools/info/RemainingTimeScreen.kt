@@ -45,7 +45,7 @@ fun TiempoHasta(onBack: () -> Unit) {
     var dateError by remember { mutableStateOf<String?>(null) }
     var daysLeft by remember { mutableStateOf<Long?>(0) }
     var showInfo by remember { mutableStateOf(false) }
-    var today = LocalDate.now()
+    val today = LocalDate.now()
 
     fun updateDaysLeft(target: LocalDate) {
         val today = LocalDate.now()
