@@ -3,7 +3,6 @@ package com.joasasso.minitoolbox.tools
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ShortText
-import androidx.compose.material.icons.filled.BrowserNotSupported
 import androidx.compose.material.icons.filled.Cake
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.Casino
@@ -70,7 +69,7 @@ object ToolRegistry {
             screen = Screen.TrucoScoreBoard,
             category = ToolCategory.Entretenimiento,
             subCategory = "Marcadores",
-            icon = Icons.Filled.BrowserNotSupported
+            svgResId = R.drawable.truco_square
         ),
         Tool(
             name = "Calculadora de Edad",
@@ -273,7 +272,7 @@ object ToolRegistry {
             svgResId = R.drawable.phrases
         ),
         Tool(
-            name = "Mi Yo del Multiverso",
+            name = "Versión alternativa de tu amigo",
             screen = Screen.MiYoDelMultiverso,
             category = ToolCategory.Entretenimiento,
             subCategory = "Minijuego",

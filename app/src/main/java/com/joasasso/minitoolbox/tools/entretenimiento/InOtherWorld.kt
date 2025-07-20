@@ -6,11 +6,11 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.net.Uri
-import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -48,14 +48,12 @@ import androidx.core.content.FileProvider
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.toColorInt
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 import androidx.compose.ui.graphics.Color as ComposeColor
 
 @Composable
-fun MiYoDelMultiversoScreen(onBack: () -> Unit) {
+fun InOtherWoldScreen(onBack: () -> Unit) {
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -75,7 +73,7 @@ fun MiYoDelMultiversoScreen(onBack: () -> Unit) {
         "hechicero jubilado", "cajero automático con alma de poeta", "emperador de memes", "lagarto influencer",
         "rey del karaoke intergaláctico", "zombie filósofo", "DJ en un culto de caracoles", "vampiro vegano",
         "bot de Twitter", "dios del WiFi", "pingüino emprendedor", "papa frita semiconsciente", "pastelero intergaláctico",
-        "dinosaurio con MBA", "luz de emergencia ansiosa", "cebra con doble identidad", "koala programador de C++",
+        "dinosaurio anciano", "luz de emergencia ansiosa", "cebra con doble identidad", "koala programador de C++",
         "caracol filósofo estoico", "drone existencialista", "sandía con complejo de superioridad",
         "código QR sensible", "cactus extrovertido", "pez payaso antisocial", "cuadro abstracto que llora",
         "horno microondas con sueños"
@@ -105,68 +103,71 @@ fun MiYoDelMultiversoScreen(onBack: () -> Unit) {
 
     fun generarResultadoAleatorio(): String {
         val emoji = emojis.random()
+        val letra = ('A'..'Z').random()
         val nombre = nombres.random()
         val rol = roles.random()
         val ubicacion = ubicaciones.random()
-        return "$emoji Sos un $nombre $rol $ubicacion."
+        return "$emoji La persona con inicial $letra es un $nombre $rol $ubicacion."
     }
 
     var imagenResultado by remember { mutableStateOf<Bitmap?>(null) }
 
+    fun compartirImagen(){
+        try {
+            val cacheDir = context.cacheDir
+            val file = File(cacheDir, "multiverso.png")
+
+            // Marca de agua
+            val bitmap = imagenResultado!!
+            val resultBitmap = createBitmap(bitmap.width, bitmap.height + 80)
+            val canvas = Canvas(resultBitmap)
+            canvas.drawColor(textBackgroundColor)
+            canvas.drawBitmap(bitmap, 0f, 0f, null)
+
+            val paint = Paint().apply {
+                color = Color.DKGRAY
+                textSize = 48f
+                textAlign = Paint.Align.CENTER
+                isAntiAlias = true
+            }
+
+            canvas.drawText(
+                "#MiniToolbox",
+                resultBitmap.width / 2f,
+                bitmap.height + 60f,
+                paint
+            )
+
+            FileOutputStream(file).use { out ->
+                resultBitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+            }
+
+            val uri: Uri = FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                file
+            )
+
+            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                type = "image/png"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            context.startActivity(Intent.createChooser(shareIntent, "Compartir imagen con..."))
+        } catch (_: Exception) {
+        }
+    }
+
+
+
+
     Scaffold(
-        topBar = { TopBarReusable("Mi yo del multiverso", onBack) },
+        topBar = { TopBarReusable("Versión alternativa de tu amigo", onBack) },
         floatingActionButton = {
             Column(horizontalAlignment = Alignment.End) {
                 if (imagenResultado != null) {
                     ExtendedFloatingActionButton(
-                        onClick = {
-                            scope.launch(Dispatchers.IO) {
-                                try {
-                                    val cacheDir = context.cacheDir
-                                    val file = File(cacheDir, "yo_multiverso.png")
-
-                                    // Marca de agua
-                                    val bitmap = imagenResultado!!
-                                    val resultBitmap = createBitmap(bitmap.width, bitmap.height + 80)
-                                    val canvas = Canvas(resultBitmap)
-                                    canvas.drawColor(textBackgroundColor)
-                                    canvas.drawBitmap(bitmap, 0f, 0f, null)
-
-                                    val paint = Paint().apply {
-                                        color = Color.DKGRAY
-                                        textSize = 48f
-                                        textAlign = Paint.Align.CENTER
-                                        isAntiAlias = true
-                                    }
-
-                                    canvas.drawText(
-                                        "#MiniToolbox",
-                                        resultBitmap.width / 2f,
-                                        bitmap.height + 60f,
-                                        paint
-                                    )
-
-                                    FileOutputStream(file).use { out ->
-                                        resultBitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
-                                    }
-
-                                    val uri: Uri = FileProvider.getUriForFile(
-                                        context,
-                                        "${context.packageName}.fileprovider",
-                                        file
-                                    )
-
-                                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                                        type = "image/png"
-                                        putExtra(Intent.EXTRA_STREAM, uri)
-                                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                    }
-                                    context.startActivity(Intent.createChooser(shareIntent, "Compartir imagen con..."))
-                                } catch (e: Exception) {
-                                    Log.e("MiYoDelMultiverso", "Error exportando imagen", e)
-                                }
-                            }
-                        },
+                        onClick = {compartirImagen()},
                         icon = { Icon(Icons.Default.Share, contentDescription = null) },
                         text = { Text("Compartir imagen") }
                     )
@@ -179,7 +180,7 @@ fun MiYoDelMultiversoScreen(onBack: () -> Unit) {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     },
                     icon = { Icon(Icons.Default.Refresh, contentDescription = null) },
-                    text = { Text("Nuevo universo") }
+                    text = { Text("Nuevo amigo") }
                 )
             }
         }
@@ -243,14 +244,18 @@ fun MiYoDelMultiversoScreen(onBack: () -> Unit) {
 
                 Image(
                     painter = BitmapPainter(resultBitmap.asImageBitmap()),
-                    contentDescription = "Resultado multiverso",
-                    contentScale = ContentScale.Fit,
+                    contentDescription = "Resultado",
+                    contentScale = ContentScale.Inside,
                     modifier = Modifier
                         .fillMaxWidth()
                         .border(2.dp, backgroundColor, RoundedCornerShape(12.dp))
                         .background(backgroundColor, RoundedCornerShape(12.dp))
-                        .padding(16.dp)
+                        .padding(16.dp, bottom = 24.dp)
                         .alpha(fadeAnim)
+                        .clickable(onClick = {
+                            resultado = generarResultadoAleatorio()
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        })
                 )
 
 
@@ -263,7 +268,7 @@ fun MiYoDelMultiversoScreen(onBack: () -> Unit) {
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(24.dp)
                 ) {
-                    Text("🌌 Descubrir quién soy en otro universo", style = MaterialTheme.typography.titleMedium)
+                    Text("¿Quién es tu amigo en otro universo?", style = MaterialTheme.typography.titleMedium)
                 }
             }
         }

@@ -191,6 +191,7 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("• Para qué sirve: Juego para poner a prueba tus conocimientos sobre banderas del mundo.")
                     Text("• Cómo usar: Aparece una bandera y debes elegir el país correspondiente. Si acertás, sumás puntos. Si errás, perdés el puntaje actual.")
+                    Text("Créditos a Santiago Garcia")
                 }
             },
             confirmButton = {
