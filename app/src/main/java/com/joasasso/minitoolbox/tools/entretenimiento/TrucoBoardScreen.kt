@@ -7,16 +7,16 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.absoluteOffset
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Refresh
@@ -24,7 +24,6 @@ import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -49,75 +48,100 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.joasasso.minitoolbox.tools.data.ScoreRepository
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlinx.coroutines.launch
 
+@Suppress("UnusedBoxWithConstraintsScope")
 @Composable
-fun PointCounter(points: Int, color: Color) {
-    val squares = points / 5
-    val remaining = points % 5
+fun PointCounter(
+    points: Int,
+    color: Color,
+    modifier: Modifier = Modifier
+) {
+    val fullSquares = points / 5
+    val remainder = points % 5
+    val totalSquares = fullSquares + if (remainder > 0) 1 else 0
+    val lineColor = MaterialTheme.colorScheme.onSurfaceVariant
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        for (i in 0 until squares) {
-            Square(color = color, points = 5)
+    BoxWithConstraints(modifier = modifier) {
+        val squareSize = (maxHeight / 7)
+
+        // ✅ uso directo de maxHeight en height modifier
+        Column(
+            modifier = Modifier
+                .height(maxHeight) // ⚠️ uso directo dentro de Modifier
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
+        ) {
+            repeat(fullSquares) {
+                Square(color = color, points = 5, squareSize = squareSize)
+            }
+            if (remainder > 0) {
+                Square(color = color, points = remainder, squareSize = squareSize)
+            }
+            repeat(6 - totalSquares) {
+                Spacer(modifier = Modifier.size(squareSize))
+            }
         }
-        if (remaining > 0) {
-            Square(color = color, points = remaining)
+
+        // Línea divisoria usando squareSize (derivado de maxHeight)
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val y = (squareSize * 3).toPx()
+            drawLine(
+                color = lineColor,
+                start = Offset(0f, y),
+                end = Offset(size.width, y),
+                strokeWidth = 2.dp.toPx()
+            )
         }
     }
 }
 
+
+
 @Composable
-fun Square(color: Color, points: Int) {
+fun Square(color: Color, points: Int, squareSize: Dp) {
     Box(
         modifier = Modifier
-            .size(90.dp)
-            .padding(10.dp),
+            .size(squareSize)
+            .padding(4.dp),
         contentAlignment = Alignment.Center
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val padding = 8.dp.toPx()
+            val padding = 6.dp.toPx()
             val startX = padding
             val startY = padding
             val endX = size.width - padding
             val endY = size.height - padding
 
             val lines = listOf(
-                Offset(startX, startY) to Offset(endX, startY),   // Línea superior
-                Offset(endX, startY) to Offset(endX, endY),       // Derecha
-                Offset(endX, endY) to Offset(startX, endY),       // Inferior
-                Offset(startX, endY) to Offset(startX, startY)    // Izquierda
+                Offset(startX, startY) to Offset(endX, startY),
+                Offset(endX, startY) to Offset(endX, endY),
+                Offset(endX, endY) to Offset(startX, endY),
+                Offset(startX, endY) to Offset(startX, startY)
             )
 
-            // Dibujar hasta 4 lados del cuadrado
             for (i in 0 until points.coerceAtMost(4)) {
                 val (start, end) = lines[i]
-                drawLine(
-                    color = color,
-                    start = start,
-                    end = end,
-                    strokeWidth = 4.dp.toPx(),
-                    cap = StrokeCap.Round
-                )
+                drawLine(color = color, start = start, end = end, strokeWidth = 6.dp.toPx(),  cap = StrokeCap.Round)
             }
 
-            // Si hay 5 puntos, dibujar la línea diagonal
             if (points == 5) {
                 drawLine(
                     color = color,
                     start = Offset(startX, startY),
                     end = Offset(endX, endY),
-                    strokeWidth = 3.dp.toPx(),
+                    strokeWidth = 6.dp.toPx(),
                     cap = StrokeCap.Round
                 )
             }
         }
     }
 }
-
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -128,14 +152,11 @@ fun TrucoScoreBoardScreen(onBack: () -> Unit) {
     val scoreRepo = remember { ScoreRepository(context) }
     val scope = rememberCoroutineScope()
 
-    // Estado para mostrar ventana de información
     var showInfo by remember { mutableStateOf(false) }
 
-    // Flujos persistentes de puntos
     val ourPointsFlow by scoreRepo.ourPointsFlow.collectAsState(initial = 0)
     val theirPointsFlow by scoreRepo.theirPointsFlow.collectAsState(initial = 0)
 
-    // Estado local sincronizado con DataStore
     var ourPoints by remember { mutableStateOf(ourPointsFlow) }
     var theirPoints by remember { mutableStateOf(theirPointsFlow) }
     LaunchedEffect(ourPointsFlow, theirPointsFlow) {
@@ -163,89 +184,82 @@ fun TrucoScoreBoardScreen(onBack: () -> Unit) {
     }
 
     Scaffold(
-        topBar = {TopBarReusable("Anotador de truco", onBack, {showInfo = true})},
+        topBar = { TopBarReusable("Anotador de truco", onBack, { showInfo = true }) },
+        floatingActionButton = {
+            Button(onClick = { resetPoints()}) {
+                Icon(modifier = Modifier.padding(8.dp) ,
+                    imageVector = Icons.Default.Refresh, contentDescription = "Reiniciar")
+            }
+        },
         content = { padding ->
-            Box(
+            Row(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
                     .pointerInput(Unit) {
                         detectTapGestures { offset ->
-                            if (offset.x < size.width / 2) addPoints("our", 1)
-                            else                              addPoints("their", 1)
+                            val width = size.width
+                            if (offset.x < width / 2) {
+                                addPoints("our", 1)
+                            } else {
+                                addPoints("their", 1)
+                            }
                         }
-                    }
+                    },
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
+                // Botones izquierda (Nuestras)
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(0.5f),
-                        horizontalAlignment = Alignment.Start
-                    ) {
-                        Text("Nuestras", fontWeight = FontWeight.Bold)
-                        Spacer(Modifier.height(8.dp))
-                        PointCounter(points = ourPoints, color = Color(0xFF2196F3))
+                    IconButton(onClick = { addPoints("our", 1) }) {
+                        Icon(Icons.Default.Add, contentDescription = "+1 Nuestras")
                     }
-                    Spacer(Modifier.width(16.dp))
+                    Spacer(Modifier.height(8.dp))
+                    IconButton(onClick = { addPoints("our", -1) }) {
+                        Icon(Icons.Default.Remove, contentDescription = "-1 Nuestras")
+                    }
+                }
+                Row(
+                    modifier = Modifier
+                        .weight(2f)
+                        .fillMaxHeight()
+                ){
                     Column(
-                        modifier = Modifier.fillMaxWidth(0.5f),
+                        modifier = Modifier.weight(2f),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        Text("Nuestras", fontWeight = FontWeight.Bold)
+                        PointCounter(points = ourPoints, color = Color(0xFF2196F3))
+                }
+                    Column(
+                        modifier = Modifier.weight(2f),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ){
                         Text("Suyas", fontWeight = FontWeight.Bold)
-                        Spacer(Modifier.height(8.dp))
                         PointCounter(points = theirPoints, color = Color(0xFFF44336))
                     }
                 }
-                HorizontalDivider(
+
+                // Botones derecha (Suyas)
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .absoluteOffset(y = 300.dp),
-                    thickness = 3.dp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        },
-        bottomBar = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 50.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                        .weight(1f)
+                        .padding(end = 8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        IconButton(onClick = { addPoints("our", 1) }) {
-                            Icon(Icons.Default.Add, contentDescription = "+1 Nuestras")
-                        }
-                        Spacer(Modifier.height(5.dp))
-                        IconButton(onClick = { addPoints("our", -1) }) {
-                            Icon(Icons.Default.Remove, contentDescription = "-1 Nuestras")
-                        }
+                    IconButton(onClick = { addPoints("their", 1) }) {
+                        Icon(Icons.Default.Add, contentDescription = "+1 Suyas")
                     }
-                    Spacer(Modifier.width(16.dp))
-
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        IconButton(onClick = { addPoints("their", 1) }) {
-                            Icon(Icons.Default.Add, contentDescription = "+1 Suyas")
-                        }
-                        Spacer(Modifier.height(5.dp))
-                        IconButton(onClick = { addPoints("their", -1) }) {
-                            Icon(Icons.Default.Remove, contentDescription = "-1 Suyas")
-                        }
+                    Spacer(Modifier.height(8.dp))
+                    IconButton(onClick = { addPoints("their", -1) }) {
+                        Icon(Icons.Default.Remove, contentDescription = "-1 Suyas")
                     }
-                }
-
-                Spacer(Modifier.height(12.dp))
-
-                Button(onClick = { resetPoints() }) {
-                    Icon(Icons.Default.Refresh, contentDescription = "Reiniciar")
-                    Spacer(Modifier.width(8.dp))
-                    Text("Reiniciar")
                 }
             }
         }
@@ -259,9 +273,8 @@ fun TrucoScoreBoardScreen(onBack: () -> Unit) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("• Para qué sirve: Te ayuda a llevar la cuenta de los puntos de ambos equipos en una partida de Truco.")
                     Text("• Guía rápida:")
-                    Text("   – Toca en el lado izquierdo de la pantalla para sumar un punto a “Nuestras”.")
-                    Text("   – Toca en el lado derecho para sumar un punto a “Suyas”.")
-                    Text("   – Usa los botones +/– en la parte inferior para ajustar manualmente.")
+                    Text("   – Usa los botones +/– en los costados para sumar/restar puntos.")
+                    Text("   – Toca en mitad izquierda o derecha de la pantalla para sumar rápido.")
                     Text("   – Presiona “Reiniciar” para empezar una nueva partida.")
                     Text("   – La partida se guarda automáticamente si sales y regresas más tarde.")
                 }
@@ -277,3 +290,4 @@ fun TrucoScoreBoardScreen(onBack: () -> Unit) {
         )
     }
 }
+

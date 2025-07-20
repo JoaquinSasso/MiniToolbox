@@ -25,8 +25,8 @@ import com.joasasso.minitoolbox.tools.calculadoras.divisorGastos.ReunionesScreen
 import com.joasasso.minitoolbox.tools.entretenimiento.AdivinaBanderaScreen
 import com.joasasso.minitoolbox.tools.entretenimiento.CalculosRapidosScreen
 import com.joasasso.minitoolbox.tools.entretenimiento.CoinFlipScreen
+import com.joasasso.minitoolbox.tools.entretenimiento.InOtherWoldScreen
 import com.joasasso.minitoolbox.tools.entretenimiento.LanzadorDadosScreen
-import com.joasasso.minitoolbox.tools.entretenimiento.MiYoDelMultiversoScreen
 import com.joasasso.minitoolbox.tools.entretenimiento.SelectorOpcionesScreen
 import com.joasasso.minitoolbox.tools.entretenimiento.TrucoScoreBoardScreen
 import com.joasasso.minitoolbox.tools.frases.BasicPhrasesScreen
@@ -224,7 +224,7 @@ fun MiniToolboxNavGraph(navController: NavHostController) {
             BasicPhrasesScreen(onBack = { navController.popBackStack() })
         }
         composable(Screen.MiYoDelMultiverso.route){
-            MiYoDelMultiversoScreen(onBack = { navController.popBackStack() })
+            InOtherWoldScreen(onBack = { navController.popBackStack() })
         }
 
     }
