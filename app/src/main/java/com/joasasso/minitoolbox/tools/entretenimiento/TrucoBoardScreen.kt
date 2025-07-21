@@ -36,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -162,8 +163,8 @@ fun TrucoScoreBoardScreen(onBack: () -> Unit) {
     val ourPointsFlow by scoreRepo.ourPointsFlow.collectAsState(initial = 0)
     val theirPointsFlow by scoreRepo.theirPointsFlow.collectAsState(initial = 0)
 
-    var ourPoints by remember { mutableStateOf(ourPointsFlow) }
-    var theirPoints by remember { mutableStateOf(theirPointsFlow) }
+    var ourPoints by remember { mutableIntStateOf(ourPointsFlow) }
+    var theirPoints by remember { mutableIntStateOf(theirPointsFlow) }
     LaunchedEffect(ourPointsFlow, theirPointsFlow) {
         ourPoints = ourPointsFlow
         theirPoints = theirPointsFlow
