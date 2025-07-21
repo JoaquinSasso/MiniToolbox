@@ -278,5 +278,12 @@ object ToolRegistry {
             subCategory = "Minijuego",
             svgResId = R.drawable.planet_ringed
         ),
+        Tool(
+            name = "Adivina la Capital",
+            screen = Screen.AdivinaCapital,
+            category = ToolCategory.Entretenimiento,
+            subCategory = "Minijuego",
+            svgResId = R.drawable.capitol
+        )
     )
 }

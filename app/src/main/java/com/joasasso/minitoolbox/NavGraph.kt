@@ -23,6 +23,7 @@ import com.joasasso.minitoolbox.tools.calculadoras.divisorGastos.DetallesReunion
 import com.joasasso.minitoolbox.tools.calculadoras.divisorGastos.EditarGastoScreen
 import com.joasasso.minitoolbox.tools.calculadoras.divisorGastos.ReunionesScreen
 import com.joasasso.minitoolbox.tools.entretenimiento.AdivinaBanderaScreen
+import com.joasasso.minitoolbox.tools.entretenimiento.AdivinaCapitalScreen
 import com.joasasso.minitoolbox.tools.entretenimiento.CalculosRapidosScreen
 import com.joasasso.minitoolbox.tools.entretenimiento.CoinFlipScreen
 import com.joasasso.minitoolbox.tools.entretenimiento.InOtherWoldScreen
@@ -225,6 +226,9 @@ fun MiniToolboxNavGraph(navController: NavHostController) {
         }
         composable(Screen.MiYoDelMultiverso.route){
             InOtherWoldScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.AdivinaCapital.route){
+            AdivinaCapitalScreen(onBack = { navController.popBackStack() })
         }
 
     }
