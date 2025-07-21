@@ -1,8 +1,6 @@
 package com.joasasso.minitoolbox.tools.entretenimiento
 
 import android.content.Context
-import android.os.VibrationEffect
-import android.os.Vibrator
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -18,7 +16,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProgressIndicatorDefaults
@@ -41,26 +38,28 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
+import com.joasasso.minitoolbox.tools.data.CapitalOfCountry
 import com.joasasso.minitoolbox.tools.data.CountryOuterClass
-import com.joasasso.minitoolbox.tools.data.FlagGameDataStore
-import com.joasasso.minitoolbox.tools.data.MinimalCountry
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.abs
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AdivinaBanderaScreen(onBack: () -> Unit) {
+fun AdivinaCapitalScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
 
-    var countries by remember { mutableStateOf<List<MinimalCountry>>(emptyList()) }
-    var currentQuestion by remember { mutableStateOf<MinimalCountry?>(null) }
+    var countries by remember { mutableStateOf<List<CapitalOfCountry>>(emptyList()) }
+    var currentQuestion by remember { mutableStateOf<CapitalOfCountry?>(null) }
 
     var score by remember { mutableIntStateOf(0) }
     var record by remember { mutableIntStateOf(0) }
@@ -71,21 +70,19 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
     var selectedOption by remember { mutableStateOf<String?>(null) }
     var correctOption by remember { mutableStateOf<String?>(null) }
     var buttonsEnabled by remember { mutableStateOf(true) }
-    var shuffledOptions by remember { mutableStateOf<List<MinimalCountry>>(emptyList()) }
+    var shuffledOptions by remember { mutableStateOf<List<CapitalOfCountry>>(emptyList()) }
 
-    var timeLeft by remember { mutableIntStateOf(100) } // de 0 a 100
+    var timeLeft by remember { mutableIntStateOf(100) }
     var timerRunning by remember { mutableStateOf(false) }
     var progress by remember { mutableFloatStateOf(1f) }
-    var timerJob by remember { mutableStateOf<Job?>(null) }
-
 
     val defaultBg = MaterialTheme.colorScheme.background
     var bgFlashColor by remember { mutableStateOf(defaultBg) }
     val animatedBgColor by animateColorAsState(targetValue = bgFlashColor, label = "bgColor")
 
     LaunchedEffect(Unit) {
-        countries = loadMinimalCountryDataset(context)
-        nextRoundFlag(countries) { q, opts, shuffled ->
+        countries = loadCapitalsFromDataset(context)
+        nextRoundCapital(countries) { q, opts, shuffled ->
             currentQuestion = q
             shuffledOptions = shuffled
         }
@@ -93,7 +90,7 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
     }
 
     LaunchedEffect(Unit) {
-        FlagGameDataStore.getBestScore(context).collect { record = it }
+        CapitalGameDataStore.getBestScore(context).collect { record = it }
     }
 
     LaunchedEffect(timerRunning) {
@@ -119,7 +116,7 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
                     buttonsEnabled = true
                     timeLeft = 100
                     timerRunning = true
-                    nextRoundFlag(countries) { q, opts, shuffled ->
+                    nextRoundCapital(countries) { q, opts, shuffled ->
                         currentQuestion = q
                         shuffledOptions = shuffled
                     }
@@ -128,9 +125,8 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
         }
     }
 
-
     Scaffold(
-        topBar = { TopBarReusable("Adivina la bandera", onBack) { showInfo = true } },
+        topBar = { TopBarReusable("Adivina la capital", onBack) { showInfo = true } },
         bottomBar = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -142,15 +138,14 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
                 Text("Tiempo restante: %.0f segundos".format(abs(progress * 10f)),
                     style = MaterialTheme.typography.titleMedium
                 )
-
                 LinearProgressIndicator(
-                    progress = { progress.coerceIn(0f, 1f) },
+                    progress = { progress },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(12.dp),
                     color = MaterialTheme.colorScheme.primary,
                     trackColor = ProgressIndicatorDefaults.linearTrackColor,
-                    strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
+                    strokeCap = ProgressIndicatorDefaults.LinearStrokeCap
                 )
                 Spacer(Modifier.height(40.dp))
             }
@@ -166,8 +161,9 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             currentQuestion?.let { question ->
-                Text("¿De qué país es esta bandera?", style = MaterialTheme.typography.titleLarge)
-                Text(question.flag, style = MaterialTheme.typography.displayLarge)
+                Text("¿Que país tiene esta cápital?", style = MaterialTheme.typography.titleLarge)
+                Text(question.capital, style = MaterialTheme.typography.headlineLarge)
+
 
                 LazyColumn(
                     modifier = Modifier
@@ -179,7 +175,7 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
                     items(shuffledOptions) { option ->
                         val bgColor = when {
                             selectedOption == null -> MaterialTheme.colorScheme.primaryContainer
-                            option.name == correctOption -> Color(0xFF4CAF50)
+                            option.capital == correctOption -> Color(0xFF4CAF50)
                             else -> Color(0xFFF44336)
                         }
 
@@ -188,23 +184,22 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
                                 if (!buttonsEnabled) return@Button
                                 buttonsEnabled = false
                                 selectedOption = option.name
-                                correctOption = currentQuestion?.name
+                                correctOption = currentQuestion?.capital
 
-                                val correct = option.name == currentQuestion?.name
+                                val correct = option.capital == currentQuestion?.capital
 
                                 if (correct) {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     score++
                                     if (score > record) {
                                         record = score
-                                        scope.launch { FlagGameDataStore.setBestScore(context, score) }
+                                        scope.launch { CapitalGameDataStore.setBestScore(context, score) }
                                         lastResult = "¡Nuevo récord!"
                                     } else {
                                         lastResult = null
                                     }
                                 } else {
                                     vibrate(context, duration = 400, amplitude = 255)
-
                                     bgFlashColor = Color(0xFFC53737)
                                     lastResult = "¡Incorrecto! Tu puntuación se reinició."
                                     score = 0
@@ -219,7 +214,7 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
                                     buttonsEnabled = true
                                     timeLeft = 100
                                     timerRunning = true
-                                    nextRoundFlag(countries) { q, opts, shuffled ->
+                                    nextRoundCapital(countries) { q, opts, shuffled ->
                                         currentQuestion = q
                                         shuffledOptions = shuffled
                                     }
@@ -259,13 +254,12 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
     if (showInfo) {
         AlertDialog(
             onDismissRequest = { showInfo = false },
-            title = { Text("Acerca de Adivina la Bandera") },
+            title = { Text("Acerca de Adivina la Capital") },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Para qué sirve: Juego para poner a prueba tus conocimientos sobre banderas del mundo.")
-                    Text("• Cómo usar: Aparece una bandera y debes elegir el país correspondiente. Si acertás, sumás puntos. Si errás, perdés el puntaje actual.")
-                    Text("• Hay un límite de tiempo de 10 segundos por cada bandera.")
-                    Text("• Créditos a Santiago Garcia por la idea")
+                    Text("• Para qué sirve: Juego para practicar y divertirte reconociendo capitales del mundo.")
+                    Text("• Cómo usar: Aparece el nombre de una capital y debes elegir el país correspondiente.")
+                    Text("• Si acertás, sumás puntos. Si errás o se termina el tiempo, tu puntaje se reinicia.")
                 }
             },
             confirmButton = {
@@ -280,32 +274,42 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
     }
 }
 
-suspend fun loadMinimalCountryDataset(context: Context): List<MinimalCountry> = withContext(Dispatchers.IO) {
+private suspend fun loadCapitalsFromDataset(context: Context): List<CapitalOfCountry> = withContext(Dispatchers.IO) {
     val bytes = context.assets.open("countries_dataset.pb").readBytes()
     val protoList = CountryOuterClass.CountryList.parseFrom(bytes)
-    protoList.countriesList.map {
-        MinimalCountry(name = it.name, flag = it.flag)
-    }
+    protoList.countriesList
+        .filter { it.capitalList.isNotEmpty() && it.capitalList.first().isNotBlank() }
+        .map {
+            // capital = flag, país = name
+            CapitalOfCountry(name = it.name, capital = it.capitalList.first())
+        }
 }
 
-private fun nextRoundFlag(
-    all: List<MinimalCountry>,
-    onSet: (MinimalCountry, List<MinimalCountry>, List<MinimalCountry>) -> Unit
+private fun nextRoundCapital(
+    all: List<CapitalOfCountry>,
+    onSet: (CapitalOfCountry, List<CapitalOfCountry>, List<CapitalOfCountry>) -> Unit
 ) {
     val correct = all.random()
     val options = buildList {
         add(correct)
         while (size < 4) {
             val candidate = all.random()
-            if (candidate.name != correct.name && candidate !in this) add(candidate)
+            if (candidate.capital != correct.capital && candidate !in this) add(candidate)
         }
     }
     val shuffled = options.shuffled()
     onSet(correct, options, shuffled)
 }
 
-fun vibrate(context: Context, duration: Long = 300, amplitude: Int = VibrationEffect.DEFAULT_AMPLITUDE) {
-    val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
-    vibrator?.vibrate(VibrationEffect.createOneShot(duration, amplitude))
+object CapitalGameDataStore {
+    private val Context.dataStore by preferencesDataStore("capital_game_prefs")
+    private val BEST_SCORE = intPreferencesKey("capital_best_score")
+
+    suspend fun getBestScore(context: Context): Flow<Int> =
+        context.dataStore.data.map { it[BEST_SCORE] ?: 0 }
+
+    suspend fun setBestScore(context: Context, score: Int) {
+        context.dataStore.edit { it[BEST_SCORE] = score }
+    }
 }
 

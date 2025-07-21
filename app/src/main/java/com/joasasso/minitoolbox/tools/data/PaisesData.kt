@@ -15,3 +15,8 @@ data class MinimalCountry(
     val name: String,
     val flag: String
 )
+
+data class CapitalOfCountry(
+    val name: String,
+    val capital: String
+)
