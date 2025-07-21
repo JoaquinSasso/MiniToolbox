@@ -6,12 +6,14 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.net.Uri
+import androidx.compose.animation.Animatable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,21 +24,24 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -56,7 +61,7 @@ import androidx.compose.ui.graphics.Color as ComposeColor
 fun InOtherWoldScreen(onBack: () -> Unit) {
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
+    var showInfo by remember { mutableStateOf(false) }
 
     var resultado by remember { mutableStateOf("") }
     val fadeAnim by animateFloatAsState(targetValue = if (resultado.isNotBlank()) 1f else 0f)
@@ -162,7 +167,7 @@ fun InOtherWoldScreen(onBack: () -> Unit) {
 
 
     Scaffold(
-        topBar = { TopBarReusable("Versión alternativa de tu amigo", onBack) },
+        topBar = { TopBarReusable("En otro mundo", onBack, {showInfo = true}) },
         floatingActionButton = {
             Column(horizontalAlignment = Alignment.End) {
                 if (imagenResultado != null) {
@@ -211,13 +216,9 @@ fun InOtherWoldScreen(onBack: () -> Unit) {
                     backgroundColor = ComposeColor(fondoColor)
 
                     val width = 1080
-                    val height = 600
-                    val bitmap = createBitmap(width, height)
-                    val canvas = Canvas(bitmap)
-                    canvas.drawColor(fondoColor)
-
-                    val paddingPx = 64
                     val maxWidth = width - 100
+                    val paddingPx = 64
+
                     val words = resultado.split(" ")
                     val lines = mutableListOf<String>()
                     var currentLine = ""
@@ -234,29 +235,51 @@ fun InOtherWoldScreen(onBack: () -> Unit) {
                     }
                     if (currentLine.isNotEmpty()) lines.add(currentLine)
 
+                    // 🔢 Calcular altura necesaria dinámicamente
+                    val lineHeight = 100f
+                    val totalHeight = (lines.size * lineHeight + paddingPx * 2).toInt()
+
+                    val bitmap = createBitmap(width, totalHeight)
+                    val canvas = Canvas(bitmap)
+                    canvas.drawColor(fondoColor)
+
                     lines.forEachIndexed { index, line ->
-                        canvas.drawText(line, width / 2f, (index + 1) * 100f + paddingPx, paint)
+                        val y = (index + 1) * lineHeight + paddingPx - 20
+                        canvas.drawText(line, width / 2f, y, paint)
                     }
 
                     bitmap
                 }
                 imagenResultado = resultBitmap
 
-                Image(
-                    painter = BitmapPainter(resultBitmap.asImageBitmap()),
-                    contentDescription = "Resultado",
-                    contentScale = ContentScale.Inside,
+                val currentColor = remember { Animatable(ComposeColor(0xFFFFF176)) }
+
+                LaunchedEffect(resultado) {
+                    currentColor.animateTo(backgroundColor)
+                }
+
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(2.dp, backgroundColor, RoundedCornerShape(12.dp))
                         .background(backgroundColor, RoundedCornerShape(12.dp))
+                        .border(2.dp, backgroundColor, RoundedCornerShape(12.dp))
                         .padding(16.dp, bottom = 24.dp)
                         .alpha(fadeAnim)
                         .clickable(onClick = {
                             resultado = generarResultadoAleatorio()
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        })
-                )
+                        }),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        painter = BitmapPainter(resultBitmap.asImageBitmap()),
+                        contentDescription = "Resultado",
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                    )
+                }
 
 
             } else {
@@ -273,4 +296,31 @@ fun InOtherWoldScreen(onBack: () -> Unit) {
             }
         }
     }
+    if (showInfo) {
+        AlertDialog(
+            onDismissRequest = { showInfo = false },
+            title = { Text("Acerca de En otro mundo") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("• Para qué sirve: Te genera frases divertidas y virales sobre un amigo en un universo alternativo.")
+                    Text("• Guía rápida:")
+                    Text("   – Toca el botón principal para generar una nueva frase aleatoria.")
+                    Text("   – Cada resultado incluye un emoji, un nombre absurdo, un rol inusual y un lugar extraño.")
+                    Text("   – Podés compartir el resultado con tus amigos usando el botón de compartir.")
+                    Text("   – ¡Ideal para redes sociales, para enviárselo a tu grupo o para reírte un rato!")
+                    Text("Curiosidad: ¡Hay 10.156.250 combinaciones posibles entre emojis, letras, nombres, roles y lugares!")
+
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showInfo = false
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                }) {
+                    Text("Cerrar")
+                }
+            }
+        )
+    }
+
 }

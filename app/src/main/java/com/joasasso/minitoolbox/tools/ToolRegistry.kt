@@ -272,7 +272,7 @@ object ToolRegistry {
             svgResId = R.drawable.phrases
         ),
         Tool(
-            name = "Versión alternativa de tu amigo",
+            name = "En otro mundo",
             screen = Screen.MiYoDelMultiverso,
             category = ToolCategory.Entretenimiento,
             subCategory = "Minijuego",
