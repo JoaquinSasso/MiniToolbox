@@ -28,7 +28,7 @@ import com.joasasso.minitoolbox.tools.entretenimiento.CalculosRapidosScreen
 import com.joasasso.minitoolbox.tools.entretenimiento.CoinFlipScreen
 import com.joasasso.minitoolbox.tools.entretenimiento.InOtherWoldScreen
 import com.joasasso.minitoolbox.tools.entretenimiento.LanzadorDadosScreen
-import com.joasasso.minitoolbox.tools.entretenimiento.SelectorOpcionesScreen
+import com.joasasso.minitoolbox.tools.entretenimiento.OptionSelectorScreen
 import com.joasasso.minitoolbox.tools.entretenimiento.TrucoScoreBoardScreen
 import com.joasasso.minitoolbox.tools.frases.BasicPhrasesScreen
 import com.joasasso.minitoolbox.tools.generadores.GeneradorContrasenaScreen
@@ -40,17 +40,18 @@ import com.joasasso.minitoolbox.tools.generadores.GroupSelectorScreen
 import com.joasasso.minitoolbox.tools.generadores.RandomColorGeneratorScreen
 import com.joasasso.minitoolbox.tools.generadores.SugeridorActividadScreen
 import com.joasasso.minitoolbox.tools.info.AgeCalculatorScreen
-import com.joasasso.minitoolbox.tools.info.PaisesInfoScreen
+import com.joasasso.minitoolbox.tools.info.CountriesInfoScreen
+import com.joasasso.minitoolbox.tools.info.RemainingTimeScreen
 import com.joasasso.minitoolbox.tools.info.TextBinaryConverterScreen
-import com.joasasso.minitoolbox.tools.info.TiempoHasta
 import com.joasasso.minitoolbox.tools.medicion.BrujulaScreen
 import com.joasasso.minitoolbox.tools.medicion.BubbleLevelScreen
-import com.joasasso.minitoolbox.tools.medicion.LinternaScreen
-import com.joasasso.minitoolbox.tools.medicion.MedidorLuzScreen
+import com.joasasso.minitoolbox.tools.medicion.FlashScreen
+import com.joasasso.minitoolbox.tools.medicion.LightSensorScreen
 import com.joasasso.minitoolbox.tools.medicion.ReglaScreen
-import com.joasasso.minitoolbox.tools.recordatorios.ContadorRachaScreen
-import com.joasasso.minitoolbox.tools.recordatorios.agua.AguaEstadisticasScreen
-import com.joasasso.minitoolbox.tools.recordatorios.agua.RecordatorioAguaScreen
+import com.joasasso.minitoolbox.tools.recordatorios.RachaScreen
+import com.joasasso.minitoolbox.tools.recordatorios.ToDoListScreen
+import com.joasasso.minitoolbox.tools.recordatorios.agua.AguaReminderScreen
+import com.joasasso.minitoolbox.tools.recordatorios.agua.AguaStatisticsScreen
 import com.joasasso.minitoolbox.tools.recordatorios.pomodoro.PomodoroScreen
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -136,16 +137,16 @@ fun MiniToolboxNavGraph(navController: NavHostController) {
             ReglaScreen(onBack = {navController.popBackStack() })
         }
         composable(Screen.MedidorLuz.route){
-            MedidorLuzScreen(onBack = {navController.popBackStack() })
+            LightSensorScreen(onBack = {navController.popBackStack() })
         }
         composable(Screen.Linterna.route){
-            LinternaScreen(onBack = {navController.popBackStack() })
+            FlashScreen(onBack = {navController.popBackStack() })
         }
         composable(Screen.Rachas.route){
-            ContadorRachaScreen(onBack = {navController.popBackStack() })
+            RachaScreen(onBack = {navController.popBackStack() })
         }
         composable(Screen.Agua.route){
-            RecordatorioAguaScreen(
+            AguaReminderScreen(
                 onBack = { navController.popBackStack() },
                 onShowEstadisticas = {
                     navController.navigate(Screen.EstadisticasAgua.route)
@@ -153,19 +154,19 @@ fun MiniToolboxNavGraph(navController: NavHostController) {
             )
         }
         composable(Screen.TiempoHasta.route){
-            TiempoHasta(onBack = { navController.popBackStack() }) }
+            RemainingTimeScreen(onBack = { navController.popBackStack() }) }
 
         composable(Screen.EstadisticasAgua.route){
-            AguaEstadisticasScreen(onBack = {navController.popBackStack() })
+            AguaStatisticsScreen(onBack = {navController.popBackStack() })
         }
 
         composable(Screen.PaisesInfo.route){
-            PaisesInfoScreen(onBack = { navController.popBackStack() })
+            CountriesInfoScreen(onBack = { navController.popBackStack() })
         }
 
         composable(Screen.RuletaSelectora.route)
         {
-            SelectorOpcionesScreen(onBack = {navController.popBackStack()})
+            OptionSelectorScreen(onBack = {navController.popBackStack()})
         }
         composable(Screen.AdivinaBandera.route)
         {
@@ -233,6 +234,9 @@ fun MiniToolboxNavGraph(navController: NavHostController) {
         }
         composable(Screen.Brujula.route){
             BrujulaScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.ToDo.route){
+            ToDoListScreen(onBack = { navController.popBackStack() })
         }
 
     }

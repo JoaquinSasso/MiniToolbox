@@ -6,6 +6,7 @@ import androidx.compose.material.icons.automirrored.filled.ShortText
 import androidx.compose.material.icons.filled.Cake
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.Casino
+import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material.icons.filled.Flag
@@ -291,6 +292,13 @@ object ToolRegistry {
             category = ToolCategory.Herramientas,
             subCategory = "Instrumentos",
             svgResId = R.drawable.arrow_north
+        ),
+        Tool(
+            name = "ToDo List",
+            screen = Screen.ToDo,
+            category = ToolCategory.Organizacion,
+            subCategory = "Tareas",
+            icon = Icons.Filled.Checklist
         )
     )
 }

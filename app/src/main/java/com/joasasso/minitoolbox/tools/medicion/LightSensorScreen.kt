@@ -43,7 +43,7 @@ import com.joasasso.minitoolbox.ui.components.TopBarReusable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MedidorLuzScreen(onBack: () -> Unit) {
+fun LightSensorScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
     var showInfo by remember { mutableStateOf(false) }

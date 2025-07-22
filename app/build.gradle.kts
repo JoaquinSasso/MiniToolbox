@@ -61,7 +61,7 @@ dependencies {
     // 3) Compose Material 3 (Actualización a Material3)
     implementation(libs.material3)
     implementation(libs.material)
-    implementation("androidx.compose.foundation:foundation:1.8.3")
+    implementation("androidx.compose.foundation:foundation")
 
 
 

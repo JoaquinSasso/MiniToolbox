@@ -41,7 +41,7 @@ import com.joasasso.minitoolbox.ui.components.TopBarReusable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LinternaScreen(onBack: () -> Unit) {
+fun FlashScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
 

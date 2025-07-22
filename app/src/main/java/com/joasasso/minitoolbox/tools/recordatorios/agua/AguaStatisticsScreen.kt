@@ -46,7 +46,7 @@ import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AguaEstadisticasScreen(
+fun AguaStatisticsScreen(
     onBack: () -> Unit
 ) {
     val context = LocalContext.current

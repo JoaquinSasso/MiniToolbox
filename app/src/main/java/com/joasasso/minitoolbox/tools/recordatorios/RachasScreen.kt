@@ -101,7 +101,7 @@ object RachaPrefs {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ContadorRachaScreen(onBack: () -> Unit) {
+fun RachaScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
     var showAddDialog by remember { mutableStateOf(false) }
