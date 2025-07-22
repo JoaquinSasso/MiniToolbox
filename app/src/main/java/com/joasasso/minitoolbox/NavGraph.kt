@@ -43,6 +43,7 @@ import com.joasasso.minitoolbox.tools.info.AgeCalculatorScreen
 import com.joasasso.minitoolbox.tools.info.PaisesInfoScreen
 import com.joasasso.minitoolbox.tools.info.TextBinaryConverterScreen
 import com.joasasso.minitoolbox.tools.info.TiempoHasta
+import com.joasasso.minitoolbox.tools.medicion.BrujulaScreen
 import com.joasasso.minitoolbox.tools.medicion.BubbleLevelScreen
 import com.joasasso.minitoolbox.tools.medicion.LinternaScreen
 import com.joasasso.minitoolbox.tools.medicion.MedidorLuzScreen
@@ -229,6 +230,9 @@ fun MiniToolboxNavGraph(navController: NavHostController) {
         }
         composable(Screen.AdivinaCapital.route){
             AdivinaCapitalScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.Brujula.route){
+            BrujulaScreen(onBack = { navController.popBackStack() })
         }
 
     }

@@ -112,7 +112,7 @@ fun GroupSelectorScreen(onBack: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .background(color = MaterialTheme.colorScheme.surfaceVariant)
+                .background(color = MaterialTheme.colorScheme.surfaceContainerLowest)
         ) {
             Text(
                 text = "Tamaño de equipo",
@@ -133,8 +133,8 @@ fun GroupSelectorScreen(onBack: () -> Unit) {
                         onClick = { selectedSize = size
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)},
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (selectedSize == size) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.background,
-                            contentColor = if (selectedSize == size) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground
+                            containerColor = if (selectedSize == size) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainer,
+                            contentColor = if (selectedSize == size) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
                         ),
                         modifier = Modifier.weight(1f)
                     ) {

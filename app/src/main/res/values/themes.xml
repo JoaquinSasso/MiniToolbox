@@ -1,6 +1,13 @@
 <resources>
     <!-- Base application theme -->
     <style name="Theme.MiniToolbox" parent="Theme.Material3.DayNight">
-        <!-- No necesitas especificar los colores aquí, ya que el sistema se encargará de ello -->
+        <!-- Fondo del splash screen -->
+        <item name="android:windowSplashScreenBackground">#000000</item> <!-- o cualquier otro color oscuro o de contraste -->
+
+        <!-- Ícono animado del splash screen -->
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_icon</item>
+
+        <!-- Si querés mantener el ícono centrado -->
+        <item name="android:windowSplashScreenIconBackgroundColor">@null</item>
     </style>
 </resources>

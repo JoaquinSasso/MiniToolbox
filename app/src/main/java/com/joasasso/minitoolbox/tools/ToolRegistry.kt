@@ -284,6 +284,13 @@ object ToolRegistry {
             category = ToolCategory.Entretenimiento,
             subCategory = "Minijuego",
             svgResId = R.drawable.capitol
+        ),
+        Tool(
+            name = "Brújula",
+            screen = Screen.Brujula,
+            category = ToolCategory.Herramientas,
+            subCategory = "Instrumentos",
+            svgResId = R.drawable.arrow_north
         )
     )
 }
