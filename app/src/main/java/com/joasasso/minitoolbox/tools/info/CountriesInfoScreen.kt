@@ -43,7 +43,7 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PaisesInfoScreen(onBack: () -> Unit) {
+fun CountriesInfoScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
     val formatter = remember { NumberFormat.getInstance(Locale("es", "AR")) }

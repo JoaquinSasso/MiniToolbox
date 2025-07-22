@@ -36,7 +36,7 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TiempoHasta(onBack: () -> Unit) {
+fun RemainingTimeScreen(onBack: () -> Unit) {
     val haptic = LocalHapticFeedback.current
     val formatter = remember { NumberFormat.getInstance(Locale("es", "AR")) }
     val scrollState = rememberScrollState()

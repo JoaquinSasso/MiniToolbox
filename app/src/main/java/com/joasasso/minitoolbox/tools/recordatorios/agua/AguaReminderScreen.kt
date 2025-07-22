@@ -88,7 +88,7 @@ import kotlin.math.roundToInt
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RecordatorioAguaScreen(
+fun AguaReminderScreen(
     onBack: () -> Unit,
     onShowEstadisticas: () -> Unit
 ) {

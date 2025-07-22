@@ -44,7 +44,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
-fun SelectorOpcionesScreen(onBack: () -> Unit) {
+fun OptionSelectorScreen(onBack: () -> Unit) {
     val haptic = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
     var showInfo by remember { mutableStateOf(false) }
