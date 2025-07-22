@@ -59,7 +59,7 @@ fun CategoriesScreen(
                     Text(stringResource(selectedCategory.titleRes))
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
                     titleContentColor = MaterialTheme.colorScheme.onSurface
                 ),
                 modifier = Modifier.fillMaxWidth()

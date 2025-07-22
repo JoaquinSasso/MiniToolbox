@@ -1,0 +1,6 @@
+<resources>
+    <style name="Theme.MiniToolbox" parent="Theme.Material3.DayNight">
+        <item name="android:windowSplashScreenBackground">#FFFFFF</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_icon</item> <!-- Icono oscuro para fondo claro -->
+    </style>
+</resources>
