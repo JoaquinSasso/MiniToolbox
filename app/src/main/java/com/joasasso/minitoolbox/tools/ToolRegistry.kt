@@ -87,13 +87,6 @@ object ToolRegistry {
             svgResId = R.drawable.zodiac_sign
     ),
         Tool(
-            name = "Temporizador Pomodoro",
-            screen = Screen.Pomodoro,
-            category = ToolCategory.Organizacion,
-            subCategory = "Temporizadores",
-            icon = Icons.Filled.Timer
-    ),
-        Tool(
             name = "Nivel Burbuja",
             screen = Screen.BubbleLevel,
             category = ToolCategory.Herramientas,
@@ -149,6 +142,13 @@ object ToolRegistry {
             category = ToolCategory.Organizacion,
             subCategory = "Hábitos y Actividades",
             icon = Icons.Filled.Lightbulb
+        ),
+        Tool(
+            name = "Temporizador Pomodoro",
+            screen = Screen.Pomodoro,
+            category = ToolCategory.Organizacion,
+            subCategory = "",
+            icon = Icons.Filled.Timer
         ),
         Tool(
             name = "Generador de Nombres",
@@ -248,7 +248,7 @@ object ToolRegistry {
             name = "Divisor de Gastos",
             screen = Screen.Reuniones,
             category = ToolCategory.Organizacion,
-            subCategory = "Reuniones",
+            subCategory = "",
             icon = Icons.Filled.Receipt
         ),
         Tool(
@@ -297,7 +297,7 @@ object ToolRegistry {
             name = "ToDo List",
             screen = Screen.ToDo,
             category = ToolCategory.Organizacion,
-            subCategory = "Tareas",
+            subCategory = "",
             icon = Icons.Filled.Checklist
         )
     )
