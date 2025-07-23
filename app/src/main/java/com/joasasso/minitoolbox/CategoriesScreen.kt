@@ -114,7 +114,7 @@ fun CategoriesScreen(
                             .padding(vertical = 4.dp, horizontal = 8.dp)
                     ) {
                         Text(
-                            text = subCategory,
+                            text = stringResource(subCategory),
                             style = MaterialTheme.typography.titleSmall,
                             color = MaterialTheme.colorScheme.onSurface,
                             fontSize = MaterialTheme.typography.titleLarge.fontSize,

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="team_size">Tamaño de equipo</string>
+    <string name="place_fingers">Pon aquí los dedos para formar equipos</string>
+    <string name="incorrect_player_count">Cantidad de jugadores incorrecta</string>
+    <string name="about_team_generator">Acerca de Selector de Grupos</string>
+    <string name="team_generator_purpose">• Para qué sirve: Distribuye participantes en equipos de tamaño fijo de forma aleatoria y táctil.</string>
+    <string name="team_help_guide">• Guía rápida:</string>
+    <string name="team_generator_help_1">   – Selecciona el tamaño de equipo (2–5).</string>
+    <string name="team_generator_help_2">   – Cada jugador debe colocar un dedo en la pantalla. Si el número de dedos no es divisible, verás un aviso de error.</string>
+    <string name="team_generator_help_3">   – Los círculos de colores debajo de los dedos de cada jugador indican los equipos asignados.</string>
+</resources>

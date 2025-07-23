@@ -75,26 +75,26 @@ fun RandomColorGeneratorScreen(onBack: () -> Unit) {
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 )
-            ) { Text("Generar nuevo") }
+            ) { Text(stringResource(R.string.generate_new_color)) }
             Spacer(Modifier.height(16.dp))
             IconButton(onClick = {
                 clipboardManager.setText(AnnotatedString(hex))
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
             }) {
-                Icon(Icons.Default.ContentCopy, contentDescription = "Copiar", tint = contrastColor)
+                Icon(Icons.Default.ContentCopy, contentDescription = stringResource(R.string.desc_copy), tint = contrastColor)
             }
         }
     }
     if (showInfo) {
         AlertDialog(
             onDismissRequest = { showInfo = false },
-            title = { Text("Acerca de Generador de Colores") },
+            title = { Text(stringResource(R.string.color_generator_help_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Para qué sirve: Crea de un solo toque un color aleatorio y te muestra su código hexadecimal.")
-                    Text("• Guía rápida:")
-                    Text("   – Pulsa “Generar nuevo” para cambiar el color de fondo.")
-                    Text("   – Pulsa el boton de copiar para llevar el código hexadecimal al portapapeles.")
+                    Text(stringResource(R.string.color_generator_help_purpose))
+                    Text(stringResource(R.string.color_generator_help_quickguide))
+                    Text("   – " + stringResource(R.string.color_generator_help_generate))
+                    Text("   – " + stringResource(R.string.color_generator_help_copy))
                 }
             },
             confirmButton = {
@@ -102,7 +102,7 @@ fun RandomColorGeneratorScreen(onBack: () -> Unit) {
                     showInfo = false
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 }) {
-                    Text("Cerrar")
+                    Text(stringResource(R.string.close))
                 }
             }
         )
