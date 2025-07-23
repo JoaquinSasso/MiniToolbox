@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="category_herramientas">Tools</string>
+    <string name="category_organizacion">Organization</string>
+    <string name="category_informacion">Information</string>
+    <string name="category_entretenimiento">Entertainment</string>"
+</resources>

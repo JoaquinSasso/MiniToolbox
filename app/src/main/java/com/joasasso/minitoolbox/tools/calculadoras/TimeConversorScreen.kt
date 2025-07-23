@@ -41,12 +41,14 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlinx.coroutines.launch
 
@@ -159,7 +161,7 @@ fun ConversorHorasScreen(onBack: () -> Unit) {
     }
 
     Scaffold(
-        topBar = {TopBarReusable("Conversor de Horas 12 / 24h", onBack, {showInfo = true})},
+        topBar = {TopBarReusable(stringResource(R.string.tool_hour_converter), onBack, {showInfo = true})},
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         Column(

@@ -58,6 +58,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -205,7 +206,7 @@ fun AguaReminderScreen(
     }
 
     Scaffold(
-        topBar = {TopBarReusable("Recordatorio de beber agua", onBack, {showInfo = true})},
+        topBar = {TopBarReusable(stringResource(R.string.tool_water_reminder), onBack, {showInfo = true})},
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
 

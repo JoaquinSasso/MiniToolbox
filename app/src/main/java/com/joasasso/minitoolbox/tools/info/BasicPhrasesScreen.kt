@@ -36,7 +36,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.tools.data.categoriasDisponibles
 import com.joasasso.minitoolbox.tools.data.idiomasDisponibles
 import com.joasasso.minitoolbox.tools.data.todasLasFrases
@@ -70,7 +72,7 @@ fun BasicPhrasesScreen(onBack: () -> Unit) {
 
     Scaffold(
         topBar = {
-            TopBarReusable("Frases Básicas", onBack = onBack, { showInfo = true })
+            TopBarReusable(stringResource(R.string.tool_basic_phrases), onBack = onBack, { showInfo = true })
         },
         content = { padding ->
             Column(

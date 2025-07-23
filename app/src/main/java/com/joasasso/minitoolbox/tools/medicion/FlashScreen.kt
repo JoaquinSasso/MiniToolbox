@@ -35,8 +35,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -79,7 +81,7 @@ fun FlashScreen(onBack: () -> Unit) {
     }
 
     Scaffold(
-        topBar = {TopBarReusable("Linterna", onBack, {showInfo = true})},
+        topBar = {TopBarReusable(stringResource(R.string.tool_flashlight), onBack, {showInfo = true})},
     ) { padding ->
         Box(
             Modifier

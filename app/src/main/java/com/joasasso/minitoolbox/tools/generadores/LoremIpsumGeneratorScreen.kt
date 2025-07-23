@@ -44,8 +44,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlinx.coroutines.launch
 
@@ -83,7 +85,7 @@ fun GeneradorLoremIpsumScreen(onBack: () -> Unit) {
     }
 
     Scaffold(
-        topBar = {TopBarReusable("Generador de Lorem Ipsum", onBack, {showInfo = true})},
+        topBar = {TopBarReusable(stringResource(R.string.tool_lorem_ipsum), onBack, {showInfo = true})},
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         Column(

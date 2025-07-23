@@ -25,8 +25,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import java.text.NumberFormat
 import java.util.Calendar
@@ -116,7 +118,7 @@ fun AgeCalculatorScreen(onBack: () -> Unit) {
     }
 
     Scaffold(
-        topBar = {TopBarReusable("Calculadora de Edad", onBack, {showInfo = true})},
+        topBar = {TopBarReusable(stringResource(R.string.tool_age_calculator), onBack, {showInfo = true})},
     ) { padding ->
         Column(
             Modifier

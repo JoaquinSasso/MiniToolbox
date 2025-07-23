@@ -44,10 +44,12 @@ import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.edit
+import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -116,7 +118,7 @@ fun RachaScreen(onBack: () -> Unit) {
     }
 
     Scaffold(
-        topBar = { TopBarReusable("Seguimiento de hábitos", onBack, { showInfo = true }) },
+        topBar = { TopBarReusable(stringResource(R.string.tool_habit_tracker), onBack, { showInfo = true }) },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {

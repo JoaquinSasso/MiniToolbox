@@ -40,10 +40,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import com.lightspark.composeqr.QrCodeView
 import kotlinx.coroutines.launch
@@ -60,7 +62,7 @@ fun GeneradorQrScreen(onBack: () -> Unit) {
     val haptic = LocalHapticFeedback.current
 
     Scaffold(
-        topBar = {TopBarReusable("Generador de QR", onBack, {showInfo = true})},
+        topBar = {TopBarReusable(stringResource(R.string.tool_qr_generator), onBack, {showInfo = true})},
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         Column(

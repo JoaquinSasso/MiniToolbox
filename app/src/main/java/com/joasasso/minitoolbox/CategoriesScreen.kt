@@ -164,7 +164,7 @@ fun CategoriesScreen(
 
                             Spacer(Modifier.width(16.dp))
                             Text(
-                                text = tool.name,
+                                text = stringResource(id = tool.name),
                                 style = MaterialTheme.typography.bodyLarge
                             )
                         }

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="add_expenses_screen">Add expenses</string>
+    <string name="create_meeting_screen">Add meeting</string>
+    <string name="edit_expenses_screen">Edit expenses</string>
+    <string name="meeting_details_screen">Meeting details</string>
+    <string name="water_statistics_screen">Water statistics</string>
+</resources>

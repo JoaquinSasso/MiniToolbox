@@ -37,10 +37,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -156,7 +158,7 @@ fun CalculosRapidosScreen(onBack: () -> Unit) {
     }
 
     Scaffold(
-        topBar = { TopBarReusable("Cálculos Rápidos", onBack) },
+        topBar = { TopBarReusable(stringResource(R.string.tool_quick_math), onBack) },
         containerColor = animatedBgColor,
         bottomBar = {
             Column(

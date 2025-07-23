@@ -40,7 +40,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.tools.data.CountryOuterClass
 import com.joasasso.minitoolbox.tools.data.FlagGameDataStore
 import com.joasasso.minitoolbox.tools.data.MinimalCountry
@@ -130,7 +132,7 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
 
 
     Scaffold(
-        topBar = { TopBarReusable("Adivina la bandera", onBack) { showInfo = true } },
+        topBar = { TopBarReusable(stringResource(R.string.tool_guess_flag), onBack) { showInfo = true } },
         bottomBar = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp),

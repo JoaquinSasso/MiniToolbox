@@ -36,7 +36,9 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.PointerId
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlinx.coroutines.delay
 
@@ -106,7 +108,7 @@ fun GroupSelectorScreen(onBack: () -> Unit) {
     }
 
     Scaffold(
-        topBar = {TopBarReusable("Generador de equipos", onBack, {showInfo = true})}
+        topBar = {TopBarReusable(stringResource(R.string.tool_team_generator), onBack, {showInfo = true})}
     ) { padding ->
         Column(
             modifier = Modifier

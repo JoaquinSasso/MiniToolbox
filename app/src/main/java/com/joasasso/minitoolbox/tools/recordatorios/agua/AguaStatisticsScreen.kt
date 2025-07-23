@@ -34,8 +34,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.tools.data.aguaDataStore
 import com.joasasso.minitoolbox.tools.data.flujoObjetivo
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
@@ -85,7 +87,7 @@ fun AguaStatisticsScreen(
     }
 
     Scaffold(
-        topBar = {TopBarReusable("Estadísticas de agua", onBack, {showInfo = true})},
+        topBar = {TopBarReusable(stringResource(R.string.water_statistics_screen), onBack, {showInfo = true})},
     ) { padding ->
         Column(
             modifier = Modifier

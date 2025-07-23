@@ -30,9 +30,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.tools.data.CountryOuterClass
 import com.joasasso.minitoolbox.tools.data.CountryResponse
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
@@ -85,7 +87,7 @@ fun CountriesInfoScreen(onBack: () -> Unit) {
     }
 
     Scaffold(
-        topBar = { TopBarReusable("Información de Países", onBack, { showInfo = true }) }
+        topBar = { TopBarReusable(stringResource(R.string.tool_country_info), onBack, { showInfo = true }) }
     ) { padding ->
         Column(
             Modifier

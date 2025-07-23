@@ -31,7 +31,9 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,7 +51,7 @@ fun ReglaScreen(onBack: () -> Unit) {
     val mainColor = MaterialTheme.colorScheme.primary
 
     Scaffold(
-        topBar = {TopBarReusable("Regla", onBack, {showInfo = true})},
+        topBar = {TopBarReusable(stringResource(R.string.tool_ruler), onBack, {showInfo = true})},
     ) { padding ->
         Box(
             Modifier

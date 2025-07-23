@@ -37,10 +37,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.tools.data.CapitalOfCountry
 import com.joasasso.minitoolbox.tools.data.CountryOuterClass
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
@@ -126,7 +128,7 @@ fun AdivinaCapitalScreen(onBack: () -> Unit) {
     }
 
     Scaffold(
-        topBar = { TopBarReusable("Adivina la capital", onBack) { showInfo = true } },
+        topBar = { TopBarReusable(stringResource(R.string.tool_guess_capital), onBack) { showInfo = true } },
         bottomBar = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp),

@@ -11,7 +11,7 @@ import com.joasasso.minitoolbox.nav.Screen
  * con su nombre, pantalla de destino, categoría e icono.
  */
 data class Tool(
-    val name: String,
+    val name: Int,
     val screen: Screen,
     val category: ToolCategory,
     val subCategory: String,

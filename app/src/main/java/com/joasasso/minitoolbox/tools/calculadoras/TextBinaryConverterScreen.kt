@@ -27,12 +27,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -76,7 +78,7 @@ fun TextBinaryConverterScreen(onBack: () -> Unit) {
     }
 
     Scaffold(
-        topBar = {TopBarReusable("Conversor Texto / Binario", onBack, {showInfo = true})}
+        topBar = {TopBarReusable(stringResource(R.string.tool_text_binary), onBack, {showInfo = true})}
     ) { inner ->
         Column(
             Modifier
