@@ -50,11 +50,13 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlinx.coroutines.delay
 import kotlin.math.abs
@@ -226,7 +228,7 @@ fun BubbleLevelScreen(onBack: () -> Unit) {
     }
 
     Scaffold(
-        topBar = {TopBarReusable("Nivel Burbuja", onBack, {showInfo = true})}
+        topBar = {TopBarReusable(stringResource(R.string.tool_bubble_level), onBack, {showInfo = true})}
     ) { padding ->
         Column(
             Modifier.fillMaxSize().padding(padding),

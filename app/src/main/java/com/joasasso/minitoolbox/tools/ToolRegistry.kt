@@ -31,91 +31,91 @@ import com.joasasso.minitoolbox.nav.Screen
 object ToolRegistry {
     val tools = listOf(
         Tool(
-            name = "Generador de Colores",
+            name = R.string.tool_color_generator,
             screen = Screen.RandomColor,
             category = ToolCategory.Herramientas,
             subCategory = "Generadores",
             icon = Icons.Filled.ColorLens
         ),
         Tool(
-            name = "Generador de equipos",
+            name = R.string.tool_team_generator,
             screen = Screen.GroupSelector,
             category = ToolCategory.Herramientas,
             subCategory = "Generadores",
             icon = Icons.Filled.Groups
         ),
         Tool(
-            name = "Cara o Cruz",
+            name = R.string.tool_coin_flip,
             screen = Screen.CoinFlip,
             category = ToolCategory.Entretenimiento,
             subCategory = "Aleatorio",
             svgResId = R.drawable.coin
         ),
         Tool(
-            name = "Conversor Decimal / Binario",
+            name = R.string.tool_decimal_binary,
             screen = Screen.DecimalBinaryConverter,
             category = ToolCategory.Herramientas,
             subCategory = "Calculadoras",
             icon = Icons.Filled.Code
         ),
         Tool(
-            name = "Conversor Texto / Binario",
+            name = R.string.tool_text_binary,
             screen = Screen.TextBinaryConverter,
             category = ToolCategory.Herramientas,
             subCategory = "Calculadoras",
             svgResId = R.drawable.binary
         ),
         Tool(
-            name = "Anotador Truco",
+            name = R.string.tool_truco_score,
             screen = Screen.TrucoScoreBoard,
             category = ToolCategory.Entretenimiento,
             subCategory = "Marcadores",
             svgResId = R.drawable.truco_square
         ),
         Tool(
-            name = "Calculadora de Edad",
+            name = R.string.tool_age_calculator,
             screen = Screen.AgeCalculator,
             category = ToolCategory.Informacion,
             subCategory = "Fechas",
             icon = Icons.Filled.Cake
     ),
         Tool(
-            name = "Signo del Zodíaco",
+            name = R.string.tool_zodiac_sign,
             screen = Screen.ZodiacSign,
             category = ToolCategory.Informacion,
             subCategory = "Fechas",
             svgResId = R.drawable.zodiac_sign
     ),
         Tool(
-            name = "Nivel Burbuja",
+            name = R.string.tool_bubble_level,
             screen = Screen.BubbleLevel,
             category = ToolCategory.Herramientas,
             subCategory = "Instrumentos",
             svgResId = R.drawable.bubble_level
     ),
         Tool(
-            name = "Calculadora de Porcentaje",
+            name = R.string.tool_percentage,
             screen = Screen.Porcentaje,
             category = ToolCategory.Herramientas,
             subCategory = "Calculadoras",
             icon = Icons.Filled.Percent
     ),
         Tool(
-            name = "Conversor de Horas 12h / 24h",
+            name = R.string.tool_hour_converter,
             screen = Screen.ConversorHoras,
             category = ToolCategory.Herramientas,
             subCategory = "Calculadoras",
             svgResId = R.drawable.clock_conversor
     ),
         Tool(
-            name = "Calculadora de IMC",
+            name = R.string.tool_bmi_calculator,
             screen = Screen.CalculadoraDeIMC,
             category = ToolCategory.Herramientas,
             subCategory = "Calculadoras",
             svgResId = R.drawable.scale
     ),
         Tool(
-            name = "Conversor Romano / Decimal",
+            name = R.string.tool_roman_converter,
             screen = Screen.ConversorRomanos,
             category = ToolCategory.Herramientas,
             subCategory = "Calculadoras",
@@ -123,56 +123,56 @@ object ToolRegistry {
         ),
 
         Tool(
-            name = "Conversor de Unidades",
+            name = R.string.tool_unit_converter,
             screen = Screen.ConversorUnidades,
             category = ToolCategory.Herramientas,
             subCategory = "Calculadoras",
             svgResId = R.drawable.unit_conversor
         ),
         Tool(
-            name = "Generador de Contraseñas",
+            name = R.string.tool_password_generator,
             screen = Screen.GeneradorContrasena,
             category = ToolCategory.Herramientas,
             subCategory = "Generadores",
             icon = Icons.Filled.Password
         ),
         Tool(
-            name = "Sugeridor de Actividades",
+            name = R.string.tool_activity_suggester,
             screen = Screen.SugeridorActividades,
             category = ToolCategory.Organizacion,
             subCategory = "Hábitos y Actividades",
             icon = Icons.Filled.Lightbulb
         ),
         Tool(
-            name = "Temporizador Pomodoro",
+            name = R.string.tool_pomodoro_timer,
             screen = Screen.Pomodoro,
             category = ToolCategory.Organizacion,
             subCategory = "",
             icon = Icons.Filled.Timer
         ),
         Tool(
-            name = "Generador de Nombres",
+            name = R.string.tool_name_generator,
             screen = Screen.GeneradorNombres,
             category = ToolCategory.Herramientas,
             subCategory = "Generadores",
             svgResId = R.drawable.id_card
     ),
         Tool(
-            name = "Generador de QR",
+            name = R.string.tool_qr_generator,
             screen = Screen.GeneradorQR,
             category = ToolCategory.Herramientas,
             subCategory = "Generadores",
             icon = Icons.Filled.QrCode
     ),
         Tool(
-            name = "Generador de QR de Contacto (vCard)",
+            name = R.string.tool_qr_vcard,
             screen = Screen.GeneradorVCard,
             category = ToolCategory.Herramientas,
             subCategory = "Generadores",
             icon = Icons.Filled.PersonAdd
         ),
         Tool(
-            name = "Generador de Lorem Ipsum",
+            name = R.string.tool_lorem_ipsum,
             screen = Screen.LoremIpsum,
             category = ToolCategory.Herramientas,
             subCategory = "Generadores",
@@ -180,21 +180,21 @@ object ToolRegistry {
 
         ),
         Tool(
-            name = "Regla",
+            name = R.string.tool_ruler,
             screen = Screen.Regla,
             category = ToolCategory.Herramientas,
             subCategory = "Instrumentos",
             icon = Icons.Filled.Straighten
         ),
         Tool(
-            name = "Medidor de Luz",
+            name = R.string.tool_light_meter,
             screen = Screen.MedidorLuz,
             category = ToolCategory.Herramientas,
             subCategory = "Instrumentos",
             icon = Icons.Filled.WbSunny
         ),
         Tool(
-            name = "Linterna",
+            name = R.string.tool_flashlight,
             screen = Screen.Linterna,
             category = ToolCategory.Herramientas,
             subCategory = "Instrumentos",
@@ -202,7 +202,7 @@ object ToolRegistry {
 
         ),
         Tool(
-            name = "Seguimiento de Hábitos",
+            name = R.string.tool_habit_tracker,
             screen = Screen.Rachas,
             category = ToolCategory.Organizacion,
             subCategory = "Hábitos y Actividades",
@@ -210,91 +210,91 @@ object ToolRegistry {
 
         ),
         Tool(
-            name = "Recordatorio de Beber Agua",
+            name = R.string.tool_water_reminder,
             screen = Screen.Agua,
             category = ToolCategory.Organizacion,
             subCategory = "Hábitos y Actividades",
             icon = Icons.Filled.WaterDrop
         ),
         Tool(
-            name = "Cuenta regresiva de días",
+            name = R.string.tool_day_countdown,
             screen = Screen.TiempoHasta,
             category = ToolCategory.Informacion,
             subCategory = "Fechas",
             icon = Icons.Filled.Timelapse
         ),
         Tool(
-            name = "Información de Países",
+            name = R.string.tool_country_info,
             screen = Screen.PaisesInfo,
             category = ToolCategory.Informacion,
             subCategory = "General",
             icon = Icons.Filled.TravelExplore
         ),
         Tool(
-            name = "Selector de Opciones",
+            name = R.string.tool_option_selector,
             screen = Screen.RuletaSelectora,
             category = ToolCategory.Entretenimiento,
             subCategory = "Aleatorio",
             svgResId = R.drawable.fortune_wheel
     ),
         Tool(
-            name = "Adivina la Bandera",
+            name = R.string.tool_guess_flag,
             screen = Screen.AdivinaBandera,
             category = ToolCategory.Entretenimiento,
             subCategory = "Minijuego",
             icon = Icons.Filled.Flag
     ),
         Tool(
-            name = "Divisor de Gastos",
+            name = R.string.tool_expense_splitter,
             screen = Screen.Reuniones,
             category = ToolCategory.Organizacion,
             subCategory = "",
             icon = Icons.Filled.Receipt
         ),
         Tool(
-            name = "Dados (D&D)",
+            name = R.string.tool_dice,
             screen = Screen.Dados,
             category = ToolCategory.Entretenimiento,
             subCategory = "Aleatorio",
             icon = Icons.Filled.Casino
         ),
         Tool(
-            name = "Calculos rápidos",
+            name = R.string.tool_quick_math,
             screen = Screen.CalculosRapidos,
             category = ToolCategory.Entretenimiento,
             subCategory = "Minijuego",
             icon = Icons.Filled.Calculate
         ),
         Tool(
-            name = "Frases básicas",
+            name = R.string.tool_basic_phrases,
             screen = Screen.Frases,
             category = ToolCategory.Informacion,
             subCategory = "General",
             svgResId = R.drawable.phrases
         ),
         Tool(
-            name = "En otro mundo",
+            name = R.string.tool_multiverse_me,
             screen = Screen.MiYoDelMultiverso,
             category = ToolCategory.Entretenimiento,
             subCategory = "Minijuego",
             svgResId = R.drawable.planet_ringed
         ),
         Tool(
-            name = "Adivina la Capital",
+            name = R.string.tool_guess_capital,
             screen = Screen.AdivinaCapital,
             category = ToolCategory.Entretenimiento,
             subCategory = "Minijuego",
             svgResId = R.drawable.capitol
         ),
         Tool(
-            name = "Brújula",
+            name = R.string.tool_compass,
             screen = Screen.Brujula,
             category = ToolCategory.Herramientas,
             subCategory = "Instrumentos",
             svgResId = R.drawable.arrow_north
         ),
         Tool(
-            name = "ToDo List",
+            name = R.string.tool_todo_list,
             screen = Screen.ToDo,
             category = ToolCategory.Organizacion,
             subCategory = "",

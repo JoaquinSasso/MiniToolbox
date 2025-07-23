@@ -37,7 +37,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.tools.data.Reunion
 import com.joasasso.minitoolbox.tools.data.ReunionesRepository
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
@@ -68,7 +70,7 @@ fun ReunionesScreen(
 
     Scaffold(
         topBar = {
-            TopBarReusable("Divisor de Gastos", onBack) {
+            TopBarReusable(stringResource(R.string.tool_expense_splitter), onBack) {
                 showInfo = true
             }
         },

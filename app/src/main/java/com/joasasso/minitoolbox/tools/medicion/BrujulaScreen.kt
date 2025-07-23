@@ -36,6 +36,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -131,7 +132,7 @@ fun BrujulaScreen(onBack: () -> Unit) {
 
 
     Scaffold(
-        topBar = { TopBarReusable("Brújula", onBack) { showInfo = true } },
+        topBar = { TopBarReusable(stringResource(R.string.tool_compass), onBack) { showInfo = true } },
         bottomBar = {
             Column(modifier = Modifier.fillMaxWidth()
                 .padding(bottom = 32.dp),

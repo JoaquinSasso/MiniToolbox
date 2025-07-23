@@ -43,9 +43,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.tools.data.ToDoDataStore
 import com.joasasso.minitoolbox.tools.data.ToDoItem
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
@@ -76,7 +78,7 @@ fun ToDoListScreen(onBack: () -> Unit) {
     }
 
     Scaffold(
-        topBar = { TopBarReusable("ToDo List", onBack) },
+        topBar = { TopBarReusable(stringResource(R.string.tool_todo_list), onBack) },
         floatingActionButton = {
             FloatingActionButton(onClick = { showDialog = true }) {
                 Icon(Icons.Default.Add, contentDescription = "Agregar tarea")

@@ -41,6 +41,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.tools.data.DadosHistorialRepository
@@ -74,7 +75,7 @@ fun LanzadorDadosScreen(
     val tiposDados = listOf(4, 6, 8, 10, 12, 20, 100)
 
     Scaffold(
-        topBar = { TopBarReusable("Lanzador de Dados", onBack) { showInfo = true }},
+        topBar = { TopBarReusable(stringResource(R.string.tool_dice), onBack) { showInfo = true }},
         bottomBar = {
             if (selectedTab == 0) {
                 Column(

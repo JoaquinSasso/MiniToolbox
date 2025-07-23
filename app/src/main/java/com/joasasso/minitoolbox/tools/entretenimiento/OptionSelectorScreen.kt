@@ -37,7 +37,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -58,7 +60,7 @@ fun OptionSelectorScreen(onBack: () -> Unit) {
     val itemHeight = 80.dp
 
     Scaffold(
-        topBar = { TopBarReusable("Selector de Opciones", onBack) { showInfo = true } }
+        topBar = { TopBarReusable(stringResource(R.string.tool_option_selector), onBack) { showInfo = true } }
     ) { padding ->
         Column(
             Modifier

@@ -33,8 +33,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.tools.data.Gasto
 import com.joasasso.minitoolbox.tools.data.Reunion
 import com.joasasso.minitoolbox.tools.data.ReunionesRepository
@@ -77,7 +79,7 @@ fun AgregarGastoScreen(
     val montoTotal = aportes.values.sumOf { it.toDoubleOrNull() ?: 0.0 }
 
     Scaffold(
-        topBar = { TopBarReusable("Nuevo gasto", onBack, { showInfo = true }) }
+        topBar = { TopBarReusable(stringResource(R.string.add_expenses_screen), onBack, { showInfo = true }) }
     ) { padding ->
         LazyColumn(
             modifier = Modifier

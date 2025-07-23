@@ -51,9 +51,11 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.tools.data.ScoreRepository
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlinx.coroutines.launch
@@ -190,7 +192,7 @@ fun TrucoScoreBoardScreen(onBack: () -> Unit) {
     }
 
     Scaffold(
-        topBar = { TopBarReusable("Anotador de truco", onBack, { showInfo = true }) },
+        topBar = { TopBarReusable(stringResource(R.string.tool_truco_score), onBack, { showInfo = true }) },
         floatingActionButton = {
             Button(onClick = {
                 scope.launch {

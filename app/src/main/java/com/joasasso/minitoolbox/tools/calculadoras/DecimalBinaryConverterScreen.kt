@@ -29,9 +29,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import java.math.BigInteger
 
@@ -45,7 +47,7 @@ fun DecimalBinaryConverterScreen(onBack: () -> Unit) {
     var showInfo    by remember { mutableStateOf(false) }
 
     Scaffold(
-        topBar = {TopBarReusable("Conversor Decimal / Binario", onBack, {showInfo = true})},
+        topBar = {TopBarReusable(stringResource(R.string.tool_decimal_binary), onBack, {showInfo = true})},
     ) { inner ->
         Column(
             modifier = Modifier

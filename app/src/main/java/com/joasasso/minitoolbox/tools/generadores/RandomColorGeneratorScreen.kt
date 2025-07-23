@@ -30,8 +30,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
+import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlin.random.Random
 
@@ -47,7 +49,7 @@ fun RandomColorGeneratorScreen(onBack: () -> Unit) {
     var showInfo    by remember { mutableStateOf(false) }
 
     Scaffold(
-        topBar = {TopBarReusable("Generador de colores", onBack, {showInfo = true})},
+        topBar = {TopBarReusable(stringResource(R.string.tool_color_generator), onBack, {showInfo = true})},
     ) { padding ->
         Column(
             modifier = Modifier

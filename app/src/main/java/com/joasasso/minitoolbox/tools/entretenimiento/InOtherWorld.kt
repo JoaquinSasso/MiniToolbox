@@ -48,10 +48,12 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.toColorInt
+import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import java.io.File
 import java.io.FileOutputStream
@@ -167,7 +169,7 @@ fun InOtherWoldScreen(onBack: () -> Unit) {
 
 
     Scaffold(
-        topBar = { TopBarReusable("En otro mundo", onBack, {showInfo = true}) },
+        topBar = { TopBarReusable(stringResource(R.string.tool_multiverse_me), onBack, {showInfo = true}) },
         floatingActionButton = {
             Column(horizontalAlignment = Alignment.End) {
                 if (imagenResultado != null) {

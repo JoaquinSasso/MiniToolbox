@@ -36,8 +36,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlin.random.Random
 
@@ -82,7 +84,7 @@ fun CoinFlipScreen(onBack: () -> Unit) {
     }
 
     Scaffold(
-        topBar = {TopBarReusable("Cara o Cruz", onBack, {showInfo = true})}
+        topBar = {TopBarReusable(stringResource(R.string.tool_coin_flip), onBack, {showInfo = true})}
     ) { padding ->
         Box(
             modifier = Modifier
