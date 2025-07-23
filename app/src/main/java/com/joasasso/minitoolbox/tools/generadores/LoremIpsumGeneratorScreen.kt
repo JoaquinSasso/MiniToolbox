@@ -23,14 +23,12 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -56,23 +54,24 @@ import kotlinx.coroutines.launch
 fun GeneradorLoremIpsumScreen(onBack: () -> Unit) {
     val haptic = LocalHapticFeedback.current
     val clipboardManager = LocalClipboardManager.current
-    val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
-
-    // State
-    var modo by remember { mutableStateOf("Párrafos") } // o "Palabras"
-    var cantidad by remember { mutableStateOf(3) }
-    var textoGenerado by remember { mutableStateOf("") }
     var showInfo by remember { mutableStateOf(false) }
 
-    // Límites dinámicos
-    val minCantidad = if (modo == "Palabras") 1 else 1
-    val maxCantidad = if (modo == "Palabras") 30 else 10
+    // Opciones de modo
+    val modoParrafos = stringResource(R.string.lorem_modo_parrafos)
+    val modoPalabras = stringResource(R.string.lorem_modo_palabras)
+    val opcionesModo = listOf(modoParrafos, modoPalabras)
 
-    // Generar Lorem
+    var modo by remember { mutableStateOf(modoParrafos) }
+    var cantidad by remember { mutableStateOf(3) }
+    var textoGenerado by remember { mutableStateOf("") }
+
+    val minCantidad = 1
+    val maxCantidad = if (modo == modoPalabras) 30 else 10
+
     fun generarLorem() {
-        textoGenerado = if (modo == "Palabras") {
+        textoGenerado = if (modo == modoPalabras) {
             generarLoremIpsumPalabras(cantidad)
         } else {
             generarLoremIpsumParrafos(cantidad)
@@ -80,13 +79,18 @@ fun GeneradorLoremIpsumScreen(onBack: () -> Unit) {
     }
 
     fun reset() {
-        cantidad = if (modo == "Palabras") 10 else 3
+        cantidad = if (modo == modoPalabras) 10 else 3
         textoGenerado = ""
     }
 
     Scaffold(
-        topBar = {TopBarReusable(stringResource(R.string.tool_lorem_ipsum), onBack, {showInfo = true})},
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        topBar = {
+            TopBarReusable(
+                title = stringResource(R.string.tool_lorem_ipsum),
+                onBack = onBack,
+                 { showInfo = true }
+            )
+        }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -94,42 +98,37 @@ fun GeneradorLoremIpsumScreen(onBack: () -> Unit) {
                 .verticalScroll(scrollState)
                 .padding(padding)
                 .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp, Alignment.Top),
+            verticalArrangement = Arrangement.spacedBy(18.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                "Genera texto de ejemplo clásico para maquetar o testear.",
-                fontSize = 17.sp, color = MaterialTheme.colorScheme.primary
+                stringResource(R.string.lorem_subtitulo),
+                fontSize = 17.sp,
+                color = MaterialTheme.colorScheme.primary
             )
+
             // Selector de modo
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                SegmentedButton(
-                    options = listOf("Párrafos", "Palabras"),
-                    selected = modo,
-                    onSelect = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        modo = it
-                        cantidad = if (it == "Palabras") 10 else 3
-                        textoGenerado = ""
-                    }
-                )
-            }
-            Spacer(Modifier.height(8.dp))
-            // Slider para cantidad
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth()
-            ) {
+            SegmentedButton(
+                options = opcionesModo,
+                selected = modo,
+                onSelect = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    modo = it
+                    reset()
+                }
+            )
+
+            // Selector de cantidad
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    if (modo == "Palabras") "Cantidad de palabras" else "Cantidad de párrafos",
+                    text = if (modo == modoPalabras)
+                        stringResource(R.string.lorem_cantidad_palabras)
+                    else
+                        stringResource(R.string.lorem_cantidad_parrafos),
                     fontSize = 15.sp
                 )
                 Spacer(Modifier.height(2.dp))
-                Text(
-                    "$cantidad",
-                    fontSize = 26.sp,
-                    color = MaterialTheme.colorScheme.primary
-                )
+                Text("$cantidad", fontSize = 26.sp, color = MaterialTheme.colorScheme.primary)
                 Slider(
                     value = cantidad.toFloat(),
                     onValueChange = {
@@ -142,58 +141,49 @@ fun GeneradorLoremIpsumScreen(onBack: () -> Unit) {
                 )
             }
 
-            // Botones acción
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Button(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        generarLorem()
-                    }
-                ) { Text("Generar") }
+            // Botones de acción
+            Row(horizontalArrangement = Arrangement.Center) {
+                Button(onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    generarLorem()
+                }) {
+                    Text(stringResource(R.string.lorem_boton_generar))
+                }
                 Spacer(Modifier.width(12.dp))
-                Button(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        textoGenerado = ""
-                        reset()
-                    }
-                ) {
-                    Icon(Icons.Filled.Refresh, contentDescription = "Limpiar")
+                Button(onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    reset()
+                }) {
+                    Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.desc_clear))
                     Spacer(Modifier.width(4.dp))
-                    Text("Limpiar")
+                    Text(stringResource(R.string.lorem_boton_limpiar))
                 }
                 Spacer(Modifier.width(12.dp))
                 Button(
                     onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         clipboardManager.setText(androidx.compose.ui.text.AnnotatedString(textoGenerado))
-                        scope.launch { snackbarHostState.showSnackbar("Texto copiado") }
+                        scope.launch { /* Snackbar opcional */ }
                     },
                     enabled = textoGenerado.isNotBlank()
                 ) {
-                    Icon(Icons.Default.ContentCopy, contentDescription = "Copiar texto")
+                    Icon(Icons.Default.ContentCopy, contentDescription = stringResource(R.string.desc_copy))
                     Spacer(Modifier.width(4.dp))
-                    Text("Copiar")
+                    Text(stringResource(R.string.lorem_boton_copiar))
                 }
             }
-            // Resultado
+
+            // Resultado generado
             if (textoGenerado.isNotBlank()) {
-                Divider(Modifier.padding(vertical = 8.dp))
-                Text("Texto generado:", fontSize = 15.sp)
+                HorizontalDivider(Modifier.padding(vertical = 8.dp))
+                Text(stringResource(R.string.lorem_etiqueta_resultado), fontSize = 15.sp)
                 Spacer(Modifier.height(8.dp))
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainer
-                    ),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
                     elevation = CardDefaults.cardElevation(2.dp)
                 ) {
-                    Box(
-                        modifier = Modifier.padding(18.dp)
-                    ) {
+                    Box(Modifier.padding(18.dp)) {
                         SelectionContainer {
                             Text(textoGenerado, fontSize = 15.sp)
                         }
@@ -209,12 +199,12 @@ fun GeneradorLoremIpsumScreen(onBack: () -> Unit) {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 showInfo = false
             },
-            title = { Text("¿Qué es Lorem Ipsum?") },
+            title = { Text(stringResource(R.string.lorem_help_titulo)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Es un texto ficticio en latín usado desde hace siglos para probar diseños y maquetar páginas.")
-                    Text("• Puedes generar la cantidad de palabras o párrafos que quieras y copiar el texto rápidamente.")
-                    Text("• Todo se genera localmente, no se utiliza conexión a internet.")
+                    Text(stringResource(R.string.lorem_help_linea1))
+                    Text(stringResource(R.string.lorem_help_linea2))
+                    Text(stringResource(R.string.lorem_help_linea3))
                 }
             },
             confirmButton = {
@@ -222,7 +212,7 @@ fun GeneradorLoremIpsumScreen(onBack: () -> Unit) {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     showInfo = false
                 }) {
-                    Text("Cerrar")
+                    Text(stringResource(R.string.close))
                 }
             }
         )

@@ -1,5 +1,6 @@
 package com.joasasso.minitoolbox.tools.generadores
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,8 +24,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -33,7 +32,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,34 +43,41 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
-import kotlinx.coroutines.launch
 
-enum class NombreTipo(val display: String) {
-    Masculino("Masculino"),
-    Femenino("Femenino"),
-    Mixto("Mixto"),
-    Gracioso("Gracioso")
+enum class NombreTipo(@StringRes val stringResId: Int) {
+    Masculino(R.string.name_generator_masculino),
+    Femenino(R.string.name_generator_femenino),
+    Mixto(R.string.name_generator_mixto),
+    Gracioso(R.string.name_generator_gracioso)
 }
+
+
+enum class IdiomaNombre(@StringRes val stringResId: Int) {
+    Espanol(R.string.name_generator_idioma_es),
+    Ingles(R.string.name_generator_idioma_en)
+}
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GeneradorNombresScreen(onBack: () -> Unit) {
-    val nombresMasculinos = listOf(
+    val nombresMasculinosEs = listOf(
         "Lucas", "Mateo", "Juan", "Santiago", "Benjamín", "Lautaro", "Martín", "Joaquín", "Tomás", "Facundo",
         "Emiliano", "Franco", "Bruno", "Andrés", "Ramiro", "Nicolás", "Agustín", "Iván", "Matías", "Esteban",
         "Felipe", "Valentín", "Santino", "Ulises"
     )
-    val nombresFemeninos = listOf(
+    val nombresFemeninosEs = listOf(
         "Sofía", "Valentina", "Martina", "Camila", "Lucía", "Isabella", "Emilia", "Julieta", "Mía", "Agustina",
         "Gabriela", "Aitana", "Milagros", "Paula", "Florencia", "Renata", "Jazmín", "Bianca", "Carolina", "Nicole",
         "Ana", "Laura", "Juliana", "María", "Guadalupe"
     )
-    val apellidos = listOf(
+    val apellidosEs = listOf(
         "Pérez", "Gómez", "Rodríguez", "Fernández", "López", "Díaz", "Martínez", "Romero", "Sosa", "Torres",
         "Álvarez", "Acosta", "Silva", "Suárez", "Castro", "Molina", "Ortiz", "Medina", "Herrera", "Gutiérrez",
         "Cruz", "Moreno", "Reyes", "Ruiz", "Navarro", "Aguirre", "Rojas", "Vega", "Ibáñez", "Muñoz", "Garcia"
     )
-    val nombresGraciosos = listOf(
+    val nombresGraciososEs = listOf(
         "Elsa Pato",
         "Aitor Tilla",
         "Mario Neta",
@@ -106,19 +111,55 @@ fun GeneradorNombresScreen(onBack: () -> Unit) {
         "Aitor Nillos"
     )
 
+    val nombresMasculinosEn = listOf(
+        "James", "Liam", "Oliver", "Benjamin", "Elijah",
+        "Lucas", "Henry", "Alexander", "Jack", "William",
+        "Ethan", "Noah", "Mason", "Logan", "Michael",
+        "Daniel", "Jackson", "Sebastian", "Caleb", "Matthew"
+    )
+
+    val nombresFemeninosEn = listOf(
+        "Emma", "Olivia", "Sophia", "Isabella", "Ava",
+        "Charlotte", "Amelia", "Mia", "Luna", "Harper",
+        "Ella", "Grace", "Scarlett", "Chloe", "Abigail",
+        "Aria", "Emily", "Hazel", "Nora", "Layla"
+    )
+
+    val apellidosEn = listOf(
+        "Smith", "Johnson", "Brown", "Jones", "Davis",
+        "Miller", "Wilson", "Anderson", "Taylor", "Thomas",
+        "Moore", "Martin", "White", "Clark", "Hall",
+        "Lewis", "Young", "Walker", "King", "Wright"
+    )
+
+    val nombresGraciososEn = listOf(
+        "Ben Dover", "Al Beback", "Justin Time", "Sue Flay", "Anita Bath",
+        "Rick O'Shea", "Paige Turner", "Chris P. Bacon", "Sal Ami", "Barry Cuda",
+        "Terry Aki", "Bea O’Problem", "Warren Peace", "Gail Forcewind", "Sonny Day",
+        "Dinah Mite", "Bill Board", "Manny Jah", "Hal Jalikee", "Jonkey Donkey",
+        "Ella Vator", "Ima Pigg", "Neil Down", "Lois Price", "Lance Boyle"
+    )
+
+
+
 
     var tipo by remember { mutableStateOf(NombreTipo.Mixto) }
+    var idioma by remember { mutableStateOf(IdiomaNombre.Ingles) }
     var incluirApellido by remember { mutableStateOf(true) }
     var nombre by remember { mutableStateOf("") }
     var showInfo by remember { mutableStateOf(false) }
 
     val clipboardManager = LocalClipboardManager.current
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
 
     fun generar() {
         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+
+        val nombresMasculinos = if (idioma == IdiomaNombre.Espanol) nombresMasculinosEs else nombresMasculinosEn
+        val nombresFemeninos = if (idioma == IdiomaNombre.Espanol) nombresFemeninosEs else nombresFemeninosEn
+        val apellidos = if (idioma == IdiomaNombre.Espanol) apellidosEs else apellidosEn
+        val nombresGraciosos = if (idioma == IdiomaNombre.Espanol) nombresGraciososEs else nombresGraciososEn
+
         nombre = when (tipo) {
             NombreTipo.Masculino -> {
                 val nom = nombresMasculinos.random()
@@ -129,20 +170,20 @@ fun GeneradorNombresScreen(onBack: () -> Unit) {
                 if (incluirApellido) "$nom ${apellidos.random()}" else nom
             }
             NombreTipo.Mixto -> {
-                val nombres = nombresMasculinos + nombresFemeninos
-                val nom = nombres.random()
+                val todos = nombresMasculinos + nombresFemeninos
+                val nom = todos.random()
                 if (incluirApellido) "$nom ${apellidos.random()}" else nom
             }
             NombreTipo.Gracioso -> nombresGraciosos.random()
         }
     }
 
+
     // Generar uno al inicio o cuando cambia tipo o el toggle
     LaunchedEffect(tipo, incluirApellido) { generar() }
 
     Scaffold(
-        topBar = {TopBarReusable(stringResource(R.string.tool_name_generator), onBack, {showInfo = true})},
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        topBar = {TopBarReusable(stringResource(R.string.tool_name_generator), onBack, {showInfo = true})}
     ) { padding ->
         Column(
             modifier = Modifier
@@ -153,7 +194,7 @@ fun GeneradorNombresScreen(onBack: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                "Selecciona el tipo de nombre",
+                stringResource(R.string.name_generator_subtitulo),
                 fontSize = 18.sp,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -180,7 +221,7 @@ fun GeneradorNombresScreen(onBack: () -> Unit) {
                             ),
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text(it.display, fontSize = 13.sp, maxLines = 1)
+                            Text(stringResource(it.stringResId), fontSize = 13.sp, maxLines = 1)
                         }
                     }
                 }
@@ -202,7 +243,7 @@ fun GeneradorNombresScreen(onBack: () -> Unit) {
                             ),
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text(it.display, fontSize = 13.sp, maxLines = 1)
+                            Text(stringResource(it.stringResId), fontSize = 13.sp, maxLines = 1)
                         }
                     }
                 }
@@ -210,7 +251,7 @@ fun GeneradorNombresScreen(onBack: () -> Unit) {
 
             Spacer(Modifier.height(8.dp))
             Text(
-                "Nombre generado:",
+                stringResource(R.string.name_generator_generado),
                 fontSize = 16.sp,
                 color = MaterialTheme.colorScheme.secondary
             )
@@ -244,21 +285,20 @@ fun GeneradorNombresScreen(onBack: () -> Unit) {
                 Button(
                     onClick = { generar() }
                 ) {
-                    Icon(Icons.Default.Refresh, contentDescription = "Nuevo nombre")
+                    Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.name_generator_boton_nuevo))
                     Spacer(Modifier.width(4.dp))
-                    Text("Generar otro")
+                    Text(stringResource(R.string.name_generator_boton_nuevo))
                 }
                 Spacer(Modifier.width(16.dp))
                 Button(
                     onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         clipboardManager.setText(androidx.compose.ui.text.AnnotatedString(nombre))
-                        scope.launch { snackbarHostState.showSnackbar("Nombre copiado") }
                     }
                 ) {
-                    Icon(Icons.Default.ContentCopy, contentDescription = "Copiar nombre")
+                    Icon(Icons.Default.ContentCopy, contentDescription = stringResource(R.string.desc_copy))
                     Spacer(Modifier.width(4.dp))
-                    Text("Copiar")
+                    Text(stringResource(R.string.desc_copy))
                 }
             }
             // Toggle al final
@@ -268,7 +308,7 @@ fun GeneradorNombresScreen(onBack: () -> Unit) {
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("¿Agregar apellido?", fontSize = 15.sp)
+                Text(stringResource(R.string.name_generator_toggle_apellido), fontSize = 15.sp)
                 Spacer(Modifier.width(8.dp))
                 Switch(
                     checked = incluirApellido,
@@ -278,6 +318,32 @@ fun GeneradorNombresScreen(onBack: () -> Unit) {
                     }
                 )
             }
+            // Toggle para cambiar idiomas
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(stringResource(R.string.name_generator_idioma) + ": ", fontSize = 15.sp)
+                Spacer(Modifier.width(8.dp))
+                // Idiomas disponibles, con sus nombres traducidos
+                val idiomaOpcionesMap = IdiomaNombre.entries.associateBy { stringResource(it.stringResId) }
+                val idiomaOpciones = idiomaOpcionesMap.keys.toList()
+                val idiomaSeleccionado = stringResource(idioma.stringResId)
+
+                SegmentedButton(
+                    options = idiomaOpciones,
+                    selected = idiomaSeleccionado,
+                    onSelect = { selectedLabel ->
+                        idiomaOpcionesMap[selectedLabel]?.let {
+                            idioma = it
+                            generar()
+                        }
+                    }
+                )
+
+            }
+
         }
     }
 
@@ -287,15 +353,15 @@ fun GeneradorNombresScreen(onBack: () -> Unit) {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 showInfo = false
             },
-            title = { Text("¿Para qué sirve?") },
+            title = { Text(stringResource(R.string.name_generator_help_titulo)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Genera nombres completos aleatorios: masculinos, femeninos, mixtos o graciosos.")
-                    Text("• Elegí si querés incluir o no apellido (excepto en modo gracioso, que el chiste es el nombre completo).")
-                    Text("• Útil para juegos, pruebas, equipos, personajes, mascotas, usuarios, etc.")
-                    Text("• En modo gracioso genera combinaciones humorísticas.")
-                    Text("• Tocá “Generar otro” para una nueva combinación, o copialo si te gusta.")
-                    Text("• Sabemos que algunos nombres con doble sentido hacen reír, pero para que la app siga siendo apta para todo público, tuvimos que dejar solo los más inocentes. ¡Gracias por entender!")
+                    Text(stringResource(R.string.name_generator_help_linea1))
+                    Text(stringResource(R.string.name_generator_help_linea2))
+                    Text(stringResource(R.string.name_generator_help_linea3))
+                    Text(stringResource(R.string.name_generator_help_linea4))
+                    Text(stringResource(R.string.name_generator_help_linea5))
+                    Text(stringResource(R.string.name_generator_help_linea6))
                 }
             },
             confirmButton = {
@@ -303,7 +369,7 @@ fun GeneradorNombresScreen(onBack: () -> Unit) {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     showInfo = false
                 }) {
-                    Text("Cerrar")
+                    Text(stringResource(R.string.close))
                 }
             }
         )

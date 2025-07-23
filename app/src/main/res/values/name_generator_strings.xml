@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="name_generator_subtitulo">Select the name type</string>
+    <string name="name_generator_generado">Nombre generado:</string>
+    <string name="name_generator_boton_nuevo">Generated name:</string>
+    <string name="name_generator_toggle_apellido">Add last name?</string>
+    <string name="name_generator_help_titulo">What is it for?</string>
+    <string name="name_generator_help_linea1">• Generates random full names: male, female, mixed or funny.</string>
+    <string name="name_generator_help_linea2">• You can choose whether to include a last name (except in funny mode).</string>
+    <string name="name_generator_help_linea3">• Useful for games, testing, teams, characters, pets, usernames, etc.</string>
+    <string name="name_generator_help_linea4">• Funny mode creates humorous combinations.</string>
+    <string name="name_generator_help_linea5">• Tap “Generate another” for a new one, or copy it if you like it.</string>
+    <string name="name_generator_help_linea6">• We know some names with double meaning are funny, but to keep the app family-friendly, we kept only the most innocent ones. Thanks for understanding!</string>
+    <string name="name_generator_content_desc_copiar">Copy name</string>
+    <string name="name_generator_content_desc_generar">Generate new name</string>
+    <string name="name_generator_masculino">Male</string>
+    <string name="name_generator_femenino">Female</string>
+    <string name="name_generator_mixto">Mixed</string>
+    <string name="name_generator_gracioso">Funny</string>
+    <string name="name_generator_idioma">Language</string>
+    <string name="name_generator_idioma_es">Spanish</string>
+    <string name="name_generator_idioma_en">English</string>
+
+</resources>

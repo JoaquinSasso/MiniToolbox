@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="name_generator_subtitulo">Selecciona el tipo de nombre</string>
+    <string name="name_generator_generado">Nombre generado:</string>
+    <string name="name_generator_boton_nuevo">Generar otro</string>
+    <string name="name_generator_toggle_apellido">¿Agregar apellido?</string>
+    <string name="name_generator_help_titulo">¿Para qué sirve?</string>
+    <string name="name_generator_help_linea1">• Genera nombres completos aleatorios: masculinos, femeninos, mixtos o graciosos.</string>
+    <string name="name_generator_help_linea2">• Elegí si querés incluir o no apellido (excepto en modo gracioso, que el chiste es el nombre completo).</string>
+    <string name="name_generator_help_linea3">• Útil para juegos, pruebas, equipos, personajes, mascotas, usuarios, etc.</string>
+    <string name="name_generator_help_linea4">• En modo gracioso genera combinaciones humorísticas.</string>
+    <string name="name_generator_help_linea5">• Tocá “Generar otro” para una nueva combinación, o copialo si te gusta.</string>
+    <string name="name_generator_help_linea6">• Sabemos que algunos nombres con doble sentido hacen reír, pero para que la app siga siendo apta para todo público, tuvimos que dejar solo los más inocentes. ¡Gracias por entender!</string>
+    <string name="name_generator_content_desc_copiar">Copiar nombre</string>
+    <string name="name_generator_content_desc_generar">Generar nuevo nombre</string>
+    <string name="name_generator_masculino">Masculino</string>
+    <string name="name_generator_femenino">Femenino</string>
+    <string name="name_generator_mixto">Mixto</string>
+    <string name="name_generator_gracioso">Gracioso</string>
+    <string name="name_generator_idioma">Idioma</string>
+    <string name="name_generator_idioma_es">Español</string>
+    <string name="name_generator_idioma_en">Inglés</string>
+</resources>
