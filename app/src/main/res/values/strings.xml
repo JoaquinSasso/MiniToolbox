@@ -2,4 +2,5 @@
 <resources>
     <string name="close">Close</string>
     <string name="desc_copy">Copy</string>
+    <string name="desc_clear">Clear</string>
 </resources>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lorem_subtitulo">Generate classic sample text for layout or testing.</string>
+    <string name="lorem_modo_parrafos">Paragraphs</string>
+    <string name="lorem_modo_palabras">Words</string>
+    <string name="lorem_cantidad_parrafos">Number of paragraphs</string>
+    <string name="lorem_cantidad_palabras">Number of words</string>
+    <string name="lorem_boton_generar">Generate</string>
+    <string name="lorem_boton_limpiar">Clear</string>
+    <string name="lorem_boton_copiar">Copy</string>
+    <string name="lorem_etiqueta_resultado">Generated text:</string>
+
+    <!-- Help dialog -->
+    <string name="lorem_help_titulo">What is Lorem Ipsum?</string>
+    <string name="lorem_help_linea1">• It is a pseudo-Latin text used for centuries to test designs and layouts.</string>
+    <string name="lorem_help_linea2">• You can generate the desired number of words or paragraphs and quickly copy the text.</string>
+    <string name="lorem_help_linea3">• Everything is generated locally, no internet connection is used.</string>
+</resources>
