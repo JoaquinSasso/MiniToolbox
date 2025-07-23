@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="qr_generator_text_label">Text or link</string>
+    <string name="qr_generator_qr_generado">Generated QR code:</string>
+    <string name="qr_generator_qr_vacio">Empty QR</string>
+    <string name="qr_generator_help_titulo">What is it for?</string>
+    <string name="qr_generator_help_linea1">• Create QR codes from any text, link, contact, etc.</string>
+    <string name="qr_generator_help_linea2">• Just type what you want to convert, and the QR appears automatically!</string>
+    <string name="qr_generator_help_linea3">• You can copy or clear the input field.</string>
+    <string name="qr_generator_help_linea4">• The QR is generated on your device and never uploaded to the internet.</string>
+
+</resources>

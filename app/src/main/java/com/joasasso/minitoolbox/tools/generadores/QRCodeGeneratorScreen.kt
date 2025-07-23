@@ -25,15 +25,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,7 +45,6 @@ import androidx.compose.ui.unit.sp
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import com.lightspark.composeqr.QrCodeView
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,13 +53,15 @@ fun GeneradorQrScreen(onBack: () -> Unit) {
     var showInfo by remember { mutableStateOf(false) }
 
     val clipboardManager = LocalClipboardManager.current
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
 
     Scaffold(
-        topBar = {TopBarReusable(stringResource(R.string.tool_qr_generator), onBack, {showInfo = true})},
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        topBar = {
+            TopBarReusable(
+                stringResource(R.string.tool_qr_generator),
+                onBack,
+                { showInfo = true })
+        }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -76,7 +74,7 @@ fun GeneradorQrScreen(onBack: () -> Unit) {
             OutlinedTextField(
                 value = text,
                 onValueChange = { text = it },
-                label = { Text("Texto o enlace") },
+                label = { Text(stringResource(R.string.qr_generator_text_label)) },
                 singleLine = false,
                 minLines = 2,
                 maxLines = 4,
@@ -86,6 +84,7 @@ fun GeneradorQrScreen(onBack: () -> Unit) {
                 ),
                 modifier = Modifier.fillMaxWidth()
             )
+
             Row(
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.fillMaxWidth()
@@ -94,15 +93,19 @@ fun GeneradorQrScreen(onBack: () -> Unit) {
                     onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         clipboardManager.setText(androidx.compose.ui.text.AnnotatedString(text))
-                        scope.launch { snackbarHostState.showSnackbar("Texto copiado") }
                     },
                     enabled = text.isNotBlank()
                 ) {
-                    Icon(Icons.Default.ContentCopy, contentDescription = "Copiar texto")
+                    Icon(
+                        Icons.Default.ContentCopy,
+                        contentDescription = stringResource(R.string.desc_copy)
+                    )
                     Spacer(Modifier.width(4.dp))
-                    Text("Copiar")
+                    Text(stringResource(R.string.desc_copy))
                 }
+
                 Spacer(Modifier.width(16.dp))
+
                 Button(
                     onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -110,14 +113,21 @@ fun GeneradorQrScreen(onBack: () -> Unit) {
                     },
                     enabled = text.isNotBlank()
                 ) {
-                    Icon(Icons.Default.Delete, contentDescription = "Limpiar")
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = stringResource(R.string.desc_clear)
+                    )
                     Spacer(Modifier.width(4.dp))
-                    Text("Limpiar")
+                    Text(stringResource(R.string.desc_clear))
                 }
             }
+
             Divider(Modifier.padding(vertical = 8.dp))
-            Text("Código QR generado:", fontSize = 16.sp)
+
+            Text(stringResource(R.string.qr_generator_qr_generado), fontSize = 16.sp)
+
             Spacer(Modifier.height(8.dp))
+
             Card(
                 modifier = Modifier
                     .size(300.dp)
@@ -138,7 +148,7 @@ fun GeneradorQrScreen(onBack: () -> Unit) {
                         )
                     } else {
                         Text(
-                            "QR vacío",
+                            stringResource(R.string.qr_generator_qr_vacio),
                             fontSize = 16.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -154,13 +164,13 @@ fun GeneradorQrScreen(onBack: () -> Unit) {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 showInfo = false
             },
-            title = { Text("¿Para qué sirve?") },
+            title = { Text(stringResource(R.string.qr_generator_help_titulo)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Crea códigos QR de cualquier texto, enlace, contacto, etc.")
-                    Text("• Solo escribe lo que quieras transformar, ¡el QR aparece automáticamente!")
-                    Text("• Puedes copiar o limpiar el campo de entrada.")
-                    Text("• El QR se genera en tu dispositivo, nunca se sube a internet.")
+                    Text(stringResource(R.string.qr_generator_help_linea1))
+                    Text(stringResource(R.string.qr_generator_help_linea2))
+                    Text(stringResource(R.string.qr_generator_help_linea3))
+                    Text(stringResource(R.string.qr_generator_help_linea4))
                 }
             },
             confirmButton = {
@@ -168,7 +178,7 @@ fun GeneradorQrScreen(onBack: () -> Unit) {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     showInfo = false
                 }) {
-                    Text("Cerrar")
+                    Text(stringResource(R.string.close))
                 }
             }
         )

@@ -21,8 +21,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -33,7 +31,6 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,7 +42,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
-import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,8 +58,6 @@ fun GeneradorContrasenaScreen(onBack: () -> Unit) {
     var lastCantidad by remember { mutableIntStateOf(longitud) }
 
     val clipboardManager = LocalClipboardManager.current
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
 
     fun generar() {
@@ -88,8 +82,7 @@ fun GeneradorContrasenaScreen(onBack: () -> Unit) {
     LaunchedEffect(Unit) { generar() }
 
     Scaffold(
-        topBar = {TopBarReusable(stringResource(R.string.tool_password_generator), onBack, {showInfo = true})},
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        topBar = {TopBarReusable(stringResource(R.string.tool_password_generator), onBack, {showInfo = true})}
     ) { padding ->
         Column(
             modifier = Modifier
@@ -100,7 +93,7 @@ fun GeneradorContrasenaScreen(onBack: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                "Tu nueva contraseña segura",
+                stringResource(R.string.password_generator_subtitulo),
                 fontSize = 18.sp,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -121,7 +114,7 @@ fun GeneradorContrasenaScreen(onBack: () -> Unit) {
                         generar()
                     }
                 ) {
-                    Icon(Icons.Default.Refresh, contentDescription = "Nueva contraseña")
+                    Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.password_generator_boton_nuevo))
                     Spacer(Modifier.width(4.dp))
                     Text("Generar otra")
                 }
@@ -130,11 +123,10 @@ fun GeneradorContrasenaScreen(onBack: () -> Unit) {
                     onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         clipboardManager.setText(androidx.compose.ui.text.AnnotatedString(contrasena))
-                        scope.launch { snackbarHostState.showSnackbar("Contraseña copiada") }
                     },
                     enabled = contrasena.isNotBlank()
                 ) {
-                    Icon(Icons.Default.ContentCopy, contentDescription = "Copiar contraseña")
+                    Icon(Icons.Default.ContentCopy, contentDescription = stringResource(R.string.password_generator_boton_copiar))
                     Spacer(Modifier.width(4.dp))
                     Text("Copiar")
                 }
@@ -145,8 +137,10 @@ fun GeneradorContrasenaScreen(onBack: () -> Unit) {
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth(0.92f)
             ) {
-                Text("Longitud: $longitud", modifier = Modifier.padding(start = 4.dp))
-
+                Text(
+                    stringResource(R.string.password_generator_longitud, longitud),
+                    modifier = Modifier.padding(start = 4.dp)
+                )
                 Slider(
                     value = sliderValue,
                     onValueChange = {
@@ -166,7 +160,7 @@ fun GeneradorContrasenaScreen(onBack: () -> Unit) {
                     Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("Mayúsculas")
+                    Text(stringResource(R.string.password_generator_mayusculas))
                     Switch(
                         checked = incluirMayusculas,
                         onCheckedChange = {
@@ -180,7 +174,7 @@ fun GeneradorContrasenaScreen(onBack: () -> Unit) {
                     Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("Minúsculas")
+                    Text(stringResource(R.string.password_generator_minusculas))
                     Switch(
                         checked = incluirMinusculas,
                         onCheckedChange = {
@@ -194,7 +188,7 @@ fun GeneradorContrasenaScreen(onBack: () -> Unit) {
                     Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("Números")
+                    Text(stringResource(R.string.password_generator_numeros))
                     Switch(
                         checked = incluirNumeros,
                         onCheckedChange = {
@@ -208,7 +202,7 @@ fun GeneradorContrasenaScreen(onBack: () -> Unit) {
                     Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("Símbolos")
+                    Text(stringResource(R.string.password_generator_simbolos))
                     Switch(
                         checked = incluirSimbolos,
                         onCheckedChange = {
@@ -220,7 +214,7 @@ fun GeneradorContrasenaScreen(onBack: () -> Unit) {
                 }
                 Spacer(Modifier.height(32.dp))
                 Text(
-                    "La contraseña se genera de forma local en tu dispositivo y no se almacena ni se envía a ningún servidor.",
+                    stringResource(R.string.password_generator_privacidad),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 15.sp,
                     modifier = Modifier
@@ -239,14 +233,14 @@ fun GeneradorContrasenaScreen(onBack: () -> Unit) {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 showInfo = false
             },
-            title = { Text("Acerca del generador de contraseñas") },
+            title = { stringResource(R.string.password_generator_ayuda_titulo) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Generá contraseñas seguras y aleatorias para tus cuentas.")
-                    Text("• Podés elegir la longitud y qué tipos de caracteres incluir.")
-                    Text("• Se recomienda usar contraseñas largas y mezclar mayúsculas, minúsculas, números y símbolos.")
-                    Text("• Copiá la contraseña fácilmente con el botón 'Copiar'.")
-                    Text("• No guardes contraseñas inseguras o fáciles de adivinar (ejemplo: 123456, password, etc).")
+                    Text(stringResource(R.string.password_generator_ayuda_linea1))
+                    Text(stringResource(R.string.password_generator_ayuda_linea2))
+                    Text(stringResource(R.string.password_generator_ayuda_linea3))
+                    Text(stringResource(R.string.password_generator_ayuda_linea4))
+                    Text(stringResource(R.string.password_generator_ayuda_linea5))
                 }
             },
             confirmButton = {
@@ -254,7 +248,7 @@ fun GeneradorContrasenaScreen(onBack: () -> Unit) {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     showInfo = false
                 }) {
-                    Text("Cerrar")
+                    Text(stringResource(R.string.close))
                 }
             }
         )
