@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="team_size">Team size</string>
+    <string name="place_fingers">Place your fingers here to form teams</string>
+    <string name="incorrect_player_count">Invalid number of players</string>
+    <string name="about_team_generator">About Team Selector</string>
+    <string name="team_generator_purpose">• What it\'s for: Randomly and interactively divides participants into fixed-size teams.</string>
+    <string name="team_help_guide">• Quick guide:</string>
+    <string name="team_generator_help_1">   – Select the team size (2–5).</string>
+    <string name="team_generator_help_2">   – Each player must place one finger on the screen. If the number of fingers isn’t divisible, you’ll see an error message.</string>
+    <string name="team_generator_help_3">   – The colored circles under each finger indicate assigned teams.</string>
+</resources>

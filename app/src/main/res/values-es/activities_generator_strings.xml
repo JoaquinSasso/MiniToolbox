@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+        <string name="actividad_titulo">¿Qué podrías hacer ahora?</string>
+        <string name="actividad_boton_otro">Otra sugerencia</string>
+        <string name="actividad_help_titulo">¿Para qué sirve?</string>
+        <string name="actividad_help_linea1">• Te da ideas rápidas para hacer cuando no sabés qué hacer, querés moverte o distraerte.</string>
+        <string name="actividad_help_linea2">• Usalo para romper la rutina, salir de un bloqueo, o encontrar un pequeño desafío o descanso en tu día.</string>
+        <string name="actividad_help_linea3">• Podés copiar la sugerencia para compartirla o anotarla.</string>
+        <string name="actividad_help_linea4">• Si no te convence la idea, tocá “Otra sugerencia”.</string>
+        <string name="actividad_content_desc_otro">Otra sugerencia</string>
+        <string name="actividad_content_desc_copiar">Copiar sugerencia</string>
+        <string-array name="actividad_sugerida_list">
+            <item>Lee un capítulo de un libro 📚</item>
+            <item>Dibuja algo que te guste ✏️</item>
+            <item>Sal a caminar 10 minutos 🚶‍♂️</item>
+            <item>Toma un vaso de agua 💧</item>
+            <item>Haz 10 flexiones 💪</item>
+            <item>Llama a un amigo 📞</item>
+            <item>Ordena tu escritorio 🧹</item>
+            <item>Busca una nueva canción para escuchar 🎵</item>
+            <item>Medita durante 3 minutos 🧘</item>
+            <item>Haz una lista de agradecimientos 🙏</item>
+            <item>Escribe una idea para un proyecto nuevo 💡</item>
+            <item>Prepara un snack saludable 🍎</item>
+            <item>Aprende una palabra nueva en otro idioma 🌍</item>
+            <item>Toma una foto creativa 📸</item>
+            <item>Desconéctate del celular por 15 minutos 📵</item>
+            <item>Haz una pequeña limpieza en tu cuarto 🛏️</item>
+            <item>Practica respiración profunda 🌬️</item>
+            <item>Haz un gesto amable por alguien hoy 🤗</item>
+            <item>Organiza tu día con una lista de tareas 📝</item>
+            <item>Saluda a alguien que no conocés 👋</item>
+            <item>Escribe tres cosas que te hacen feliz 😊</item>
+            <item>Baila una canción que te guste 💃</item>
+            <item>Mira un corto inspirador en internet 🎬</item>
+            <item>Haz un estiramiento durante 5 minutos 🧘‍♂️</item>
+            <item>Escucha un podcast sobre un tema nuevo 🎧</item>
+            <item>Tómate un té relajante ☕️</item>
+            <item>Revisa y limpia tus emails 📧</item>
+            <item>Planifica un viaje imaginario 🗺️</item>
+            <item>Escribe una pequeña poesía ✍️</item>
+            <item>Prueba una receta sencilla y rápida 🍽️</item>
+            <item>Dedica 5 minutos a observar el cielo 🌤️</item>
+            <item>Riega tus plantas 🌱</item>
+            <item>Haz un dibujo con los ojos cerrados 🎨</item>
+            <item>Busca un dato curioso sobre historia 📖</item>
+            <item>Escribe tres objetivos semanales 🗒️</item>
+            <item>Haz una pausa y sonríe por 30 segundos 😊</item>
+            <item>Organiza tu biblioteca o estante 📕</item>
+            <item>Escribe algo positivo sobre ti mismo 💖</item>
+            <item>Juega un minijuego de ingenio 🧩</item>
+            <item>Escucha sonidos de la naturaleza 🌳</item>
+            <item>Recuerda un momento divertido 😄</item>
+            <item>Planifica una actividad para el fin de semana 📅</item>
+            <item>Escribe una carta breve a tu futuro tú 📨</item>
+            <item>Haz una pausa para observar tu entorno 👀</item>
+            <item>Busca inspiración en imágenes bonitas 📷</item>
+            <item>Practica un poco de yoga simple 🧘</item>
+            <item>Intenta hacer malabares con objetos pequeños 🤹</item>
+            <item>Haz una donación simbólica o ayuda online 🌟</item>
+            <item>Aprende sobre una cultura distinta 🌎</item>
+            <item>Prueba una fruta que no sueles comer 🍍</item>
+            <item>Prepara una bebida refrescante 🍹</item>
+            <item>Escribe sobre algo que te gustaría aprender 🖋️</item>
+            <item>Organiza una pequeña reunión virtual con amigos 💻</item>
+            <item>Saca la basura o recicla algo ♻️</item>
+            <item>Escribe una frase inspiradora para compartir ✨</item>
+            <item>Busca una cita motivacional 📌</item>
+            <item>Dedica tiempo a cuidar tu piel 🧖</item>
+            <item>Escribe o dibuja sobre un sueño reciente 💤</item>
+            <item>Pasa tiempo con tu mascota o animal favorito 🐶</item>
+            <item>Haz una pausa consciente sin hacer nada 🙌</item>
+            <item>Busca formas creativas de reutilizar un objeto 🔄</item>
+            <item>Explora una afición que hayas olvidado 🎭</item>
+            <item>Observa el atardecer o amanecer 🌅</item>
+            <item>Visita virtualmente un museo o galería 🖼️</item>
+            <item>Dale mantenimiento o limpieza a tu bicicleta 🚲</item>
+            <item>Revisa y actualiza tus objetivos personales 🎯</item>
+            <item>Haz un breve ejercicio visual para descansar la vista 👁️</item>
+            <item>Prueba escribir con la mano no dominante ✍️</item>
+            <item>Escucha música relajante durante 5 minutos 🎶</item>
+            <item>Haz una pequeña lista de cosas por soltar 🚮</item>
+            <item>Prepara algo creativo con materiales reciclados ♻️</item>
+            <item>Busca una anécdota inspiradora o divertida 🌟</item>
+            <item>Piensa en tres logros recientes que has tenido 🏆</item>
+            <item>Comparte algo positivo en redes sociales 📲</item>
+            <item>Juega a tu videojuego favorito 🎮</item>
+            <item>Mira una película o serie que no has visto 📺</item>
+            <item>Mira un documental 🐆</item>
+        </string-array>
+</resources>

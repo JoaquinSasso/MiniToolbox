@@ -14,7 +14,7 @@ data class Tool(
     val name: Int,
     val screen: Screen,
     val category: ToolCategory,
-    val subCategory: String,
+    val subCategory: Int,
     val icon: ImageVector? = null,
     @DrawableRes val svgResId: Int? = null
 )

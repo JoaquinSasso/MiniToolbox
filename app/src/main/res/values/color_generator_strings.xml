@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="color_generator_help_title">About Color Generator</string>
+    <string name="color_generator_help_purpose">• Purpose: Instantly generate a random color and display its hexadecimal code.</string>
+    <string name="color_generator_help_quickguide">• Quick guide:</string>
+    <string name="color_generator_help_generate">Tap “Generate New” to change the background color.</string>
+    <string name="color_generator_help_copy">Tap the copy button to save the hexadecimal code to your clipboard.</string>
+    <string name="generate_new_color">Generate new</string>
+</resources>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <resources>
+        <string name="actividad_titulo">What could you do right now?</string>
+        <string name="actividad_boton_otro">Another suggestion</string>
+        <string name="actividad_help_titulo">What is it for?</string>
+        <string name="actividad_help_linea1">• Gives you quick ideas when you don’t know what to do, want to move, or need a distraction.</string>
+        <string name="actividad_help_linea2">• Use it to break the routine, overcome a block, or find a small challenge or break in your day.</string>
+        <string name="actividad_help_linea3">• You can copy the suggestion to share or save it.</string>
+        <string name="actividad_help_linea4">• If you don’t like the idea, tap “Another suggestion”.</string>
+        <string name="actividad_content_desc_otro">Another suggestion</string>
+        <string name="actividad_content_desc_copiar">Copy suggestion</string>
+
+        <string-array name="actividad_sugerida_list">
+            <item>Read a chapter from a book 📚</item>
+            <item>Draw something you like ✏️</item>
+            <item>Go for a 10-minute walk 🚶‍♂️</item>
+            <item>Drink a glass of water 💧</item>
+            <item>Do 10 push-ups 💪</item>
+            <item>Call a friend 📞</item>
+            <item>Tidy up your desk 🧹</item>
+            <item>Find a new song to listen to 🎵</item>
+            <item>Meditate for 3 minutes 🧘</item>
+            <item>Make a gratitude list 🙏</item>
+            <item>Write down an idea for a new project 💡</item>
+            <item>Prepare a healthy snack 🍎</item>
+            <item>Learn a new word in another language 🌍</item>
+            <item>Take a creative photo 📸</item>
+            <item>Disconnect from your phone for 15 minutes 📵</item>
+            <item>Do a quick cleanup of your room 🛏️</item>
+            <item>Practice deep breathing 🌬️</item>
+            <item>Do a kind act for someone today 🤗</item>
+            <item>Organize your day with a to-do list 📝</item>
+            <item>Say hello to someone you don’t know 👋</item>
+            <item>Write down three things that make you happy 😊</item>
+            <item>Dance to a song you like 💃</item>
+            <item>Watch an inspiring short video online 🎬</item>
+            <item>Stretch for 5 minutes 🧘‍♂️</item>
+            <item>Listen to a podcast on a new topic 🎧</item>
+            <item>Enjoy a relaxing cup of tea ☕️</item>
+            <item>Check and clean your emails 📧</item>
+            <item>Plan an imaginary trip 🗺️</item>
+            <item>Write a short poem ✍️</item>
+            <item>Try a simple and quick recipe 🍽️</item>
+            <item>Spend 5 minutes watching the sky 🌤️</item>
+            <item>Water your plants 🌱</item>
+            <item>Draw with your eyes closed 🎨</item>
+            <item>Find a curious historical fact 📖</item>
+            <item>Write three weekly goals 🗒️</item>
+            <item>Pause and smile for 30 seconds 😊</item>
+            <item>Organize your bookshelf or shelf 📕</item>
+            <item>Write something positive about yourself 💖</item>
+            <item>Play a short brain game 🧩</item>
+            <item>Listen to nature sounds 🌳</item>
+            <item>Recall a funny moment 😄</item>
+            <item>Plan an activity for the weekend 📅</item>
+            <item>Write a short letter to your future self 📨</item>
+            <item>Take a moment to observe your surroundings 👀</item>
+            <item>Seek inspiration from beautiful images 📷</item>
+            <item>Try some simple yoga 🧘</item>
+            <item>Try juggling with small objects 🤹</item>
+            <item>Make a symbolic donation or help online 🌟</item>
+            <item>Learn about a different culture 🌎</item>
+            <item>Try a fruit you don’t usually eat 🍍</item>
+            <item>Prepare a refreshing drink 🍹</item>
+            <item>Write about something you’d like to learn 🖋️</item>
+            <item>Organize a small virtual meeting with friends 💻</item>
+            <item>Take out the trash or recycle something ♻️</item>
+            <item>Write an inspiring quote to share ✨</item>
+            <item>Look for a motivational quote 📌</item>
+            <item>Take time to care for your skin 🧖</item>
+            <item>Write or draw about a recent dream 💤</item>
+            <item>Spend time with your pet or favorite animal 🐶</item>
+            <item>Take a mindful pause without doing anything 🙌</item>
+            <item>Find creative ways to reuse an object 🔄</item>
+            <item>Explore a forgotten hobby 🎭</item>
+            <item>Watch the sunset or sunrise 🌅</item>
+            <item>Visit a museum or gallery virtually 🖼️</item>
+            <item>Clean or maintain your bicycle 🚲</item>
+            <item>Review and update your personal goals 🎯</item>
+            <item>Do a short eye exercise to rest your sight 👁️</item>
+            <item>Try writing with your non-dominant hand ✍️</item>
+            <item>Listen to relaxing music for 5 minutes 🎶</item>
+            <item>Make a short list of things to let go 🚮</item>
+            <item>Create something using recycled materials ♻️</item>
+            <item>Find an inspiring or funny anecdote 🌟</item>
+            <item>Think of three recent accomplishments 🏆</item>
+            <item>Share something positive on social media 📲</item>
+            <item>Play your favorite video game 🎮</item>
+            <item>Watch a movie or series you haven’t seen 📺</item>
+            <item>Watch a documentary 🐆</item>
+        </string-array>
+    </resources>

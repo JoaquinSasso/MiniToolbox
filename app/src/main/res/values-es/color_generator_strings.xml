@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="color_generator_help_title">Acerca de Generador de Colores</string>
+    <string name="color_generator_help_purpose">• Para qué sirve: Crea de un solo toque un color aleatorio y te muestra su código hexadecimal.</string>
+    <string name="color_generator_help_quickguide">• Guía rápida:</string>
+    <string name="color_generator_help_generate">Pulsa “Generar nuevo” para cambiar el color de fondo.</string>
+    <string name="color_generator_help_copy">Pulsa el botón de copiar para llevar el código hexadecimal al portapapeles.</string>
+    <string name="generate_new_color">Generar nuevo</string>
+</resources>

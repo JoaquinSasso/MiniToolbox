@@ -117,7 +117,7 @@ fun GroupSelectorScreen(onBack: () -> Unit) {
                 .background(color = MaterialTheme.colorScheme.surfaceContainerLowest)
         ) {
             Text(
-                text = "Tamaño de equipo",
+                text = stringResource(R.string.team_size),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -185,7 +185,7 @@ fun GroupSelectorScreen(onBack: () -> Unit) {
                 }
                 if (fingerPositions.isEmpty()) {
                     Text(
-                        text = "Pon aquí los dedos para formar equipos",
+                        text = stringResource(R.string.place_fingers),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -197,7 +197,7 @@ fun GroupSelectorScreen(onBack: () -> Unit) {
                             .background(Color(0x55FF0000))
                     )
                     Text(
-                        text = "Cantidad de jugadores incorrecta",
+                        text = stringResource(R.string.incorrect_player_count),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.align(Alignment.Center)
@@ -209,14 +209,14 @@ fun GroupSelectorScreen(onBack: () -> Unit) {
     if (showInfo) {
         AlertDialog(
             onDismissRequest = { showInfo = false },
-            title = { Text("Acerca de Selector de Grupos") },
+            title = { Text(stringResource(R.string.about_team_generator)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Para qué sirve: Distribuye participantes en equipos de tamaño fijo de forma aleatoria y táctil.")
-                    Text("• Guía rápida:")
-                    Text("   – Selecciona el tamaño de equipo (2–5).")
-                    Text("   – Cada jugador debe colocar un dedo en la pantalla. Si el número de dedos no es divisible, verás un aviso de error.")
-                    Text("   – Los círculos de colores debajo de los dedos de cada jugador indican los equipos asignados.")
+                    Text(stringResource(R.string.team_generator_purpose))
+                    Text(stringResource(R.string.team_help_guide))
+                    Text(stringResource(R.string.team_generator_help_1))
+                    Text(stringResource(R.string.team_generator_help_2))
+                    Text(stringResource(R.string.team_generator_help_3))
                 }
             },
             confirmButton = {
@@ -224,7 +224,7 @@ fun GroupSelectorScreen(onBack: () -> Unit) {
                     showInfo = false
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 }) {
-                    Text("Cerrar")
+                    Text(stringResource(R.string.close))
                 }
             }
         )

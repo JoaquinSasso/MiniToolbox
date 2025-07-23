@@ -4,4 +4,14 @@
     <string name="category_organizacion">Organización</string>
     <string name="category_informacion">Información</string>
     <string name="category_entretenimiento">Entretenimiento</string>"
+    <string name="subcategory_generator">Generadores</string>"
+    <string name="subcategory_calculator">Calculadoras</string>"
+    <string name="subcategory_instrument">Instrumentos</string>"
+    <string name="subcategory_habits">Hábitos y Actividades</string>"
+    <string name="subcategory_dates">Fechas</string>"
+    <string name="subcategory_general">General</string>
+    <string name="subcategory_random">Aleatorio</string>
+    <string name="subcategory_scoreboards">Marcadores</string>"
+    <string name="subcategory_minigames">Minijuegos</string>
+    <string name="subcategory_others">Otros</string>
 </resources>
