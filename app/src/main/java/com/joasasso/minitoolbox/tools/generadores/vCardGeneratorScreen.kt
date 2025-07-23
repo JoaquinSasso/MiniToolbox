@@ -20,14 +20,13 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -63,22 +62,21 @@ fun GeneradorQrContactoScreen(onBack: () -> Unit) {
     val dataStore = remember { QrContactoDataStore(context) }
     val haptic = LocalHapticFeedback.current
     val clipboardManager = LocalClipboardManager.current
-    val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
 
     val datosGuardados by dataStore.datos.collectAsState(initial = QrContacto())
 
-    var nombre    by remember { mutableStateOf("") }
-    var telefono  by remember { mutableStateOf("") }
-    var email     by remember { mutableStateOf("") }
-    var showInfo  by remember { mutableStateOf(false) }
+    var nombre by remember { mutableStateOf("") }
+    var telefono by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var showInfo by remember { mutableStateOf(false) }
 
     // Cargar datos guardados al iniciar
     LaunchedEffect(datosGuardados) {
-        nombre    = datosGuardados.nombre
-        telefono  = datosGuardados.telefono
-        email     = datosGuardados.email
+        nombre = datosGuardados.nombre
+        telefono = datosGuardados.telefono
+        email = datosGuardados.email
     }
 
     fun guardarDatos() {
@@ -98,9 +96,9 @@ fun GeneradorQrContactoScreen(onBack: () -> Unit) {
         return buildString {
             appendLine("BEGIN:VCARD")
             appendLine("VERSION:3.0")
-            if (nombre.isNotBlank())   appendLine("FN:${nombre.trim()}")
+            if (nombre.isNotBlank()) appendLine("FN:${nombre.trim()}")
             if (telefono.isNotBlank()) appendLine("TEL;TYPE=CELL:${telefono.trim()}")
-            if (email.isNotBlank())    appendLine("EMAIL:${email.trim()}")
+            if (email.isNotBlank()) appendLine("EMAIL:${email.trim()}")
             appendLine("END:VCARD")
         }
     }
@@ -109,8 +107,12 @@ fun GeneradorQrContactoScreen(onBack: () -> Unit) {
     val qrEnabled = nombre.isNotBlank() && telefono.isNotBlank()
 
     Scaffold(
-        topBar = {TopBarReusable(stringResource(R.string.tool_qr_vcard), onBack, {showInfo = true})},
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        topBar = {
+            TopBarReusable(
+                stringResource(R.string.tool_qr_vcard),
+                onBack,
+                { showInfo = true })
+        }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -131,7 +133,7 @@ fun GeneradorQrContactoScreen(onBack: () -> Unit) {
                         nombre = it
                         guardarDatos()
                     },
-                    label = { Text("Nombre completo*") },
+                    label = { Text(stringResource(R.string.qr_vcard_label_nombre)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Text,
@@ -139,13 +141,15 @@ fun GeneradorQrContactoScreen(onBack: () -> Unit) {
                     ),
                     modifier = Modifier.fillMaxWidth()
                 )
+
                 OutlinedTextField(
                     value = telefono,
                     onValueChange = {
-                        telefono = it.filter { c -> c.isDigit() || c == '+' || c == ' ' || c == '-' }
+                        telefono =
+                            it.filter { c -> c.isDigit() || c == '+' || c == ' ' || c == '-' }
                         guardarDatos()
                     },
-                    label = { Text("Teléfono*") },
+                    label = { Text(stringResource(R.string.qr_vcard_label_telefono)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Phone,
@@ -153,13 +157,14 @@ fun GeneradorQrContactoScreen(onBack: () -> Unit) {
                     ),
                     modifier = Modifier.fillMaxWidth()
                 )
+
                 OutlinedTextField(
                     value = email,
                     onValueChange = {
                         email = it
                         guardarDatos()
                     },
-                    label = { Text("Email (opcional)") },
+                    label = { Text(stringResource(R.string.qr_vcard_label_email)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Email,
@@ -176,15 +181,19 @@ fun GeneradorQrContactoScreen(onBack: () -> Unit) {
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             clipboardManager.setText(androidx.compose.ui.text.AnnotatedString(vCard))
-                            scope.launch { snackbarHostState.showSnackbar("vCard copiada") }
                         },
                         enabled = qrEnabled
                     ) {
-                        Icon(Icons.Default.ContentCopy, contentDescription = "Copiar vCard")
+                        Icon(
+                            Icons.Default.ContentCopy,
+                            contentDescription = stringResource(R.string.desc_copy) + " vCard"
+                        )
                         Spacer(Modifier.width(4.dp))
-                        Text("Copiar vCard")
+                        Text(stringResource(R.string.desc_copy) + " vCard")
                     }
+
                     Spacer(Modifier.width(16.dp))
+
                     Button(
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -195,12 +204,21 @@ fun GeneradorQrContactoScreen(onBack: () -> Unit) {
                         },
                         enabled = nombre.isNotBlank() || telefono.isNotBlank() || email.isNotBlank()
                     ) {
-                        Icon(Icons.Default.Delete, contentDescription = "Limpiar")
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = stringResource(R.string.desc_clear)
+                        )
                         Spacer(Modifier.width(4.dp))
-                        Text("Limpiar")
+                        Text(stringResource(R.string.desc_clear))
                     }
                 }
-                Divider(Modifier.padding(vertical = 8.dp))
+
+                HorizontalDivider(
+                    Modifier.padding(vertical = 8.dp),
+                    DividerDefaults.Thickness,
+                    DividerDefaults.color
+                )
+
                 Card(
                     modifier = Modifier
                         .size(300.dp)
@@ -221,7 +239,7 @@ fun GeneradorQrContactoScreen(onBack: () -> Unit) {
                             )
                         } else {
                             Text(
-                                "Completa nombre y teléfono",
+                                stringResource(R.string.qr_vcard_texto_incompleto),
                                 fontSize = 15.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -238,13 +256,13 @@ fun GeneradorQrContactoScreen(onBack: () -> Unit) {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 showInfo = false
             },
-            title = { Text("¿Para qué sirve?") },
+            title = { Text(stringResource(R.string.qr_vcard_help_titulo)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Crea un código QR de contacto estándar (vCard) que puedes escanear desde cualquier celular para agregar la info a tu agenda rápidamente.")
-                    Text("• Solo pide nombre completo y teléfono (email opcional).")
-                    Text("• Puedes copiar el texto vCard para compartirlo por otros medios.")
-                    Text("• El QR y la vCard se generan de manera local y nunca se envían a ningún servidor.")
+                    Text(stringResource(R.string.qr_vcard_help_linea1))
+                    Text(stringResource(R.string.qr_vcard_help_linea2))
+                    Text(stringResource(R.string.qr_vcard_help_linea3))
+                    Text(stringResource(R.string.qr_vcard_help_linea4))
                 }
             },
             confirmButton = {
@@ -252,9 +270,10 @@ fun GeneradorQrContactoScreen(onBack: () -> Unit) {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     showInfo = false
                 }) {
-                    Text("Cerrar")
+                    Text(stringResource(R.string.close))
                 }
             }
         )
     }
 }
+

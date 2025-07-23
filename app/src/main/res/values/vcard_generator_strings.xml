@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="qr_vcard_label_nombre">Full name*</string>
+    <string name="qr_vcard_label_telefono">Phone number*</string>
+    <string name="qr_vcard_label_email">Email (optional)</string>
+    <string name="qr_vcard_texto_incompleto">Enter name and phone</string>
+    <string name="qr_vcard_help_titulo">What is it for?</string>
+    <string name="qr_vcard_help_linea1">• Creates a standard contact QR code (vCard) that can be scanned to quickly add info to a contact list.</string>
+    <string name="qr_vcard_help_linea2">• Requires full name and phone number (email is optional).</string>
+    <string name="qr_vcard_help_linea3">• You can copy the vCard text to share it by other means.</string>
+    <string name="qr_vcard_help_linea4">• Both QR and vCard are generated locally and never sent to any server.</string>
+
+</resources>

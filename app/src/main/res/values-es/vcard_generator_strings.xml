@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="qr_vcard_label_nombre">Nombre completo*</string>
+    <string name="qr_vcard_label_telefono">Teléfono*</string>
+    <string name="qr_vcard_label_email">Email (opcional)</string>
+    <string name="qr_vcard_texto_incompleto">Completa nombre y teléfono</string>
+    <string name="qr_vcard_help_titulo">¿Para qué sirve?</string>
+    <string name="qr_vcard_help_linea1">• Crea un código QR de contacto estándar (vCard) que puedes escanear desde cualquier celular para agregar la info a tu agenda rápidamente.</string>
+    <string name="qr_vcard_help_linea2">• Solo pide nombre completo y teléfono (email opcional).</string>
+    <string name="qr_vcard_help_linea3">• Puedes copiar el texto vCard para compartirlo por otros medios.</string>
+    <string name="qr_vcard_help_linea4">• El QR y la vCard se generan de manera local y nunca se envían a ningún servidor.</string>
+</resources>
