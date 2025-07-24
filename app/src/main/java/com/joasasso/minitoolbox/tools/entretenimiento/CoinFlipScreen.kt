@@ -12,8 +12,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -25,6 +27,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -51,10 +54,10 @@ fun CoinFlipScreen(onBack: () -> Unit) {
     val haptic = LocalHapticFeedback.current
     var showInfo by remember { mutableStateOf(false) }
 
-    var result by remember { mutableStateOf("Cara") }
+    var result by remember { mutableStateOf(context.getString(R.string.coin_heads)) }
     var flipping by remember { mutableStateOf(false) }
     val scaleY = remember { Animatable(1f) }
-    var flipTrigger by remember { mutableStateOf(0) }
+    var flipTrigger by remember { mutableIntStateOf(0) }
     var currentColor by remember { mutableStateOf(Color(0xFFBCAAA4)) }
 
     val flipColors = listOf(
@@ -76,15 +79,26 @@ fun CoinFlipScreen(onBack: () -> Unit) {
                 scaleY.animateTo(1f, tween(durationPerFlip / 2, easing = LinearEasing))
                 vibrator?.vibrate(VibrationEffect.createOneShot(30, VibrationEffect.DEFAULT_AMPLITUDE))
             }
-            result = if (Random.nextBoolean()) "Cara" else "Cruz"
-            currentColor = if (result == "Cara") flipColors.first() else flipColors[1]
+            val newResult = if (Random.nextBoolean()) {
+                context.getString(R.string.coin_heads)
+            } else {
+                context.getString(R.string.coin_tails)
+            }
+            result = newResult
+            currentColor = if (newResult == context.getString(R.string.coin_heads)) flipColors[0] else flipColors[1]
             flipping = false
             vibrator?.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE))
         }
     }
 
     Scaffold(
-        topBar = {TopBarReusable(stringResource(R.string.tool_coin_flip), onBack, {showInfo = true})}
+        topBar = {
+            TopBarReusable(
+                stringResource(R.string.tool_coin_flip),
+                onBack,
+                { showInfo = true }
+            )
+        }
     ) { padding ->
         Box(
             modifier = Modifier
@@ -124,9 +138,11 @@ fun CoinFlipScreen(onBack: () -> Unit) {
                         flipping = true
                         flipTrigger++
                     },
-                    enabled = !flipping
+                    enabled = !flipping,
+                    modifier = Modifier.height(75.dp)
+                        .width(200.dp)
                 ) {
-                    Text("Lanzar")
+                    Text(stringResource(R.string.coin_flip_button), style = MaterialTheme.typography.headlineMedium)
                 }
             }
         }
@@ -134,15 +150,17 @@ fun CoinFlipScreen(onBack: () -> Unit) {
 
     if (showInfo) {
         AlertDialog(
-            onDismissRequest = { showInfo = false },
-            title = { Text("Acerca de Cara o Cruz") },
+            onDismissRequest = {
+                showInfo = false
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            },
+            title = { Text(stringResource(R.string.coin_help_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Para qué sirve: Realiza un lanzamiento de moneda virtual con animación y vibración.")
-                    Text("• Guía rápida:")
-                    Text("   – Pulsa sobre la moneda o el botón “Lanzar” para iniciar el giro.")
-                    Text("   – Durante la animación, el botón queda deshabilitado.")
-                    Text("   – Al terminar, verás el resultado de la tirada: “Cara” o “Cruz”")
+                    Text(stringResource(R.string.coin_help_line1))
+                    Text(stringResource(R.string.coin_help_line2))
+                    Text(stringResource(R.string.coin_help_line3))
+                    Text(stringResource(R.string.coin_help_line4))
                 }
             },
             confirmButton = {
@@ -150,9 +168,10 @@ fun CoinFlipScreen(onBack: () -> Unit) {
                     showInfo = false
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 }) {
-                    Text("Cerrar")
+                    Text(stringResource(R.string.close))
                 }
             }
         )
     }
 }
+

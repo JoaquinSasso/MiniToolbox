@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="option_selector_spin">Spin</string>
+    <string name="option_add">Add option</string>
+    <string name="option_remove_last">Remove last</string>
+    <string name="option_label">Option %1$d</string>
+
+    <string name="option_help_title">About the Option Selector</string>
+    <string name="option_help_line1">• What it does: Slot-machine-style selector that scrolls through options before landing on one.</string>
+    <string name="option_help_line2">• How to use: Edit or add options, then tap “Spin”. It will scroll and pick one at random.</string>
+
+</resources>

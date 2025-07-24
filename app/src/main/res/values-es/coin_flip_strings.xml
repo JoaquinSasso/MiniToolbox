@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="coin_heads">Cara</string>
+    <string name="coin_tails">Cruz</string>
+    <string name="coin_flip_button">Lanzar</string>
+
+    <string name="coin_help_title">Acerca de Cara o Cruz</string>
+    <string name="coin_help_line1">• Para qué sirve: Realiza un lanzamiento de moneda virtual con animación y vibración.</string>
+    <string name="coin_help_line2">• Guía rápida:</string>
+    <string name="coin_help_line3">   – Pulsa sobre la moneda o el botón “Lanzar” para iniciar el giro.</string>
+    <string name="coin_help_line4">   – Durante la animación, el botón queda deshabilitado. Al terminar, verás el resultado: “Cara” o “Cruz”.</string>
+
+
+</resources>

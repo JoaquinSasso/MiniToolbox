@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="option_selector_spin">Girar</string>
+    <string name="option_add">Agregar opción</string>
+    <string name="option_remove_last">Eliminar última</string>
+    <string name="option_label">Opción %1$d</string>
+
+    <string name="option_help_title">Acerca del Selector de Opciones</string>
+    <string name="option_help_line1">• Para qué sirve: Selector estilo tragamonedas que pasa por varias opciones antes de detenerse.</string>
+    <string name="option_help_line2">• Cómo usar: Editá o agregá opciones, luego presioná \'Girar\'. El selector pasará por varias y se detendrá en una al azar.</string>
+</resources>
