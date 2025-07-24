@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hour_format_12">Formato 12 horas</string>
+    <string name="hour_format_24">Formato 24 horas</string>
+    <string name="hour_label_hhmm">HH:MM</string>
+    <string name="hour_copied_12">Hora 12h copiada</string>
+    <string name="hour_copied_24">Hora 24h copiada</string>
+    <string name="hour_invalid_error">Hora inválida</string>
+    <string name="hour_invalid_format">Usa el formato 12h</string>
+
+    <string name="hour_help_title">Acerca del conversor de horas</string>
+    <string name="hour_help_line1">• Convierte horas entre formato 12h (AM/PM) y 24h.</string>
+    <string name="hour_help_line2">• Escribí la hora en uno de los campos (formato HH:MM).</string>
+    <string name="hour_help_line3">• El otro campo se actualiza automáticamente.</string>
+    <string name="hour_help_line4">• El botón \'Copiar\' te permite guardar el resultado en el portapapeles.</string>
+    <string name="hour_help_line5">• Usá \'Resetear todo\' para limpiar ambos campos.</string>
+    <string name="hour_help_examples">Ejemplos:</string>
+
+</resources>
