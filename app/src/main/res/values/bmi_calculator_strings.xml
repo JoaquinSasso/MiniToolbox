@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bmi_titulo">Calculate your BMI</string>
+    <string name="bmi_peso_label">Weight (kg)</string>
+    <string name="bmi_altura_label">Height (cm)</string>
+    <string name="bmi_boton_calcular">Calculate</string>
+    <string name="bmi_peso_label_lb">Weight (lb)</string>
+    <string name="bmi_altura_label_ft">Height (ft)</string>
+    <string name="bmi_altura_label_in">Height (in)</string>
+    <string name="bmi_resultado">BMI: %1$.2f</string>
+    <string name="bmi_categoria_bajo">Underweight</string>
+    <string name="bmi_categoria_normal">Normal</string>
+    <string name="bmi_categoria_sobrepeso">Overweight</string>
+    <string name="bmi_categoria_obesidad1">Obesity I</string>
+    <string name="bmi_categoria_obesidad2">Obesity II</string>
+    <string name="bmi_categoria_obesidad3">Obesity III</string>
+    <string name="bmi_result_copy_format">BMI: %1$.2f (%2$s)</string>
+    <string name="bmi_info_titulo">What is BMI?</string>
+    <string name="bmi_info_descripcion1">BMI (Body Mass Index) is a formula that estimates whether your weight is healthy based on your height.</string>
+    <string name="bmi_info_formula">Formula: BMI = Weight (kg) / [Height (m)]²</string>
+    <string name="bmi_info_clasificacion">Classification according to WHO:</string>
+    <string name="bmi_info_clasificacion_1">• Less than 18.5: Underweight</string>
+    <string name="bmi_info_clasificacion_2">• 18.5 to 24.9: Normal</string>
+    <string name="bmi_info_clasificacion_3">• 25 to 29.9: Overweight</string>
+    <string name="bmi_info_clasificacion_4">• 30 to 34.9: Obesity I</string>
+    <string name="bmi_info_clasificacion_5">• 35 to 39.9: Obesity II</string>
+    <string name="bmi_info_clasificacion_6">• 40 or more: Obesity III</string>
+    <string name="bmi_info_aclaracion">This calculator is for reference only and does not replace medical diagnosis.</string>
+    <string name="bmi_imperial_system">Imperial (lb/ft)</string>
+    <string name="bmi_metric_system">Metric (kg/cm)</string>
+</resources>

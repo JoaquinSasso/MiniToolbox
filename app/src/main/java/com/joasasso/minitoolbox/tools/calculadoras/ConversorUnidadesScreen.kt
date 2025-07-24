@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AlertDialog
@@ -21,14 +22,11 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -36,7 +34,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,49 +48,51 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
-import kotlinx.coroutines.launch
 
-enum class UnitType(val display: String) {
-    Length("Longitud"),
-    Weight("Peso"),
-    Temperature("Temperatura"),
-    Time("Tiempo")
+enum class UnitType(val stringResId: Int) {
+    Length(R.string.unit_type_length),
+    Weight(R.string.unit_type_weight),
+    Temperature(R.string.unit_type_temperature),
+    Time(R.string.unit_type_time)
 }
 
-data class SimpleUnit(val name: String, val symbol: String)
+
+data class SimpleUnit(val stringResId: Int, val symbol: String)
+
 
 val lengthUnits = listOf(
-    SimpleUnit("Metro", "m"),
-    SimpleUnit("Centímetro", "cm"),
-    SimpleUnit("Milímetro", "mm"),
-    SimpleUnit("Kilómetro", "km"),
-    SimpleUnit("Pulgada", "in"),
-    SimpleUnit("Pie", "ft"),
-    SimpleUnit("Yarda", "yd"),
-    SimpleUnit("Milla", "mi")
+    SimpleUnit(R.string.unit_meter, "m"),
+    SimpleUnit(R.string.unit_centimeter, "cm"),
+    SimpleUnit(R.string.unit_millimeter, "mm"),
+    SimpleUnit(R.string.unit_kilometer, "km"),
+    SimpleUnit(R.string.unit_inch, "in"),
+    SimpleUnit(R.string.unit_foot, "ft"),
+    SimpleUnit(R.string.unit_yard, "yd"),
+    SimpleUnit(R.string.unit_mile, "mi")
 )
 
 val weightUnits = listOf(
-    SimpleUnit("Kilogramo", "kg"),
-    SimpleUnit("Gramo", "g"),
-    SimpleUnit("Miligramo", "mg"),
-    SimpleUnit("Tonelada", "t"),
-    SimpleUnit("Libra", "lb"),
-    SimpleUnit("Onza", "oz")
+    SimpleUnit(R.string.unit_kilogram, "kg"),
+    SimpleUnit(R.string.unit_gram, "g"),
+    SimpleUnit(R.string.unit_milligram, "mg"),
+    SimpleUnit(R.string.unit_ton, "t"),
+    SimpleUnit(R.string.unit_pound, "lb"),
+    SimpleUnit(R.string.unit_ounce, "oz")
 )
 
 val temperatureUnits = listOf(
-    SimpleUnit("Celsius", "°C"),
-    SimpleUnit("Fahrenheit", "°F"),
-    SimpleUnit("Kelvin", "K")
+    SimpleUnit(R.string.unit_celsius, "°C"),
+    SimpleUnit(R.string.unit_fahrenheit, "°F"),
+    SimpleUnit(R.string.unit_kelvin, "K")
 )
 
 val timeUnits = listOf(
-    SimpleUnit("Segundo", "s"),
-    SimpleUnit("Minuto", "min"),
-    SimpleUnit("Hora", "h"),
-    SimpleUnit("Día", "d")
+    SimpleUnit(R.string.unit_second, "s"),
+    SimpleUnit(R.string.unit_minute, "min"),
+    SimpleUnit(R.string.unit_hour, "h"),
+    SimpleUnit(R.string.unit_day, "d")
 )
+
 
 fun convertLength(value: Double, from: String, to: String): Double {
     val meters = when (from) {
@@ -185,8 +184,6 @@ fun ConversorUnidadesScreen(onBack: () -> Unit) {
 
     val focusManager = LocalFocusManager.current
     val clipboardManager = LocalClipboardManager.current
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
 
     val units = when (type) {
@@ -210,7 +207,6 @@ fun ConversorUnidadesScreen(onBack: () -> Unit) {
         }
     }
 
-    // Actualiza las unidades cuando cambia el tipo
     LaunchedEffect(type) {
         fromUnit = units[0]
         toUnit = units[1]
@@ -219,8 +215,7 @@ fun ConversorUnidadesScreen(onBack: () -> Unit) {
     }
 
     Scaffold(
-        topBar = {TopBarReusable(stringResource(R.string.tool_unit_converter), onBack, {showInfo = true})},
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        topBar = { TopBarReusable(stringResource(R.string.tool_unit_converter), onBack, { showInfo = true }) }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -230,11 +225,8 @@ fun ConversorUnidadesScreen(onBack: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.Top),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Botones de tipo en dos filas
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+            // Botones de tipo de unidad
+            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxWidth(),
@@ -254,7 +246,7 @@ fun ConversorUnidadesScreen(onBack: () -> Unit) {
                                 .height(40.dp)
                                 .weight(1f)
                         ) {
-                            Text(ut.display, fontSize = 14.sp, maxLines = 1)
+                            Text(stringResource(ut.stringResId), fontSize = 14.sp, maxLines = 1)
                         }
                     }
                 }
@@ -278,12 +270,13 @@ fun ConversorUnidadesScreen(onBack: () -> Unit) {
                                 .height(40.dp)
                                 .weight(1f)
                         ) {
-                            Text(ut.display, fontSize = 14.sp, maxLines = 1)
+                            Text(stringResource(ut.stringResId), fontSize = 14.sp, maxLines = 1)
                         }
                     }
                 }
             }
-            // Input y selección de unidades
+
+            // Entrada y selección de unidades
             Row(verticalAlignment = Alignment.CenterVertically) {
                 OutlinedTextField(
                     value = input,
@@ -291,105 +284,101 @@ fun ConversorUnidadesScreen(onBack: () -> Unit) {
                         input = it.filter { c -> c.isDigit() || c == '.' || c == ',' }
                         calculate()
                     },
-                    label = { Text("Valor") },
+                    label = { Text(stringResource(R.string.unidad_valor)) },
                     singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Decimal,
-                        imeAction = ImeAction.Done
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onDone = { focusManager.clearFocus() }
-                    ),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     modifier = Modifier.width(110.dp)
                 )
                 Spacer(Modifier.width(12.dp))
+
                 // Unidad origen
-                ExposedDropdownMenuBox(
-                    expanded = false,
-                    onExpandedChange = {},
-                ) {
-                    var expandedFrom by remember { mutableStateOf(false) }
-                    Box {
-                        OutlinedButton(
-                            onClick = {
-                                expandedFrom = true
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress) },
-                            modifier = Modifier.width(110.dp)
-                        ) {
-                            Text(fromUnit.symbol)
-                        }
-                        DropdownMenu(
-                            expanded = expandedFrom,
-                            onDismissRequest = { expandedFrom = false }
-                        ) {
-                            units.forEach {
-                                DropdownMenuItem(
-                                    text = { Text("${it.name} (${it.symbol})") },
-                                    onClick = {
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        fromUnit = it
-                                        expandedFrom = false
-                                        calculate()
-                                    }
-                                )
-                            }
+                var expandedFrom by remember { mutableStateOf(false) }
+                Box {
+                    OutlinedButton(
+                        onClick = {
+                            expandedFrom = true
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        },
+                        modifier = Modifier.width(110.dp)
+                    ) {
+                        Text(fromUnit.symbol)
+                        Spacer(Modifier.width(4.dp))
+                        Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                    }
+
+                    DropdownMenu(
+                        expanded = expandedFrom,
+                        onDismissRequest = { expandedFrom = false }
+                    ) {
+                        units.forEach {
+                            DropdownMenuItem(
+                                text = { Text("${stringResource(it.stringResId)} (${it.symbol})") },
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    fromUnit = it
+                                    expandedFrom = false
+                                    calculate()
+                                }
+                            )
                         }
                     }
                 }
+
                 Spacer(Modifier.width(8.dp))
-                Text("a", fontSize = 24.sp)
+                Text("→", fontSize = 24.sp)
                 Spacer(Modifier.width(8.dp))
+
                 // Unidad destino
-                ExposedDropdownMenuBox(
-                    expanded = false,
-                    onExpandedChange = {haptic.performHapticFeedback(HapticFeedbackType.LongPress)},
-                ) {
-                    var expandedTo by remember { mutableStateOf(false) }
-                    Box {
-                        OutlinedButton(
-                            onClick = { expandedTo = true},
-                            modifier = Modifier.width(110.dp)
-                        ) {
-                            Text(toUnit.symbol)
-                        }
-                        DropdownMenu(
-                            expanded = expandedTo,
-                            onDismissRequest = { expandedTo = false }
-                        ) {
-                            units.forEach {
-                                DropdownMenuItem(
-                                    text = { Text("${it.name} (${it.symbol})") },
-                                    onClick = {
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        toUnit = it
-                                        expandedTo = false
-                                        calculate()
-                                    }
-                                )
-                            }
+                var expandedTo by remember { mutableStateOf(false) }
+                Box {
+                    OutlinedButton(
+                        onClick = {
+                            expandedTo = true
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        },
+                        modifier = Modifier.width(110.dp)
+                    ) {
+                        Text(toUnit.symbol)
+                        Spacer(Modifier.width(4.dp))
+                        Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                    }
+
+                    DropdownMenu(
+                        expanded = expandedTo,
+                        onDismissRequest = { expandedTo = false }
+                    ) {
+                        units.forEach {
+                            DropdownMenuItem(
+                                text = { Text("${stringResource(it.stringResId)} (${it.symbol})") },
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    toUnit = it
+                                    expandedTo = false
+                                    calculate()
+                                }
+                            )
                         }
                     }
                 }
             }
-            // Resultado, copiar y reset
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
+
+            // Resultado
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
                 Button(
                     onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         if (!result.isNullOrBlank()) {
                             clipboardManager.setText(androidx.compose.ui.text.AnnotatedString(result!!))
-                            scope.launch { snackbarHostState.showSnackbar("Resultado copiado") }
                         }
                     },
                     enabled = !result.isNullOrBlank()
                 ) {
-                    Icon(Icons.Default.ContentCopy, contentDescription = "Copiar resultado")
+                    Icon(Icons.Default.ContentCopy, contentDescription = stringResource(R.string.copy))
                     Spacer(Modifier.width(4.dp))
-                    Text("Copiar")
+                    Text(stringResource(R.string.copy))
                 }
+
                 Spacer(Modifier.width(16.dp))
                 Button(
                     onClick = {
@@ -399,14 +388,15 @@ fun ConversorUnidadesScreen(onBack: () -> Unit) {
                         focusManager.clearFocus()
                     }
                 ) {
-                    Icon(Icons.Default.Refresh, contentDescription = "Resetear")
+                    Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.reset))
                     Spacer(Modifier.width(4.dp))
-                    Text("Resetear")
+                    Text(stringResource(R.string.reset))
                 }
             }
+
             result?.let {
                 Text(
-                    "Resultado: $it ${toUnit.symbol}",
+                    stringResource(R.string.unidad_resultado_final, it, toUnit.symbol),
                     fontSize = 18.sp,
                     color = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.padding(top = 8.dp)
@@ -421,18 +411,18 @@ fun ConversorUnidadesScreen(onBack: () -> Unit) {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 showInfo = false
             },
-            title = { Text("Acerca del conversor de unidades") },
+            title = { Text(stringResource(R.string.unidad_info_titulo)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Convertí valores entre unidades de longitud, peso, temperatura y tiempo.")
-                    Text("• Ingresá el valor, seleccioná las unidades de origen y destino, y el resultado se calcula automáticamente.")
-                    Text("• Usá el botón 'Copiar' para guardar el resultado o 'Resetear' para limpiar los campos.")
+                    Text(stringResource(R.string.unidad_info_linea1))
+                    Text(stringResource(R.string.unidad_info_linea2))
+                    Text(stringResource(R.string.unidad_info_linea3))
                     Spacer(Modifier.height(8.dp))
-                    Text("Ejemplos de unidades:")
-                    Text("– Longitud: metro, pulgada, milla, etc.")
-                    Text("– Peso: kilogramo, libra, onza, etc.")
-                    Text("– Temperatura: Celsius, Fahrenheit, Kelvin.")
-                    Text("– Tiempo: segundo, minuto, hora, día.")
+                    Text(stringResource(R.string.unidad_info_linea4))
+                    Text(stringResource(R.string.unidad_info_linea5))
+                    Text(stringResource(R.string.unidad_info_linea6))
+                    Text(stringResource(R.string.unidad_info_linea7))
+                    Text(stringResource(R.string.unidad_info_linea8))
                 }
             },
             confirmButton = {
@@ -440,9 +430,10 @@ fun ConversorUnidadesScreen(onBack: () -> Unit) {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     showInfo = false
                 }) {
-                    Text("Cerrar")
+                    Text(stringResource(R.string.close))
                 }
             }
         )
     }
 }
+

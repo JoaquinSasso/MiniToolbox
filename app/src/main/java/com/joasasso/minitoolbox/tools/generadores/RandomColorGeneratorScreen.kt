@@ -81,7 +81,7 @@ fun RandomColorGeneratorScreen(onBack: () -> Unit) {
                 clipboardManager.setText(AnnotatedString(hex))
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
             }) {
-                Icon(Icons.Default.ContentCopy, contentDescription = stringResource(R.string.desc_copy), tint = contrastColor)
+                Icon(Icons.Default.ContentCopy, contentDescription = stringResource(R.string.copy), tint = contrastColor)
             }
         }
     }

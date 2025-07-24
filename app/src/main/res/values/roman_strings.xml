@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="roman_titulo">Convert between Arabic and Roman numerals</string>
+    <string name="roman_label_arabigo">Arabic number (1–3999)</string>
+    <string name="roman_label_romano">Roman number</string>
+    <string name="roman_range_error">Number must be between 1 and 3999</string>
+    <string name="roman_invalid_roman">Invalid Roman numeral or out of range</string>
+
+    <string name="roman_help_titulo">Roman and Arabic numbers</string>
+    <string name="roman_help_linea1">• Convert numbers between Arabic (123) and Roman (CXXIII) systems.</string>
+    <string name="roman_help_linea2">• You can type in either field and it will convert automatically.</string>
+    <string name="roman_help_linea3">Basic values:</string>
+    <string name="roman_help_linea4">I=1  V=5  X=10  L=50  C=100  D=500  M=1000</string>
+    <string name="roman_help_linea5">Example: 2024 = MMXXIV</string>
+    <string name="roman_help_linea6">• Valid range: 1 to 3999 (I to MMMCMXCIX).</string>
+    <string name="roman_help_linea7">• Why this limit? The classic Roman numeral system only uses I, V, X, L, C, D and M. The largest number you can write with these is 3999 (MMMCMXCIX). Larger numbers used special symbols or overlines that aren\'t commonly used today.</string>
+</resources>

@@ -296,9 +296,9 @@ fun GeneradorNombresScreen(onBack: () -> Unit) {
                         clipboardManager.setText(androidx.compose.ui.text.AnnotatedString(nombre))
                     }
                 ) {
-                    Icon(Icons.Default.ContentCopy, contentDescription = stringResource(R.string.desc_copy))
+                    Icon(Icons.Default.ContentCopy, contentDescription = stringResource(R.string.copy))
                     Spacer(Modifier.width(4.dp))
-                    Text(stringResource(R.string.desc_copy))
+                    Text(stringResource(R.string.copy))
                 }
             }
             // Toggle al final

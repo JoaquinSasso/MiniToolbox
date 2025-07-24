@@ -19,15 +19,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,7 +39,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,12 +49,13 @@ fun ConversorRomanosScreen(onBack: () -> Unit) {
 
     var errorArabigo by remember { mutableStateOf<String?>(null) }
     var errorRomano by remember { mutableStateOf<String?>(null) }
+    val mensajeErrorRango = stringResource(R.string.roman_range_error)
+    val mensajeErrorInvalido = stringResource(R.string.roman_invalid_roman)
 
     val focusManager = LocalFocusManager.current
     val clipboardManager = LocalClipboardManager.current
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
+
 
     var lastUserEdit by remember { mutableStateOf("none") } // "arabigo", "romano", "none"
 
@@ -115,7 +112,7 @@ fun ConversorRomanosScreen(onBack: () -> Unit) {
         }
         val num = arabigoInput.toIntOrNull()
         if (num == null || num < 1 || num > 3999) {
-            errorArabigo = "Solo entre 1 y 3999"
+            errorArabigo = mensajeErrorRango
             romanoInput = ""
         } else {
             val roman = toRoman(num)
@@ -138,7 +135,7 @@ fun ConversorRomanosScreen(onBack: () -> Unit) {
         }
         val result = fromRoman(romanoInput)
         if (result == null || result < 1 || result > 3999) {
-            errorRomano = "Romano inválido o fuera de rango (1-3999)"
+            errorRomano = mensajeErrorInvalido
             arabigoInput = ""
         } else {
             arabigoInput = result.toString()
@@ -158,8 +155,12 @@ fun ConversorRomanosScreen(onBack: () -> Unit) {
     }
 
     Scaffold(
-        topBar = {TopBarReusable(stringResource(R.string.tool_roman_converter), onBack, {showInfo = true})},
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        topBar = {
+            TopBarReusable(
+                stringResource(R.string.tool_roman_converter),
+                onBack,
+                { showInfo = true })
+        }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -170,15 +171,16 @@ fun ConversorRomanosScreen(onBack: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                "Convertí entre números arábigos y romanos",
+                text = stringResource(R.string.roman_titulo),
                 fontSize = 18.sp,
                 color = MaterialTheme.colorScheme.primary
             )
-            // Arábigo a romano
+
+            // Arabic to Roman
             OutlinedTextField(
                 value = arabigoInput,
                 onValueChange = { onArabigoChanged(it) },
-                label = { Text("N° arábigo (1-3999)") },
+                label = { Text(stringResource(R.string.roman_label_arabigo)) },
                 singleLine = true,
                 isError = errorArabigo != null,
                 keyboardOptions = KeyboardOptions(
@@ -190,11 +192,12 @@ fun ConversorRomanosScreen(onBack: () -> Unit) {
                 },
                 modifier = Modifier.width(180.dp)
             )
-            // Romano a arábigo
+
+            // Roman to Arabic
             OutlinedTextField(
                 value = romanoInput,
                 onValueChange = { onRomanoChanged(it) },
-                label = { Text("N° romano") },
+                label = { Text(stringResource(R.string.roman_label_romano)) },
                 singleLine = true,
                 isError = errorRomano != null,
                 keyboardOptions = KeyboardOptions(
@@ -206,6 +209,7 @@ fun ConversorRomanosScreen(onBack: () -> Unit) {
                 },
                 modifier = Modifier.width(180.dp)
             )
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
@@ -220,23 +224,30 @@ fun ConversorRomanosScreen(onBack: () -> Unit) {
                         else ""
                         if (toCopy.isNotBlank()) {
                             clipboardManager.setText(androidx.compose.ui.text.AnnotatedString(toCopy))
-                            scope.launch { snackbarHostState.showSnackbar("Copiado: $toCopy") }
                         }
                     },
                     enabled = (arabigoInput.isNotBlank() && errorArabigo == null && romanoInput.isNotBlank())
                             || (romanoInput.isNotBlank() && errorRomano == null && arabigoInput.isNotBlank())
                 ) {
-                    Icon(Icons.Default.ContentCopy, contentDescription = "Copiar resultado")
+                    Icon(
+                        Icons.Default.ContentCopy,
+                        contentDescription = stringResource(R.string.copy)
+                    )
                     Spacer(Modifier.width(4.dp))
-                    Text("Copiar")
+                    Text(stringResource(R.string.copy))
                 }
+
                 Spacer(Modifier.width(16.dp))
+
                 Button(
                     onClick = { reset() }
                 ) {
-                    Icon(Icons.Default.Refresh, contentDescription = "Resetear")
+                    Icon(
+                        Icons.Default.Refresh,
+                        contentDescription = stringResource(R.string.reset)
+                    )
                     Spacer(Modifier.width(4.dp))
-                    Text("Resetear")
+                    Text(stringResource(R.string.reset))
                 }
             }
         }
@@ -245,19 +256,18 @@ fun ConversorRomanosScreen(onBack: () -> Unit) {
     if (showInfo) {
         AlertDialog(
             onDismissRequest = { showInfo = false },
-            title = { Text("Números romanos y arábigos") },
+            title = { Text(stringResource(R.string.roman_help_titulo)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Convertí números entre el sistema arábigo (123) y romano (CXXIII).")
-
-                    Text("• Podés escribir en ambos campos y la conversión es automática.")
+                    Text(stringResource(R.string.roman_help_linea1))
+                    Text(stringResource(R.string.roman_help_linea2))
                     Spacer(Modifier.height(4.dp))
-                    Text("Valores básicos:")
-                    Text("I=1  V=5  X=10  L=50  C=100  D=500  M=1000")
+                    Text(stringResource(R.string.roman_help_linea3))
+                    Text(stringResource(R.string.roman_help_linea4))
                     Spacer(Modifier.height(4.dp))
-                    Text("Ejemplo: 2024 = MMXXIV")
-                    Text("• Rango válido: 1 a 3999 (I a MMMCMXCIX).")
-                    Text("• ¿Por qué ese límite? El sistema clásico de números romanos solo usa las letras I, V, X, L, C, D y M. El número más grande que se puede escribir así es 3999 (MMMCMXCIX). Para números mayores, los romanos usaban símbolos o rayas especiales que no son comunes ni estándar hoy en día.")
+                    Text(stringResource(R.string.roman_help_linea5))
+                    Text(stringResource(R.string.roman_help_linea6))
+                    Text(stringResource(R.string.roman_help_linea7))
                 }
             },
             confirmButton = {
@@ -265,7 +275,7 @@ fun ConversorRomanosScreen(onBack: () -> Unit) {
                     showInfo = false
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 }) {
-                    Text("Cerrar")
+                    Text(stringResource(R.string.close))
                 }
             }
         )

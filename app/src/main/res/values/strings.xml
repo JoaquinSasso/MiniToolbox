@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="close">Close</string>
-    <string name="desc_copy">Copy</string>
-    <string name="desc_clear">Clear</string>
+    <string name="copy">Copy</string>
+    <string name="clear">Clear</string>
+    <string name="reset">Reset</string>
 </resources>

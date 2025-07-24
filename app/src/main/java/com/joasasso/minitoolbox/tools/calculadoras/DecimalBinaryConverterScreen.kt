@@ -47,7 +47,13 @@ fun DecimalBinaryConverterScreen(onBack: () -> Unit) {
     var showInfo    by remember { mutableStateOf(false) }
 
     Scaffold(
-        topBar = {TopBarReusable(stringResource(R.string.tool_decimal_binary), onBack, {showInfo = true})},
+        topBar = {
+            TopBarReusable(
+                stringResource(R.string.tool_decimal_binary),
+                onBack,
+                { showInfo = true }
+            )
+        }
     ) { inner ->
         Column(
             modifier = Modifier
@@ -56,6 +62,7 @@ fun DecimalBinaryConverterScreen(onBack: () -> Unit) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Campo Decimal
             OutlinedTextField(
                 value = decimalInput,
                 onValueChange = { new ->
@@ -67,7 +74,7 @@ fun DecimalBinaryConverterScreen(onBack: () -> Unit) {
                             ?: binaryInput
                     } else ""
                 },
-                label = { Text("Decimal") },
+                label = { Text(stringResource(R.string.decimal_binario_decimal)) },
                 singleLine = false,
                 maxLines = 6,
                 modifier = Modifier
@@ -80,19 +87,20 @@ fun DecimalBinaryConverterScreen(onBack: () -> Unit) {
                     }) {
                         Icon(
                             imageVector = Icons.Filled.ContentCopy,
-                            contentDescription = "Copiar"
+                            contentDescription = stringResource(R.string.copy)
                         )
                     }
                 },
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor   = MaterialTheme.colorScheme.surface,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
                     unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                    focusedBorderColor      = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor    = MaterialTheme.colorScheme.onSurfaceVariant
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant
                 ),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
 
+            // Campo Binario
             OutlinedTextField(
                 value = binaryInput,
                 onValueChange = { new ->
@@ -104,7 +112,7 @@ fun DecimalBinaryConverterScreen(onBack: () -> Unit) {
                             ?: decimalInput
                     } else ""
                 },
-                label = { Text("Binario") },
+                label = { Text(stringResource(R.string.decimal_binario_binario)) },
                 singleLine = false,
                 maxLines = 6,
                 modifier = Modifier
@@ -117,31 +125,32 @@ fun DecimalBinaryConverterScreen(onBack: () -> Unit) {
                     }) {
                         Icon(
                             imageVector = Icons.Filled.ContentCopy,
-                            contentDescription = "Copiar"
+                            contentDescription = stringResource(R.string.copy)
                         )
                     }
                 },
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor   = MaterialTheme.colorScheme.surface,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
                     unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                    focusedBorderColor      = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor    = MaterialTheme.colorScheme.onSurfaceVariant
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant
                 ),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
         }
     }
+
+// Diálogo de ayuda
     if (showInfo) {
         AlertDialog(
             onDismissRequest = { showInfo = false },
-            title = { Text("Acerca de Decimal ↔ Binario") },
+            title = { Text(stringResource(R.string.decimal_binario_titulo_ayuda)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Para qué sirve: Convierte entre números decimales y su representación binaria.")
-                    Text("• Guía rápida:")
-                    Text("   – Ingresa un número decimal para ver su representación en binario.")
-                    Text("   – También puedes ingresar un número binario para ver su representación decimal.")
-                    Text("   – Pulsa 📋 para copiar el resultado.")
+                    Text(stringResource(R.string.decimal_binario_linea1))
+                    Text(stringResource(R.string.decimal_binario_linea2))
+                    Text(stringResource(R.string.decimal_binario_linea3))
+                    Text(stringResource(R.string.decimal_binario_linea4))
                 }
             },
             confirmButton = {
@@ -149,7 +158,7 @@ fun DecimalBinaryConverterScreen(onBack: () -> Unit) {
                     showInfo = false
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 }) {
-                    Text("Cerrar")
+                    Text(stringResource(R.string.close))
                 }
             }
         )

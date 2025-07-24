@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="unit_type_length">Longitud</string>
+    <string name="unit_type_weight">Peso</string>
+    <string name="unit_type_temperature">Temperatura</string>
+    <string name="unit_type_time">Tiempo</string>
+
+    <string name="unit_meter">Metro</string>
+    <string name="unit_centimeter">Centímetro</string>
+    <string name="unit_millimeter">Milímetro</string>
+    <string name="unit_kilometer">Kilómetro</string>
+    <string name="unit_inch">Pulgada</string>
+    <string name="unit_foot">Pie</string>
+    <string name="unit_yard">Yarda</string>
+    <string name="unit_mile">Milla</string>
+
+    <string name="unit_kilogram">Kilogramo</string>
+    <string name="unit_gram">Gramo</string>
+    <string name="unit_milligram">Miligramo</string>
+    <string name="unit_ton">Tonelada</string>
+    <string name="unit_pound">Libra</string>
+    <string name="unit_ounce">Onza</string>
+
+    <string name="unit_celsius">Celsius</string>
+    <string name="unit_fahrenheit">Fahrenheit</string>
+    <string name="unit_kelvin">Kelvin</string>
+
+    <string name="unit_second">Segundo</string>
+    <string name="unit_minute">Minuto</string>
+    <string name="unit_hour">Hora</string>
+    <string name="unit_day">Día</string>
+
+    <!-- Tipos de unidad -->
+    <string name="unidad_tipo_longitud">Longitud</string>
+    <string name="unidad_tipo_peso">Peso</string>
+    <string name="unidad_tipo_temperatura">Temperatura</string>
+    <string name="unidad_tipo_tiempo">Tiempo</string>
+
+    <!-- Campo de entrada -->
+    <string name="unidad_valor">Valor</string>
+
+    <!-- Botones -->
+    <string name="unidad_boton_copiar">Copiar</string>
+    <string name="unidad_boton_resetear">Resetear</string>
+    <string name="unidad_boton_cerrar">Cerrar</string>
+
+    <!-- Content descriptions -->
+    <string name="unidad_content_desc_copiar">Copiar resultado</string>
+    <string name="unidad_content_desc_resetear">Resetear campos</string>
+
+    <!-- Snackbar -->
+    <string name="unidad_resultado_copiado">Resultado copiado</string>
+
+    <!-- Resultado final -->
+    <string name="unidad_resultado_final">Resultado: %1$s %2$s</string>
+
+    <!-- Diálogo de ayuda -->
+    <string name="unidad_info_titulo">Acerca del conversor de unidades</string>
+    <string name="unidad_info_linea1">• Convertí valores entre unidades de longitud, peso, temperatura y tiempo.</string>
+    <string name="unidad_info_linea2">• Ingresá el valor, seleccioná las unidades de origen y destino, y el resultado se calcula automáticamente.</string>
+    <string name="unidad_info_linea3">• Usá el botón "Copiar" para guardar el resultado o "Resetear" para limpiar los campos.</string>
+    <string name="unidad_info_linea4">Ejemplos de unidades:</string>
+    <string name="unidad_info_linea5">– Longitud: metro, pulgada, milla, etc.</string>
+    <string name="unidad_info_linea6">– Peso: kilogramo, libra, onza, etc.</string>
+    <string name="unidad_info_linea7">– Temperatura: Celsius, Fahrenheit, Kelvin.</string>
+    <string name="unidad_info_linea8">– Tiempo: segundo, minuto, hora, día.</string>
+
+</resources>

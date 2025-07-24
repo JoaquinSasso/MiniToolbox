@@ -154,7 +154,7 @@ fun GeneradorLoremIpsumScreen(onBack: () -> Unit) {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     reset()
                 }) {
-                    Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.desc_clear))
+                    Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.clear))
                     Spacer(Modifier.width(4.dp))
                     Text(stringResource(R.string.lorem_boton_limpiar))
                 }
@@ -167,7 +167,7 @@ fun GeneradorLoremIpsumScreen(onBack: () -> Unit) {
                     },
                     enabled = textoGenerado.isNotBlank()
                 ) {
-                    Icon(Icons.Default.ContentCopy, contentDescription = stringResource(R.string.desc_copy))
+                    Icon(Icons.Default.ContentCopy, contentDescription = stringResource(R.string.copy))
                     Spacer(Modifier.width(4.dp))
                     Text(stringResource(R.string.lorem_boton_copiar))
                 }

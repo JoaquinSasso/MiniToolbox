@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="texto_binario_texto">Texto</string>
+    <string name="texto_binario_binario">Binario</string>
+    <string name="texto_binario_titulo_ayuda">Acerca de Texto / Binario</string>
+    <string name="texto_binario_linea1">• Para qué sirve: Convierte texto a código binario ASCII y viceversa.</string>
+    <string name="texto_binario_linea2">• Guía rápida:</string>
+    <string name="texto_binario_linea3">   – Escribe texto para ver su representación binaria.</string>
+    <string name="texto_binario_linea4">   – Escribe ceros y unos; se agrupan visualmente en bytes (8 bits) sin afectar la edición.</string>
+</resources>

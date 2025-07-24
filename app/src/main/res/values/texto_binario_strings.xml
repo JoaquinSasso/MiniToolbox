@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="texto_binario_texto">Text</string>
+    <string name="texto_binario_binario">Binary</string>
+    <string name="texto_binario_titulo_ayuda">About Text / Binary</string>
+    <string name="texto_binario_linea1">• Purpose: Converts text to ASCII binary code and vice versa.</string>
+    <string name="texto_binario_linea2">• Quick guide:</string>
+    <string name="texto_binario_linea3">   – Type text to see its binary representation.</string>
+    <string name="texto_binario_linea4">   – Type 0s and 1s; they are visually grouped into 8-bit bytes without affecting editing.</string>
+</resources>
