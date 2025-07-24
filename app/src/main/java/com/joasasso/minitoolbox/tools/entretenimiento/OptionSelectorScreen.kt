@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -27,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,8 +53,16 @@ fun OptionSelectorScreen(onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
     var showInfo by remember { mutableStateOf(false) }
 
-    var options by remember { mutableStateOf(mutableStateListOf("Opción 1", "Opción 2", "Opción 3")) }
-    var currentStep by remember { mutableStateOf(0) }
+    var options by remember {
+        mutableStateOf(
+            mutableStateListOf(
+                "",
+                "",
+                ""
+            )
+        )
+    }
+    var currentStep by remember { mutableIntStateOf(0) }
     var currentText by remember { mutableStateOf("") }
     var isSpinning by remember { mutableStateOf(false) }
 
@@ -81,16 +91,8 @@ fun OptionSelectorScreen(onBack: () -> Unit) {
                 AnimatedContent(
                     targetState = Pair(currentText, currentStep),
                     transitionSpec = {
-                        (slideInVertically(
-                            animationSpec = tween(200),
-                            initialOffsetY = { -it }
-                        )
-                            .togetherWith(
-                                slideOutVertically(
-                                    animationSpec = tween(200),
-                                    targetOffsetY = { it }
-                                )
-                            ))
+                        slideInVertically(animationSpec = tween(200), initialOffsetY = { -it }) togetherWith
+                                slideOutVertically(animationSpec = tween(200), targetOffsetY = { it })
                     }
                 ) { (text, _) ->
                     Text(
@@ -107,51 +109,54 @@ fun OptionSelectorScreen(onBack: () -> Unit) {
                         scope.launch {
                             val steps = 15
                             val totalDuration = 300L * steps
-
                             for (i in 1..steps) {
                                 val next = options.random()
                                 currentText = next
-                                currentStep++ // Incrementa para que AnimatedContent detecte cambio
+                                currentStep++
                                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-
                                 val stepDelay = (totalDuration / steps) * i / steps
                                 delay(stepDelay)
                             }
-
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             isSpinning = false
                         }
                     }
                 },
-                enabled = !isSpinning
+                enabled = !isSpinning,
+                modifier = Modifier.height(75.dp)
+                    .width(200.dp)
             ) {
-                Text("Girar")
+                Text(stringResource(R.string.option_selector_spin), style = MaterialTheme.typography.headlineMedium)
             }
 
             Column(
                 Modifier
                     .verticalScroll(scrollState)
                     .weight(1f),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 options.forEachIndexed { index, text ->
                     OutlinedTextField(
                         value = text,
                         onValueChange = { new -> options[index] = new },
-                        label = { Text("Opción ${index + 1}") },
+                        label = { Text(stringResource(R.string.option_label, index + 1)) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(onClick = { options.add("Opción ${options.size + 1}") }) {
-                        Text("Agregar opción")
+                    Button(onClick = {
+                        options.add(
+                            ""
+                        )
+                    }) {
+                        Text(stringResource(R.string.option_add))
                     }
-                    if (options.size > 1) {
-                        Button(onClick = { options.removeAt(options.lastIndex) }) {
-                            Text("Eliminar última")
-                        }
+                    Button(onClick = { options.removeAt(options.lastIndex) },
+                        enabled = options.isNotEmpty()) {
+                        Text(stringResource(R.string.option_remove_last))
                     }
                 }
             }
@@ -161,18 +166,19 @@ fun OptionSelectorScreen(onBack: () -> Unit) {
     if (showInfo) {
         AlertDialog(
             onDismissRequest = { showInfo = false },
-            title = { Text("Acerca del Selector de Opciones") },
+            title = { Text(stringResource(R.string.option_help_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Para qué sirve: Selector estilo tragamonedas que pasa por varias opciones antes de detenerse.")
-                    Text("• Cómo usar: Editá o agregá opciones, luego presioná 'Girar'. El selector pasará por varias y se detendrá en una al azar.")
+                    Text(stringResource(R.string.option_help_line1))
+                    Text(stringResource(R.string.option_help_line2))
                 }
             },
             confirmButton = {
                 TextButton(onClick = { showInfo = false }) {
-                    Text("Cerrar")
+                    Text(stringResource(R.string.close))
                 }
             }
         )
     }
 }
+

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="coin_heads">Heads</string>
+    <string name="coin_tails">Tails</string>
+    <string name="coin_flip_button">Flip</string>
+
+    <string name="coin_help_title">About Coin Flip</string>
+    <string name="coin_help_line1">• What it does: Simulates a virtual coin flip with animation and vibration.</string>
+    <string name="coin_help_line2">• Quick guide:</string>
+    <string name="coin_help_line3">   – Tap the coin or the “Flip” button to start the animation.</string>
+    <string name="coin_help_line4">   – During the animation, the button is disabled. When it ends, the result will show: “Heads” or “Tails”.</string>
+</resources>
