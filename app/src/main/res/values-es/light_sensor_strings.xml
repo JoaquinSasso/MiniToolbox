@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lightmeter_no_sensor">Este dispositivo no tiene sensor de luz ambiental.</string>
+    <string name="lightmeter_current_label">Nivel de luz actual</string>
+    <string name="lightmeter_value_lux">%1$d lux</string>
+    <string name="lightmeter_max_label">Máximo detectado: %1$s</string>
+    <string name="lightmeter_reset_button">Reiniciar máximo</string>
+    <string name="lightmeter_reset_content_desc">Reiniciar máximo</string>
+
+    <string name="lightmeter_help_title">¿Cómo funciona el medidor de luz?</string>
+    <string name="lightmeter_help_line1">• Usa el sensor de luz ambiental del dispositivo para mostrar el nivel de iluminación en lux (lúmenes por metro cuadrado).</string>
+    <string name="lightmeter_help_line2">• 1 lux = 1 lumen/m². No mide lúmenes directamente, pero el valor de lux es el estándar en medición ambiental.</string>
+    <string name="lightmeter_help_line3">• Valores típicos:</string>
+    <string name="lightmeter_help_line4">    • 10–50 lux: luz baja, ambiente tenue.</string>
+    <string name="lightmeter_help_line5">    • 300–500 lux: lectura/escritorio.</string>
+    <string name="lightmeter_help_line6">    • 1.000+ lux: cerca de ventana o exterior. / 10.000+ lux: luz solar directa.</string>
+    <string name="lightmeter_help_line7">• Si el sensor marca 0 o no varía, es posible que el dispositivo no tenga sensor o esté tapado. Los cambios bruscos de valor son normales.</string>
+
+
+</resources>

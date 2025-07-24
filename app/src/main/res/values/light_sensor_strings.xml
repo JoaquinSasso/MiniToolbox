@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lightmeter_no_sensor">This device does not have an ambient light sensor.</string>
+    <string name="lightmeter_current_label">Current light level</string>
+    <string name="lightmeter_value_lux">%1$d lux</string>
+    <string name="lightmeter_max_label">Maximum detected: %1$s</string>
+    <string name="lightmeter_reset_button">Reset maximum</string>
+    <string name="lightmeter_reset_content_desc">Reset maximum</string>
+
+    <string name="lightmeter_help_title">How does the light meter work?</string>
+    <string name="lightmeter_help_line1">• Uses the device’s ambient light sensor to show the illumination level in lux (lumens per square meter).</string>
+    <string name="lightmeter_help_line2">• 1 lux = 1 lumen/m². It doesn’t measure lumens directly, but lux is the standard for environmental lighting.</string>
+    <string name="lightmeter_help_line3">• Typical values:</string>
+    <string name="lightmeter_help_line4">    • 10–50 lux: dim light, low ambient.</string>
+    <string name="lightmeter_help_line5">    • 300–500 lux: reading/desk.</string>
+    <string name="lightmeter_help_line6">    • 1,000+ lux: near window or outside. / 10,000+ lux: direct sunlight.</string>
+    <string name="lightmeter_help_line7">• If the sensor shows 0 or doesn\'t change, your device might not have a light sensor or it may be covered. Sudden value jumps are normal.</string>
+
+</resources>

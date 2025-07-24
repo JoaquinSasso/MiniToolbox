@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="flash_on_desc">Linterna encendida</string>
+    <string name="flash_off_desc">Linterna apagada</string>
+    <string name="flash_button_on">Encender linterna</string>
+    <string name="flash_button_off">Apagar linterna</string>
+
+    <string name="flash_error_noflash">No se encontró flash en este dispositivo.</string>
+    <string name="flash_error_camera_access">No se pudo acceder al flash de la cámara.</string>
+    <string name="flash_error_permission">Permiso denegado para usar el flash.</string>
+
+    <string name="flash_help_title">¿Cómo funciona la linterna?</string>
+    <string name="flash_help_line1">• Usa el flash de la cámara como linterna para iluminar en la oscuridad.</string>
+    <string name="flash_help_line2">• Pulsa el botón para encender o apagar la linterna.</string>
+    <string name="flash_help_line3">• El flash se apaga automáticamente al salir de la pantalla.</string>
+    <string name="flash_help_line4">• Si ves un error, es posible que tu dispositivo no tenga flash o que otra app lo esté usando.</string>
+    <string name="flash_help_line5">• La linterna solo tiene una intensidad (encendido/apagado). No es posible ajustar el brillo, ya que es una limitación del hardware en casi todos los teléfonos.</string>
+
+
+</resources>

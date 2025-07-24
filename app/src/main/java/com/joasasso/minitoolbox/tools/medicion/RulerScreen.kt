@@ -102,7 +102,7 @@ fun ReglaScreen(onBack: () -> Unit) {
                                 drawContext.canvas.nativeCanvas.apply {
                                     val num = i / stepsPerUnidad
                                     drawText(
-                                        "$num${if (isCm) "cm" else "\""}",
+                                        "$num${if (isCm) " cm" else " in"}",
                                         lineLength + 8f,
                                         y + 12f,
                                         android.graphics.Paint().apply {
@@ -135,7 +135,12 @@ fun ReglaScreen(onBack: () -> Unit) {
                             },
                             shape = MaterialTheme.shapes.medium
                         ) {
-                            Text(if (unidad == "cm") "Cambiar a pulgadas" else "Cambiar a cm")
+                            Text(
+                                stringResource(
+                                    if (unidad == "cm") R.string.ruler_switch_to_inches
+                                    else R.string.ruler_switch_to_cm
+                                )
+                            )
                         }
                     }
                 }
@@ -150,13 +155,13 @@ fun ReglaScreen(onBack: () -> Unit) {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 showInfo = false
             },
-            title = { Text("¿Cómo funciona la regla?") },
+            title = { Text(stringResource(R.string.ruler_help_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Esta herramienta dibuja una regla vertical calibrada según la pantalla de tu dispositivo.")
-                    Text("• Puedes medir objetos pequeños apoyándolos sobre la pantalla, junto al borde izquierdo.")
-                    Text("• El botón de la esquina permite alternar entre centímetros y pulgadas.")
-                    Text("• La precisión depende del tamaño físico reportado por tu dispositivo, por lo que puede variar ligeramente entre modelos.")
+                    Text(stringResource(R.string.ruler_help_line1))
+                    Text(stringResource(R.string.ruler_help_line2))
+                    Text(stringResource(R.string.ruler_help_line3))
+                    Text(stringResource(R.string.ruler_help_line4))
                 }
             },
             confirmButton = {
@@ -164,7 +169,7 @@ fun ReglaScreen(onBack: () -> Unit) {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     showInfo = false
                 }) {
-                    Text("Cerrar")
+                    Text(stringResource(R.string.close))
                 }
             }
         )

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bubble_lock">Bloquear burbuja</string>
+    <string name="bubble_unlock">Desbloquear burbuja</string>
+    <string name="bubble_help_title">Acerca de Nivel Burbuja</string>
+    <string name="bubble_help_line1">• Para qué sirve: Permite ver la inclinación horizontal y vertical del dispositivo, como un nivel de burbuja real.</string>
+    <string name="bubble_help_line2">• Guía rápida:</string>
+    <string name="bubble_help_line3">   – Colocá el dispositivo sobre la superficie que querés nivelar.</string>
+    <string name="bubble_help_line4">   – Ajustá la inclinación. Cuando escuches un pitido y la burbuja se ponga verde, significa que está nivelada.</string>
+    <string name="bubble_help_line5">   – Podés usar los modos Flat, Portrait y Landscape para medir inclinación en distintas posiciones.</string>
+    <string name="bubble_help_line6">   – Flat (plano) detecta nivel en ambas direcciones.</string>
+    <string name="bubble_help_line7">   – Portrait y Landscape miden inclinación en una sola dirección. Usá el botón de pausa para congelar la burbuja.</string>
+</resources>

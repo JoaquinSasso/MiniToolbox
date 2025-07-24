@@ -228,13 +228,12 @@ fun BubbleLevelScreen(onBack: () -> Unit) {
     }
 
     Scaffold(
-        topBar = {TopBarReusable(stringResource(R.string.tool_bubble_level), onBack, {showInfo = true})}
+        topBar = { TopBarReusable(stringResource(R.string.tool_bubble_level), onBack, { showInfo = true }) }
     ) { padding ->
         Column(
             Modifier.fillMaxSize().padding(padding),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             Spacer(Modifier.height(8.dp))
             Row(
                 Modifier.fillMaxWidth(),
@@ -245,16 +244,17 @@ fun BubbleLevelScreen(onBack: () -> Unit) {
                 ) {
                     Icon(
                         imageVector = if (isLocked) Icons.Filled.PlayArrow else Icons.Filled.Pause,
-                        contentDescription = if (isLocked) "Desbloquear burbuja" else "Bloquear burbuja",
+                        contentDescription = stringResource(if (isLocked) R.string.bubble_unlock else R.string.bubble_lock),
                         modifier = Modifier.size(22.dp)
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        if (isLocked) "Desbloquear burbuja" else "Bloquear burbuja",
+                        stringResource(if (isLocked) R.string.bubble_unlock else R.string.bubble_lock),
                         fontSize = 16.sp
                     )
                 }
             }
+        }
             Spacer(Modifier.height(8.dp))
             Column(
                 Modifier.fillMaxSize().padding(padding),
@@ -427,32 +427,30 @@ fun BubbleLevelScreen(onBack: () -> Unit) {
         }
 
         //Menu de ayuda con información sobre la tool
-        if (showInfo) {
-            AlertDialog(
-                onDismissRequest = { showInfo = false },
-                title = { Text("Acerca de Nivel Burbuja") },
-                text = {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("• Para qué sirve: Permite ver la inclinación horizontal y vertical del dispositivo, como un nivel de burbuja real.")
-                        Text("• Guía rápida:")
-                        Text("   – Coloca el dispositivo sobre la superficie que quieres nivelar.")
-                        Text("   – Ajusta la inclinación de la superficie. Cuando escuches un pitido y la burbuja se ponga verde, significa que está nivelada.")
-                        Text("   – Puedes utilizar los modos Flat, Portrait y Landscape para medir inclinación en diferentes posiciones del dispositivo.")
-                        Text("   – Flat (plano) detecta nivel en ambas direcciones.")
-                        Text("   – Portrait y Landscape miden nivel en una sola dirección.")
-                        Text("   – Usa el botón con el icono de pausa para congelar/retener la burbuja y los valores.")
-                    }
-                },
-                confirmButton = {
-                    TextButton(onClick = {
-                        showInfo = false
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    }) {
-                        Text("Cerrar")
-                    }
+    if (showInfo) {
+        AlertDialog(
+            onDismissRequest = { showInfo = false },
+            title = { Text(stringResource(R.string.bubble_help_title)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(stringResource(R.string.bubble_help_line1))
+                    Text(stringResource(R.string.bubble_help_line2))
+                    Text(stringResource(R.string.bubble_help_line3))
+                    Text(stringResource(R.string.bubble_help_line4))
+                    Text(stringResource(R.string.bubble_help_line5))
+                    Text(stringResource(R.string.bubble_help_line6))
+                    Text(stringResource(R.string.bubble_help_line7))
                 }
-            )
-        }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showInfo = false
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                }) {
+                    Text(stringResource(R.string.close))
+                }
+            }
+        )
     }
 }
 

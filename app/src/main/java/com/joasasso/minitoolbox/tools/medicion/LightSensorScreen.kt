@@ -62,6 +62,7 @@ fun LightSensorScreen(onBack: () -> Unit) {
                 lux = event.values.firstOrNull()
                 lux?.let { if (it > maxLux) maxLux = it }
             }
+
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
         }
         if (lightSensor != null) {
@@ -76,7 +77,13 @@ fun LightSensorScreen(onBack: () -> Unit) {
     }
 
     Scaffold(
-        topBar = {TopBarReusable(stringResource(R.string.tool_light_meter), onBack, {showInfo = true})}
+        topBar = {
+            TopBarReusable(
+                stringResource(R.string.tool_light_meter),
+                onBack,
+                { showInfo = true }
+            )
+        }
     ) { padding ->
         Box(
             modifier = Modifier
@@ -94,26 +101,29 @@ fun LightSensorScreen(onBack: () -> Unit) {
             ) {
                 if (!sensorDisponible) {
                     Text(
-                        "Este dispositivo no tiene sensor de luz ambiental.",
+                        stringResource(R.string.lightmeter_no_sensor),
                         fontSize = 17.sp,
                         color = MaterialTheme.colorScheme.error
                     )
                 } else {
                     Text(
-                        "Nivel de luz actual",
+                        stringResource(R.string.lightmeter_current_label),
                         fontSize = 18.sp,
                         color = MaterialTheme.colorScheme.primary
                     )
                     Spacer(Modifier.height(18.dp))
                     Text(
-                        lux?.let { "%.0f lux".format(it) } ?: "...",
+                        lux?.let { stringResource(R.string.lightmeter_value_lux, it.toInt()) }
+                            ?: "...",
                         fontSize = 46.sp,
-                        color = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                        color = MaterialTheme.colorScheme.secondary
                     )
                     Spacer(Modifier.height(18.dp))
                     Text(
-                        "Máximo detectado: ${if (maxLux > 0f) "%.0f lux".format(maxLux) else "..."}",
+                        stringResource(
+                            R.string.lightmeter_max_label,
+                            if (maxLux > 0f) maxLux.toInt() else -1
+                        ),
                         fontSize = 18.sp,
                         color = MaterialTheme.colorScheme.secondary
                     )
@@ -124,9 +134,12 @@ fun LightSensorScreen(onBack: () -> Unit) {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         }
                     ) {
-                        Icon(Icons.Filled.Refresh, contentDescription = "Reiniciar máximo")
+                        Icon(
+                            Icons.Filled.Refresh,
+                            contentDescription = stringResource(R.string.lightmeter_reset_content_desc)
+                        )
                         Spacer(Modifier.width(8.dp))
-                        Text("Reiniciar máximo")
+                        Text(stringResource(R.string.lightmeter_reset_button))
                     }
                 }
             }
@@ -139,18 +152,16 @@ fun LightSensorScreen(onBack: () -> Unit) {
                 showInfo = false
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
             },
-            title = { Text("¿Cómo funciona el medidor de luz?") },
+            title = { Text(stringResource(R.string.lightmeter_help_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Usa el sensor de luz ambiental del dispositivo para mostrar el nivel de iluminación en lux (lúmenes por metro cuadrado).")
-                    Text("• 1 lux = 1 lumen/m². No mide lúmenes directamente, pero el valor de lux es el estándar en medición ambiental.")
-                    Text("• Valores típicos:")
-                    Text("    • 10–50 lux: luz baja, ambiente tenue.")
-                    Text("    • 300–500 lux: lectura/escritorio.")
-                    Text("    • 1.000+ lux: cerca de ventana o exterior.")
-                    Text("    • 10.000+ lux: luz solar directa.")
-                    Text("• Si el sensor marca 0 o no varía, es posible que el dispositivo no tenga sensor de luz o esté tapado.")
-                    Text("• Es normal que el valor de lux cambie en saltos grandes, especialmente al pasar de poca luz a mucha luz. Esto depende de cómo está construido el sensor y no significa que la app funcione mal.")
+                    Text(stringResource(R.string.lightmeter_help_line1))
+                    Text(stringResource(R.string.lightmeter_help_line2))
+                    Text(stringResource(R.string.lightmeter_help_line3))
+                    Text(stringResource(R.string.lightmeter_help_line4))
+                    Text(stringResource(R.string.lightmeter_help_line5))
+                    Text(stringResource(R.string.lightmeter_help_line6))
+                    Text(stringResource(R.string.lightmeter_help_line7))
                 }
             },
             confirmButton = {
@@ -158,7 +169,7 @@ fun LightSensorScreen(onBack: () -> Unit) {
                     showInfo = false
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 }) {
-                    Text("Cerrar")
+                    Text(stringResource(R.string.close))
                 }
             }
         )

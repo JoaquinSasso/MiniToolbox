@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="compass_arrow_content_desc">Compass arrow</string>
+    <string name="compass_north_abbr">N</string>
+    <string name="compass_northeast_abbr">NE</string>
+    <string name="compass_east_abbr">E</string>
+    <string name="compass_southeast_abbr">SE</string>
+    <string name="compass_south_abbr">S</string>
+    <string name="compass_southwest_abbr">SW</string>
+    <string name="compass_west_abbr">W</string>
+    <string name="compass_northwest_abbr">NW</string>
+
+    <string name="compass_label_n">%1$d° North</string>
+    <string name="compass_label_ne">%1$d° Northeast</string>
+    <string name="compass_label_e">%1$d° East</string>
+    <string name="compass_label_se">%1$d° Southeast</string>
+    <string name="compass_label_s">%1$d° South</string>
+    <string name="compass_label_sw">%1$d° Southwest</string>
+    <string name="compass_label_w">%1$d° West</string>
+    <string name="compass_label_nw">%1$d° Northwest</string>
+
+    <string name="compass_help_title">About the Compass</string>
+    <string name="compass_help_line1">• What it does: Displays a digital compass pointing north.</string>
+    <string name="compass_help_line2">• Uses the phone\'s sensors to detect orientation and rotation.</string>
+    <string name="compass_help_line3">• The center arrow always points to magnetic north.</string>
+    <string name="compass_help_line4">• The cardinal directions are fixed around the circle.</string>
+
+</resources>
