@@ -116,7 +116,7 @@ fun GeneradorContrasenaScreen(onBack: () -> Unit) {
                 ) {
                     Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.password_generator_boton_nuevo))
                     Spacer(Modifier.width(4.dp))
-                    Text("Generar otra")
+                    Text(stringResource(R.string.password_generator_boton_nuevo))
                 }
                 Spacer(Modifier.width(16.dp))
                 Button(
@@ -126,9 +126,9 @@ fun GeneradorContrasenaScreen(onBack: () -> Unit) {
                     },
                     enabled = contrasena.isNotBlank()
                 ) {
-                    Icon(Icons.Default.ContentCopy, contentDescription = stringResource(R.string.password_generator_boton_copiar))
+                    Icon(Icons.Default.ContentCopy, contentDescription = stringResource(R.string.copy))
                     Spacer(Modifier.width(4.dp))
-                    Text("Copiar")
+                    Text(stringResource(R.string.copy))
                 }
             }
 

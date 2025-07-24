@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+        <string name="decimal_binario_decimal">Decimal</string>
+        <string name="decimal_binario_binario">Binario</string>
+        <string name="decimal_binario_titulo_ayuda">Acerca de Decimal / Binario</string>
+        <string name="decimal_binario_linea1">• Para qué sirve: Convierte entre números decimales y su representación binaria.</string>
+        <string name="decimal_binario_linea2">• Guía rápida:</string>
+        <string name="decimal_binario_linea3">   – Ingresa un número decimal para ver su representación en binario.</string>
+        <string name="decimal_binario_linea4">   – También puedes ingresar un número binario para ver su representación decimal.</string>
+</resources>

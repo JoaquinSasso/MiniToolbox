@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bmi_titulo">Calculá tu IMC</string>
+    <string name="bmi_peso_label">Peso (kg)</string>
+    <string name="bmi_altura_label">Altura (cm)</string>
+    <string name="bmi_boton_calcular">Calcular</string>
+    <string name="bmi_peso_label_lb">Peso (lb)</string>
+    <string name="bmi_altura_label_ft">Altura (ft)</string>
+    <string name="bmi_altura_label_in">Altura (in)</string>
+    <string name="bmi_resultado">IMC: %1$.2f</string>
+    <string name="bmi_categoria_bajo">Bajo peso</string>
+    <string name="bmi_categoria_normal">Normal</string>
+    <string name="bmi_categoria_sobrepeso">Sobrepeso</string>
+    <string name="bmi_categoria_obesidad1">Obesidad I</string>
+    <string name="bmi_categoria_obesidad2">Obesidad II</string>
+    <string name="bmi_categoria_obesidad3">Obesidad III</string>
+    <string name="bmi_result_copy_format">IMC: %1$.2f (%2$s)</string>
+    <string name="bmi_info_titulo">¿Qué es el IMC?</string>
+    <string name="bmi_info_descripcion1">El IMC (Índice de Masa Corporal) es una fórmula que estima si tu peso es saludable según tu altura.</string>
+    <string name="bmi_info_formula">Fórmula: IMC = Peso (kg) / [Altura (m)]²</string>
+    <string name="bmi_info_clasificacion">Clasificación según OMS:</string>
+    <string name="bmi_info_clasificacion_1">• Menos de 18.5: Bajo peso</string>
+    <string name="bmi_info_clasificacion_2">• 18.5 a 24.9: Normal</string>
+    <string name="bmi_info_clasificacion_3">• 25 a 29.9: Sobrepeso</string>
+    <string name="bmi_info_clasificacion_4">• 30 a 34.9: Obesidad I</string>
+    <string name="bmi_info_clasificacion_5">• 35 a 39.9: Obesidad II</string>
+    <string name="bmi_info_clasificacion_6">• 40 o más: Obesidad III</string>
+    <string name="bmi_info_aclaracion">Esta calculadora es solo una referencia y no reemplaza el diagnóstico médico.</string>
+    <string name="bmi_imperial_system">Imperial  (lb/ft)</string>
+    <string name="bmi_metric_system">Métrico (kg/cm)</string>
+</resources>

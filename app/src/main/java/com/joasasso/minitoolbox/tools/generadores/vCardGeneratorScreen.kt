@@ -186,10 +186,10 @@ fun GeneradorQrContactoScreen(onBack: () -> Unit) {
                     ) {
                         Icon(
                             Icons.Default.ContentCopy,
-                            contentDescription = stringResource(R.string.desc_copy) + " vCard"
+                            contentDescription = stringResource(R.string.copy) + " vCard"
                         )
                         Spacer(Modifier.width(4.dp))
-                        Text(stringResource(R.string.desc_copy) + " vCard")
+                        Text(stringResource(R.string.copy) + " vCard")
                     }
 
                     Spacer(Modifier.width(16.dp))
@@ -206,10 +206,10 @@ fun GeneradorQrContactoScreen(onBack: () -> Unit) {
                     ) {
                         Icon(
                             Icons.Default.Delete,
-                            contentDescription = stringResource(R.string.desc_clear)
+                            contentDescription = stringResource(R.string.clear)
                         )
                         Spacer(Modifier.width(4.dp))
-                        Text(stringResource(R.string.desc_clear))
+                        Text(stringResource(R.string.clear))
                     }
                 }
 

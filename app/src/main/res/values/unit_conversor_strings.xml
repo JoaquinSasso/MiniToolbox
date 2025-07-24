@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="unit_type_length">Length</string>
+    <string name="unit_type_weight">Weight</string>
+    <string name="unit_type_temperature">Temperature</string>
+    <string name="unit_type_time">Time</string>
+
+    <string name="unit_meter">Meter</string>
+    <string name="unit_centimeter">Centimeter</string>
+    <string name="unit_millimeter">Millimeter</string>
+    <string name="unit_kilometer">Kilometer</string>
+    <string name="unit_inch">Inch</string>
+    <string name="unit_foot">Foot</string>
+    <string name="unit_yard">Yard</string>
+    <string name="unit_mile">Mile</string>
+
+    <string name="unit_kilogram">Kilogram</string>
+    <string name="unit_gram">Gram</string>
+    <string name="unit_milligram">Milligram</string>
+    <string name="unit_ton">Ton</string>
+    <string name="unit_pound">Pound</string>
+    <string name="unit_ounce">Ounce</string>
+
+    <string name="unit_celsius">Celsius</string>
+    <string name="unit_fahrenheit">Fahrenheit</string>
+    <string name="unit_kelvin">Kelvin</string>
+
+    <string name="unit_second">Second</string>
+    <string name="unit_minute">Minute</string>
+    <string name="unit_hour">Hour</string>
+    <string name="unit_day">Day</string>
+
+    <!-- Unit types -->
+    <string name="unidad_tipo_longitud">Length</string>
+    <string name="unidad_tipo_peso">Weight</string>
+    <string name="unidad_tipo_temperatura">Temperature</string>
+    <string name="unidad_tipo_tiempo">Time</string>
+
+    <!-- Input field -->
+    <string name="unidad_valor">Value</string>
+
+    <!-- Buttons -->
+    <string name="unidad_boton_copiar">Copy</string>
+    <string name="unidad_boton_resetear">Reset</string>
+    <string name="unidad_boton_cerrar">Close</string>
+
+    <!-- Content descriptions -->
+    <string name="unidad_content_desc_copiar">Copy result</string>
+    <string name="unidad_content_desc_resetear">Reset fields</string>
+
+    <!-- Snackbar -->
+    <string name="unidad_resultado_copiado">Result copied</string>
+
+    <!-- Final result -->
+    <string name="unidad_resultado_final">Result: %1$s %2$s</string>
+
+    <!-- Help dialog -->
+    <string name="unidad_info_titulo">About the Unit Converter</string>
+    <string name="unidad_info_linea1">• Convert values between length, weight, temperature and time units.</string>
+    <string name="unidad_info_linea2">• Enter the value, select origin and destination units, and the result is calculated automatically.</string>
+    <string name="unidad_info_linea3">• Use the "Copy" button to save the result or "Reset" to clear the fields.</string>
+    <string name="unidad_info_linea4">Examples of units:</string>
+    <string name="unidad_info_linea5">– Length: meter, inch, mile, etc.</string>
+    <string name="unidad_info_linea6">– Weight: kilogram, pound, ounce, etc.</string>
+    <string name="unidad_info_linea7">– Temperature: Celsius, Fahrenheit, Kelvin.</string>
+    <string name="unidad_info_linea8">– Time: second, minute, hour, day.</string>
+</resources>

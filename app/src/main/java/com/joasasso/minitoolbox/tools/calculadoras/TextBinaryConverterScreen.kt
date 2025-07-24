@@ -43,8 +43,8 @@ fun TextBinaryConverterScreen(onBack: () -> Unit) {
     var textInput by remember { mutableStateOf("") }
     var binaryRaw by remember { mutableStateOf("") }
     val clipboard = LocalClipboardManager.current
-    val haptic    = LocalHapticFeedback.current
-    var showInfo  by remember { mutableStateOf(false) }
+    val haptic = LocalHapticFeedback.current
+    var showInfo by remember { mutableStateOf(false) }
 
     // VisualTransformation que inserta un espacio cada 8 bits sin alterar el texto subyacente
     val binaryTransformation = remember {
@@ -66,6 +66,7 @@ fun TextBinaryConverterScreen(onBack: () -> Unit) {
                         val candidate = offset + spacesBefore
                         return candidate.coerceIn(0, outLen)
                     }
+
                     override fun transformedToOriginal(offset: Int): Int {
                         val spacesBefore = offset / 9
                         val candidate = offset - spacesBefore
@@ -78,7 +79,13 @@ fun TextBinaryConverterScreen(onBack: () -> Unit) {
     }
 
     Scaffold(
-        topBar = {TopBarReusable(stringResource(R.string.tool_text_binary), onBack, {showInfo = true})}
+        topBar = {
+            TopBarReusable(
+                stringResource(R.string.tool_text_binary),
+                onBack,
+                { showInfo = true }
+            )
+        }
     ) { inner ->
         Column(
             Modifier
@@ -92,12 +99,11 @@ fun TextBinaryConverterScreen(onBack: () -> Unit) {
                 value = textInput,
                 onValueChange = { new ->
                     textInput = new
-                    // Actualiza raw binario sin espacios
                     binaryRaw = new
                         .map { it.code.toString(2).padStart(8, '0') }
                         .joinToString(separator = "")
                 },
-                label = { Text("Texto") },
+                label = { Text(stringResource(R.string.texto_binario_texto)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(150.dp),
@@ -107,23 +113,24 @@ fun TextBinaryConverterScreen(onBack: () -> Unit) {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         clipboard.setText(AnnotatedString(textInput))
                     }) {
-                        Icon(Icons.Filled.ContentCopy, contentDescription = "Copiar texto")
+                        Icon(
+                            Icons.Filled.ContentCopy,
+                            contentDescription = stringResource(R.string.copy)
+                        )
                     }
                 }
             )
 
-            // Binario → Texto, con espacios visuales cada 8 bits
+            // Binario → Texto
             OutlinedTextField(
                 value = binaryRaw,
                 onValueChange = { new ->
-                    // Filtra solo 0 y 1
                     binaryRaw = new.filter { it == '0' || it == '1' }
-                    // Actualiza texto a partir de cada byte completo
                     textInput = binaryRaw.chunked(8)
                         .mapNotNull { it.toIntOrNull(2)?.toChar() }
                         .joinToString("")
                 },
-                label = { Text("Binario") },
+                label = { Text(stringResource(R.string.texto_binario_binario)) },
                 visualTransformation = binaryTransformation,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier
@@ -133,12 +140,14 @@ fun TextBinaryConverterScreen(onBack: () -> Unit) {
                 trailingIcon = {
                     IconButton(onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        // Copia el texto con espacios para legibilidad
                         val spaced = binaryTransformation
                             .filter(AnnotatedString(binaryRaw)).text.text
                         clipboard.setText(AnnotatedString(spaced))
                     }) {
-                        Icon(Icons.Filled.ContentCopy, contentDescription = "Copiar binario")
+                        Icon(
+                            Icons.Filled.ContentCopy,
+                            contentDescription = stringResource(R.string.copy)
+                        )
                     }
                 }
             )
@@ -147,15 +156,17 @@ fun TextBinaryConverterScreen(onBack: () -> Unit) {
 
     if (showInfo) {
         AlertDialog(
-            onDismissRequest = { showInfo = false },
-            title = { Text("Acerca de Texto ↔ Binario") },
+            onDismissRequest = {
+                showInfo = false
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            },
+            title = { Text(stringResource(R.string.texto_binario_titulo_ayuda)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Para qué sirve: Convierte texto a código binario ASCII y viceversa.")
-                    Text("• Guía rápida:")
-                    Text("   – Escribe texto para ver su representación binaria.")
-                    Text("   – Escribe ceros y unos; se agrupan visualmente en bytes (8 bits) sin afectar la edición.")
-                    Text("   – Usa 📋 para copiar el resultado.")
+                    Text(stringResource(R.string.texto_binario_linea1))
+                    Text(stringResource(R.string.texto_binario_linea2))
+                    Text(stringResource(R.string.texto_binario_linea3))
+                    Text(stringResource(R.string.texto_binario_linea4))
                 }
             },
             confirmButton = {
@@ -163,14 +174,14 @@ fun TextBinaryConverterScreen(onBack: () -> Unit) {
                     showInfo = false
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 }) {
-                    Text("Cerrar")
+                    Text(stringResource(R.string.close))
                 }
             }
         )
     }
 }
 
-class DateVisualTransformation : VisualTransformation {
+    class DateVisualTransformation : VisualTransformation {
     override fun filter(text: AnnotatedString): TransformedText {
         val digits = text.text.take(8)
         val out = buildString {

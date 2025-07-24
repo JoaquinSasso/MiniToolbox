@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="decimal_binario_decimal">Decimal</string>
+    <string name="decimal_binario_binario">Binary</string>
+    <string name="decimal_binario_titulo_ayuda">About Decimal / Binary</string>
+    <string name="decimal_binario_linea1">• Purpose: Converts between decimal numbers and their binary representation.</string>
+    <string name="decimal_binario_linea2">• Quick guide:</string>
+    <string name="decimal_binario_linea3">   – Enter a decimal number to see its binary representation.</string>
+    <string name="decimal_binario_linea4">   – You can also enter a binary number to see its decimal representation.</string>
+</resources>

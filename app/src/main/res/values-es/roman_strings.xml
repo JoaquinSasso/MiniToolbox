@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="roman_titulo">Convertí entre números arábigos y romanos</string>
+    <string name="roman_label_arabigo">N° arábigo (1–3999)</string>
+    <string name="roman_label_romano">N° romano</string>
+    <string name="roman_range_error">El número debe estar entre 1 y 3999</string>
+    <string name="roman_invalid_roman">Número romano inválido o fuera de rango</string>"
+
+    <string name="roman_help_titulo">Números romanos y arábigos</string>
+    <string name="roman_help_linea1">• Convertí números entre el sistema arábigo (123) y romano (CXXIII).</string>
+    <string name="roman_help_linea2">• Podés escribir en ambos campos y la conversión es automática.</string>
+    <string name="roman_help_linea3">Valores básicos:</string>
+    <string name="roman_help_linea4">I=1  V=5  X=10  L=50  C=100  D=500  M=1000</string>
+    <string name="roman_help_linea5">Ejemplo: 2024 = MMXXIV</string>
+    <string name="roman_help_linea6">• Rango válido: 1 a 3999 (I a MMMCMXCIX).</string>
+    <string name="roman_help_linea7">• ¿Por qué ese límite? El sistema clásico de números romanos solo usa las letras I, V, X, L, C, D y M. El número más grande que se puede escribir así es 3999 (MMMCMXCIX). Para números mayores, los romanos usaban símbolos o rayas especiales que no son comunes ni estándar hoy en día.</string>
+
+</resources>

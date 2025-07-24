@@ -129,7 +129,7 @@ fun SugeridorActividadScreen(onBack: () -> Unit) {
                         contentDescription = stringResource(R.string.actividad_content_desc_copiar)
                     )
                     Spacer(Modifier.width(4.dp))
-                    Text(stringResource(R.string.desc_copy))
+                    Text(stringResource(R.string.copy))
                 }
             }
         }
