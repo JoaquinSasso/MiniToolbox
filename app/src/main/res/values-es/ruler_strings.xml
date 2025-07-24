@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ruler_switch_to_inches">Cambiar a pulgadas</string>
+    <string name="ruler_switch_to_cm">Cambiar a cm</string>
+    <string name="ruler_unit_cm">cm</string>
+    <string name="ruler_unit_inch">"</string>
+
+    <string name="ruler_help_title">¿Cómo funciona la regla?</string>
+    <string name="ruler_help_line1">• Esta herramienta dibuja una regla vertical calibrada según la pantalla de tu dispositivo.</string>
+    <string name="ruler_help_line2">• Puedes medir objetos pequeños apoyándolos sobre la pantalla, junto al borde izquierdo.</string>
+    <string name="ruler_help_line3">• El botón de la esquina permite alternar entre centímetros y pulgadas.</string>
+    <string name="ruler_help_line4">• La precisión depende del tamaño físico reportado por tu dispositivo, por lo que puede variar ligeramente entre modelos.</string>
+
+</resources>

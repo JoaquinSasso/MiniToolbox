@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="compass_arrow_content_desc">Flecha brújula</string>
+    <string name="compass_north_abbr">N</string>
+    <string name="compass_northeast_abbr">NE</string>
+    <string name="compass_east_abbr">E</string>
+    <string name="compass_southeast_abbr">SE</string>
+    <string name="compass_south_abbr">S</string>
+    <string name="compass_southwest_abbr">SO</string>
+    <string name="compass_west_abbr">O</string>
+    <string name="compass_northwest_abbr">NO</string>
+
+    <string name="compass_label_n">%1$d° Norte</string>
+    <string name="compass_label_ne">%1$d° Noreste</string>
+    <string name="compass_label_e">%1$d° Este</string>
+    <string name="compass_label_se">%1$d° Sureste</string>
+    <string name="compass_label_s">%1$d° Sur</string>
+    <string name="compass_label_sw">%1$d° Suroeste</string>
+    <string name="compass_label_w">%1$d° Oeste</string>
+    <string name="compass_label_nw">%1$d° Noroeste</string>
+
+    <string name="compass_help_title">Acerca de Brújula</string>
+    <string name="compass_help_line1">• Para qué sirve: Muestra una brújula digital que indica la dirección norte.</string>
+    <string name="compass_help_line2">• Usa los sensores del teléfono para detectar orientación y rotación.</string>
+    <string name="compass_help_line3">• La flecha central apunta siempre al norte magnético.</string>
+    <string name="compass_help_line4">• Las direcciones cardinales se mantienen fijas.</string>
+
+</resources>

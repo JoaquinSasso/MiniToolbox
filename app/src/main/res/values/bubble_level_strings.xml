@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bubble_lock">Lock bubble</string>
+    <string name="bubble_unlock">Unlock bubble</string>
+    <string name="bubble_help_title">About the Bubble Level</string>
+    <string name="bubble_help_line1">• What it does: Shows your device’s horizontal and vertical tilt like a real spirit level.</string>
+    <string name="bubble_help_line2">• Quick guide:</string>
+    <string name="bubble_help_line3">   – Place the device on the surface you want to level.</string>
+    <string name="bubble_help_line4">   – Adjust the tilt. When you hear a beep and the bubble turns green, it’s level.</string>
+    <string name="bubble_help_line5">   – Use Flat, Portrait and Landscape modes to measure in different orientations.</string>
+    <string name="bubble_help_line6">   – Flat detects level in both axes.</string>
+    <string name="bubble_help_line7">   – Portrait and Landscape measure a single direction. Use the pause button to freeze the bubble.</string>
+
+</resources>

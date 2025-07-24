@@ -54,6 +54,16 @@ fun BrujulaScreen(onBack: () -> Unit) {
 
     var azimuth by remember { mutableFloatStateOf(0f) }
     var lastAzimuth by remember { mutableFloatStateOf(0f) }
+    val directions = listOf(
+        stringResource(R.string.compass_north_abbr),
+        stringResource(R.string.compass_northeast_abbr),
+        stringResource(R.string.compass_east_abbr),
+        stringResource(R.string.compass_southeast_abbr),
+        stringResource(R.string.compass_south_abbr),
+        stringResource(R.string.compass_southwest_abbr),
+        stringResource(R.string.compass_west_abbr),
+        stringResource(R.string.compass_northwest_abbr)
+    )
 
     // Sensor setup
     DisposableEffect(Unit) {
@@ -116,14 +126,14 @@ fun BrujulaScreen(onBack: () -> Unit) {
     fun getDirectionLabel(angle: Float): String {
         val normalized = (angle % 360 + 360) % 360
         return when (normalized) {
-            in 0f..22.5f, in 337.5f..360f -> "${normalized.toInt()}° Norte"
-            in 22.5f..67.5f -> "${normalized.toInt()}° Noreste"
-            in 67.5f..112.5f -> "${normalized.toInt()}° Este"
-            in 112.5f..157.5f -> "${normalized.toInt()}° Sureste"
-            in 157.5f..202.5f -> "${normalized.toInt()}° Sur"
-            in 202.5f..247.5f -> "${normalized.toInt()}° Suroeste"
-            in 247.5f..292.5f -> "${normalized.toInt()}° Oeste"
-            in 292.5f..337.5f -> "${normalized.toInt()}° Noroeste"
+            in 0f..22.5f, in 337.5f..360f -> context.getString(R.string.compass_label_n, normalized.toInt())
+            in 22.5f..67.5f -> context.getString(R.string.compass_label_ne, normalized.toInt())
+            in 67.5f..112.5f -> context.getString(R.string.compass_label_e, normalized.toInt())
+            in 112.5f..157.5f -> context.getString(R.string.compass_label_se, normalized.toInt())
+            in 157.5f..202.5f -> context.getString(R.string.compass_label_s, normalized.toInt())
+            in 202.5f..247.5f -> context.getString(R.string.compass_label_sw, normalized.toInt())
+            in 247.5f..292.5f -> context.getString(R.string.compass_label_w, normalized.toInt())
+            in 292.5f..337.5f -> context.getString(R.string.compass_label_nw, normalized.toInt())
             else -> "${normalized.toInt()}°"
         }
     }
@@ -157,7 +167,6 @@ fun BrujulaScreen(onBack: () -> Unit) {
         ) {
             Box(modifier = Modifier.size(300.dp), contentAlignment = Alignment.Center) {
                 // Cardinal points (fixed positions)
-                val directions = listOf("N", "NE", "E", "SE", "S", "SO", "O", "NO")
                 val angleStep = 360f / directions.size
                 val radius = 120f
 
@@ -178,7 +187,7 @@ fun BrujulaScreen(onBack: () -> Unit) {
                 // Flecha que gira
                 Image(
                     painter = painterResource(R.drawable.arrow_north),
-                    contentDescription = "Flecha brújula",
+                    contentDescription = stringResource(R.string.compass_arrow_content_desc),
                     modifier = Modifier
                         .size(120.dp)
                         .graphicsLayer {
@@ -192,13 +201,13 @@ fun BrujulaScreen(onBack: () -> Unit) {
     if (showInfo) {
         AlertDialog(
             onDismissRequest = { showInfo = false },
-            title = { Text("Acerca de Brújula") },
+            title = { Text(stringResource(R.string.compass_help_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Para qué sirve: Muestra una brújula digital que indica la dirección norte.")
-                    Text("• Usa los sensores del teléfono para detectar orientación y rotación.")
-                    Text("• La flecha central apunta siempre al norte magnético.")
-                    Text("• Las direcciones cardinales se mantienen fijas.")
+                    Text(stringResource(R.string.compass_help_line1))
+                    Text(stringResource(R.string.compass_help_line2))
+                    Text(stringResource(R.string.compass_help_line3))
+                    Text(stringResource(R.string.compass_help_line4))
                 }
             },
             confirmButton = {
@@ -206,7 +215,7 @@ fun BrujulaScreen(onBack: () -> Unit) {
                     showInfo = false
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 }) {
-                    Text("Cerrar")
+                    Text(stringResource(R.string.close))
                 }
             }
         )

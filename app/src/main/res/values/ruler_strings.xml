@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ruler_switch_to_inches">Switch to inches</string>
+    <string name="ruler_switch_to_cm">Switch to cm</string>
+    <string name="ruler_unit_cm">cm</string>
+    <string name="ruler_unit_inch">"</string>
+
+    <string name="ruler_help_title">How does the ruler work?</string>
+    <string name="ruler_help_line1">• This tool draws a vertical ruler calibrated to your device\'s screen.</string>
+    <string name="ruler_help_line2">• You can measure small objects by placing them on the screen along the left edge.</string>
+    <string name="ruler_help_line3">• Use the corner button to toggle between centimeters and inches.</string>
+    <string name="ruler_help_line4">• Accuracy depends on your device’s reported physical size and may vary slightly between models.</string>
+</resources>

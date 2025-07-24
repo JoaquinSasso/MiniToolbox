@@ -27,6 +27,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -49,7 +50,7 @@ fun FlashScreen(onBack: () -> Unit) {
 
     var linternaEncendida by remember { mutableStateOf(false) }
     var showInfo by remember { mutableStateOf(false) }
-    var errorMsg by remember { mutableStateOf<String?>(null) }
+    var errorMsg by remember { mutableIntStateOf(0) }
 
     // Función para encender/apagar el flash
     fun setLinterna(encendida: Boolean) {
@@ -62,14 +63,14 @@ fun FlashScreen(onBack: () -> Unit) {
             if (cameraId != null) {
                 cameraManager.setTorchMode(cameraId, encendida)
                 linternaEncendida = encendida
-                errorMsg = null
+                errorMsg = 0
             } else {
-                errorMsg = "No se encontró flash en este dispositivo."
+                errorMsg = R.string.flash_error_noflash
             }
-        } catch (e: CameraAccessException) {
-            errorMsg = "No se pudo acceder al flash de la cámara."
-        } catch (e: SecurityException) {
-            errorMsg = "Permiso denegado para usar el flash."
+        } catch (_: CameraAccessException) {
+            errorMsg = R.string.flash_error_camera_access
+        } catch (_: SecurityException) {
+            errorMsg = R.string.flash_error_permission
         }
     }
 
@@ -81,7 +82,13 @@ fun FlashScreen(onBack: () -> Unit) {
     }
 
     Scaffold(
-        topBar = {TopBarReusable(stringResource(R.string.tool_flashlight), onBack, {showInfo = true})},
+        topBar = {
+            TopBarReusable(
+                stringResource(R.string.tool_flashlight),
+                onBack,
+                { showInfo = true }
+            )
+        },
     ) { padding ->
         Box(
             Modifier
@@ -96,8 +103,16 @@ fun FlashScreen(onBack: () -> Unit) {
             ) {
                 Icon(
                     if (linternaEncendida) Icons.Filled.FlashlightOn else Icons.Filled.FlashlightOff,
-                    contentDescription = if (linternaEncendida) "Linterna encendida" else "Linterna apagada",
-                    tint = if (linternaEncendida) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    contentDescription = stringResource(
+                        if (linternaEncendida)
+                            R.string.flash_on_desc
+                        else
+                            R.string.flash_off_desc
+                    ),
+                    tint = if (linternaEncendida)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(90.dp)
                 )
                 Spacer(Modifier.height(32.dp))
@@ -108,12 +123,19 @@ fun FlashScreen(onBack: () -> Unit) {
                     },
                     modifier = Modifier.width(200.dp)
                 ) {
-                    Text(if (linternaEncendida) "Apagar linterna" else "Encender linterna")
+                    Text(
+                        stringResource(
+                            if (linternaEncendida)
+                                R.string.flash_button_off
+                            else
+                                R.string.flash_button_on
+                        )
+                    )
                 }
-                if (errorMsg != null) {
+                if (errorMsg != 0) {
                     Spacer(Modifier.height(24.dp))
                     Text(
-                        errorMsg ?: "",
+                        stringResource(errorMsg),
                         color = MaterialTheme.colorScheme.error,
                         fontSize = 15.sp
                     )
@@ -128,14 +150,14 @@ fun FlashScreen(onBack: () -> Unit) {
                 showInfo = false
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
             },
-            title = { Text("¿Cómo funciona la linterna?") },
+            title = { Text(stringResource(R.string.flash_help_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Usa el flash de la cámara como linterna para iluminar en la oscuridad.")
-                    Text("• Pulsa el botón para encender o apagar la linterna.")
-                    Text("• El flash se apaga automáticamente al salir de la pantalla.")
-                    Text("• Si ves un error, es posible que tu dispositivo no tenga flash o que otra app lo esté usando.")
-                    Text("• La linterna solo tiene una intensidad (encendido/apagado). No es posible ajustar el brillo, ya que es una limitación del hardware en casi todos los teléfonos.")
+                    Text(stringResource(R.string.flash_help_line1))
+                    Text(stringResource(R.string.flash_help_line2))
+                    Text(stringResource(R.string.flash_help_line3))
+                    Text(stringResource(R.string.flash_help_line4))
+                    Text(stringResource(R.string.flash_help_line5))
                 }
             },
             confirmButton = {
@@ -143,7 +165,7 @@ fun FlashScreen(onBack: () -> Unit) {
                     showInfo = false
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 }) {
-                    Text("Cerrar")
+                    Text(stringResource(R.string.close))
                 }
             }
         )
