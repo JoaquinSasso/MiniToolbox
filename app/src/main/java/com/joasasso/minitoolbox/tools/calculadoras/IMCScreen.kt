@@ -24,15 +24,18 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
@@ -42,13 +45,23 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.joasasso.minitoolbox.R
+import com.joasasso.minitoolbox.tools.data.BMIDataStore
 import com.joasasso.minitoolbox.tools.generadores.SegmentedButton
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
+import kotlinx.coroutines.launch
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IMCScreen(onBack: () -> Unit) {
     var showInfo by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
+    val clipboardManager = LocalClipboardManager.current
+    val haptic = LocalHapticFeedback.current
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    //Entradas y salidas
     var pesoInput by remember { mutableStateOf("") }
     var alturaInput by remember { mutableStateOf("") }
     var alturaFeet by remember { mutableStateOf("") }
@@ -57,16 +70,21 @@ fun IMCScreen(onBack: () -> Unit) {
     var imcCat by remember { mutableStateOf("") }
     var resultColor by remember { mutableStateOf(Color.Unspecified) }
 
+    //Variables relacionadas a manejar el sistema de unidades con uso de dataStore
     var useImperial by remember { mutableStateOf(false) }
     val metric = stringResource(R.string.bmi_metric_system)
     val imperial = stringResource(R.string.bmi_imperial_system)
     var modo = if (useImperial) imperial else metric
     val opcionesModo = listOf(metric, imperial)
 
-    val focusManager = LocalFocusManager.current
-    val clipboardManager = LocalClipboardManager.current
-    val haptic = LocalHapticFeedback.current
+    LaunchedEffect(Unit) {
+        BMIDataStore.getUseImperial(context).collect {
+            useImperial = it
+            modo = if (it) imperial else metric
+        }
+    }
 
+    //Categorias de IMC
     val catBajo = stringResource(R.string.bmi_categoria_bajo)
     val catNormal = stringResource(R.string.bmi_categoria_normal)
     val catSobrepeso = stringResource(R.string.bmi_categoria_sobrepeso)
@@ -121,6 +139,8 @@ fun IMCScreen(onBack: () -> Unit) {
         alturaInput = ""
         imcResult = null
         imcCat = ""
+        alturaFeet = ""
+        alturaInches = ""
         resultColor = Color.Unspecified
         focusManager.clearFocus()
     }
@@ -249,15 +269,12 @@ fun IMCScreen(onBack: () -> Unit) {
                 options = opcionesModo,
                 selected = modo,
                 onSelect = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     modo = it
                     useImperial = it == imperial
-                    pesoInput = ""
-                    alturaInput = ""
-                    imcResult = null
-                    alturaFeet = ""
-                    alturaInches = ""
-                    imcCat = ""
+                    resetear()
+                    scope.launch {
+                        BMIDataStore.setUseImperial(context, useImperial)
+                    }
                 }
             )
         }

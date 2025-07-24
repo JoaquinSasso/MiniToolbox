@@ -48,7 +48,6 @@ import com.joasasso.minitoolbox.tools.data.FlagGameDataStore
 import com.joasasso.minitoolbox.tools.data.MinimalCountry
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -78,7 +77,6 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
     var timeLeft by remember { mutableIntStateOf(100) } // de 0 a 100
     var timerRunning by remember { mutableStateOf(false) }
     var progress by remember { mutableFloatStateOf(1f) }
-    var timerJob by remember { mutableStateOf<Job?>(null) }
 
 
     val defaultBg = MaterialTheme.colorScheme.background
