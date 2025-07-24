@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="percentage_subtitle1">Calcular un porcentaje de un Número</string>
+    <string name="percentage_label_percent">%</string>
+    <string name="percentage_label_number">Número</string>
+    <string name="percentage_de">de</string>
+    <string name="percentage_subtitle2">¿Qué % representa X en Y?</string>
+    <string name="percentage_label_value">Valor X</string>
+    <string name="percentage_en">en</string>
+    <string name="percentage_label_number_y">Número Y</string>
+    <string name="calculate">Calcular</string>
+    <string name="result">Resultado</string>
+
+    <string name="percentage_help_title">Acerca de la calculadora de porcentaje</string>
+    <string name="percentage_help_line1">• Calcula porcentajes de dos maneras:</string>
+    <string name="percentage_help_line2">  – Calcular un porcentaje de un número. Ejemplo: ¿Cuánto es 25% de 200? El resultado es 50.</string>
+    <string name="percentage_help_line3">  – Calcular qué porcentaje representa un valor en otro. Ejemplo: ¿Cuánto % representa 50 en 200? El resultado es 25%.</string>
+    <string name="percentage_help_line4">• Puedes escribir los valores y tocar el botón \'Calcular\',</string>
+    <string name="percentage_help_line5">  o simplemente presionar el botón de tilde (✔) en el teclado para obtener el resultado más rápido.</string>
+    <string name="percentage_help_line6">• Usa el botón \'Copiar\' para guardar el resultado en el portapapeles.</string>
+
+</resources>

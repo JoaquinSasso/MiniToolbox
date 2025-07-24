@@ -22,8 +22,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -39,12 +37,12 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
-import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,7 +61,6 @@ fun PorcentajeScreen(onBack: () -> Unit) {
     val focusManager = LocalFocusManager.current
     val clipboardManager = LocalClipboardManager.current
     val haptic = LocalHapticFeedback.current
-    val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
     fun calcularPorcentajeDeNumero() {
@@ -99,8 +96,12 @@ fun PorcentajeScreen(onBack: () -> Unit) {
     }
 
     Scaffold(
-        topBar = {TopBarReusable(stringResource(R.string.tool_percentage), onBack, {showInfo = true})},
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        topBar = {
+            TopBarReusable(
+                stringResource(R.string.tool_percentage),
+                onBack,
+                { showInfo = true })
+        }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -111,7 +112,7 @@ fun PorcentajeScreen(onBack: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                "Calcular un porcentaje de un Número",
+                stringResource(R.string.percentage_subtitle1),
                 fontSize = 18.sp,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -119,11 +120,11 @@ fun PorcentajeScreen(onBack: () -> Unit) {
                 OutlinedTextField(
                     value = percentInput,
                     onValueChange = { percentInput = it.filter { c -> c.isDigit() || c == '.' } },
-                    label = { Text("%") },
+                    label = { Text(stringResource(R.string.percentage_label_percent)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number,
-                        imeAction = androidx.compose.ui.text.input.ImeAction.Done
+                        imeAction = ImeAction.Done
                     ),
                     keyboardActions = KeyboardActions(
                         onDone = { calcularPorcentajeDeNumero() }
@@ -131,16 +132,16 @@ fun PorcentajeScreen(onBack: () -> Unit) {
                     modifier = Modifier.width(100.dp)
                 )
                 Spacer(Modifier.width(8.dp))
-                Text("de", fontSize = 16.sp)
+                Text(stringResource(R.string.percentage_de), fontSize = 16.sp)
                 Spacer(Modifier.width(8.dp))
                 OutlinedTextField(
                     value = baseInput1,
                     onValueChange = { baseInput1 = it.filter { c -> c.isDigit() || c == '.' } },
-                    label = { Text("Número") },
+                    label = { Text(stringResource(R.string.percentage_label_number)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number,
-                        imeAction = androidx.compose.ui.text.input.ImeAction.Done
+                        imeAction = ImeAction.Done
                     ),
                     keyboardActions = KeyboardActions(
                         onDone = { calcularPorcentajeDeNumero() }
@@ -156,25 +157,33 @@ fun PorcentajeScreen(onBack: () -> Unit) {
                     onClick = { calcularPorcentajeDeNumero() },
                     enabled = percentInput.isNotBlank() && baseInput1.isNotBlank()
                 ) {
-                    Text("Calcular")
+                    Text(stringResource(R.string.calculate))
                 }
                 Spacer(Modifier.width(16.dp))
                 Button(
                     onClick = {
-                        clipboardManager.setText(androidx.compose.ui.text.AnnotatedString(result1 ?: ""))
-                        scope.launch {
-                            snackbarHostState.showSnackbar("Resultado copiado")
-                        }
+                        clipboardManager.setText(
+                            androidx.compose.ui.text.AnnotatedString(
+                                result1 ?: ""
+                            )
+                        )
                     },
                     enabled = result1 != null
                 ) {
-                    Icon(Icons.Default.ContentCopy, contentDescription = "Copiar resultado")
+                    Icon(
+                        Icons.Default.ContentCopy,
+                        contentDescription = stringResource(R.string.copy)
+                    )
                     Spacer(Modifier.width(4.dp))
-                    Text("Copiar")
+                    Text(stringResource(R.string.copy))
                 }
             }
             result1?.let {
-                Text("Resultado: $it", fontSize = 18.sp, color = MaterialTheme.colorScheme.secondary)
+                Text(
+                    "${stringResource(R.string.result)}: $it",
+                    fontSize = 18.sp,
+                    color = MaterialTheme.colorScheme.secondary
+                )
             }
 
             HorizontalDivider(
@@ -184,7 +193,7 @@ fun PorcentajeScreen(onBack: () -> Unit) {
             )
 
             Text(
-                "¿Qué % representa X en Y?",
+                stringResource(R.string.percentage_subtitle2),
                 fontSize = 18.sp,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -192,11 +201,11 @@ fun PorcentajeScreen(onBack: () -> Unit) {
                 OutlinedTextField(
                     value = valueInput,
                     onValueChange = { valueInput = it.filter { c -> c.isDigit() || c == '.' } },
-                    label = { Text("Valor X") },
+                    label = { Text(stringResource(R.string.percentage_label_value)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number,
-                        imeAction = androidx.compose.ui.text.input.ImeAction.Done
+                        imeAction = ImeAction.Done
                     ),
                     keyboardActions = KeyboardActions(
                         onDone = { calcularQuePorcentajeDeYEsX() }
@@ -204,16 +213,16 @@ fun PorcentajeScreen(onBack: () -> Unit) {
                     modifier = Modifier.width(120.dp)
                 )
                 Spacer(Modifier.width(8.dp))
-                Text("en", fontSize = 16.sp)
+                Text(stringResource(R.string.percentage_en), fontSize = 16.sp)
                 Spacer(Modifier.width(8.dp))
                 OutlinedTextField(
                     value = baseInput2,
                     onValueChange = { baseInput2 = it.filter { c -> c.isDigit() || c == '.' } },
-                    label = { Text("Número Y") },
+                    label = { Text(stringResource(R.string.percentage_label_number_y)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number,
-                        imeAction = androidx.compose.ui.text.input.ImeAction.Done
+                        imeAction = ImeAction.Done
                     ),
                     keyboardActions = KeyboardActions(
                         onDone = { calcularQuePorcentajeDeYEsX() }
@@ -229,25 +238,33 @@ fun PorcentajeScreen(onBack: () -> Unit) {
                     onClick = { calcularQuePorcentajeDeYEsX() },
                     enabled = valueInput.isNotBlank() && baseInput2.isNotBlank()
                 ) {
-                    Text("Calcular")
+                    Text(stringResource(R.string.calculate))
                 }
                 Spacer(Modifier.width(16.dp))
                 Button(
                     onClick = {
-                        clipboardManager.setText(androidx.compose.ui.text.AnnotatedString(result2 ?: ""))
-                        scope.launch {
-                            snackbarHostState.showSnackbar("Resultado copiado")
-                        }
+                        clipboardManager.setText(
+                            androidx.compose.ui.text.AnnotatedString(
+                                result2 ?: ""
+                            )
+                        )
                     },
                     enabled = result2 != null
                 ) {
-                    Icon(Icons.Default.ContentCopy, contentDescription = "Copiar resultado")
+                    Icon(
+                        Icons.Default.ContentCopy,
+                        contentDescription = stringResource(R.string.copy)
+                    )
                     Spacer(Modifier.width(4.dp))
-                    Text("Copiar")
+                    Text(stringResource(R.string.copy))
                 }
             }
             result2?.let {
-                Text("Resultado: $it", fontSize = 18.sp, color = MaterialTheme.colorScheme.secondary)
+                Text(
+                    "${stringResource(R.string.result)}: $it",
+                    fontSize = 18.sp,
+                    color = MaterialTheme.colorScheme.secondary
+                )
             }
 
             Spacer(Modifier.height(32.dp))
@@ -255,9 +272,9 @@ fun PorcentajeScreen(onBack: () -> Unit) {
                 onClick = { resetearTodo() },
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
-                Icon(Icons.Default.Refresh, contentDescription = "Resetear")
+                Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.reset))
                 Spacer(Modifier.width(8.dp))
-                Text("Resetear todo")
+                Text(stringResource(R.string.reset))
             }
         }
     }
@@ -265,17 +282,16 @@ fun PorcentajeScreen(onBack: () -> Unit) {
     if (showInfo) {
         AlertDialog(
             onDismissRequest = { showInfo = false },
-            title = { Text("Acerca de la calculadora de porcentaje") },
+            title = { Text(stringResource(R.string.percentage_help_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Calcula porcentajes de dos maneras:")
-                    Text("  – Calcular un porcentaje de un número. Ejemplo: ¿Cuánto es 25 % de 200? El resultado es 50.")
-                    Text("  – Calcular qué porcentaje representa un valor en otro. Ejemplo: ¿Cuánto % representa 50 en 200? El resultado es 25 %.")
+                    Text(stringResource(R.string.percentage_help_line1))
+                    Text(stringResource(R.string.percentage_help_line2))
                     Spacer(Modifier.height(8.dp))
-                    Text("• Puedes escribir los valores y tocar el botón 'Calcular',")
-                    Text("  o simplemente presionar el botón de tilde (✔) en el teclado para obtener el resultado más rápido.")
-                    Text("• Usa el botón 'Copiar' para guardar el resultado en el portapapeles.")
-                    Text("• El botón 'Resetear todo' limpia todos los campos y resultados.")
+                    Text(stringResource(R.string.percentage_help_line3))
+                    Text(stringResource(R.string.percentage_help_line4))
+                    Text(stringResource(R.string.percentage_help_line5))
+                    Text(stringResource(R.string.percentage_help_line6))
                 }
             },
             confirmButton = {
@@ -283,7 +299,7 @@ fun PorcentajeScreen(onBack: () -> Unit) {
                     showInfo = false
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 }) {
-                    Text("Cerrar")
+                    Text(stringResource(R.string.close))
                 }
             }
         )
