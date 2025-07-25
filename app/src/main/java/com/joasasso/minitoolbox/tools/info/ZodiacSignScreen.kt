@@ -31,6 +31,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
+import java.util.Calendar
 
 class ZodiacVisualTransformation : VisualTransformation {
     override fun filter(text: AnnotatedString): TransformedText {
@@ -58,41 +59,30 @@ class ZodiacVisualTransformation : VisualTransformation {
 }
 
 data class ZodiacSign(
-    val name: String,
+    val nameRes: Int,
     val emoji: String,
-    val range: String,
-    val funFact: String,
-    val element: String,
-    val planet: String,
-    val personality: String
+    val rangeRes: Int,
+    val funFactRes: Int,
+    val elementRes: Int,
+    val planetRes: Int,
+    val personalityRes: Int
 )
 
 fun getZodiacSign(day: Int, month: Int): ZodiacSign? {
+
     val signs = listOf(
-        (21 to 3) to ZodiacSign("Aries", "♈", "21 Mar - 19 Abr", "🔥 Es el primer signo del zodiaco y representa el inicio de todo.",
-            "🔥 Fuego", "🪖 Marte", "⚡ Impulsivo, valiente, competitivo"),
-        (20 to 4) to ZodiacSign("Tauro", "♉", "20 Abr - 20 May", "🌿 Ama el confort y lo tangible.",
-            "🌍 Tierra", "💖 Venus", "😌 Paciente, estable, leal"),
-        (21 to 5) to ZodiacSign("Géminis", "♊", "21 May - 20 Jun", "🌀 Tiene facilidad para adaptarse a cualquier situación.",
-            "💨 Aire", "📬 Mercurio", "💬 Curioso, comunicativo, versátil"),
-        (21 to 6) to ZodiacSign("Cáncer", "♋", "21 Jun - 22 Jul", "🌙 Tiene una memoria emocional muy poderosa.",
-            "💧 Agua", "🌕 Luna", "🤍 Protector, intuitivo, sentimental"),
-        (23 to 7) to ZodiacSign("Leo", "♌", "23 Jul - 22 Ago", "🌟 Adora el escenario y brillar con luz propia.",
-            "🔥 Fuego", "☀️ Sol", "🎭 Líder, generoso, creativo"),
-        (23 to 8) to ZodiacSign("Virgo", "♍", "23 Ago - 22 Sep", "🔍 Detecta errores con facilidad.",
-            "🌍 Tierra", "📬 Mercurio", "🧠 Analítico, ordenado, perfeccionista"),
-        (23 to 9) to ZodiacSign("Libra", "♎", "23 Sep - 22 Oct", "⚖️ Ama el equilibrio y la estética.",
-            "💨 Aire", "💖 Venus", "🎨 Diplomático, sociable, justo"),
-        (23 to 10) to ZodiacSign("Escorpio", "♏", "23 Oct - 21 Nov", "🦂 Tiene una intensidad emocional profunda.",
-            "💧 Agua", "🌑 Plutón", "🔮 Misterioso, apasionado, decidido"),
-        (22 to 11) to ZodiacSign("Sagitario", "♐", "22 Nov - 21 Dic", "🏹 Siempre quiere explorar más allá.",
-            "🔥 Fuego", "🪐 Júpiter", "🌍 Optimista, aventurero, libre"),
-        (22 to 12) to ZodiacSign("Capricornio", "♑", "22 Dic - 19 Ene", "🏔️ Es el más disciplinado del zodiaco.",
-            "🌍 Tierra", "🪐 Saturno", "📈 Responsable, ambicioso, práctico"),
-        (20 to 1) to ZodiacSign("Acuario", "♒", "20 Ene - 18 Feb", "🧠 Tiene ideas adelantadas a su tiempo.",
-            "💨 Aire", "⚡ Urano", "🤖 Innovador, excéntrico, independiente"),
-        (19 to 2) to ZodiacSign("Piscis", "♓", "19 Feb - 20 Mar", "🌊 Está muy conectado con lo espiritual.",
-            "💧 Agua", "🌊 Neptuno", "🌙 Empático, soñador, sensible")
+        (21 to 3) to ZodiacSign(R.string.zodiac_aries, "♈", R.string.range_aries, R.string.fact_aries, R.string.element_aries, R.string.planet_aries, R.string.personality_aries),
+        (20 to 4) to ZodiacSign(R.string.zodiac_taurus, "♉", R.string.range_taurus, R.string.fact_taurus, R.string.element_taurus, R.string.planet_taurus, R.string.personality_taurus),
+        (21 to 5) to ZodiacSign(R.string.zodiac_gemini, "♊", R.string.range_gemini, R.string.fact_gemini, R.string.element_gemini, R.string.planet_gemini, R.string.personality_gemini),
+        (21 to 6) to ZodiacSign(R.string.zodiac_cancer, "♋", R.string.range_cancer, R.string.fact_cancer, R.string.element_cancer, R.string.planet_cancer, R.string.personality_cancer),
+        (23 to 7) to ZodiacSign(R.string.zodiac_leo, "♌", R.string.range_leo, R.string.fact_leo, R.string.element_leo, R.string.planet_leo, R.string.personality_leo),
+        (23 to 8) to ZodiacSign(R.string.zodiac_virgo, "♍", R.string.range_virgo, R.string.fact_virgo, R.string.element_virgo, R.string.planet_virgo, R.string.personality_virgo),
+        (23 to 9) to ZodiacSign(R.string.zodiac_libra, "♎", R.string.range_libra, R.string.fact_libra, R.string.element_libra, R.string.planet_libra, R.string.personality_libra),
+        (23 to 10) to ZodiacSign(R.string.zodiac_scorpio, "♏", R.string.range_scorpio, R.string.fact_scorpio, R.string.element_scorpio, R.string.planet_scorpio, R.string.personality_scorpio),
+        (22 to 11) to ZodiacSign(R.string.zodiac_sagittarius, "♐", R.string.range_sagittarius, R.string.fact_sagittarius, R.string.element_sagittarius, R.string.planet_sagittarius, R.string.personality_sagittarius),
+        (22 to 12) to ZodiacSign(R.string.zodiac_capricorn, "♑", R.string.range_capricorn, R.string.fact_capricorn, R.string.element_capricorn, R.string.planet_capricorn, R.string.personality_capricorn),
+        (20 to 1) to ZodiacSign(R.string.zodiac_aquarius, "♒", R.string.range_aquarius, R.string.fact_aquarius, R.string.element_aquarius, R.string.planet_aquarius, R.string.personality_aquarius),
+        (19 to 2) to ZodiacSign(R.string.zodiac_pisces, "♓", R.string.range_pisces, R.string.fact_pisces, R.string.element_pisces, R.string.planet_pisces, R.string.personality_pisces)
     ).sortedBy { it.first.second * 100 + it.first.first }
 
     val input = month * 100 + day
@@ -112,6 +102,7 @@ fun getZodiacSign(day: Int, month: Int): ZodiacSign? {
     return null
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ZodiacSignScreen(onBack: () -> Unit) {
@@ -120,6 +111,7 @@ fun ZodiacSignScreen(onBack: () -> Unit) {
     val showData = currentSign != null
     var showInfo    by remember { mutableStateOf(false) }
     val haptic = LocalHapticFeedback.current
+    var dateError by remember { mutableStateOf<String?>(null) }
 
     fun calculateSign() {
         if (rawDigits.length == 4) {
@@ -143,14 +135,47 @@ fun ZodiacSignScreen(onBack: () -> Unit) {
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            val errorMonth = stringResource(R.string.zodiac_error_month)
+            val errorDay =  stringResource(R.string.zodiac_error_day)
+            var maxDay = 0
+
             OutlinedTextField(
                 value = rawDigits,
-                onValueChange = {
-                    rawDigits = it.filter { c -> c.isDigit() }.take(4)
-                    calculateSign()
+                onValueChange = { new ->
+                    rawDigits = new.filter { it.isDigit() }.take(4)
+                    dateError = null
+                    currentSign = null
+
+                    if (rawDigits.length == 4) {
+                        val d = rawDigits.substring(0, 2).toIntOrNull()
+                        val m = rawDigits.substring(2, 4).toIntOrNull()
+                        if (d != null && m != null) {
+                            if (m in 1..12) {
+                                val tmp = Calendar.getInstance().apply {
+                                    set(Calendar.YEAR, 2024)
+                                    set(Calendar.MONTH, m - 1)
+                                }
+                                maxDay = tmp.getActualMaximum(Calendar.DAY_OF_MONTH)
+                                //Si el mes es correcto pero los días no, se muestra un error
+                                if (d !in 1..maxDay) {
+                                    dateError = errorDay.format(maxDay)
+                                }
+                                //Si los días son correctos, se calcula el signo
+                                else currentSign = getZodiacSign(d, m)
+                            }
+                            //Si el mes no es correcto, se muestra un error
+                            else{
+                                dateError = errorMonth
+                            }
+                        }
+                    }
                 },
-                label = { Text("Fecha de nacimiento (DD/MM)") },
+                label = { Text(stringResource(R.string.zodiac_hint)) },
                 singleLine = true,
+                isError = dateError != null,
+                supportingText = {
+                    dateError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 visualTransformation = ZodiacVisualTransformation(),
                 modifier = Modifier.fillMaxWidth()
@@ -163,23 +188,23 @@ fun ZodiacSignScreen(onBack: () -> Unit) {
                 enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 })
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("🔮 Tu signo es: ${sign?.emoji ?: "..."} ${sign?.name ?: "..."}", style = MaterialTheme.typography.headlineSmall)
-                    Text("📆 Rango de fechas: ${sign?.range ?: "..."}")
-                    Text("🌟 Curiosidad: ${sign?.funFact ?: "..."}")
-                    Text("🌬️ Elemento: ${sign?.element ?: "..."}")
-                    Text("🪐 Planeta regente: ${sign?.planet ?: "..."}")
-                    Text("🧠 Personalidad típica: ${sign?.personality ?: "..."}")
+                    Text("🔮 ${stringResource(R.string.your_sign)}: ${sign?.emoji ?: "..."} ${sign?.let { stringResource(it.nameRes) } ?: "..."}", style = MaterialTheme.typography.headlineSmall)
+                    Text("📆 ${stringResource(R.string.date_range)}: ${sign?.let { stringResource(it.rangeRes) } ?: "..."}")
+                    Text("🌟 ${stringResource(R.string.fun_fact)}: ${sign?.let { stringResource(it.funFactRes) } ?: "..."}")
+                    Text("🌬️ ${stringResource(R.string.element)}: ${sign?.let { stringResource(it.elementRes) } ?: "..."}")
+                    Text("🪐 ${stringResource(R.string.ruling_planet)}: ${sign?.let { stringResource(it.planetRes) } ?: "..."}")
+                    Text("🧠 ${stringResource(R.string.personality)}: ${sign?.let { stringResource(it.personalityRes) } ?: "..."}")
                 }
             }
 
             if (!showData) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("🔮 Tu signo es: ...", style = MaterialTheme.typography.headlineSmall)
-                    Text("📆 Rango de fechas: ...")
-                    Text("🌟 Curiosidad: ...")
-                    Text("🌬️ Elemento: ...")
-                    Text("🪐 Planeta regente: ...")
-                    Text("🧠 Personalidad típica: ...")
+                    Text("🔮 ${stringResource(R.string.your_sign)}: ${sign?.emoji ?: "..."} ${sign?.let { stringResource(it.nameRes) } ?: "..."}", style = MaterialTheme.typography.headlineSmall)
+                    Text("📆 ${stringResource(R.string.date_range)}: ${sign?.let { stringResource(it.rangeRes) } ?: "..."}")
+                    Text("🌟 ${stringResource(R.string.fun_fact)}: ${sign?.let { stringResource(it.funFactRes) } ?: "..."}")
+                    Text("🌬️ ${stringResource(R.string.element)}: ${sign?.let { stringResource(it.elementRes) } ?: "..."}")
+                    Text("🪐 ${stringResource(R.string.ruling_planet)}: ${sign?.let { stringResource(it.planetRes) } ?: "..."}")
+                    Text("🧠 ${stringResource(R.string.personality)}: ${sign?.let { stringResource(it.personalityRes) } ?: "..."}")
                 }
             }
         }
@@ -187,13 +212,13 @@ fun ZodiacSignScreen(onBack: () -> Unit) {
     if (showInfo) {
         AlertDialog(
             onDismissRequest = { showInfo = false },
-            title = { Text("Acerca de Signo Zodiacal") },
+            title = { Text(stringResource(R.string.zodiac_help_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Para qué sirve: Identifica tu signo zodiacal según tu fecha de nacimiento.")
-                    Text("• Guía rápida:")
-                    Text("   – Ingresa tu fecha de cumpleaños en formato DD/MM.")
-                    Text("   – Si es válido, veras tu signo zodiacal y datos curiosos.")
+                    Text(stringResource(R.string.zodiac_help_line1))
+                    Text(stringResource(R.string.zodiac_help_line2))
+                    Text(stringResource(R.string.zodiac_help_line3))
+                    Text(stringResource(R.string.zodiac_help_line4))
                 }
             },
             confirmButton = {
@@ -201,7 +226,7 @@ fun ZodiacSignScreen(onBack: () -> Unit) {
                     showInfo = false
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 }) {
-                    Text("Cerrar")
+                    Text(stringResource(R.string.close))
                 }
             }
         )

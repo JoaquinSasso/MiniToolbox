@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Zodiac signs -->
+    <string name="zodiac_aries">Aries</string>
+    <string name="range_aries">Mar 21 - Apr 19</string>
+    <string name="fact_aries">🔥 It’s the first sign of the zodiac and represents new beginnings.</string>
+    <string name="element_aries">🔥 Fire</string>
+    <string name="planet_aries">🪖 Mars</string>
+    <string name="personality_aries">⚡ Bold, courageous, competitive</string>
+
+    <string name="zodiac_taurus">Taurus</string>
+    <string name="range_taurus">Apr 20 - May 20</string>
+    <string name="fact_taurus">🌿 Loves comfort and material things.</string>
+    <string name="element_taurus">🌍 Earth</string>
+    <string name="planet_taurus">💖 Venus</string>
+    <string name="personality_taurus">😌 Patient, steady, loyal</string>
+
+    <string name="zodiac_gemini">Gemini</string>
+    <string name="range_gemini">May 21 - Jun 20</string>
+    <string name="fact_gemini">🌀 Easily adapts to new situations.</string>
+    <string name="element_gemini">💨 Air</string>
+    <string name="planet_gemini">📬 Mercury</string>
+    <string name="personality_gemini">💬 Curious, talkative, versatile</string>
+
+    <string name="zodiac_cancer">Cancer</string>
+    <string name="range_cancer">Jun 21 - Jul 22</string>
+    <string name="fact_cancer">🌙 Has a powerful emotional memory.</string>
+    <string name="element_cancer">💧 Water</string>
+    <string name="planet_cancer">🌕 Moon</string>
+    <string name="personality_cancer">🤍 Protective, intuitive, emotional</string>
+
+    <string name="zodiac_leo">Leo</string>
+    <string name="range_leo">Jul 23 - Aug 22</string>
+    <string name="fact_leo">🌟 Loves the spotlight and to shine.</string>
+    <string name="element_leo">🔥 Fire</string>
+    <string name="planet_leo">☀️ Sun</string>
+    <string name="personality_leo">🎭 Leader, generous, creative</string>
+
+    <string name="zodiac_virgo">Virgo</string>
+    <string name="range_virgo">Aug 23 - Sep 22</string>
+    <string name="fact_virgo">🔍 Easily spots mistakes.</string>
+    <string name="element_virgo">🌍 Earth</string>
+    <string name="planet_virgo">📬 Mercury</string>
+    <string name="personality_virgo">🧠 Analytical, orderly, perfectionist</string>
+
+    <string name="zodiac_libra">Libra</string>
+    <string name="range_libra">Sep 23 - Oct 22</string>
+    <string name="fact_libra">⚖️ Loves balance and beauty.</string>
+    <string name="element_libra">💨 Air</string>
+    <string name="planet_libra">💖 Venus</string>
+    <string name="personality_libra">🎨 Diplomatic, sociable, fair</string>
+
+    <string name="zodiac_scorpio">Scorpio</string>
+    <string name="range_scorpio">Oct 23 - Nov 21</string>
+    <string name="fact_scorpio">🦂 Feels everything deeply and intensely.</string>
+    <string name="element_scorpio">💧 Water</string>
+    <string name="planet_scorpio">🌑 Pluto</string>
+    <string name="personality_scorpio">🔮 Mysterious, passionate, determined</string>
+
+    <string name="zodiac_sagittarius">Sagittarius</string>
+    <string name="range_sagittarius">Nov 22 - Dec 21</string>
+    <string name="fact_sagittarius">🏹 Always wants to explore beyond.</string>
+    <string name="element_sagittarius">🔥 Fire</string>
+    <string name="planet_sagittarius">🪐 Jupiter</string>
+    <string name="personality_sagittarius">🌍 Optimistic, adventurous, free</string>
+
+    <string name="zodiac_capricorn">Capricorn</string>
+    <string name="range_capricorn">Dec 22 - Jan 19</string>
+    <string name="fact_capricorn">🏔️ The most disciplined of the zodiac.</string>
+    <string name="element_capricorn">🌍 Earth</string>
+    <string name="planet_capricorn">🪐 Saturn</string>
+    <string name="personality_capricorn">📈 Responsible, ambitious, practical</string>
+
+    <string name="zodiac_aquarius">Aquarius</string>
+    <string name="range_aquarius">Jan 20 - Feb 18</string>
+    <string name="fact_aquarius">🧠 Has ideas ahead of their time.</string>
+    <string name="element_aquarius">💨 Air</string>
+    <string name="planet_aquarius">⚡ Uranus</string>
+    <string name="personality_aquarius">🤖 Innovative, eccentric, independent</string>
+
+    <string name="zodiac_pisces">Pisces</string>
+    <string name="range_pisces">Feb 19 - Mar 20</string>
+    <string name="fact_pisces">🌊 Deeply connected to the spiritual world.</string>
+    <string name="element_pisces">💧 Water</string>
+    <string name="planet_pisces">🌊 Neptune</string>
+    <string name="personality_pisces">🌙 Empathetic, dreamy, sensitive</string>
+
+    <!-- Common labels -->
+    <string name="your_sign">Your sign is</string>
+    <string name="date_range">Date range</string>
+    <string name="fun_fact">Fun fact</string>
+    <string name="element">Element</string>
+    <string name="ruling_planet">Ruling planet</string>
+    <string name="personality">Typical personality</string>
+
+    <string name="zodiac_hint">Birth date (DD/MM)</string>
+    <string name="zodiac_error_month">Month out of range (1–12)</string>
+    <string name="zodiac_error_day">Day out of range (1–%1$d)</string>
+
+
+    <!-- Help menu -->
+    <string name="zodiac_help_title">About Zodiac Sign</string>
+    <string name="zodiac_help_line1">• What it does: Identifies your zodiac sign based on your birthdate.</string>
+    <string name="zodiac_help_line2">• Quick guide:</string>
+    <string name="zodiac_help_line3">   – Enter your birth date in DD/MM format.</string>
+    <string name="zodiac_help_line4">   – If valid, your zodiac sign and fun facts will appear.</string>
+</resources>
