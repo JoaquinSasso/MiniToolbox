@@ -33,6 +33,7 @@ import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import java.text.NumberFormat
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Locale
 
@@ -137,7 +138,7 @@ fun RemainingTimeScreen(onBack: () -> Unit) {
                 },
                     modifier = Modifier.fillMaxWidth())
                 {
-                    Text("$label (${date.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))})")
+                    Text("$label (${date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))})")
                 }
             }
         }

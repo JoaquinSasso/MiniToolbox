@@ -1,4 +1,4 @@
-package com.joasasso.minitoolbox.tools.frases
+package com.joasasso.minitoolbox.tools.info
 
 import android.speech.tts.TextToSpeech
 import androidx.compose.foundation.layout.Arrangement
@@ -51,7 +51,7 @@ fun BasicPhrasesScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val tts = remember {
         TextToSpeech(context, null).apply {
-            language = Locale("es")
+            this.language = Locale("es") // Or language = Locale("es")
         }
     }
     val haptic = LocalHapticFeedback.current
