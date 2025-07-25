@@ -76,11 +76,9 @@ fun PointCounter(
 
     BoxWithConstraints(modifier = modifier) {
         val squareSize = (maxHeight / 7)
-
-        // ✅ uso directo de maxHeight en height modifier
         Column(
             modifier = Modifier
-                .height(maxHeight) // ⚠️ uso directo dentro de Modifier
+                .height(maxHeight)
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
@@ -192,16 +190,27 @@ fun TrucoScoreBoardScreen(onBack: () -> Unit) {
     }
 
     Scaffold(
-        topBar = { TopBarReusable(stringResource(R.string.tool_truco_score), onBack, { showInfo = true }) },
+        topBar = {
+            TopBarReusable(
+                stringResource(R.string.tool_truco_score),
+                onBack,
+                { showInfo = true }
+            )
+        },
         floatingActionButton = {
             Button(onClick = {
                 scope.launch {
                     val confirm = confirmResetDialog(context, haptic)
-                    if (confirm) { resetPoints() }
+                    if (confirm) {
+                        resetPoints()
+                    }
                 }
             }) {
-                Icon(modifier = Modifier.padding(8.dp) ,
-                    imageVector = Icons.Default.Refresh, contentDescription = "Reiniciar")
+                Icon(
+                    modifier = Modifier.padding(8.dp),
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = stringResource(R.string.reset)
+                )
             }
         },
         content = { padding ->
@@ -221,7 +230,6 @@ fun TrucoScoreBoardScreen(onBack: () -> Unit) {
                     },
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Botones izquierda (Nuestras)
                 Column(
                     modifier = Modifier
                         .weight(1f)
@@ -230,36 +238,42 @@ fun TrucoScoreBoardScreen(onBack: () -> Unit) {
                     verticalArrangement = Arrangement.Center
                 ) {
                     IconButton(onClick = { addPoints("our", 1) }) {
-                        Icon(Icons.Default.Add, contentDescription = "+1 Nuestras")
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = stringResource(R.string.truco_add_our)
+                        )
                     }
                     Spacer(Modifier.height(8.dp))
                     IconButton(onClick = { addPoints("our", -1) }) {
-                        Icon(Icons.Default.Remove, contentDescription = "-1 Nuestras")
+                        Icon(
+                            Icons.Default.Remove,
+                            contentDescription = stringResource(R.string.truco_remove_our)
+                        )
                     }
                 }
+
                 Row(
                     modifier = Modifier
                         .weight(2f)
                         .fillMaxHeight()
                         .padding(top = 8.dp)
-                ){
+                ) {
                     Column(
                         modifier = Modifier.weight(2f),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text("Nuestras", fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.truco_our), fontWeight = FontWeight.Bold)
                         PointCounter(points = ourPoints, color = Color(0xFF2196F3))
-                }
+                    }
                     Column(
                         modifier = Modifier.weight(2f),
                         horizontalAlignment = Alignment.CenterHorizontally
-                    ){
-                        Text("Suyas", fontWeight = FontWeight.Bold)
+                    ) {
+                        Text(stringResource(R.string.truco_their), fontWeight = FontWeight.Bold)
                         PointCounter(points = theirPoints, color = Color(0xFFF44336))
                     }
                 }
 
-                // Botones derecha (Suyas)
                 Column(
                     modifier = Modifier
                         .weight(1f)
@@ -268,11 +282,17 @@ fun TrucoScoreBoardScreen(onBack: () -> Unit) {
                     verticalArrangement = Arrangement.Center
                 ) {
                     IconButton(onClick = { addPoints("their", 1) }) {
-                        Icon(Icons.Default.Add, contentDescription = "+1 Suyas")
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = stringResource(R.string.truco_add_their)
+                        )
                     }
                     Spacer(Modifier.height(8.dp))
                     IconButton(onClick = { addPoints("their", -1) }) {
-                        Icon(Icons.Default.Remove, contentDescription = "-1 Suyas")
+                        Icon(
+                            Icons.Default.Remove,
+                            contentDescription = stringResource(R.string.truco_remove_their)
+                        )
                     }
                 }
             }
@@ -282,15 +302,14 @@ fun TrucoScoreBoardScreen(onBack: () -> Unit) {
     if (showInfo) {
         AlertDialog(
             onDismissRequest = { showInfo = false },
-            title = { Text("Acerca de Anotador de Truco") },
+            title = { Text(stringResource(R.string.truco_help_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Para qué sirve: Te ayuda a llevar la cuenta de los puntos de ambos equipos en una partida de Truco.")
-                    Text("• Guía rápida:")
-                    Text("   – Usa los botones +/– en los costados para sumar/restar puntos.")
-                    Text("   – Toca en mitad izquierda o derecha de la pantalla para sumar rápido.")
-                    Text("   – Presiona el boton abajo a la izquierda para empezar una nueva partida.")
-                    Text("   – La partida se guarda automáticamente si sales y regresas más tarde.")
+                    Text(stringResource(R.string.truco_help_line1))
+                    Text(stringResource(R.string.truco_help_line2))
+                    Text(stringResource(R.string.truco_help_line3))
+                    Text(stringResource(R.string.truco_help_line4))
+                    Text(stringResource(R.string.truco_help_line5))
                 }
             },
             confirmButton = {
@@ -298,25 +317,25 @@ fun TrucoScoreBoardScreen(onBack: () -> Unit) {
                     showInfo = false
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 }) {
-                    Text("Cerrar")
+                    Text(stringResource(R.string.close))
                 }
             }
         )
     }
 }
 
-suspend fun confirmResetDialog(
+    suspend fun confirmResetDialog(
     context: Context,
     haptic: HapticFeedback
 ): Boolean = suspendCancellableCoroutine { cont ->
     val dialog = AlertDialog.Builder(context)
-        .setTitle("Empezar nueva partida")
-        .setMessage("¿Estás seguro de que quieres comenzar una nueva partida?\nEsto borrará los puntos actuales.")
-        .setPositiveButton("Sí") { _, _ ->
+        .setTitle(context.getString(R.string.truco_reset_title))
+        .setMessage(context.getString(R.string.truco_reset_message))
+        .setPositiveButton(R.string.yes) { _, _ ->
             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
             cont.resume(true)
         }
-        .setNegativeButton("No") { _, _ ->
+        .setNegativeButton(R.string.no) { _, _ ->
             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
             cont.resume(false)
         }

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dice_cantidad_dados">Cantidad de dados: %1$d</string>
+    <string name="dice_tab_dados">Dados</string>
+    <string name="dice_tab_historial">Historial</string>
+    <string name="dice_reroll_1">Relanzar los 1</string>
+    <string name="dice_reroll_1_or_2">Relanzar los 1 o 2</string>
+    <string name="dice_total">Total: %1$d</string>
+    <string name="dice_resultados">Resultados: %1$s</string>
+    <string name="dice_hist_titulo">D%1$d x%2$d</string>
+    <string name="dice_total_y_fecha">Total: %1$d • %2$s</string>
+    <string name="dice_info_titulo">¿Cómo funciona?</string>
+    <string name="dice_info_1">• En la pestaña \'Dados\' podés lanzar varios dados del mismo tipo.</string>
+    <string name="dice_info_2">• Elegí cuántos dados lanzar y tocá el ícono del dado.</string>
+    <string name="dice_info_3">• En la pestaña \'Historial\' podés ver tus tiradas anteriores.</string>
+    <string name="dice_info_4">• El historial se guarda automáticamente cada vez que lanzás.</string>
+    <string name="dice_info_5">• Iconos de Flaticon.com</string>
+</resources>

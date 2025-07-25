@@ -108,7 +108,6 @@ fun CalculosRapidosScreen(onBack: () -> Unit) {
     }
 
 
-
     fun handleAnswer(selected: Int) {
         if (!buttonsEnabled) return
         selectedOption = selected
@@ -168,7 +167,11 @@ fun CalculosRapidosScreen(onBack: () -> Unit) {
                     .padding(16.dp)
                     .fillMaxWidth()
             ) {
-                Text("Tiempo restante: %.0f segundos".format(abs(progress * (currentTimerDuration / 1000f))),
+                Text(
+                    stringResource(
+                        R.string.quickmath_tiempo_restante,
+                        abs(progress * (currentTimerDuration / 1000f))
+                    ),
                     style = MaterialTheme.typography.titleMedium
                 )
 
@@ -194,8 +197,14 @@ fun CalculosRapidosScreen(onBack: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Récord: $highScore", style = MaterialTheme.typography.titleMedium)
-            Text("Puntaje: $score", style = MaterialTheme.typography.headlineSmall)
+            Text(
+                stringResource(R.string.quickmath_record, highScore),
+                style = MaterialTheme.typography.titleMedium
+            )
+            Text(
+                stringResource(R.string.quickmath_puntaje, score),
+                style = MaterialTheme.typography.headlineSmall
+            )
 
             Text(currentQuestion.questionText, style = MaterialTheme.typography.headlineMedium)
 

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="age_hint">DD/MM/YYYY</string>
+    <string name="age_error_future">La fecha no puede ser futura</string>
+    <string name="age_error_day">Día fuera de rango (1–%1$d)</string>
+    <string name="age_error_month">Mes fuera de rango (1–12)</string>
+
+    <string name="age_result_message">Tienes %1$d años, %2$d meses y %3$d días</string>
+    <string name="age_birthday_days">🎂 Faltan %1$s días para tu próximo cumpleaños</string>
+    <string name="age_days_lived">📅 Has vivido %1$s días</string>
+    <string name="age_days_slept">😴 Has dormido unos %1$s días</string>
+    <string name="age_weeks_lived">🗓️ Eso equivale a %1$s semanas</string>
+    <string name="age_hours_lived">🕐 Has vivido aproximadamente %1$s horas</string>
+    <string name="age_minutes_lived">⏰ Has vivido %1$s minutos</string>
+    <string name="age_seconds_lived">⏳ Has vivido %1$s segundos</string>
+    <string name="age_heartbeats">❤️ Tu corazón ha latido unas %1$s veces</string>
+    <string name="age_blood_liters">🩸 Tu corazón ha bombeado unos %1$s litros de sangre</string>
+    <string name="age_blinks">👁️ Has parpadeado unas %1$s veces</string>
+    <string name="age_breaths">🌬️ Has respirado unas %1$s veces</string>
+    <string name="age_full_moons">🌕 Has presenciado unas %1$s lunas llenas</string>
+    <string name="age_percent_since_birthday">📊 Ha pasado el %1$s%% del año desde tu último cumpleaños</string>
+    <string name="age_day_of_week">📅 Naciste un día %1$s</string>
+    <string name="age_day_of_week_unknown">📅 Día de la semana no disponible</string>
+
+    <string name="age_info_title">Acerca de Calculadora de Edad</string>
+    <string name="age_info_1">• Para qué sirve: Calcula tu edad y estadísticas relacionadas.</string>
+    <string name="age_info_2">• Guía rápida:</string>
+    <string name="age_info_3">   – Ingresa fecha en formato DD/MM/YYYY.</string>
+    <string name="age_info_4">   – Los datos curiosos se actualizan automáticamente con tu fecha.</string>
+</resources>

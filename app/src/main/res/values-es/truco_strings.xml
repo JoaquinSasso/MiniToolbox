@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="truco_add_our">+1 Nuestras</string>
+    <string name="truco_remove_our">-1 Nuestras</string>
+    <string name="truco_add_their">+1 Suyas</string>
+    <string name="truco_remove_their">-1 Suyas</string>
+    <string name="truco_our">Nuestras</string>
+    <string name="truco_their">Suyas</string>
+
+    <string name="truco_help_title">Acerca de Anotador de Truco</string>
+    <string name="truco_help_line1">• Para qué sirve: Te ayuda a llevar la cuenta de los puntos de ambos equipos en una partida de Truco.</string>
+    <string name="truco_help_line2">• Guía rápida:</string>
+    <string name="truco_help_line3">   – Usa los botones +/– en los costados para sumar/restar puntos.</string>
+    <string name="truco_help_line4">   – Toca en mitad izquierda o derecha de la pantalla para sumar rápido.</string>
+    <string name="truco_help_line5">   – Presiona el botón inferior para empezar una nueva partida. Se guarda automáticamente.</string>
+
+    <string name="truco_reset_title">Empezar nueva partida</string>
+    <string name="truco_reset_message">¿Estás seguro de que quieres comenzar una nueva partida?\nEsto borrará los puntos actuales.</string>
+
+</resources>

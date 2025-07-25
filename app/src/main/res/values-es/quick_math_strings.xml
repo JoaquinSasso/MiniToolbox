@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="quickmath_tiempo_restante">Tiempo restante: %.0f segundos</string>
+    <string name="quickmath_record">Récord: %1$d</string>
+    <string name="quickmath_puntaje">Puntaje: %1$d</string>
+</resources>
