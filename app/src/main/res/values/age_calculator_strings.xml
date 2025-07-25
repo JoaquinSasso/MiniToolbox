@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="age_hint">DD/MM/YYYY</string>
+    <string name="age_error_future">The date cannot be in the future</string>
+    <string name="age_error_day">Day out of range (1–%1$d)</string>
+    <string name="age_error_month">Month out of range (1–12)</string>
+
+    <string name="age_result_message">You are %1$d years, %2$d months and %3$d days old</string>
+    <string name="age_birthday_days">🎂 %1$s days left until your next birthday</string>
+    <string name="age_days_lived">📅 You\'ve lived %1$s days</string>
+    <string name="age_days_slept">😴 You\'ve slept around %1$s days</string>
+    <string name="age_weeks_lived">🗓️ That\'s about %1$s weeks</string>
+    <string name="age_hours_lived">🕐 You\'ve lived approximately %1$s hours</string>
+    <string name="age_minutes_lived">⏰ You\'ve lived %1$s minutes</string>
+    <string name="age_seconds_lived">⏳ You\'ve lived %1$s seconds</string>
+    <string name="age_heartbeats">❤️ Your heart has beaten around %1$s times</string>
+    <string name="age_blood_liters">🩸 Your heart has pumped about %1$s liters of blood</string>
+    <string name="age_blinks">👁️ You\'ve blinked around %1$s times</string>
+    <string name="age_breaths">🌬️ You\'ve taken about %1$s breaths</string>
+    <string name="age_full_moons">🌕 You\'ve witnessed about %1$s full moons</string>
+    <string name="age_percent_since_birthday">📊 %1$s%% of the year has passed since your last birthday</string>
+    <string name="age_day_of_week">📅 You were born on a %1$s</string>
+    <string name="age_day_of_week_unknown">📅 Day of the week not available</string>
+
+    <string name="age_info_title">About Age Calculator</string>
+    <string name="age_info_1">• What it does: Calculates your age and fun statistics.</string>
+    <string name="age_info_2">• Quick guide:</string>
+    <string name="age_info_3">   – Enter a date in DD/MM/YYYY format.</string>
+    <string name="age_info_4">   – Fun facts update automatically based on your date.</string>
+</resources>

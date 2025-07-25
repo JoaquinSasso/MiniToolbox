@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="truco_add_our">+1 Ours</string>
+    <string name="truco_remove_our">-1 Ours</string>
+    <string name="truco_add_their">+1 Theirs</string>
+    <string name="truco_remove_their">-1 Theirs</string>
+    <string name="truco_our">Ours</string>
+    <string name="truco_their">Theirs</string>
+
+    <string name="truco_help_title">About Truco Scorekeeper</string>
+    <string name="truco_help_line1">• What it does: Helps you keep track of the score for both teams during a Truco game (Argentinian card game).</string>
+    <string name="truco_help_line2">• Quick guide:</string>
+    <string name="truco_help_line3">   – Use the +/– buttons on the sides to add/remove points.</string>
+    <string name="truco_help_line4">   – Tap left or right half of the screen to quickly add points.</string>
+    <string name="truco_help_line5">   – Press the bottom button to start a new match. It auto-saves your progress.</string>
+
+    <string name="truco_reset_title">Start new game</string>
+    <string name="truco_reset_message">Are you sure you want to start a new game?\nThis will reset the current score.</string>
+
+</resources>

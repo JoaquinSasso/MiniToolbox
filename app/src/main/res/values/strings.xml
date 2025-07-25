@@ -5,4 +5,6 @@
     <string name="clear">Clear</string>
     <string name="reset">Reset</string>
     <string name="reset_all">Reset all</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 </resources>

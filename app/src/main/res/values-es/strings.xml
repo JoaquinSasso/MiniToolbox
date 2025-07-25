@@ -5,4 +5,6 @@
     <string name="clear">Limpiar</string>
     <string name="reset">Reiniciar</string>
     <string name="reset_all">Reiniciar todo</string>
+    <string name="yes">Si</string>
+    <string name="no">No</string>
 </resources>

@@ -19,6 +19,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -39,62 +41,67 @@ import java.util.Locale
 fun AgeCalculatorScreen(onBack: () -> Unit) {
     val haptic = LocalHapticFeedback.current
 
-    val formatter   = remember { NumberFormat.getInstance(Locale("es", "AR")) }
+    val formatter = remember { NumberFormat.getInstance(Locale("es", "AR")) }
     val scrollState = rememberScrollState()
-    var showInfo    by remember { mutableStateOf(false) }
+    var showInfo by remember { mutableStateOf(false) }
 
-    var rawDigits      by remember { mutableStateOf("") }
-    var dateError      by remember { mutableStateOf<String?>(null) }
-    var result         by remember { mutableStateOf("") }
+    var rawDigits by remember { mutableStateOf("") }
+    var dateError by remember { mutableStateOf<String?>(null) }
+    var result by remember { mutableStateOf("") }
 
-    var daysUntilBirthday by remember { mutableStateOf(0L) }
-    var daysLived         by remember { mutableStateOf(0L) }
-    var hoursLived        by remember { mutableStateOf(0L) }
-    var minutesLived      by remember { mutableStateOf(0L) }
-    var secondsLived      by remember { mutableStateOf(0L) }
-    var heartbeats        by remember { mutableStateOf(0L) }
-    var bloodLiters       by remember { mutableStateOf(0L) }
-    var blinks            by remember { mutableStateOf(0L) }
-    var breaths           by remember { mutableStateOf(0L) }
-    var sleepDays         by remember { mutableStateOf(0L) }
-    var weeksLived        by remember { mutableStateOf(0L) }
-    var fullMoonsSeen     by remember { mutableStateOf(0) }
-    var percentSinceBday  by remember { mutableStateOf(0) }
-    var dayOfWeek         by remember { mutableStateOf("") }
+    var daysUntilBirthday by remember { mutableLongStateOf(0L) }
+    var daysLived by remember { mutableLongStateOf(0L) }
+    var hoursLived by remember { mutableLongStateOf(0L) }
+    var minutesLived by remember { mutableLongStateOf(0L) }
+    var secondsLived by remember { mutableLongStateOf(0L) }
+    var heartbeats by remember { mutableLongStateOf(0L) }
+    var bloodLiters by remember { mutableLongStateOf(0L) }
+    var blinks by remember { mutableLongStateOf(0L) }
+    var breaths by remember { mutableLongStateOf(0L) }
+    var sleepDays by remember { mutableLongStateOf(0L) }
+    var weeksLived by remember { mutableLongStateOf(0L) }
+    var fullMoonsSeen by remember { mutableIntStateOf(0) }
+    var percentSinceBday by remember { mutableIntStateOf(0) }
+    var dayOfWeek by remember { mutableStateOf("") }
+
+    val errorDay = stringResource(R.string.age_error_day)
+    val errorMonth = stringResource(R.string.age_error_month)
+    val errorFuture = stringResource(R.string.age_error_future)
+    val ageMessage = stringResource(R.string.age_result_message)
 
     fun calculateStats(birth: Calendar) {
         val today = Calendar.getInstance()
 
         result = run {
-            var years  = today.get(Calendar.YEAR)  - birth.get(Calendar.YEAR)
+            var years = today.get(Calendar.YEAR) - birth.get(Calendar.YEAR)
             var months = today.get(Calendar.MONTH) - birth.get(Calendar.MONTH)
-            var days   = today.get(Calendar.DAY_OF_MONTH) - birth.get(Calendar.DAY_OF_MONTH)
+            var days = today.get(Calendar.DAY_OF_MONTH) - birth.get(Calendar.DAY_OF_MONTH)
             if (days < 0) {
                 months -= 1
                 val prev = (today.get(Calendar.MONTH) + 11) % 12
-                val tmp  = today.clone() as Calendar
+                val tmp = today.clone() as Calendar
                 tmp.set(Calendar.MONTH, prev)
                 days += tmp.getActualMaximum(Calendar.DAY_OF_MONTH)
             }
             if (months < 0) {
-                years  -= 1
+                years -= 1
                 months += 12
             }
-            "Tienes $years años, $months meses y $days días"
+            ageMessage.format(years, months, days)
         }
 
         val diff = today.timeInMillis - birth.timeInMillis
-        daysLived    = diff / (1000L * 60 * 60 * 24)
-        hoursLived   = diff / (1000L * 60 * 60)
+        daysLived = diff / (1000L * 60 * 60 * 24)
+        hoursLived = diff / (1000L * 60 * 60)
         minutesLived = diff / (1000L * 60)
         secondsLived = diff / 1000L
-        heartbeats   = minutesLived * 100
-        bloodLiters  = heartbeats * 7 / 100
-        blinks       = minutesLived * 15
-        breaths      = minutesLived * 16
-        sleepDays    = daysLived / 3
-        weeksLived   = daysLived / 7
-        fullMoonsSeen= (daysLived / 29.5).toInt()
+        heartbeats = minutesLived * 100
+        bloodLiters = heartbeats * 7 / 100
+        blinks = minutesLived * 15
+        breaths = minutesLived * 16
+        sleepDays = daysLived / 3
+        weeksLived = daysLived / 7
+        fullMoonsSeen = (daysLived / 29.5).toInt()
 
         val next = Calendar.getInstance().apply {
             set(Calendar.MONTH, birth.get(Calendar.MONTH))
@@ -113,12 +120,17 @@ fun AgeCalculatorScreen(onBack: () -> Unit) {
         dayOfWeek = birth.getDisplayName(
             Calendar.DAY_OF_WEEK,
             Calendar.LONG,
-            Locale("es")
+            Locale.getDefault()
         ) ?: ""
     }
 
     Scaffold(
-        topBar = {TopBarReusable(stringResource(R.string.tool_age_calculator), onBack, {showInfo = true})},
+        topBar = {
+            TopBarReusable(
+                stringResource(R.string.tool_age_calculator),
+                onBack,
+                { showInfo = true })
+        },
     ) { padding ->
         Column(
             Modifier
@@ -135,20 +147,20 @@ fun AgeCalculatorScreen(onBack: () -> Unit) {
                     dateError = null
                     result = ""
                     if (rawDigits.length == 8) {
-                        val d = rawDigits.substring(0,2).toInt()
-                        val m = rawDigits.substring(2,4).toInt()
-                        val y = rawDigits.substring(4,8).toInt()
+                        val d = rawDigits.substring(0, 2).toInt()
+                        val m = rawDigits.substring(2, 4).toInt()
+                        val y = rawDigits.substring(4, 8).toInt()
 
                         if (m in 1..12) {
                             val tmp = Calendar.getInstance().apply {
                                 set(Calendar.YEAR, y)
-                                set(Calendar.MONTH, m-1)
+                                set(Calendar.MONTH, m - 1)
                             }
                             val maxDay = tmp.getActualMaximum(Calendar.DAY_OF_MONTH)
                             if (d in 1..maxDay) {
                                 val birth = Calendar.getInstance().apply {
                                     set(Calendar.YEAR, y)
-                                    set(Calendar.MONTH, m-1)
+                                    set(Calendar.MONTH, m - 1)
                                     set(Calendar.DAY_OF_MONTH, d)
                                     set(Calendar.HOUR_OF_DAY, 0)
                                     set(Calendar.MINUTE, 0)
@@ -157,19 +169,19 @@ fun AgeCalculatorScreen(onBack: () -> Unit) {
                                 }
                                 val today = Calendar.getInstance()
                                 if (birth.after(today)) {
-                                    dateError = "La fecha no puede ser futura"
+                                    dateError = errorFuture
                                 } else {
                                     calculateStats(birth)
                                 }
                             } else {
-                                dateError = "Día fuera de rango (1–$maxDay)"
+                                dateError = errorDay.format(maxDay)
                             }
                         } else {
-                            dateError = "Mes fuera de rango (1–12)"
+                            dateError = errorMonth
                         }
                     }
                 },
-                label = { Text("DD/MM/YYYY") },
+                label = { Text(stringResource(R.string.age_hint)) },
                 singleLine = true,
                 isError = dateError != null,
                 supportingText = {
@@ -184,26 +196,30 @@ fun AgeCalculatorScreen(onBack: () -> Unit) {
                 Text(result, style = MaterialTheme.typography.headlineSmall)
             }
 
-            // Datos curiosos siempre visibles, empiezan en 0
             Spacer(Modifier.height(8.dp))
-            Text("🎂 Faltan ${formatter.format(daysUntilBirthday)} días para tu próximo cumpleaños")
-            Text("📅 Has vivido ${formatter.format(daysLived)} días")
-            Text("😴 Has dormido unos ${formatter.format(sleepDays)} días")
-            Text("🗓️ Eso equivale a ${formatter.format(weeksLived)} semanas")
-            Text("🕐 Has vivido aproximadamente ${formatter.format(hoursLived)} horas")
-            Text("⏰ Has vivido ${formatter.format(minutesLived)} minutos")
-            Text("⏳ Has vivido ${formatter.format(secondsLived)} segundos")
-            Text("❤️ Tu corazón ha latido unas ${formatter.format(heartbeats)} veces")
-            Text("🩸 Tu corazón ha bombeado unos ${formatter.format(bloodLiters)} litros de sangre")
-            Text("👁️ Has parpadeado unas ${formatter.format(blinks)} veces")
-            Text("🌬️ Has respirado unas ${formatter.format(breaths)} veces")
-            Text("🌕 Has presenciado unas ${formatter.format(fullMoonsSeen)} lunas llenas")
-            Text("📊 Ha pasado el ${formatter.format(percentSinceBday)}% del año desde tu último cumpleaños")
+            Text(stringResource(R.string.age_birthday_days, formatter.format(daysUntilBirthday)))
+            Text(stringResource(R.string.age_days_lived, formatter.format(daysLived)))
+            Text(stringResource(R.string.age_days_slept, formatter.format(sleepDays)))
+            Text(stringResource(R.string.age_weeks_lived, formatter.format(weeksLived)))
+            Text(stringResource(R.string.age_hours_lived, formatter.format(hoursLived)))
+            Text(stringResource(R.string.age_minutes_lived, formatter.format(minutesLived)))
+            Text(stringResource(R.string.age_seconds_lived, formatter.format(secondsLived)))
+            Text(stringResource(R.string.age_heartbeats, formatter.format(heartbeats)))
+            Text(stringResource(R.string.age_blood_liters, formatter.format(bloodLiters)))
+            Text(stringResource(R.string.age_blinks, formatter.format(blinks)))
+            Text(stringResource(R.string.age_breaths, formatter.format(breaths)))
+            Text(stringResource(R.string.age_full_moons, formatter.format(fullMoonsSeen)))
+            Text(
+                stringResource(
+                    R.string.age_percent_since_birthday,
+                    formatter.format(percentSinceBday)
+                )
+            )
             Text(
                 if (dayOfWeek.isNotEmpty())
-                    "📅 Naciste un día $dayOfWeek"
+                    stringResource(R.string.age_day_of_week, dayOfWeek)
                 else
-                    "📅 Día de la semana no disponible"
+                    stringResource(R.string.age_day_of_week_unknown)
             )
         }
     }
@@ -211,14 +227,13 @@ fun AgeCalculatorScreen(onBack: () -> Unit) {
     if (showInfo) {
         AlertDialog(
             onDismissRequest = { showInfo = false },
-            title = { Text("Acerca de Calculadora de Edad") },
+            title = { Text(stringResource(R.string.age_info_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Para qué sirve: Calcula tu edad y estadísticas relacionadas.")
-                    Text("• Guía rápida:")
-                    Text("   – Ingresa fecha en formato DD/MM/YYYY.")
-                    Text("   – Mes entre 01–12; día válido según mes/año; no puede ser futura.")
-                    Text("   – Los datos curiosos aparecen siempre y se actualizan con tu fecha.")
+                    Text(stringResource(R.string.age_info_1))
+                    Text(stringResource(R.string.age_info_2))
+                    Text(stringResource(R.string.age_info_3))
+                    Text(stringResource(R.string.age_info_4))
                 }
             },
             confirmButton = {
@@ -226,7 +241,7 @@ fun AgeCalculatorScreen(onBack: () -> Unit) {
                     showInfo = false
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 }) {
-                    Text("Cerrar")
+                    Text(stringResource(R.string.close))
                 }
             }
         )

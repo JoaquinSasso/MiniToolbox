@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dice_cantidad_dados">Number of dice: %1$d</string>
+    <string name="dice_tab_dados">Dice</string>
+    <string name="dice_tab_historial">History</string>
+    <string name="dice_reroll_1">Reroll 1s</string>
+    <string name="dice_reroll_1_or_2">Reroll 1s or 2s</string>
+    <string name="dice_total">Total: %1$d</string>
+    <string name="dice_resultados">Results: %1$s</string>
+    <string name="dice_total_y_fecha">Total: %1$d • %2$s</string>
+    <string name="dice_info_titulo">How does it work?</string>
+    <string name="dice_info_1">• In the \'Dice\' tab you can roll several of the same type.</string>
+    <string name="dice_info_2">• Choose how many dice to roll and tap the die icon.</string>
+    <string name="dice_info_3">• In the \'History\' tab you can view previous rolls.</string>
+    <string name="dice_info_4">• Rolls are automatically saved every time you roll.</string>
+    <string name="dice_info_5">• Icons from Flaticon.com</string>
+</resources>

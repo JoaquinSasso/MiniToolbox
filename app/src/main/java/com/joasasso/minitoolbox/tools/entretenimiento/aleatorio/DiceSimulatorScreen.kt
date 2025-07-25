@@ -83,7 +83,7 @@ fun LanzadorDadosScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth()){
 
-                    Text("Cantidad de dados: $cantidad", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.dice_cantidad_dados, cantidad), style = MaterialTheme.typography.titleMedium)
 
                     Slider(
                         value = sliderValue,
@@ -123,7 +123,7 @@ fun LanzadorDadosScreen(
                         contentColor = if (selectedTab == 0) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 ) {
-                    Text("Dados")
+                    Text(stringResource(R.string.dice_tab_dados))
                 }
 
                 Button(
@@ -133,7 +133,7 @@ fun LanzadorDadosScreen(
                         contentColor = if (selectedTab == 1) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 ) {
-                    Text("Historial")
+                    Text(stringResource(R.string.dice_tab_historial))
                 }
             }
 
@@ -194,13 +194,13 @@ fun LanzadorDadosScreen(
                                     checked = rerollOnes.value,
                                     onCheckedChange = { rerollOnes.value = it; if (it) rerollOnesOrTwos.value = false }
                                 )
-                                Text("Relanzar los 1")
+                                Text(stringResource(R.string.dice_reroll_1))
 
                                 Checkbox(
                                     checked = rerollOnesOrTwos.value,
                                     onCheckedChange = { rerollOnesOrTwos.value = it; if (it) rerollOnes.value = false }
                                 )
-                                Text("Relanzar los 1 o 2")
+                                Text(stringResource(R.string.dice_reroll_1_or_2))
                             }
                         }
 
@@ -233,7 +233,8 @@ fun LanzadorDadosScreen(
                                     .padding(12.dp)
                             ) {
                                 Text("D${tirada.tipo} x${tirada.cantidad}", style = MaterialTheme.typography.titleMedium)
-                                Text("Resultados: ${tirada.resultados.joinToString()}")
+                                Text( stringResource(R.string.dice_cantidad_dados, tirada.cantidad), style = MaterialTheme.typography.bodySmall)
+                                Text(stringResource(R.string.dice_resultados, tirada.resultados.joinToString()))
                                 Text(
                                     text = "Total: ${tirada.resultados.sum()} • ${SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date(tirada.timestamp))}",
                                     style = MaterialTheme.typography.bodySmall
@@ -249,14 +250,14 @@ fun LanzadorDadosScreen(
     if (showInfo) {
         AlertDialog(
             onDismissRequest = { showInfo = false },
-            title = { Text("¿Cómo funciona?") },
+            title = { Text(stringResource(R.string.dice_info_titulo)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• En la pestaña 'Dados' podés lanzar varios dados del mismo tipo.")
-                    Text("• Elegí cuántos dados lanzar y tocá el ícono del dado.")
-                    Text("• En la pestaña 'Historial' podés ver tus tiradas anteriores.")
-                    Text("• El historial se guarda automáticamente cada vez que lanzás.")
-                    Text("• Iconos de Flaticon.com")
+                    Text(stringResource(R.string.dice_info_1))
+                    Text(stringResource(R.string.dice_info_2))
+                    Text(stringResource(R.string.dice_info_3))
+                    Text(stringResource(R.string.dice_info_4))
+                    Text(stringResource(R.string.dice_info_5))
                 }
             },
             confirmButton = {
@@ -264,7 +265,7 @@ fun LanzadorDadosScreen(
                     showInfo = false
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 }) {
-                    Text("Cerrar")
+                    Text(stringResource(R.string.close))
                 }
             }
         )
