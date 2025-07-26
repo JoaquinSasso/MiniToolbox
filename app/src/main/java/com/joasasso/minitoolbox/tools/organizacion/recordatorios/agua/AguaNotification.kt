@@ -10,8 +10,8 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.joasasso.minitoolbox.MainActivity
 import com.joasasso.minitoolbox.R
-import com.joasasso.minitoolbox.tools.data.flujoAguaHoy
-import com.joasasso.minitoolbox.tools.data.flujoObjetivo
+import com.joasasso.minitoolbox.data.flujoAguaHoy
+import com.joasasso.minitoolbox.data.flujoObjetivo
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 

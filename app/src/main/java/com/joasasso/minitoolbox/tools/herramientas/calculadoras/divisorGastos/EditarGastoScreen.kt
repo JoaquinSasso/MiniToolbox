@@ -37,9 +37,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.joasasso.minitoolbox.R
-import com.joasasso.minitoolbox.tools.data.Gasto
-import com.joasasso.minitoolbox.tools.data.Reunion
-import com.joasasso.minitoolbox.tools.data.ReunionesRepository
+import com.joasasso.minitoolbox.data.Gasto
+import com.joasasso.minitoolbox.data.Reunion
+import com.joasasso.minitoolbox.data.ReunionesRepository
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
