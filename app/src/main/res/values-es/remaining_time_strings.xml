@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="countdown_hint">DD/MM/YYYY</string>
+    <string name="countdown_error_future">La fecha debe ser futura</string>
+    <string name="countdown_error_month">Mes fuera de rango (1–12)</string>
+    <string name="countdown_error_day">Día fuera de rango (1–%1$d)</string>
+    <string name="countdown_result">Faltan:\n%1$s días, %2$s h, %3$s min, %4$s s</string>
+    <string name="countdown_title_dates">Fechas típicas:</string>
+
+    <string name="countdown_xmas">Navidad</string>
+    <string name="countdown_new_year">Año Nuevo</string>
+    <string name="countdown_valentines">San Valentín</string>
+    <string name="countdown_easter">Pascuas</string>
+    <string name="countdown_halloween">Halloween</string>
+    <string name="countdown_dead">Día de los Muertos</string>
+    <string name="countdown_kings">Reyes</string>
+    <string name="countdown_labor">Día del Trabajador</string>
+    <string name="countdown_earth">Día de la Tierra</string>
+    <string name="countdown_winter">Solsticio de invierno</string>
+    <string name="countdown_summer">Solsticio de verano</string>
+    <string name="countdown_spring">Equinoccio de primavera</string>
+    <string name="countdown_autumn">Equinoccio de otoño</string>
+
+    <string name="countdown_help_title">Acerca de ¿Cuánto falta para…?</string>
+    <string name="countdown_help_line1">• Para qué sirve: Calcula cuántos días, horas, minutos y segundos faltan hasta la fecha que elijas.</string>
+    <string name="countdown_help_line2">• Guía rápida:</string>
+    <string name="countdown_help_line3">   – Ingresa la fecha en formato DD/MM/YYYY.</string>
+    <string name="countdown_help_line4">   – O selecciona una de las fechas típicas. La fecha debe ser futura.</string>
+</resources>
