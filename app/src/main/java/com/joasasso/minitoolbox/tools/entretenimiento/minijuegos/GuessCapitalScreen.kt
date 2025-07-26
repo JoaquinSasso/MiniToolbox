@@ -43,8 +43,8 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.joasasso.minitoolbox.R
-import com.joasasso.minitoolbox.tools.data.CapitalOfCountry
-import com.joasasso.minitoolbox.tools.data.CountryOuterClass
+import com.joasasso.minitoolbox.data.CapitalOfCountry
+import com.joasasso.minitoolbox.data.CountryOuterClass
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay

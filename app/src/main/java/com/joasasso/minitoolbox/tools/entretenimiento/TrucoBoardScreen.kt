@@ -56,7 +56,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.joasasso.minitoolbox.R
-import com.joasasso.minitoolbox.tools.data.ScoreRepository
+import com.joasasso.minitoolbox.data.ScoreRepository
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine

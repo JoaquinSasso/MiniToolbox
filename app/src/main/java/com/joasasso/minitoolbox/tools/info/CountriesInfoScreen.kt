@@ -35,8 +35,8 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.joasasso.minitoolbox.R
-import com.joasasso.minitoolbox.tools.data.CountryOuterClass
-import com.joasasso.minitoolbox.tools.data.CountryResponse
+import com.joasasso.minitoolbox.data.CountryOuterClass
+import com.joasasso.minitoolbox.data.CountryResponse
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

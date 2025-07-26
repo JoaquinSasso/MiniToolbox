@@ -48,8 +48,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.joasasso.minitoolbox.R
-import com.joasasso.minitoolbox.tools.data.ToDoDataStore
-import com.joasasso.minitoolbox.tools.data.ToDoItem
+import com.joasasso.minitoolbox.data.ToDoDataStore
+import com.joasasso.minitoolbox.data.ToDoItem
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

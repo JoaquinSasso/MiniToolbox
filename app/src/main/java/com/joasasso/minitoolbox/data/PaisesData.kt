@@ -1,4 +1,4 @@
-package com.joasasso.minitoolbox.tools.data
+package com.joasasso.minitoolbox.data
 
 data class CountryResponse(
     val name: String,

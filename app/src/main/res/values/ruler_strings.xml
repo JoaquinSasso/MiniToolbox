@@ -3,7 +3,6 @@
     <string name="ruler_switch_to_inches">Switch to inches</string>
     <string name="ruler_switch_to_cm">Switch to cm</string>
     <string name="ruler_unit_cm">cm</string>
-    <string name="ruler_unit_inch">"</string>
 
     <string name="ruler_help_title">How does the ruler work?</string>
     <string name="ruler_help_line1">• This tool draws a vertical ruler calibrated to your device\'s screen.</string>

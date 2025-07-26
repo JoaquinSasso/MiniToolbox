@@ -44,8 +44,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.joasasso.minitoolbox.R
-import com.joasasso.minitoolbox.tools.data.DadosHistorialRepository
-import com.joasasso.minitoolbox.tools.data.TiradaDeDados
+import com.joasasso.minitoolbox.data.DadosHistorialRepository
+import com.joasasso.minitoolbox.data.TiradaDeDados
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch

@@ -48,6 +48,7 @@ sealed class Screen(val route: String) {
     object AdivinaCapital          : Screen("adivina_capital")
     object Brujula          : Screen("brujula")
     object ToDo          : Screen("to_do")
+    object Eventos          : Screen("eventos")
 
     // Añade aquí nuevos objetos para cada herramienta…
 }
