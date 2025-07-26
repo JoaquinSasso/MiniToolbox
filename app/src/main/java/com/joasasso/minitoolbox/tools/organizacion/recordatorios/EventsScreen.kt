@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.joasasso.minitoolbox.tools.organizacion.recordatorios
 
 import EventoImportante
@@ -19,7 +17,6 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,19 +38,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.tools.info.DateVisualTransformation
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import java.text.NumberFormat
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 import java.util.UUID
 
 @Composable
@@ -61,12 +58,12 @@ fun EventosImportantesScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
-    val formatter = remember { NumberFormat.getInstance(Locale("es", "AR")) }
 
     val eventosFlow = remember { EventosDataStore.flujoEventos(context) }
     var eventos by remember { mutableStateOf<List<EventoImportante>>(emptyList()) }
 
     var showDialog by remember { mutableStateOf(false) }
+    var showInfo by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         eventosFlow.collect { eventos = it }
@@ -74,11 +71,14 @@ fun EventosImportantesScreen(onBack: () -> Unit) {
 
     Scaffold(
         topBar = {
-            TopBarReusable("Eventos importantes", onBack)
+            TopBarReusable(stringResource(R.string.tool_event_tracker), onBack, { showInfo = !showInfo })
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { showDialog = true }) {
-                Icon(Icons.Default.Add, contentDescription = "Agregar evento")
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = stringResource(R.string.event_add_content_desc)
+                )
             }
         }
     ) { padding ->
@@ -96,7 +96,10 @@ fun EventosImportantesScreen(onBack: () -> Unit) {
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                     ) {
-                        Text("No hay eventos guardados. Toca + para agregar uno.", modifier = Modifier.padding(16.dp))
+                        Text(
+                            stringResource(R.string.event_empty_message),
+                            modifier = Modifier.padding(16.dp)
+                        )
                     }
                 }
             } else {
@@ -107,7 +110,8 @@ fun EventosImportantesScreen(onBack: () -> Unit) {
                         while (isActive) {
                             val now = LocalDateTime.now()
                             val objetivo = LocalDate.parse(evento.fecha).atStartOfDay()
-                            remainingTime = Duration.between(now, objetivo).coerceAtLeast(Duration.ZERO)
+                            remainingTime =
+                                Duration.between(now, objetivo).coerceAtLeast(Duration.ZERO)
                             delay(1000)
                         }
                     }
@@ -134,18 +138,22 @@ fun EventosImportantesScreen(onBack: () -> Unit) {
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
-                                Text(evento.nombre, style = MaterialTheme.typography.titleMedium, color = fgColor)
                                 Text(
-                                    "Fecha: ${
-                                        LocalDate.parse(evento.fecha).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-                                    }",
+                                    evento.nombre,
+                                    style = MaterialTheme.typography.titleMedium,
                                     color = fgColor
                                 )
                                 Text(
-                                    "Faltan: ${formatter.format(dias)} días, " +
-                                            "${formatter.format(horas)} h, " +
-                                            "${formatter.format(minutos)} min, " +
-                                            "${formatter.format(segundos)} s",
+                                    stringResource(R.string.event_date_prefix) +
+                                            LocalDate.parse(evento.fecha)
+                                                .format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                                    color = fgColor
+                                )
+                                Text(
+                                    stringResource(
+                                        R.string.event_remaining_prefix,
+                                        dias, horas, minutos, segundos
+                                    ),
                                     color = fgColor
                                 )
                             }
@@ -158,14 +166,13 @@ fun EventosImportantesScreen(onBack: () -> Unit) {
                             }) {
                                 Icon(
                                     imageVector = Icons.Default.Delete,
-                                    contentDescription = "Eliminar",
+                                    contentDescription = stringResource(R.string.delete),
                                     tint = fgColor
                                 )
                             }
                         }
                     }
                 }
-
             }
         }
     }
@@ -187,6 +194,28 @@ fun EventosImportantesScreen(onBack: () -> Unit) {
             }
         )
     }
+    // Menú de ayuda
+    if (showInfo) {
+        AlertDialog(
+            onDismissRequest = { showInfo = false },
+            title = { Text(stringResource(R.string.event_help_title)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(stringResource(R.string.event_help_line1))
+                    Text(stringResource(R.string.event_help_line2))
+                    Text(stringResource(R.string.event_help_line3))
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showInfo = false
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                }) {
+                    Text(stringResource(R.string.close))
+                }
+            }
+        )
+    }
 }
 
 @Composable
@@ -198,15 +227,19 @@ fun DialogAgregarEventoImportante(
     var rawFecha by remember { mutableStateOf("") }
     var fechaError by remember { mutableStateOf<String?>(null) }
 
+    val errorPasado = stringResource(R.string.event_error_past)
+    val errorIncompleto = stringResource(R.string.event_error_incomplete)
+    val errorInvalido = stringResource(R.string.event_error_invalid)
+
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Nuevo evento importante") },
+        title = { Text(stringResource(R.string.event_dialog_title)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
                     value = nombre,
                     onValueChange = { nombre = it },
-                    label = { Text("Nombre del evento") },
+                    label = { Text(stringResource(R.string.event_name_label)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -216,7 +249,7 @@ fun DialogAgregarEventoImportante(
                         rawFecha = it.filter { c -> c.isDigit() }.take(8)
                         fechaError = null
                     },
-                    label = { Text("Fecha (DDMMYYYY)") },
+                    label = { Text(stringResource(R.string.event_date_label)) },
                     singleLine = true,
                     isError = fechaError != null,
                     supportingText = {
@@ -239,22 +272,24 @@ fun DialogAgregarEventoImportante(
                     try {
                         val date = LocalDate.of(y, m, d)
                         if (date.isBefore(LocalDate.now())) {
-                            fechaError = "Debe ser una fecha futura"
+                            fechaError = errorPasado
                         } else {
                             onSave(nombre.trim(), date)
                         }
-                    } catch (e: Exception) {
-                        fechaError = "Fecha inválida"
+                    } catch (_: Exception) {
+                        fechaError = errorInvalido
                     }
                 } else {
-                    fechaError = "Fecha incompleta"
+                    fechaError = errorIncompleto
                 }
             }) {
-                Text("Guardar")
+                Text(stringResource(R.string.save))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar") }
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
         }
     )
 }

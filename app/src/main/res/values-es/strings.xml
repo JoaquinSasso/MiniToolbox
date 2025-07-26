@@ -7,4 +7,7 @@
     <string name="reset_all">Reiniciar todo</string>
     <string name="yes">Si</string>
     <string name="no">No</string>
+    <string name="save">Guardar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="delete">Borrar</string>
 </resources>

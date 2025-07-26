@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="event_add_content_desc">Add event</string>
+    <string name="event_empty_message">No events saved. Tap + to add one.</string>
+    <string name="event_date_prefix">Date: </string>
+    <string name="event_remaining_prefix">Remaining: %1$d days, %2$d h, %3$d min, %4$d s</string>
+
+    <!-- Dialog -->
+    <string name="event_dialog_title">New important event</string>
+    <string name="event_name_label">Event name</string>
+    <string name="event_date_label">Date (DD/MM/YYYY)</string>
+    <string name="event_error_invalid">Invalid date</string>
+    <string name="event_error_incomplete">Incomplete date</string>
+    <string name="event_error_past">Date must be in the future</string>
+
+    <!-- Menú de ayuda -->
+    <string name="event_help_title">How does it work?</string>
+    <string name="event_help_line1">• Use this tool to save important dates like birthdays, appointments or special events.</string>
+    <string name="event_help_line2">• Enter a name and a future date in DD/MM/YYYY format to create an event.</string>
+    <string name="event_help_line3">• You will see a countdown in days, hours, minutes, and seconds.</string>
+</resources>

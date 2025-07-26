@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="event_add_content_desc">Agregar evento</string>
+    <string name="event_empty_message">No hay eventos guardados. Toca + para agregar uno.</string>
+    <string name="event_date_prefix">Fecha: </string>
+    <string name="event_remaining_prefix">Faltan: %1$d días, %2$d h, %3$d min, %4$d s</string>
+
+    <!-- Diálogo -->
+    <string name="event_dialog_title">Nuevo evento importante</string>
+    <string name="event_name_label">Nombre del evento</string>
+    <string name="event_date_label">Fecha (DD/MM/YYYY)</string>
+    <string name="event_error_invalid">Fecha inválida</string>
+    <string name="event_error_incomplete">Fecha incompleta</string>
+    <string name="event_error_past">Debe ser una fecha futura</string>
+
+    <!-- Menú de ayuda -->
+    <string name="event_help_title">¿Cómo funciona?</string>
+    <string name="event_help_line1">• Puedes usar esta herramienta para guardar fechas importantes como cumpleaños, citas o eventos especiales.</string>
+    <string name="event_help_line2">• Ingresa un nombre y una fecha futura en formato DD/MM/YYYY para crear un evento.</string>
+    <string name="event_help_line3">• Verás una cuenta regresiva en días, horas, minutos y segundos.</string>
+</resources>
