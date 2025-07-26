@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -46,7 +47,7 @@ import java.util.Locale
 @Composable
 fun RemainingTimeScreen(onBack: () -> Unit) {
     val haptic = LocalHapticFeedback.current
-    val formatter = remember { NumberFormat.getInstance(Locale("es", "AR")) }
+    val formatter = remember { NumberFormat.getInstance(Locale.getDefault()) }
     val scrollState = rememberScrollState()
 
     var rawDigits by remember { mutableStateOf("") }
@@ -68,6 +69,8 @@ fun RemainingTimeScreen(onBack: () -> Unit) {
             delay(1000)
         }
     }
+
+    val context = LocalContext.current
 
     Scaffold(
         topBar = { TopBarReusable(stringResource(R.string.tool_day_countdown), onBack, { showInfo = true }) }
@@ -98,19 +101,19 @@ fun RemainingTimeScreen(onBack: () -> Unit) {
                                 val target = LocalDate.of(y, m, d)
                                 val now = LocalDate.now()
                                 if (target.isBefore(now)) {
-                                    dateError = "La fecha debe ser futura"
+                                    dateError = context.getString(R.string.countdown_error_future)
                                 } else {
                                     updateRemainingTime(target)
                                 }
                             } else {
-                                dateError = "Día fuera de rango (1-$maxDay)"
+                                dateError = context.getString(R.string.countdown_error_day, maxDay)
                             }
                         } else {
-                            dateError = "Mes fuera de rango (1–12)"
+                            dateError = context.getString(R.string.countdown_error_month)
                         }
                     }
                 },
-                label = { Text("DD/MM/YYYY") },
+                label = { Text(stringResource(R.string.countdown_hint)) },
                 singleLine = true,
                 isError = dateError != null,
                 supportingText = {
@@ -127,29 +130,34 @@ fun RemainingTimeScreen(onBack: () -> Unit) {
             val seconds = (remainingTime.seconds % 60)
 
             Text(
-                "Faltan: ${formatter.format(days)} días, " +
-                        "${formatter.format(hours)} h, ${formatter.format(minutes)} min, ${formatter.format(seconds)} s",
+                stringResource(
+                    R.string.countdown_result,
+                    formatter.format(days),
+                    formatter.format(hours),
+                    formatter.format(minutes),
+                    formatter.format(seconds)
+                ),
                 style = MaterialTheme.typography.headlineSmall
             )
 
             Spacer(Modifier.height(8.dp))
-            Text("Fechas típicas:")
+            Text(stringResource(R.string.countdown_title_dates))
             listOf(
-                "🎄 Navidad" to nextDate(today, 12, 25),
-                "🎆 Año Nuevo" to nextDate(today, 1, 1),
-                "💘 San Valentín" to nextDate(today, 2, 14),
-                "🐣 Pascuas" to estimateEaster(today.year).let {
+                "🎄 ${stringResource(R.string.countdown_xmas)}" to nextDate(today, 12, 25),
+                "🎆 ${stringResource(R.string.countdown_new_year)}" to nextDate(today, 1, 1),
+                "💘 ${stringResource(R.string.countdown_valentines)}" to nextDate(today, 2, 14),
+                "🐣 ${stringResource(R.string.countdown_easter)}" to estimateEaster(today.year).let {
                     if (it.isBefore(LocalDate.now())) estimateEaster(today.year + 1) else it
                 },
-                "🎃 Halloween" to nextDate(today, 10, 31),
-                "👻 Día de los Muertos" to nextDate(today, 11, 2),
-                "👑 Reyes" to nextDate(today, 1, 6),
-                "🛠️ Día del Trabajador" to nextDate(today, 5, 1),
-                "🌎 Día de la Tierra" to nextDate(today, 4, 22),
-                "❄️ Solsticio de invierno" to nextDate(today, 6, 21),
-                "🌞 Solsticio de verano" to nextDate(today, 12, 21),
-                "🌱 Equinoccio de primavera" to nextDate(today, 9, 21),
-                "🍂 Equinoccio de otoño" to nextDate(today, 3, 21)
+                "🎃 ${stringResource(R.string.countdown_halloween)}" to nextDate(today, 10, 31),
+                "👻 ${stringResource(R.string.countdown_dead)}" to nextDate(today, 11, 2),
+                "👑 ${stringResource(R.string.countdown_kings)}" to nextDate(today, 1, 6),
+                "🛠️ ${stringResource(R.string.countdown_labor)}" to nextDate(today, 5, 1),
+                "🌎 ${stringResource(R.string.countdown_earth)}" to nextDate(today, 4, 22),
+                "❄️ ${stringResource(R.string.countdown_winter)}" to nextDate(today, 6, 21),
+                "🌞 ${stringResource(R.string.countdown_summer)}" to nextDate(today, 12, 21),
+                "🌱 ${stringResource(R.string.countdown_spring)}" to nextDate(today, 9, 21),
+                "🍂 ${stringResource(R.string.countdown_autumn)}" to nextDate(today, 3, 21)
             ).forEach { (label, date) ->
                 Button(
                     onClick = {
@@ -167,14 +175,13 @@ fun RemainingTimeScreen(onBack: () -> Unit) {
     if (showInfo) {
         AlertDialog(
             onDismissRequest = { showInfo = false },
-            title = { Text("Acerca de ¿Cuánto falta para...?") },
+            title = { Text(stringResource(R.string.countdown_help_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Para qué sirve: Calcula cuántos días, horas, minutos y segundos faltan hasta la fecha que elijas.")
-                    Text("• Guía rápida:")
-                    Text("   – Ingresa la fecha en formato DD/MM/YYYY.")
-                    Text("   – O selecciona una de las fechas típicas.")
-                    Text("   – La fecha debe ser futura.")
+                    Text(stringResource(R.string.countdown_help_line1))
+                    Text(stringResource(R.string.countdown_help_line2))
+                    Text(stringResource(R.string.countdown_help_line3))
+                    Text(stringResource(R.string.countdown_help_line4))
                 }
             },
             confirmButton = {
@@ -182,12 +189,13 @@ fun RemainingTimeScreen(onBack: () -> Unit) {
                     showInfo = false
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 }) {
-                    Text("Cerrar")
+                    Text(stringResource(R.string.close))
                 }
             }
         )
     }
 }
+
 
 
 fun nextDate(today: LocalDate, month: Int, day: Int): LocalDate {

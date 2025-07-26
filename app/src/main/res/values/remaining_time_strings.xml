@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="countdown_hint">DD/MM/YYYY</string>
+    <string name="countdown_error_future">The date must be in the future</string>
+    <string name="countdown_error_month">Month out of range (1–12)</string>
+    <string name="countdown_error_day">Day out of range (1–%1$d)</string>
+    <string name="countdown_result">Time remaining:\n%1$s days, %2$s h, %3$s min, %4$s s</string>
+    <string name="countdown_title_dates">Typical dates:</string>
+
+    <string name="countdown_xmas">Christmas</string>
+    <string name="countdown_new_year">New Year</string>
+    <string name="countdown_valentines">Valentine\'s Day</string>
+    <string name="countdown_easter">Easter</string>
+    <string name="countdown_halloween">Halloween</string>
+    <string name="countdown_dead">Day of the Dead</string>
+    <string name="countdown_kings">Three Kings Day</string>
+    <string name="countdown_labor">Labor Day</string>
+    <string name="countdown_earth">Earth Day</string>
+    <string name="countdown_winter">Winter Solstice</string>
+    <string name="countdown_summer">Summer Solstice</string>
+    <string name="countdown_spring">Spring Equinox</string>
+    <string name="countdown_autumn">Autumn Equinox</string>
+
+    <string name="countdown_help_title">About “How much time left?”</string>
+    <string name="countdown_help_line1">• Purpose: Calculates how many days, hours, minutes, and seconds are left until the date you choose.</string>
+    <string name="countdown_help_line2">• Quick guide:</string>
+    <string name="countdown_help_line3">   – Enter the date in DD/MM/YYYY format.</string>
+    <string name="countdown_help_line4">   – Or select one of the typical dates. The date must be in the future.</string>
+</resources>
