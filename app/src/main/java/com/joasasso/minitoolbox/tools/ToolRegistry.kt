@@ -299,6 +299,13 @@ object ToolRegistry {
             category = ToolCategory.Organizacion,
             subCategory = R.string.subcategory_others,
             icon = Icons.Filled.Checklist
-        )
+        ),
+        Tool(
+            name = R.string.tool_event_tracker,
+            screen = Screen.Eventos,
+            category = ToolCategory.Organizacion,
+            subCategory = R.string.subcategory_habits,
+            svgResId = R.drawable.events
+    )
     )
 }

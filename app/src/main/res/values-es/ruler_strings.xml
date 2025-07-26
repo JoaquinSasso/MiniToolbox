@@ -3,7 +3,6 @@
     <string name="ruler_switch_to_inches">Cambiar a pulgadas</string>
     <string name="ruler_switch_to_cm">Cambiar a cm</string>
     <string name="ruler_unit_cm">cm</string>
-    <string name="ruler_unit_inch">"</string>
 
     <string name="ruler_help_title">¿Cómo funciona la regla?</string>
     <string name="ruler_help_line1">• Esta herramienta dibuja una regla vertical calibrada según la pantalla de tu dispositivo.</string>

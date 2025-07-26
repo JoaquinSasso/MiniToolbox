@@ -45,7 +45,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.joasasso.minitoolbox.R
-import com.joasasso.minitoolbox.tools.data.BMIDataStore
+import com.joasasso.minitoolbox.data.BMIDataStore
 import com.joasasso.minitoolbox.tools.herramientas.generadores.SegmentedButton
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlinx.coroutines.launch

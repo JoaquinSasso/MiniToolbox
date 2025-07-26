@@ -1,4 +1,4 @@
-package com.joasasso.minitoolbox.tools.data
+package com.joasasso.minitoolbox.data
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit

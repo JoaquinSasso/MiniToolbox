@@ -19,6 +19,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,11 +32,15 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import java.text.NumberFormat
+import java.time.Duration
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
 import java.util.Locale
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,17 +51,26 @@ fun RemainingTimeScreen(onBack: () -> Unit) {
 
     var rawDigits by remember { mutableStateOf("") }
     var dateError by remember { mutableStateOf<String?>(null) }
-    var daysLeft by remember { mutableStateOf<Long?>(0) }
+    var targetDateTime by remember { mutableStateOf<LocalDateTime?>(null) }
+    var remainingTime by remember { mutableStateOf(Duration.ZERO) }
     var showInfo by remember { mutableStateOf(false) }
+
     val today = LocalDate.now()
 
-    fun updateDaysLeft(target: LocalDate) {
-        val today = LocalDate.now()
-        daysLeft = ChronoUnit.DAYS.between(today, target).coerceAtLeast(0)
+    fun updateRemainingTime(target: LocalDate) {
+        targetDateTime = target.atStartOfDay()
+    }
+
+    LaunchedEffect(targetDateTime) {
+        while (isActive && targetDateTime != null) {
+            val now = LocalDateTime.now()
+            remainingTime = Duration.between(now, targetDateTime).coerceAtLeast(Duration.ZERO)
+            delay(1000)
+        }
     }
 
     Scaffold(
-        topBar = {TopBarReusable(stringResource(R.string.tool_day_countdown), onBack, {showInfo = true})}
+        topBar = { TopBarReusable(stringResource(R.string.tool_day_countdown), onBack, { showInfo = true }) }
     ) { padding ->
         Column(
             Modifier
@@ -71,7 +85,7 @@ fun RemainingTimeScreen(onBack: () -> Unit) {
                 onValueChange = { new ->
                     rawDigits = new.filter { it.isDigit() }.take(8)
                     dateError = null
-                    daysLeft = null
+                    targetDateTime = null
 
                     if (rawDigits.length == 8) {
                         val d = rawDigits.substring(0, 2).toInt()
@@ -82,11 +96,11 @@ fun RemainingTimeScreen(onBack: () -> Unit) {
                             val maxDay = LocalDate.of(y, m, 1).lengthOfMonth()
                             if (d in 1..maxDay) {
                                 val target = LocalDate.of(y, m, d)
-                                val today = LocalDate.now()
-                                if (target.isBefore(today)) {
+                                val now = LocalDate.now()
+                                if (target.isBefore(now)) {
                                     dateError = "La fecha debe ser futura"
                                 } else {
-                                    updateDaysLeft(target)
+                                    updateRemainingTime(target)
                                 }
                             } else {
                                 dateError = "Día fuera de rango (1-$maxDay)"
@@ -107,9 +121,16 @@ fun RemainingTimeScreen(onBack: () -> Unit) {
                 visualTransformation = DateVisualTransformation()
             )
 
-            if (daysLeft != null) {
-                Text("⏳ Faltan ${formatter.format(daysLeft)} días", style = MaterialTheme.typography.headlineSmall)
-            }
+            val days = remainingTime.toDays()
+            val hours = (remainingTime.toHours() % 24)
+            val minutes = (remainingTime.toMinutes() % 60)
+            val seconds = (remainingTime.seconds % 60)
+
+            Text(
+                "Faltan: ${formatter.format(days)} días, " +
+                        "${formatter.format(hours)} h, ${formatter.format(minutes)} min, ${formatter.format(seconds)} s",
+                style = MaterialTheme.typography.headlineSmall
+            )
 
             Spacer(Modifier.height(8.dp))
             Text("Fechas típicas:")
@@ -129,15 +150,14 @@ fun RemainingTimeScreen(onBack: () -> Unit) {
                 "🌞 Solsticio de verano" to nextDate(today, 12, 21),
                 "🌱 Equinoccio de primavera" to nextDate(today, 9, 21),
                 "🍂 Equinoccio de otoño" to nextDate(today, 3, 21)
-
-
             ).forEach { (label, date) ->
-                Button(onClick = {
-                    updateDaysLeft(date)
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                },
-                    modifier = Modifier.fillMaxWidth())
-                {
+                Button(
+                    onClick = {
+                        updateRemainingTime(date)
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Text("$label (${date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))})")
                 }
             }
@@ -150,7 +170,7 @@ fun RemainingTimeScreen(onBack: () -> Unit) {
             title = { Text("Acerca de ¿Cuánto falta para...?") },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Para qué sirve: Calcula cuántos días faltan hasta la fecha que elijas.")
+                    Text("• Para qué sirve: Calcula cuántos días, horas, minutos y segundos faltan hasta la fecha que elijas.")
                     Text("• Guía rápida:")
                     Text("   – Ingresa la fecha en formato DD/MM/YYYY.")
                     Text("   – O selecciona una de las fechas típicas.")
@@ -168,6 +188,7 @@ fun RemainingTimeScreen(onBack: () -> Unit) {
         )
     }
 }
+
 
 fun nextDate(today: LocalDate, month: Int, day: Int): LocalDate {
     var candidate = LocalDate.of(today.year, month, day)

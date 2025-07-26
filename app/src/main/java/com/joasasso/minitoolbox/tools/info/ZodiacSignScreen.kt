@@ -113,17 +113,6 @@ fun ZodiacSignScreen(onBack: () -> Unit) {
     val haptic = LocalHapticFeedback.current
     var dateError by remember { mutableStateOf<String?>(null) }
 
-    fun calculateSign() {
-        if (rawDigits.length == 4) {
-            val day = rawDigits.substring(0, 2).toIntOrNull() ?: return
-            val month = rawDigits.substring(2, 4).toIntOrNull() ?: return
-            if (day in 1..31 && month in 1..12) {
-                currentSign = getZodiacSign(day, month)
-            }
-        } else {
-            currentSign = null
-        }
-    }
 
     Scaffold(
         topBar = {TopBarReusable(stringResource(R.string.tool_zodiac_sign), onBack, {showInfo = true})}

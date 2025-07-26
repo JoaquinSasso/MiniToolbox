@@ -7,7 +7,6 @@
     <string name="dice_reroll_1_or_2">Relanzar los 1 o 2</string>
     <string name="dice_total">Total: %1$d</string>
     <string name="dice_resultados">Resultados: %1$s</string>
-    <string name="dice_hist_titulo">D%1$d x%2$d</string>
     <string name="dice_total_y_fecha">Total: %1$d • %2$s</string>
     <string name="dice_info_titulo">¿Cómo funciona?</string>
     <string name="dice_info_1">• En la pestaña \'Dados\' podés lanzar varios dados del mismo tipo.</string>

@@ -37,4 +37,5 @@
     <string name="tool_guess_capital">Guess the Capital</string>
     <string name="tool_compass">Compass</string>
     <string name="tool_todo_list">ToDo List</string>
+    <string name="tool_event_tracker">Important Events</string>
 </resources>

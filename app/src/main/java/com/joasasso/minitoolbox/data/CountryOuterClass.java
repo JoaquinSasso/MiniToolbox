@@ -3,7 +3,7 @@
 // source: Country.proto
 // Protobuf Java Version: 4.31.1
 
-package com.joasasso.minitoolbox.tools.data;
+package com.joasasso.minitoolbox.data;
 
 @com.google.protobuf.Generated
 public final class CountryOuterClass {
@@ -167,15 +167,15 @@ public final class CountryOuterClass {
 
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.joasasso.minitoolbox.tools.data.CountryOuterClass.internal_static_com_joasasso_minitoolbox_tools_data_Country_descriptor;
+      return CountryOuterClass.internal_static_com_joasasso_minitoolbox_tools_data_Country_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.joasasso.minitoolbox.tools.data.CountryOuterClass.internal_static_com_joasasso_minitoolbox_tools_data_Country_fieldAccessorTable
+      return CountryOuterClass.internal_static_com_joasasso_minitoolbox_tools_data_Country_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country.class, com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country.Builder.class);
+              CountryOuterClass.Country.class, CountryOuterClass.Country.Builder.class);
     }
 
     public static final int NAME_FIELD_NUMBER = 1;
@@ -547,10 +547,10 @@ public final class CountryOuterClass {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country)) {
+      if (!(obj instanceof CountryOuterClass.Country)) {
         return super.equals(obj);
       }
-      com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country other = (com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country) obj;
+      CountryOuterClass.Country other = (CountryOuterClass.Country) obj;
 
       if (!getName()
           .equals(other.getName())) return false;
@@ -603,44 +603,44 @@ public final class CountryOuterClass {
       return hash;
     }
 
-    public static com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country parseFrom(
+    public static CountryOuterClass.Country parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country parseFrom(
+    public static CountryOuterClass.Country parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country parseFrom(
+    public static CountryOuterClass.Country parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country parseFrom(
+    public static CountryOuterClass.Country parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country parseFrom(byte[] data)
+    public static CountryOuterClass.Country parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country parseFrom(
+    public static CountryOuterClass.Country parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country parseFrom(java.io.InputStream input)
+    public static CountryOuterClass.Country parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessage
           .parseWithIOException(PARSER, input);
     }
-    public static com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country parseFrom(
+    public static CountryOuterClass.Country parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -648,26 +648,26 @@ public final class CountryOuterClass {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public static com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country parseDelimitedFrom(java.io.InputStream input)
+    public static CountryOuterClass.Country parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessage
           .parseDelimitedWithIOException(PARSER, input);
     }
 
-    public static com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country parseDelimitedFrom(
+    public static CountryOuterClass.Country parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessage
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country parseFrom(
+    public static CountryOuterClass.Country parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessage
           .parseWithIOException(PARSER, input);
     }
-    public static com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country parseFrom(
+    public static CountryOuterClass.Country parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -680,7 +680,7 @@ public final class CountryOuterClass {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country prototype) {
+    public static Builder newBuilder(CountryOuterClass.Country prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @java.lang.Override
@@ -701,18 +701,18 @@ public final class CountryOuterClass {
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:com.joasasso.minitoolbox.tools.data.Country)
-        com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryOrBuilder {
+        CountryOuterClass.CountryOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return com.joasasso.minitoolbox.tools.data.CountryOuterClass.internal_static_com_joasasso_minitoolbox_tools_data_Country_descriptor;
+        return CountryOuterClass.internal_static_com_joasasso_minitoolbox_tools_data_Country_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.joasasso.minitoolbox.tools.data.CountryOuterClass.internal_static_com_joasasso_minitoolbox_tools_data_Country_fieldAccessorTable
+        return CountryOuterClass.internal_static_com_joasasso_minitoolbox_tools_data_Country_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country.class, com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country.Builder.class);
+                CountryOuterClass.Country.class, CountryOuterClass.Country.Builder.class);
       }
 
       // Construct using com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country.newBuilder()
@@ -744,17 +744,17 @@ public final class CountryOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.joasasso.minitoolbox.tools.data.CountryOuterClass.internal_static_com_joasasso_minitoolbox_tools_data_Country_descriptor;
+        return CountryOuterClass.internal_static_com_joasasso_minitoolbox_tools_data_Country_descriptor;
       }
 
       @java.lang.Override
-      public com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country getDefaultInstanceForType() {
-        return com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country.getDefaultInstance();
+      public CountryOuterClass.Country getDefaultInstanceForType() {
+        return CountryOuterClass.Country.getDefaultInstance();
       }
 
       @java.lang.Override
-      public com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country build() {
-        com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country result = buildPartial();
+      public CountryOuterClass.Country build() {
+        CountryOuterClass.Country result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -762,14 +762,14 @@ public final class CountryOuterClass {
       }
 
       @java.lang.Override
-      public com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country buildPartial() {
-        com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country result = new com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country(this);
+      public CountryOuterClass.Country buildPartial() {
+        CountryOuterClass.Country result = new CountryOuterClass.Country(this);
         if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
       }
 
-      private void buildPartial0(com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country result) {
+      private void buildPartial0(CountryOuterClass.Country result) {
         int from_bitField0_ = bitField0_;
         if (((from_bitField0_ & 0x00000001) != 0)) {
           result.name_ = name_;
@@ -800,16 +800,16 @@ public final class CountryOuterClass {
 
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country) {
-          return mergeFrom((com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country)other);
+        if (other instanceof CountryOuterClass.Country) {
+          return mergeFrom((CountryOuterClass.Country)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country other) {
-        if (other == com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country.getDefaultInstance()) return this;
+      public Builder mergeFrom(CountryOuterClass.Country other) {
+        if (other == CountryOuterClass.Country.getDefaultInstance()) return this;
         if (!other.getName().isEmpty()) {
           name_ = other.name_;
           bitField0_ |= 0x00000001;
@@ -1516,12 +1516,12 @@ public final class CountryOuterClass {
     }
 
     // @@protoc_insertion_point(class_scope:com.joasasso.minitoolbox.tools.data.Country)
-    private static final com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country DEFAULT_INSTANCE;
+    private static final CountryOuterClass.Country DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country();
+      DEFAULT_INSTANCE = new CountryOuterClass.Country();
     }
 
-    public static com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country getDefaultInstance() {
+    public static CountryOuterClass.Country getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
@@ -1557,7 +1557,7 @@ public final class CountryOuterClass {
     }
 
     @java.lang.Override
-    public com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country getDefaultInstanceForType() {
+    public CountryOuterClass.Country getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -1570,12 +1570,12 @@ public final class CountryOuterClass {
     /**
      * <code>repeated .com.joasasso.minitoolbox.tools.data.Country countries = 1;</code>
      */
-    java.util.List<com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country> 
+    java.util.List<CountryOuterClass.Country>
         getCountriesList();
     /**
      * <code>repeated .com.joasasso.minitoolbox.tools.data.Country countries = 1;</code>
      */
-    com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country getCountries(int index);
+    CountryOuterClass.Country getCountries(int index);
     /**
      * <code>repeated .com.joasasso.minitoolbox.tools.data.Country countries = 1;</code>
      */
@@ -1583,12 +1583,12 @@ public final class CountryOuterClass {
     /**
      * <code>repeated .com.joasasso.minitoolbox.tools.data.Country countries = 1;</code>
      */
-    java.util.List<? extends com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryOrBuilder> 
+    java.util.List<? extends CountryOuterClass.CountryOrBuilder>
         getCountriesOrBuilderList();
     /**
      * <code>repeated .com.joasasso.minitoolbox.tools.data.Country countries = 1;</code>
      */
-    com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryOrBuilder getCountriesOrBuilder(
+    CountryOuterClass.CountryOrBuilder getCountriesOrBuilder(
         int index);
   }
   /**
@@ -1618,32 +1618,32 @@ public final class CountryOuterClass {
 
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.joasasso.minitoolbox.tools.data.CountryOuterClass.internal_static_com_joasasso_minitoolbox_tools_data_CountryList_descriptor;
+      return CountryOuterClass.internal_static_com_joasasso_minitoolbox_tools_data_CountryList_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.joasasso.minitoolbox.tools.data.CountryOuterClass.internal_static_com_joasasso_minitoolbox_tools_data_CountryList_fieldAccessorTable
+      return CountryOuterClass.internal_static_com_joasasso_minitoolbox_tools_data_CountryList_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList.class, com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList.Builder.class);
+              CountryOuterClass.CountryList.class, CountryOuterClass.CountryList.Builder.class);
     }
 
     public static final int COUNTRIES_FIELD_NUMBER = 1;
     @SuppressWarnings("serial")
-    private java.util.List<com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country> countries_;
+    private java.util.List<CountryOuterClass.Country> countries_;
     /**
      * <code>repeated .com.joasasso.minitoolbox.tools.data.Country countries = 1;</code>
      */
     @java.lang.Override
-    public java.util.List<com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country> getCountriesList() {
+    public java.util.List<CountryOuterClass.Country> getCountriesList() {
       return countries_;
     }
     /**
      * <code>repeated .com.joasasso.minitoolbox.tools.data.Country countries = 1;</code>
      */
     @java.lang.Override
-    public java.util.List<? extends com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryOrBuilder> 
+    public java.util.List<? extends CountryOuterClass.CountryOrBuilder>
         getCountriesOrBuilderList() {
       return countries_;
     }
@@ -1658,14 +1658,14 @@ public final class CountryOuterClass {
      * <code>repeated .com.joasasso.minitoolbox.tools.data.Country countries = 1;</code>
      */
     @java.lang.Override
-    public com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country getCountries(int index) {
+    public CountryOuterClass.Country getCountries(int index) {
       return countries_.get(index);
     }
     /**
      * <code>repeated .com.joasasso.minitoolbox.tools.data.Country countries = 1;</code>
      */
     @java.lang.Override
-    public com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryOrBuilder getCountriesOrBuilder(
+    public CountryOuterClass.CountryOrBuilder getCountriesOrBuilder(
         int index) {
       return countries_.get(index);
     }
@@ -1710,10 +1710,10 @@ public final class CountryOuterClass {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList)) {
+      if (!(obj instanceof CountryOuterClass.CountryList)) {
         return super.equals(obj);
       }
-      com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList other = (com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList) obj;
+      CountryOuterClass.CountryList other = (CountryOuterClass.CountryList) obj;
 
       if (!getCountriesList()
           .equals(other.getCountriesList())) return false;
@@ -1737,44 +1737,44 @@ public final class CountryOuterClass {
       return hash;
     }
 
-    public static com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList parseFrom(
+    public static CountryOuterClass.CountryList parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList parseFrom(
+    public static CountryOuterClass.CountryList parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList parseFrom(
+    public static CountryOuterClass.CountryList parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList parseFrom(
+    public static CountryOuterClass.CountryList parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList parseFrom(byte[] data)
+    public static CountryOuterClass.CountryList parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList parseFrom(
+    public static CountryOuterClass.CountryList parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList parseFrom(java.io.InputStream input)
+    public static CountryOuterClass.CountryList parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessage
           .parseWithIOException(PARSER, input);
     }
-    public static com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList parseFrom(
+    public static CountryOuterClass.CountryList parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -1782,26 +1782,26 @@ public final class CountryOuterClass {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public static com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList parseDelimitedFrom(java.io.InputStream input)
+    public static CountryOuterClass.CountryList parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessage
           .parseDelimitedWithIOException(PARSER, input);
     }
 
-    public static com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList parseDelimitedFrom(
+    public static CountryOuterClass.CountryList parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessage
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList parseFrom(
+    public static CountryOuterClass.CountryList parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessage
           .parseWithIOException(PARSER, input);
     }
-    public static com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList parseFrom(
+    public static CountryOuterClass.CountryList parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -1814,7 +1814,7 @@ public final class CountryOuterClass {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList prototype) {
+    public static Builder newBuilder(CountryOuterClass.CountryList prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @java.lang.Override
@@ -1835,18 +1835,18 @@ public final class CountryOuterClass {
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:com.joasasso.minitoolbox.tools.data.CountryList)
-        com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryListOrBuilder {
+        CountryOuterClass.CountryListOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return com.joasasso.minitoolbox.tools.data.CountryOuterClass.internal_static_com_joasasso_minitoolbox_tools_data_CountryList_descriptor;
+        return CountryOuterClass.internal_static_com_joasasso_minitoolbox_tools_data_CountryList_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.joasasso.minitoolbox.tools.data.CountryOuterClass.internal_static_com_joasasso_minitoolbox_tools_data_CountryList_fieldAccessorTable
+        return CountryOuterClass.internal_static_com_joasasso_minitoolbox_tools_data_CountryList_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList.class, com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList.Builder.class);
+                CountryOuterClass.CountryList.class, CountryOuterClass.CountryList.Builder.class);
       }
 
       // Construct using com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList.newBuilder()
@@ -1876,17 +1876,17 @@ public final class CountryOuterClass {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.joasasso.minitoolbox.tools.data.CountryOuterClass.internal_static_com_joasasso_minitoolbox_tools_data_CountryList_descriptor;
+        return CountryOuterClass.internal_static_com_joasasso_minitoolbox_tools_data_CountryList_descriptor;
       }
 
       @java.lang.Override
-      public com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList getDefaultInstanceForType() {
-        return com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList.getDefaultInstance();
+      public CountryOuterClass.CountryList getDefaultInstanceForType() {
+        return CountryOuterClass.CountryList.getDefaultInstance();
       }
 
       @java.lang.Override
-      public com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList build() {
-        com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList result = buildPartial();
+      public CountryOuterClass.CountryList build() {
+        CountryOuterClass.CountryList result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -1894,15 +1894,15 @@ public final class CountryOuterClass {
       }
 
       @java.lang.Override
-      public com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList buildPartial() {
-        com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList result = new com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList(this);
+      public CountryOuterClass.CountryList buildPartial() {
+        CountryOuterClass.CountryList result = new CountryOuterClass.CountryList(this);
         buildPartialRepeatedFields(result);
         if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
       }
 
-      private void buildPartialRepeatedFields(com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList result) {
+      private void buildPartialRepeatedFields(CountryOuterClass.CountryList result) {
         if (countriesBuilder_ == null) {
           if (((bitField0_ & 0x00000001) != 0)) {
             countries_ = java.util.Collections.unmodifiableList(countries_);
@@ -1914,22 +1914,22 @@ public final class CountryOuterClass {
         }
       }
 
-      private void buildPartial0(com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList result) {
+      private void buildPartial0(CountryOuterClass.CountryList result) {
         int from_bitField0_ = bitField0_;
       }
 
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList) {
-          return mergeFrom((com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList)other);
+        if (other instanceof CountryOuterClass.CountryList) {
+          return mergeFrom((CountryOuterClass.CountryList)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList other) {
-        if (other == com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList.getDefaultInstance()) return this;
+      public Builder mergeFrom(CountryOuterClass.CountryList other) {
+        if (other == CountryOuterClass.CountryList.getDefaultInstance()) return this;
         if (countriesBuilder_ == null) {
           if (!other.countries_.isEmpty()) {
             if (countries_.isEmpty()) {
@@ -1983,9 +1983,9 @@ public final class CountryOuterClass {
                 done = true;
                 break;
               case 10: {
-                com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country m =
+                CountryOuterClass.Country m =
                     input.readMessage(
-                        com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country.parser(),
+                        CountryOuterClass.Country.parser(),
                         extensionRegistry);
                 if (countriesBuilder_ == null) {
                   ensureCountriesIsMutable();
@@ -2012,22 +2012,22 @@ public final class CountryOuterClass {
       }
       private int bitField0_;
 
-      private java.util.List<com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country> countries_ =
+      private java.util.List<CountryOuterClass.Country> countries_ =
         java.util.Collections.emptyList();
       private void ensureCountriesIsMutable() {
         if (!((bitField0_ & 0x00000001) != 0)) {
-          countries_ = new java.util.ArrayList<com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country>(countries_);
+          countries_ = new java.util.ArrayList<CountryOuterClass.Country>(countries_);
           bitField0_ |= 0x00000001;
          }
       }
 
       private com.google.protobuf.RepeatedFieldBuilder<
-          com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country, com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country.Builder, com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryOrBuilder> countriesBuilder_;
+          CountryOuterClass.Country, CountryOuterClass.Country.Builder, CountryOuterClass.CountryOrBuilder> countriesBuilder_;
 
       /**
        * <code>repeated .com.joasasso.minitoolbox.tools.data.Country countries = 1;</code>
        */
-      public java.util.List<com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country> getCountriesList() {
+      public java.util.List<CountryOuterClass.Country> getCountriesList() {
         if (countriesBuilder_ == null) {
           return java.util.Collections.unmodifiableList(countries_);
         } else {
@@ -2047,7 +2047,7 @@ public final class CountryOuterClass {
       /**
        * <code>repeated .com.joasasso.minitoolbox.tools.data.Country countries = 1;</code>
        */
-      public com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country getCountries(int index) {
+      public CountryOuterClass.Country getCountries(int index) {
         if (countriesBuilder_ == null) {
           return countries_.get(index);
         } else {
@@ -2058,7 +2058,7 @@ public final class CountryOuterClass {
        * <code>repeated .com.joasasso.minitoolbox.tools.data.Country countries = 1;</code>
        */
       public Builder setCountries(
-          int index, com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country value) {
+          int index, CountryOuterClass.Country value) {
         if (countriesBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -2075,7 +2075,7 @@ public final class CountryOuterClass {
        * <code>repeated .com.joasasso.minitoolbox.tools.data.Country countries = 1;</code>
        */
       public Builder setCountries(
-          int index, com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country.Builder builderForValue) {
+          int index, CountryOuterClass.Country.Builder builderForValue) {
         if (countriesBuilder_ == null) {
           ensureCountriesIsMutable();
           countries_.set(index, builderForValue.build());
@@ -2088,7 +2088,7 @@ public final class CountryOuterClass {
       /**
        * <code>repeated .com.joasasso.minitoolbox.tools.data.Country countries = 1;</code>
        */
-      public Builder addCountries(com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country value) {
+      public Builder addCountries(CountryOuterClass.Country value) {
         if (countriesBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -2105,7 +2105,7 @@ public final class CountryOuterClass {
        * <code>repeated .com.joasasso.minitoolbox.tools.data.Country countries = 1;</code>
        */
       public Builder addCountries(
-          int index, com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country value) {
+          int index, CountryOuterClass.Country value) {
         if (countriesBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -2122,7 +2122,7 @@ public final class CountryOuterClass {
        * <code>repeated .com.joasasso.minitoolbox.tools.data.Country countries = 1;</code>
        */
       public Builder addCountries(
-          com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country.Builder builderForValue) {
+          CountryOuterClass.Country.Builder builderForValue) {
         if (countriesBuilder_ == null) {
           ensureCountriesIsMutable();
           countries_.add(builderForValue.build());
@@ -2136,7 +2136,7 @@ public final class CountryOuterClass {
        * <code>repeated .com.joasasso.minitoolbox.tools.data.Country countries = 1;</code>
        */
       public Builder addCountries(
-          int index, com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country.Builder builderForValue) {
+          int index, CountryOuterClass.Country.Builder builderForValue) {
         if (countriesBuilder_ == null) {
           ensureCountriesIsMutable();
           countries_.add(index, builderForValue.build());
@@ -2150,7 +2150,7 @@ public final class CountryOuterClass {
        * <code>repeated .com.joasasso.minitoolbox.tools.data.Country countries = 1;</code>
        */
       public Builder addAllCountries(
-          java.lang.Iterable<? extends com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country> values) {
+          java.lang.Iterable<? extends CountryOuterClass.Country> values) {
         if (countriesBuilder_ == null) {
           ensureCountriesIsMutable();
           com.google.protobuf.AbstractMessageLite.Builder.addAll(
@@ -2190,14 +2190,14 @@ public final class CountryOuterClass {
       /**
        * <code>repeated .com.joasasso.minitoolbox.tools.data.Country countries = 1;</code>
        */
-      public com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country.Builder getCountriesBuilder(
+      public CountryOuterClass.Country.Builder getCountriesBuilder(
           int index) {
         return internalGetCountriesFieldBuilder().getBuilder(index);
       }
       /**
        * <code>repeated .com.joasasso.minitoolbox.tools.data.Country countries = 1;</code>
        */
-      public com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryOrBuilder getCountriesOrBuilder(
+      public CountryOuterClass.CountryOrBuilder getCountriesOrBuilder(
           int index) {
         if (countriesBuilder_ == null) {
           return countries_.get(index);  } else {
@@ -2207,7 +2207,7 @@ public final class CountryOuterClass {
       /**
        * <code>repeated .com.joasasso.minitoolbox.tools.data.Country countries = 1;</code>
        */
-      public java.util.List<? extends com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryOrBuilder> 
+      public java.util.List<? extends CountryOuterClass.CountryOrBuilder>
            getCountriesOrBuilderList() {
         if (countriesBuilder_ != null) {
           return countriesBuilder_.getMessageOrBuilderList();
@@ -2218,31 +2218,31 @@ public final class CountryOuterClass {
       /**
        * <code>repeated .com.joasasso.minitoolbox.tools.data.Country countries = 1;</code>
        */
-      public com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country.Builder addCountriesBuilder() {
+      public CountryOuterClass.Country.Builder addCountriesBuilder() {
         return internalGetCountriesFieldBuilder().addBuilder(
-            com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country.getDefaultInstance());
+            CountryOuterClass.Country.getDefaultInstance());
       }
       /**
        * <code>repeated .com.joasasso.minitoolbox.tools.data.Country countries = 1;</code>
        */
-      public com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country.Builder addCountriesBuilder(
+      public CountryOuterClass.Country.Builder addCountriesBuilder(
           int index) {
         return internalGetCountriesFieldBuilder().addBuilder(
-            index, com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country.getDefaultInstance());
+            index, CountryOuterClass.Country.getDefaultInstance());
       }
       /**
        * <code>repeated .com.joasasso.minitoolbox.tools.data.Country countries = 1;</code>
        */
-      public java.util.List<com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country.Builder> 
+      public java.util.List<CountryOuterClass.Country.Builder>
            getCountriesBuilderList() {
         return internalGetCountriesFieldBuilder().getBuilderList();
       }
       private com.google.protobuf.RepeatedFieldBuilder<
-          com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country, com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country.Builder, com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryOrBuilder> 
+          CountryOuterClass.Country, CountryOuterClass.Country.Builder, CountryOuterClass.CountryOrBuilder>
           internalGetCountriesFieldBuilder() {
         if (countriesBuilder_ == null) {
           countriesBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country, com.joasasso.minitoolbox.tools.data.CountryOuterClass.Country.Builder, com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryOrBuilder>(
+              CountryOuterClass.Country, CountryOuterClass.Country.Builder, CountryOuterClass.CountryOrBuilder>(
                   countries_,
                   ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
@@ -2256,12 +2256,12 @@ public final class CountryOuterClass {
     }
 
     // @@protoc_insertion_point(class_scope:com.joasasso.minitoolbox.tools.data.CountryList)
-    private static final com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList DEFAULT_INSTANCE;
+    private static final CountryOuterClass.CountryList DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList();
+      DEFAULT_INSTANCE = new CountryOuterClass.CountryList();
     }
 
-    public static com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList getDefaultInstance() {
+    public static CountryOuterClass.CountryList getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
@@ -2297,7 +2297,7 @@ public final class CountryOuterClass {
     }
 
     @java.lang.Override
-    public com.joasasso.minitoolbox.tools.data.CountryOuterClass.CountryList getDefaultInstanceForType() {
+    public CountryOuterClass.CountryList getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
