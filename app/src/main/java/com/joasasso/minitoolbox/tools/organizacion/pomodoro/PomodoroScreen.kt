@@ -44,8 +44,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.joasasso.minitoolbox.R
-import com.joasasso.minitoolbox.tools.data.PomodoroSettingsRepository
-import com.joasasso.minitoolbox.tools.data.PomodoroStateRepository
+import com.joasasso.minitoolbox.data.PomodoroSettingsRepository
+import com.joasasso.minitoolbox.data.PomodoroStateRepository
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

@@ -39,9 +39,9 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.joasasso.minitoolbox.R
-import com.joasasso.minitoolbox.tools.data.categoriasDisponibles
-import com.joasasso.minitoolbox.tools.data.idiomasDisponibles
-import com.joasasso.minitoolbox.tools.data.todasLasFrases
+import com.joasasso.minitoolbox.data.categoriasDisponibles
+import com.joasasso.minitoolbox.data.idiomasDisponibles
+import com.joasasso.minitoolbox.data.todasLasFrases
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import java.util.Locale
 

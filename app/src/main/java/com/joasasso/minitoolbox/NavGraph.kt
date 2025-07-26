@@ -49,6 +49,7 @@ import com.joasasso.minitoolbox.tools.info.RemainingTimeScreen
 import com.joasasso.minitoolbox.tools.info.TextBinaryConverterScreen
 import com.joasasso.minitoolbox.tools.organizacion.SugeridorActividadScreen
 import com.joasasso.minitoolbox.tools.organizacion.pomodoro.PomodoroScreen
+import com.joasasso.minitoolbox.tools.organizacion.recordatorios.EventosImportantesScreen
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.RachaScreen
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.ToDoListScreen
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AguaReminderScreen
@@ -237,6 +238,9 @@ fun MiniToolboxNavGraph(navController: NavHostController) {
         }
         composable(Screen.ToDo.route){
             ToDoListScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.Eventos.route){
+            EventosImportantesScreen(onBack = { navController.popBackStack() })
         }
 
     }

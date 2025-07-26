@@ -6,11 +6,11 @@ import androidx.glance.action.ActionParameters
 import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.state.PreferencesGlanceStateDefinition
-import com.joasasso.minitoolbox.tools.data.flujoAguaHoy
-import com.joasasso.minitoolbox.tools.data.flujoFrecuenciaMinutos
-import com.joasasso.minitoolbox.tools.data.flujoObjetivo
-import com.joasasso.minitoolbox.tools.data.flujoPorVaso
-import com.joasasso.minitoolbox.tools.data.guardarAguaHoy
+import com.joasasso.minitoolbox.data.flujoAguaHoy
+import com.joasasso.minitoolbox.data.flujoFrecuenciaMinutos
+import com.joasasso.minitoolbox.data.flujoObjetivo
+import com.joasasso.minitoolbox.data.flujoPorVaso
+import com.joasasso.minitoolbox.data.guardarAguaHoy
 import kotlinx.coroutines.flow.first
 
 class AgregarAguaCallback : ActionCallback {
