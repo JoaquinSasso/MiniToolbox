@@ -45,7 +45,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.data.ToDoDataStore
@@ -206,8 +205,6 @@ fun ToDoListScreen(onBack: () -> Unit) {
                                 Text(
                                     item.text,
                                     modifier = Modifier.weight(1f),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
                                     style = MaterialTheme.typography.bodyLarge
                                 )
                                 if (selectedTab == 1) {
