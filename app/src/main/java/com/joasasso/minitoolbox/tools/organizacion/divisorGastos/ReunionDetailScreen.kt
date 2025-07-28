@@ -1,10 +1,11 @@
-package com.joasasso.minitoolbox.tools.herramientas.calculadoras.divisorGastos
+package com.joasasso.minitoolbox.tools.organizacion.divisorGastos
 
+import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,11 +14,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -26,10 +25,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -43,7 +40,6 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.data.Grupo
@@ -79,7 +75,7 @@ fun DetallesReunionScreen(
         val reuniones = ReunionesRepository.flujoReuniones(context).firstOrNull().orEmpty()
         reuniones.find { it.id == reunionId.trim() }?.let {
             reunion = it
-            textoCompartir = generarTextoCompartible(it)
+            textoCompartir = generarTextoCompartible(context, it, context.resources)
         }
     }
 
@@ -107,7 +103,12 @@ fun DetallesReunionScreen(
         }
     }
 
-    Scaffold(topBar = { TopBarReusable(stringResource(R.string.meeting_details_screen) ?: "Reunión", onBack, { showInfo = true }) })
+    Scaffold(topBar = {
+        TopBarReusable(
+            stringResource(R.string.meeting_details_screen),
+            onBack,
+            { showInfo = true })
+    })
     { padding ->
         LazyColumn(
             modifier = Modifier
@@ -119,14 +120,22 @@ fun DetallesReunionScreen(
             item {
                 reunion?.let { r ->
                     val total = r.gastos.sumOf { it.aportesIndividuales.values.sum() }
-                    Text("Fecha: ${formatearFecha(r.fecha)}")
-                    Text("Total gastado: $${"%.2f".format(total)}", style = MaterialTheme.typography.titleMedium)
+                    Text("${stringResource(R.string.date_label)}: ${formatearFecha(r.fecha)}")
+                    Text(
+                        "${stringResource(R.string.total_amount_label)}: $${"%.2f".format(total)}",
+                        style = MaterialTheme.typography.titleMedium
+                    )
                     Spacer(Modifier.height(8.dp))
                     HorizontalDivider()
                 }
             }
 
-            item { Text("Gastos", style = MaterialTheme.typography.titleSmall) }
+            item {
+                Text(
+                    stringResource(R.string.expenses_section),
+                    style = MaterialTheme.typography.titleSmall
+                )
+            }
 
             items(reunion?.gastos ?: emptyList()) { gasto ->
                 Card(
@@ -141,23 +150,28 @@ fun DetallesReunionScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(gasto.descripcion)
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ){
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             Text("$${"%.2f".format(gasto.aportesIndividuales.values.sum())}")
                             IconButton(onClick = { onEditarGasto(reunionId, gasto.id) }) {
-                                Icon(Icons.Default.Edit, contentDescription = "Editar gasto")
+                                Icon(
+                                    Icons.Default.Edit,
+                                    contentDescription = stringResource(R.string.edit_expense_content_desc)
+                                )
                             }
                             IconButton(onClick = {
                                 reunion?.let {
-                                    val nueva = it.copy(gastos = it.gastos.filterNot { g -> g.id == gasto.id })
+                                    val nueva =
+                                        it.copy(gastos = it.gastos.filterNot { g -> g.id == gasto.id })
                                     scope.launch {
                                         ReunionesRepository.actualizarReunion(context, nueva)
                                         reunion = nueva
                                     }
                                 }
                             }) {
-                                Icon(Icons.Default.Delete, contentDescription = "Eliminar gasto")
+                                Icon(
+                                    Icons.Default.Delete,
+                                    contentDescription = stringResource(R.string.delete_expense_content_desc)
+                                )
                             }
                         }
                     }
@@ -172,7 +186,7 @@ fun DetallesReunionScreen(
                     colors = CardDefaults.cardColors(MaterialTheme.colorScheme.secondaryContainer)
                 ) {
                     Box(Modifier.padding(16.dp), contentAlignment = Alignment.Center) {
-                        Text("+ Agregar gasto")
+                        Text(stringResource(R.string.add_expense_button))
                     }
                 }
             }
@@ -180,12 +194,15 @@ fun DetallesReunionScreen(
             item {
                 HorizontalDivider()
                 Spacer(Modifier.height(8.dp))
-                Text("Integrantes", style = MaterialTheme.typography.titleSmall)
+                Text(
+                    stringResource(R.string.members_section),
+                    style = MaterialTheme.typography.titleSmall
+                )
             }
 
             items(reunion?.integrantes ?: emptyList()) { grupo ->
-                val totalPagado = reunion?.gastos?.sumOf { it.aportesIndividuales[grupo.nombre] ?: 0.0 } ?: 0.0
-
+                val totalPagado =
+                    reunion?.gastos?.sumOf { it.aportesIndividuales[grupo.nombre] ?: 0.0 } ?: 0.0
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surfaceVariant)
@@ -197,17 +214,24 @@ fun DetallesReunionScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("${grupo.nombre} (${grupo.cantidad} personas)")
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ){
+                        Text(
+                            stringResource(
+                                R.string.name_label,
+                                grupo.nombre,
+                                grupo.cantidad
+                            )
+                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             Text("$${"%.2f".format(totalPagado)}")
                             IconButton(onClick = {
                                 grupoAEditar = grupo
                                 nombreEditado = grupo.nombre
                                 cantidadEditada = grupo.cantidad.toString()
                             }) {
-                                Icon(Icons.Default.Edit, contentDescription = "Editar grupo")
+                                Icon(
+                                    Icons.Default.Edit,
+                                    contentDescription = stringResource(R.string.edit_member_content_desc)
+                                )
                             }
                             IconButton(onClick = {
                                 reunion?.let {
@@ -226,7 +250,10 @@ fun DetallesReunionScreen(
                                     }
                                 }
                             }) {
-                                Icon(Icons.Default.Delete, contentDescription = "Eliminar grupo")
+                                Icon(
+                                    Icons.Default.Delete,
+                                    contentDescription = stringResource(R.string.delete_member_content_desc)
+                                )
                             }
                         }
                     }
@@ -245,7 +272,7 @@ fun DetallesReunionScreen(
                     colors = CardDefaults.cardColors(MaterialTheme.colorScheme.secondaryContainer)
                 ) {
                     Box(Modifier.padding(16.dp), contentAlignment = Alignment.Center) {
-                        Text("+ Agregar integrante")
+                        Text(stringResource(R.string.add_member_button))
                     }
                 }
             }
@@ -253,10 +280,13 @@ fun DetallesReunionScreen(
             item {
                 HorizontalDivider()
                 Spacer(Modifier.height(8.dp))
-                Text("Deudas", style = MaterialTheme.typography.titleSmall)
+                Text(
+                    stringResource(R.string.debts_section),
+                    style = MaterialTheme.typography.titleSmall
+                )
             }
 
-            items(calcularDeudas(reunion ?: return@LazyColumn)) { deuda ->
+            items(calcularDeudas(reunion ?: return@LazyColumn, context)) { deuda ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surfaceVariant)
@@ -264,6 +294,7 @@ fun DetallesReunionScreen(
                     Text(deuda, modifier = Modifier.padding(16.dp))
                 }
             }
+
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -275,139 +306,75 @@ fun DetallesReunionScreen(
                             scope.launch {
                                 val sendIntent = Intent().apply {
                                     action = Intent.ACTION_SEND
-                                    putExtra(Intent.EXTRA_TEXT, textoCompartir)
+                                    putExtra(
+                                        Intent.EXTRA_TEXT,
+                                        reunion?.let { generarTextoCompartible(context, reunion!!, context.resources) }
+                                    )
                                     type = "text/plain"
                                 }
                                 val shareIntent = Intent.createChooser(
                                     sendIntent,
-                                    "Compartir resumen"
+                                    context.getString(R.string.share_summary_title)
                                 )
                                 context.startActivity(shareIntent)
                             }
                         },
                         colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondaryContainer)
                     ) {
-                        Text("Compartir")
+                        Text(stringResource(R.string.share))
                     }
                 }
             }
         }
     }
-
-    if (grupoAEditar != null) {
-        AlertDialog(
-            onDismissRequest = { grupoAEditar = null },
-            title = { Text(if (grupoAEditar!!.nombre.isBlank()) "Nuevo integrante" else "Editar integrante") },
-            text = {
-                Column {
-                    OutlinedTextField(
-                        value = nombreEditado,
-                        onValueChange = { nombreEditado = it },
-                        label = { Text("Nombre") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    OutlinedTextField(
-                        value = cantidadEditada,
-                        onValueChange = { cantidadEditada = it },
-                        label = { Text("Cantidad de personas") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    val nombre = nombreEditado.trim()
-                    val cantidad = cantidadEditada.toIntOrNull()?.coerceAtLeast(1) ?: 1
-                    if (nombre.isNotBlank()) {
-                        val nuevo = Grupo(nombre, cantidad)
-                        actualizarGrupo(grupoAEditar!!, nuevo)
-                    } else grupoAEditar = null
-                }) {
-                    Text("Guardar")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { grupoAEditar = null
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)}) {
-                    Text("Cancelar")
-                }
-            }
-        )
-    }
-    if (showInfo) {
-        AlertDialog(
-            onDismissRequest = { showInfo = false },
-            title = { Text("Acerca de la reunión") },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Aquí puedes ver el resumen de la reunión, con fecha, total gastado y lista de gastos.")
-                    Text("• Puedes editar o eliminar gastos, o agregar nuevos.")
-                    Text("• También puedes modificar los grupos: cambiar nombre, cantidad de personas o eliminar alguno.")
-                    Text("• En la sección de deudas se calcula quién debe pagar a quién, considerando cuánto aportó y cuánto consumió cada grupo.")
-                    Text("• El cálculo es automático y proporcional a la cantidad de personas que consumieron en cada grupo.")
-                    Text("• Puedes usar el botón de compartir para enviar un resumen por mensaje, email o cualquier app compatible. Ideal para dividir cuentas con amigos fácilmente.")
-
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showInfo = false
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress) }) {
-                    Text("Cerrar")
-                }
-            }
-        )
-    }
 }
 
-
-
-
-
-fun formatearFecha(millis: Long): String {
+    fun formatearFecha(millis: Long): String {
     val formato = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
     return formato.format(Date(millis))
 }
 
-fun generarTextoCompartible(reunion: Reunion): String {
-    val formatoMoneda = NumberFormat.getCurrencyInstance(Locale("es", "AR")).apply {
+fun generarTextoCompartible(
+    context: Context,
+    reunion: Reunion,
+    resources: Resources
+): String {
+    val locale = context.resources.configuration.locales[0] ?: Locale.getDefault()
+    val formatoMoneda = NumberFormat.getCurrencyInstance(locale).apply {
         maximumFractionDigits = 2
         minimumFractionDigits = 2
     }
-    val sb = StringBuilder()
-    sb.appendLine("📋 Reunión: ${reunion.nombre}")
-    sb.appendLine("📅 Fecha: ${formatearFecha(reunion.fecha)}")
-    sb.appendLine("💰 Total: ${formatoMoneda.format(reunion.gastos.sumOf { it.aportesIndividuales.values.sum() })}")
-    sb.appendLine()
 
-    sb.appendLine("🧾 Gastos:")
+    val sb = StringBuilder()
+    sb.appendLine("📋 ${resources.getString(R.string.share_meeting_title)}: ${reunion.nombre}")
+    sb.appendLine("📅 ${resources.getString(R.string.share_date)}: ${formatearFecha(reunion.fecha)}")
+    sb.appendLine("💰 ${resources.getString(R.string.share_total)}: ${formatoMoneda.format(reunion.gastos.sumOf { it.aportesIndividuales.values.sum() })}")
+    sb.appendLine()
+    sb.appendLine("🧾 ${resources.getString(R.string.share_expenses)}:")
     reunion.gastos.forEach {
         val monto = it.aportesIndividuales.values.sum()
         sb.appendLine("- ${it.descripcion}: ${formatoMoneda.format(monto)}")
     }
 
     sb.appendLine()
-    sb.appendLine("👥 Integrantes:")
+    sb.appendLine("👥 ${resources.getString(R.string.share_members)}:")
     reunion.integrantes.forEach { grupo ->
         val pagado = reunion.gastos.sumOf { it.aportesIndividuales[grupo.nombre] ?: 0.0 }
-        sb.appendLine("- ${grupo.nombre} (${grupo.cantidad} personas) pagó ${formatoMoneda.format(pagado)}")
+        sb.appendLine("- ${grupo.nombre} (${resources.getString(R.string.expense_group_size)} ${grupo.cantidad}) ${resources.getString(R.string.share_paid)} ${formatoMoneda.format(pagado)}")
     }
 
     sb.appendLine()
-    sb.appendLine("💸 Reparto:")
-    calcularDeudas(reunion).forEach { sb.appendLine("- $it") }
+    sb.appendLine("💸 ${resources.getString(R.string.share_debts)}:")
+    calcularDeudas( reunion, context).forEach { sb.appendLine("- $it") }
 
     return sb.toString()
 }
 
-fun calcularDeudas(reunion: Reunion): List<String> {
-    // Inicializar deudas por grupo
+
+
+fun calcularDeudas(reunion: Reunion, context: Context, locale: Locale = Locale.getDefault()): List<String> {
     val deudaPorGrupo = reunion.integrantes.associate { it.nombre to 0.0 }.toMutableMap()
 
-    // Calcular cuánto debe cada grupo según los gastos que consumió
     for (gasto in reunion.gastos) {
         val totalPersonas = gasto.consumidoPor.values.sum()
         if (totalPersonas == 0) continue
@@ -419,26 +386,21 @@ fun calcularDeudas(reunion: Reunion): List<String> {
         }
     }
 
-    // Calcular cuánto pagó cada grupo
     val pagadoPorGrupo = reunion.integrantes.associate { grupo ->
         grupo.nombre to reunion.gastos.sumOf { it.aportesIndividuales[grupo.nombre] ?: 0.0 }
     }
 
-    // Calcular balances
     val balance = reunion.integrantes.associate { grupo ->
         val pagado = pagadoPorGrupo[grupo.nombre] ?: 0.0
         val debe = deudaPorGrupo[grupo.nombre] ?: 0.0
         grupo.nombre to (pagado - debe)
     }
 
-    // Separar acreedores y deudores
     val deudores = balance.filterValues { it < -0.01 }.toMutableMap()
     val acreedores = balance.filterValues { it > 0.01 }.toMutableMap()
 
     val resultados = mutableListOf<String>()
-
-    // Formateador de moneda con puntos de miles y coma decimal
-    val formatoMoneda = NumberFormat.getCurrencyInstance(Locale("es", "AR")).apply {
+    val formatoMoneda = NumberFormat.getCurrencyInstance(locale).apply {
         maximumFractionDigits = 2
         minimumFractionDigits = 2
     }
@@ -454,7 +416,9 @@ fun calcularDeudas(reunion: Reunion): List<String> {
             if (credito <= 0.01) continue
 
             val monto = minOf(pendiente, credito)
-            pagos.add("$deudor debe pagar ${formatoMoneda.format(monto)} a $acreedor")
+            pagos.add(
+                context.getString(R.string.debt_line, deudor, formatoMoneda.format(monto), acreedor)
+            )
 
             pendiente -= monto
             acreedores[acreedor] = credito - monto
@@ -467,3 +431,4 @@ fun calcularDeudas(reunion: Reunion): List<String> {
 
     return resultados
 }
+

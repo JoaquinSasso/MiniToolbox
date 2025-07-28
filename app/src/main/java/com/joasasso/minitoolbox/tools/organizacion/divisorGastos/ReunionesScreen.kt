@@ -1,4 +1,4 @@
-package com.joasasso.minitoolbox.tools.herramientas.calculadoras.divisorGastos
+package com.joasasso.minitoolbox.tools.organizacion.divisorGastos
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -76,7 +76,10 @@ fun ReunionesScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onCrearReunion) {
-                Icon(Icons.Default.Add, contentDescription = "Nueva reunión")
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = stringResource(R.string.expense_new_meeting_content_desc)
+                )
             }
         }
     ) { padding ->
@@ -87,7 +90,7 @@ fun ReunionesScreen(
         ) {
             if (reuniones.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Aún no hay reuniones guardadas.")
+                    Text(stringResource(R.string.expense_no_meetings))
                 }
             } else {
                 LazyColumn(
@@ -99,10 +102,14 @@ fun ReunionesScreen(
                     items(reuniones) { reunion ->
                         ReunionItem(
                             reunion = reunion,
-                            onClick = { onReunionClick(reunion)
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)},
-                            onDelete = { reunionAEliminar = reunion
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)}
+                            onClick = {
+                                onReunionClick(reunion)
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            },
+                            onDelete = {
+                                reunionAEliminar = reunion
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            }
                         )
                     }
                 }
@@ -113,20 +120,22 @@ fun ReunionesScreen(
     if (showInfo) {
         AlertDialog(
             onDismissRequest = { showInfo = false },
-            title = { Text("Acerca del divisor de gastos") },
+            title = { Text(stringResource(R.string.expense_help_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Aquí se muestran todas las reuniones que hayas creado, ordenadas por fecha.")
-                    Text("• Puedes tocar una reunión para ver sus detalles, editar gastos o modificar grupos.")
-                    Text("• Puedes eliminar reuniones tocando el ícono de la papelera.")
-                    Text("• Desde los detalles de una reunión puedes compartir el resumen tocando el ícono correspondiente.")
-                    Text("• Usa el botón '+' para crear una nueva reunión.")
+                    Text(stringResource(R.string.expense_help_line1))
+                    Text(stringResource(R.string.expense_help_line2))
+                    Text(stringResource(R.string.expense_help_line3))
+                    Text(stringResource(R.string.expense_help_line4))
+                    Text(stringResource(R.string.expense_help_line5))
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showInfo = false
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)}) {
-                    Text("Cerrar")
+                TextButton(onClick = {
+                    showInfo = false
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                }) {
+                    Text(stringResource(R.string.close))
                 }
             }
         )
@@ -135,8 +144,10 @@ fun ReunionesScreen(
     if (reunionAEliminar != null) {
         AlertDialog(
             onDismissRequest = { reunionAEliminar = null },
-            title = { Text("¿Eliminar reunión?") },
-            text = { Text("¿Estás seguro de que deseas eliminar la reunión \"${reunionAEliminar!!.nombre}\"? Esta acción no se puede deshacer.") },
+            title = { Text(stringResource(R.string.expense_delete_title)) },
+            text = {
+                Text(stringResource(R.string.expense_delete_message, reunionAEliminar!!.nombre))
+            },
             confirmButton = {
                 TextButton(onClick = {
                     scope.launch {
@@ -145,13 +156,15 @@ fun ReunionesScreen(
                         reunionAEliminar = null
                     }
                 }) {
-                    Text("Eliminar")
+                    Text(stringResource(R.string.delete))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { reunionAEliminar = null
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)}) {
-                    Text("Cancelar")
+                TextButton(onClick = {
+                    reunionAEliminar = null
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                }) {
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -185,14 +198,15 @@ fun ReunionItem(reunion: Reunion, onClick: () -> Unit, onDelete: () -> Unit) {
                 ) {
                     Text(reunion.nombre, style = MaterialTheme.typography.titleLarge)
                     Spacer(Modifier.height(4.dp))
-                    Text("Fecha: $fechaTexto", style = MaterialTheme.typography.bodyMedium)
-                    Text("Integrantes: ${integrantes.joinToString()}", style = MaterialTheme.typography.bodyMedium)
+                    Text("${stringResource(R.string.expense_date)} $fechaTexto", style = MaterialTheme.typography.bodyMedium)
+                    Text("${stringResource(R.string.expense_members)} ${integrantes.joinToString()}", style = MaterialTheme.typography.bodyMedium)
                 }
 
                 IconButton(onClick = onDelete) {
-                    Icon(Icons.Default.Delete, contentDescription = "Eliminar reunión")
+                    Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete))
                 }
             }
         }
     }
 }
+

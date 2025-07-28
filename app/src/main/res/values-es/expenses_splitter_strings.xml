@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="expense_new_meeting_content_desc">Nueva reunión</string>
+    <string name="expense_no_meetings">Aún no hay reuniones guardadas.</string>
+    <string name="expense_help_title">Acerca del divisor de gastos</string>
+    <string name="expense_help_line1">• Aquí se muestran todas las reuniones que hayas creado, ordenadas por fecha.</string>
+    <string name="expense_help_line2">• Puedes tocar una reunión para ver sus detalles, editar gastos o modificar grupos.</string>
+    <string name="expense_help_line3">• Puedes eliminar reuniones tocando el ícono de la papelera.</string>
+    <string name="expense_help_line4">• Desde los detalles de una reunión puedes compartir el resumen tocando el ícono correspondiente.</string>
+    <string name="expense_help_line5">• Usa el botón \'+\' para crear una nueva reunión.</string>
+    <string name="expense_delete_title">¿Eliminar reunión?</string>
+    <string name="expense_delete_message">¿Estás seguro de que deseas eliminar la reunión "%1$s"? Esta acción no se puede deshacer.</string>
+    <string name="expense_date">Fecha:</string>
+    <string name="expense_members">Integrantes:</string>
+    <string name="expense_delete_content_desc">Eliminar reunión</string>
+
+    <string name="create_meeting_button">Guardar reunión</string>
+    <string name="create_meeting_name_label">Nombre de la reunión</string>
+    <string name="create_meeting_group_name">Nombre del grupo</string>
+    <string name="expense_group_size">Tamaño</string>
+    <string name="create_meeting_add_member">Agregar integrante</string>
+    <string name="create_meeting_remove_member">Eliminar integrante</string>
+    <string name="create_meeting_snackbar_error">Completa el nombre y agrega al menos una persona / grupo</string>
+    <string name="create_meeting_help_title">¿Cómo crear una reunión?</string>
+    <string name="create_meeting_help_line1">• Asigna un nombre para identificar la reunión y agrega los grupos que participarán (personas, familias, amigos, etc.).</string>
+    <string name="create_meeting_help_line2">• Cada grupo puede tener un nombre y una cantidad de personas asociadas.</string>
+    <string name="create_meeting_help_line3">• El tamaño del grupo servirá luego para repartir los gastos proporcionalmente.</string>
+    <string name="create_meeting_help_line4">• Si quieres agregar a una persona particular, deja el tamaño del grupo en 1</string>
+    <string name="create_meeting_help_line5">• Podrás agregar y editar gastos una vez creada la reunión.</string>
+
+
+    <string name="expense_description_label">Descripción del gasto</string>
+    <string name="total_amount_label">Total: $%1$s</string>
+    <string name="expense_who_paid_label">¿Quién pagó y cuánto?</string>
+    <string name="expense_who_consumed_label">¿Quiénes consumieron? (personas por grupo)</string>
+    <string name="help_title_expense">¿Cómo registrar un gasto?</string>
+    <string name="help_expense_1">• Escribe una breve descripción del gasto (por ejemplo: \'Pizza\', \'Entrada\', \'Coca-Cola\').</string>
+    <string name="help_expense_2">• Indica cuánto aportó cada grupo al gasto.</string>
+    <string name="help_expense_3">• Luego, selecciona cuántas personas de cada grupo participaron como consumidores.</string>
+    <string name="help_expense_4">• El total del gasto se calcula automáticamente a partir de los aportes.</string>
+    <string name="help_expense_5">• El reparto se hará según el consumo proporcional de cada grupo.</string>
+
+
+
+    <string name="share_summary_title">Compartir resumen</string>
+    <string name="date_label">Fecha: %1$s</string>
+    <string name="total_spent_label">Total gastado: $%1$.2f</string>
+    <string name="expenses_section">Gastos</string>
+    <string name="members_section">Integrantes</string>
+    <string name="edit_member_content_desc">Editar grupo</string>
+    <string name="delete_member_content_desc">Eliminar grupo</string>
+    <string name="edit_expense_content_desc">Editar gasto</string>
+    <string name="delete_expense_content_desc">Eliminar gasto</string>
+    <string name="add_member_button">+ Agregar integrante</string>
+    <string name="add_expense_button">+ Agregar gasto</string>
+    <string name="debts_section">Deudas</string>
+    <string name="dialog_edit_member_title">Editar integrante</string>
+    <string name="dialog_new_member_title">Nuevo integrante</string>
+    <string name="name_label">Nombre</string>
+    <string name="people_count_label">Cantidad de personas</string>
+    <string name="dialog_meeting_info_title">Acerca de la reunión</string>
+    <string name="info_meeting_line1">• Aquí puedes ver el resumen de la reunión, con fecha, total gastado y lista de gastos.</string>
+    <string name="info_meeting_line2">• Puedes editar o eliminar gastos, o agregar nuevos.</string>
+    <string name="info_meeting_line3">• También puedes modificar los grupos: cambiar nombre, cantidad de personas o eliminar alguno.</string>
+    <string name="info_meeting_line4">• En la sección de deudas se calcula quién debe pagar a quién, considerando cuánto aportó y cuánto consumió cada grupo.</string>
+    <string name="info_meeting_line5">• El cálculo es automático y proporcional a la cantidad de personas que consumieron en cada grupo.</string>
+    <string name="info_meeting_line6">• Puedes usar el botón de compartir para enviar un resumen por mensaje, email o cualquier app compatible. Ideal para dividir cuentas con amigos fácilmente.</string>
+
+
+    <string name="share_meeting_title">Reunión:</string>
+    <string name="share_date">Fecha:</string>
+    <string name="share_total">Total:</string>
+    <string name="share_expenses">Gastos:</string>
+    <string name="share_members">Integrantes:</string>
+    <string name="people_label">personas</string>
+    <string name="share_paid">pagó</string>
+    <string name="share_debts">Reparto:</string>
+    <string name="debt_line">%1$s debe pagar %2$s a %3$s</string>
+</resources>
