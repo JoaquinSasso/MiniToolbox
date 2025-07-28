@@ -38,4 +38,5 @@
     <string name="tool_compass">Compass</string>
     <string name="tool_todo_list">ToDo List</string>
     <string name="tool_event_tracker">Important Events</string>
+    <string name="tool_compound_interest">Compound interest</string>
 </resources>

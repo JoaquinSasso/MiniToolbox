@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="interes_inicial">Inversión inicial</string>
+    <string name="interes_aporte">Aporte mensual</string>
+    <string name="interes_anios">Cantidad de años</string>
+    <string name="interes_tasa">Tasa de interés (%)</string>
+    <string name="interes_margen">Margen de variación (%)</string>
+    <string name="interes_frecuencia">Frecuencia de capitalización</string>
+    <string name="interes_resultados">Resultados:</string>
+    <string name="interes_pesimista">Escenario pesimista: %1$s</string>
+    <string name="interes_promedio">Escenario promedio: %1$s</string>
+    <string name="interes_optimista">Escenario optimista: %1$s</string>
+    <string name="interes_grafica">Proyección del crecimiento en años</string>
+    <string name="interes_help_linea1">Estima cómo crecerá tu inversión en diferentes escenarios (pesimista, promedio, optimista).</string>
+    <string name="interes_help_linea2">El gráfico muestra una proyección visual del crecimiento de tu capital en el tiempo.</string>
+    <string name="interes_anio_con_valor">A %1$d</string>
+    <string name="interes_sin_datos">Sin datos</string>
+</resources>
