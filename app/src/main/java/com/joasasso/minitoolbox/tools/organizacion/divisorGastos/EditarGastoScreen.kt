@@ -55,7 +55,11 @@ fun EditarGastoScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
-    val formatter = remember { NumberFormat.getInstance(Locale("es", "AR")) }
+    val locale = Locale.getDefault()
+    val formatter = NumberFormat.getCurrencyInstance(locale).apply {
+        maximumFractionDigits = 2
+        minimumFractionDigits = 0
+    }
     var showInfo by remember { mutableStateOf(false) }
 
     var reunion by remember { mutableStateOf<Reunion?>(null) }
@@ -139,7 +143,7 @@ fun EditarGastoScreen(
                                 }
                             },
                             modifier = Modifier.width(100.dp),
-                            placeholder = { Text("0.0") },
+                            placeholder = { Text("0") },
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                         )
@@ -167,11 +171,18 @@ fun EditarGastoScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(grupo.nombre, modifier = Modifier.weight(1f))
+
+                        val textoConsumidor = consumidores[grupo.nombre]?.takeIf { it.isNotBlank() && it != "0" } ?: ""
+
                         OutlinedTextField(
-                            value = consumidores[grupo.nombre]?.toString() ?: "0",
-                            onValueChange = {
+                            value = textoConsumidor,
+                            onValueChange = { nuevoTexto ->
                                 consumidores = consumidores.toMutableMap().apply {
-                                    put(grupo.nombre, it)
+                                    if (nuevoTexto.toIntOrNull() != null) {
+                                        put(grupo.nombre, nuevoTexto.toInt().coerceIn(0, grupo.cantidad).toString())
+                                    } else {
+                                        put(grupo.nombre, "0")
+                                    }
                                 }
                             },
                             modifier = Modifier.width(100.dp),
@@ -179,6 +190,7 @@ fun EditarGastoScreen(
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                         )
+
                     }
                 }
             }

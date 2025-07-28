@@ -14,6 +14,8 @@
     <string name="expense_members">Integrantes:</string>
     <string name="expense_delete_content_desc">Eliminar reunión</string>
 
+
+
     <string name="create_meeting_button">Guardar reunión</string>
     <string name="create_meeting_name_label">Nombre de la reunión</string>
     <string name="create_meeting_group_name">Nombre del grupo</string>
@@ -29,9 +31,11 @@
     <string name="create_meeting_help_line5">• Podrás agregar y editar gastos una vez creada la reunión.</string>
 
 
+
     <string name="expense_description_label">Descripción del gasto</string>
-    <string name="total_amount_label">Total: $%1$s</string>
+    <string name="total_amount_label">Total: %1$s</string>
     <string name="expense_who_paid_label">¿Quién pagó y cuánto?</string>
+    <string name="error_group_size_exceeded">El grupo %1$s tiene un máximo de %2$d personas</string>
     <string name="expense_who_consumed_label">¿Quiénes consumieron? (personas por grupo)</string>
     <string name="help_title_expense">¿Cómo registrar un gasto?</string>
     <string name="help_expense_1">• Escribe una breve descripción del gasto (por ejemplo: \'Pizza\', \'Entrada\', \'Coca-Cola\').</string>
@@ -42,7 +46,7 @@
 
 
 
-    <string name="share_summary_title">Compartir resumen</string>
+    <string name="expenses_share_summary_button">Compartir resumen</string>
     <string name="date_label">Fecha: %1$s</string>
     <string name="total_spent_label">Total gastado: $%1$.2f</string>
     <string name="expenses_section">Gastos</string>
@@ -56,8 +60,8 @@
     <string name="debts_section">Deudas</string>
     <string name="dialog_edit_member_title">Editar integrante</string>
     <string name="dialog_new_member_title">Nuevo integrante</string>
-    <string name="name_label">Nombre</string>
-    <string name="people_count_label">Cantidad de personas</string>
+    <string name="expenses_group_name_label">Nombre</string>
+
     <string name="dialog_meeting_info_title">Acerca de la reunión</string>
     <string name="info_meeting_line1">• Aquí puedes ver el resumen de la reunión, con fecha, total gastado y lista de gastos.</string>
     <string name="info_meeting_line2">• Puedes editar o eliminar gastos, o agregar nuevos.</string>
