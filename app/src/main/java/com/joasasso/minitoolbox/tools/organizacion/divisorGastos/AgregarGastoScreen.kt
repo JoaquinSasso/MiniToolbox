@@ -56,7 +56,11 @@ fun AgregarGastoScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
-    val formatter = remember { NumberFormat.getInstance(Locale("es", "AR")) }
+    val locale = Locale.getDefault()
+    val formatter = NumberFormat.getCurrencyInstance(locale).apply {
+        maximumFractionDigits = 2
+        minimumFractionDigits = 0
+    }
     var showInfo by remember { mutableStateOf(false) }
 
     var reunion by remember { mutableStateOf<Reunion?>(null) }
@@ -168,18 +172,24 @@ fun AgregarGastoScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(grupo.nombre, modifier = Modifier.weight(1f))
+                        val valorTexto = consumidores[grupo.nombre]?.takeIf { it > 0 }?.toString() ?: ""
+
                         OutlinedTextField(
-                            value = consumidores[grupo.nombre]?.toString() ?: "0",
-                            onValueChange = {
+                            value = valorTexto,
+                            onValueChange = { nuevoTexto ->
                                 consumidores = consumidores.toMutableMap().apply {
-                                    val cantidad =
-                                        it.toIntOrNull()?.coerceIn(0, grupo.cantidad) ?: 0
-                                    put(grupo.nombre, cantidad)
+                                    val cantidad = nuevoTexto.toIntOrNull()
+                                    if (cantidad != null) {
+                                        put(grupo.nombre, cantidad.coerceIn(0, grupo.cantidad))
+                                    } else {
+                                        put(grupo.nombre, 0)
+                                    }
                                 }
                             },
                             modifier = Modifier.width(80.dp),
                             placeholder = { Text("0") },
-                            singleLine = true
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                         )
                     }
                 }

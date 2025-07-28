@@ -44,9 +44,8 @@ import com.joasasso.minitoolbox.data.Reunion
 import com.joasasso.minitoolbox.data.ReunionesRepository
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
+import java.text.DateFormat.getDateInstance
 import java.util.Date
-import java.util.Locale
 
 @Composable
 fun ReunionesScreen(
@@ -173,7 +172,7 @@ fun ReunionesScreen(
 
 @Composable
 fun ReunionItem(reunion: Reunion, onClick: () -> Unit, onDelete: () -> Unit) {
-    val formato = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    val formato = getDateInstance()
     val fechaTexto = formato.format(Date(reunion.fecha))
     val integrantes = reunion.integrantes.map { it.nombre }
 

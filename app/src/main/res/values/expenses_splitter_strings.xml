@@ -30,9 +30,10 @@
 
 
     <string name="expense_description_label">Expense description</string>
-    <string name="total_amount_label">Total: $%1$s</string>
+    <string name="total_amount_label">Total: %1$s</string>
     <string name="expense_who_paid_label">Who paid and how much?</string>
     <string name="expense_who_consumed_label">Who consumed? (people per group)</string>
+    <string name="error_group_size_exceeded">%1$s group has a maximum of %2$d people</string>
     <string name="help_title_expense">How to record an expense?</string>
     <string name="help_expense_1">• Write a brief description of the expense (e.g. \'Pizza\', \'Ticket\', \'Coca-Cola\').</string>
     <string name="help_expense_2">• Indicate how much each group contributed.</string>
@@ -41,7 +42,7 @@
     <string name="help_expense_5">• The expense will be split proportionally based on consumption.</string>
 
 
-    <string name="share_summary_title">Share summary</string>
+    <string name="expenses_share_summary_button">Share summary</string>
     <string name="date_label">Date: %1$s</string>
     <string name="total_spent_label">Total spent: $%1$.2f</string>
     <string name="expenses_section">Expenses</string>
@@ -55,8 +56,7 @@
     <string name="debts_section">Debts</string>
     <string name="dialog_edit_member_title">Edit member</string>
     <string name="dialog_new_member_title">New member</string>
-    <string name="name_label">Name</string>
-    <string name="people_count_label">Number of people</string>
+    <string name="expenses_group_name_label">Name</string>
     <string name="dialog_meeting_info_title">About the meeting</string>
     <string name="info_meeting_line1">• Here you can see a summary of the meeting with date, total spent, and expenses.</string>
     <string name="info_meeting_line2">• You can edit or delete expenses, or add new ones.</string>
