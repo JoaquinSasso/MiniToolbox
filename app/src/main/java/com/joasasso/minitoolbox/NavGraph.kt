@@ -24,6 +24,7 @@ import com.joasasso.minitoolbox.tools.herramientas.calculadoras.ConversorRomanos
 import com.joasasso.minitoolbox.tools.herramientas.calculadoras.ConversorUnidadesScreen
 import com.joasasso.minitoolbox.tools.herramientas.calculadoras.DecimalBinaryConverterScreen
 import com.joasasso.minitoolbox.tools.herramientas.calculadoras.IMCScreen
+import com.joasasso.minitoolbox.tools.herramientas.calculadoras.InteresCompuestoScreen
 import com.joasasso.minitoolbox.tools.herramientas.calculadoras.PorcentajeScreen
 import com.joasasso.minitoolbox.tools.herramientas.calculadoras.divisorGastos.AgregarGastoScreen
 import com.joasasso.minitoolbox.tools.herramientas.calculadoras.divisorGastos.CrearReunionScreen
@@ -242,6 +243,8 @@ fun MiniToolboxNavGraph(navController: NavHostController) {
         composable(Screen.Eventos.route){
             EventosImportantesScreen(onBack = { navController.popBackStack() })
         }
-
+        composable(Screen.InteresCompuesto.route){
+            InteresCompuestoScreen(onBack = { navController.popBackStack() })
+        }
     }
 }

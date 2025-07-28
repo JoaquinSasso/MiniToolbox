@@ -38,4 +38,5 @@
     <string name="tool_compass">Brújula</string>
     <string name="tool_todo_list">ToDo List</string>
     <string name="tool_event_tracker">Eventos importantes</string>
+    <string name="tool_compound_interest">Interés compuesto</string>
 </resources>

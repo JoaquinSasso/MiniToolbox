@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="interes_inicial">Initial investment</string>
+    <string name="interes_aporte">Monthly contribution</string>
+    <string name="interes_anios">Number of years</string>
+    <string name="interes_tasa">Interest rate (%)</string>
+    <string name="interes_margen">Rate variation margin (%)</string>
+    <string name="interes_frecuencia">Compounding frequency</string>
+    <string name="interes_resultados">Resultados:</string>
+    <string name="interes_pesimista">Pessimistic result: %1$s</string>
+    <string name="interes_promedio">Average result: %1$s</string>
+    <string name="interes_optimista">Optimistic result: %1$s</string>
+    <string name="interes_grafica">Growth projection in Years</string>
+    <string name="interes_help_linea1">Estimate how your investment grows under different scenarios (pessimistic, average, optimistic).</string>
+    <string name="interes_help_linea2">The chart shows a visual projection of your capital growth over time.</string>
+    <string name="interes_anio_con_valor">Y %1$d</string>
+    <string name="interes_sin_datos">No data</string>
+</resources>

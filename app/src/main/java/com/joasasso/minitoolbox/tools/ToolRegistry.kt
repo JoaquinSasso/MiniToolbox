@@ -306,6 +306,13 @@ object ToolRegistry {
             category = ToolCategory.Organizacion,
             subCategory = R.string.subcategory_habits,
             svgResId = R.drawable.events
-    )
+    ),
+        Tool(
+            name = R.string.tool_compound_interest,
+            screen = Screen.InteresCompuesto,
+            category = ToolCategory.Herramientas,
+            subCategory = R.string.subcategory_calculator,
+            svgResId = R.drawable.interes_compuesto
+        )
     )
 }
