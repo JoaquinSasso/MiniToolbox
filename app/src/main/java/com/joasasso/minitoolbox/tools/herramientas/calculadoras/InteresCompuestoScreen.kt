@@ -1,10 +1,11 @@
 package com.joasasso.minitoolbox.tools.herramientas.calculadoras
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,17 +36,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.withSave
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import java.text.NumberFormat
@@ -67,11 +71,11 @@ fun InteresCompuestoScreen(onBack: () -> Unit) {
     val haptic = LocalHapticFeedback.current
 
     val resultados = calcularEscenarios(
-        inversionInicial.toDoubleOrNull() ?: 5000.0,
-        aporteMensual.toDoubleOrNull() ?: 50.0,
-        cantidadAnios.toIntOrNull() ?: 30,
-        tasa.toDoubleOrNull() ?: 10.0,
-        margen.toDoubleOrNull() ?: 1.0,
+        inversionInicial.toDoubleOrNull() ?: 0.0,
+        aporteMensual.toDoubleOrNull() ?: 0.0,
+        cantidadAnios.toIntOrNull() ?: 1,
+        tasa.toDoubleOrNull() ?: 0.0,
+        margen.toDoubleOrNull() ?: 0.0,
         frecuencia
     )
 
@@ -138,7 +142,6 @@ fun InteresCompuestoScreen(onBack: () -> Unit) {
                     modifier = Modifier
                         .menuAnchor()
                         .fillMaxWidth(),
-                    colors = ExposedDropdownMenuDefaults.textFieldColors()
                 )
                 ExposedDropdownMenu(
                     expanded = expanded,
@@ -197,6 +200,9 @@ fun InteresCompuestoScreen(onBack: () -> Unit) {
 @Composable
 fun LineChartInteresCompuesto(valores: List<Double>, cantidadAnios: Int) {
     val verdeSuave = Color(0xFF81C784)
+    val textoColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val textoColorArgb = textoColor.toArgb()
+
 
     if (valores.size < 2 || valores.all { it == 0.0 }) {
         Box(Modifier.height(72.dp), contentAlignment = Alignment.Center) {
@@ -207,65 +213,80 @@ fun LineChartInteresCompuesto(valores: List<Double>, cantidadAnios: Int) {
 
     val maxY = valores.maxOrNull() ?: 1.0
     val puntos = valores.mapIndexed { index, valor -> index to valor }
-    val anchoBarra = 32.dp
-    val intervalo = cantidadAnios / (valores.size - 1)
+    val anchoBarra = 24.dp
 
-    LazyRow(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(300.dp), // Altura total del gráfico
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        contentPadding = PaddingValues(horizontal = 16.dp),
-    ) {
-        items(puntos) { (index, valor) ->
-            val frac = (valor / maxY).coerceIn(0.0, 1.0)
+    Box(Modifier.border(BorderStroke(1.dp, Color.Gray), shape = RectangleShape))
+    {
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(300.dp), // Altura total del gráfico
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            items(puntos) { (index, valor) ->
+                val frac = (valor / maxY).coerceIn(0.0, 1.0)
 
-            Column(
-                modifier = Modifier
-                    .height(280.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Bottom
-            ) {
-                // Dinero en texto rotado
-                Text(
-                    text = formatoMiles(valor),
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                Column(
                     modifier = Modifier
-                        .padding(bottom = 4.dp)
-                        .rotate(-90f),
-                    maxLines = 1
-                )
-                Spacer(Modifier.height(40.dp))
-
-                // Barra
-                Box(
-                    modifier = Modifier
-                        .height(140.dp)
+                        .height(280.dp)
                         .width(anchoBarra),
-                    contentAlignment = Alignment.BottomCenter
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Bottom
                 ) {
-                    Canvas(
-                        Modifier
-                            .fillMaxSize()
+                    // Barra
+                    Box(
+                        modifier = Modifier
+                            .height(140.dp)
+                            .width(anchoBarra),
+                        contentAlignment = Alignment.BottomCenter
                     ) {
-                        val height = size.height * frac.toFloat()
-                        drawRoundRect(
-                            color = verdeSuave,
-                            topLeft = Offset(0f, size.height - height),
-                            size = Size(size.width, height),
-                            cornerRadius = CornerRadius(6f, 6f)
-                        )
-                    }
-                }
+                        Canvas(
+                            Modifier
+                                .fillMaxSize()
+                        ) {
+                            val height = size.height * frac.toFloat()
 
-                // Año debajo
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    text = stringResource(R.string.interes_anio_con_valor, index * intervalo),
-                    fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                            // Dibujo de la barra
+                            drawRoundRect(
+                                color = verdeSuave,
+                                topLeft = Offset(0f, size.height - height),
+                                size = Size(size.width, height),
+                                cornerRadius = CornerRadius(6f, 6f)
+                            )
+
+                            // Dibujo del texto rotado, con el dinero en ese intervalo
+                            drawContext.canvas.nativeCanvas.apply {
+                                withSave {
+                                    val textPaint = android.graphics.Paint().apply {
+                                        color = textoColorArgb
+                                        textSize = 30f
+                                        isAntiAlias = true
+                                        textAlign = android.graphics.Paint.Align.LEFT
+                                    }
+                                    // Texto formateado
+                                    val texto = formatoMiles(valor)
+
+                                    // Posicionar y rotar texto sobre la barra
+                                    rotate(-90f, size.width / 2, size.height - height - 8f)
+                                    drawText(
+                                        texto,
+                                        size.width / 2 + 4f,
+                                        size.height - height - 8f,
+                                        textPaint
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    // Año debajo
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        text = "${(index + 1)}",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
     }
@@ -305,7 +326,7 @@ fun calcularEscenarios(
         for (periodo in 1..totalPeriodos) {
             saldo *= (1 + r)
             saldo += (aporteMensual * 12 / n)
-            if (periodo % (totalPeriodos / 10) == 0 || periodo == totalPeriodos) {
+            if (periodo % (totalPeriodos / cantidadAnios) == 0 || periodo == totalPeriodos) {
                 montos.add(saldo)
             }
         }
