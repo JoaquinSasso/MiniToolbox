@@ -26,11 +26,6 @@ import com.joasasso.minitoolbox.tools.herramientas.calculadoras.DecimalBinaryCon
 import com.joasasso.minitoolbox.tools.herramientas.calculadoras.IMCScreen
 import com.joasasso.minitoolbox.tools.herramientas.calculadoras.InteresCompuestoScreen
 import com.joasasso.minitoolbox.tools.herramientas.calculadoras.PorcentajeScreen
-import com.joasasso.minitoolbox.tools.herramientas.calculadoras.divisorGastos.AgregarGastoScreen
-import com.joasasso.minitoolbox.tools.herramientas.calculadoras.divisorGastos.CrearReunionScreen
-import com.joasasso.minitoolbox.tools.herramientas.calculadoras.divisorGastos.DetallesReunionScreen
-import com.joasasso.minitoolbox.tools.herramientas.calculadoras.divisorGastos.EditarGastoScreen
-import com.joasasso.minitoolbox.tools.herramientas.calculadoras.divisorGastos.ReunionesScreen
 import com.joasasso.minitoolbox.tools.herramientas.generadores.GeneradorContrasenaScreen
 import com.joasasso.minitoolbox.tools.herramientas.generadores.GeneradorLoremIpsumScreen
 import com.joasasso.minitoolbox.tools.herramientas.generadores.GeneradorNombresScreen
@@ -49,6 +44,11 @@ import com.joasasso.minitoolbox.tools.info.CountriesInfoScreen
 import com.joasasso.minitoolbox.tools.info.RemainingTimeScreen
 import com.joasasso.minitoolbox.tools.info.TextBinaryConverterScreen
 import com.joasasso.minitoolbox.tools.organizacion.SugeridorActividadScreen
+import com.joasasso.minitoolbox.tools.organizacion.divisorGastos.AgregarGastoScreen
+import com.joasasso.minitoolbox.tools.organizacion.divisorGastos.CrearReunionScreen
+import com.joasasso.minitoolbox.tools.organizacion.divisorGastos.DetallesReunionScreen
+import com.joasasso.minitoolbox.tools.organizacion.divisorGastos.EditarGastoScreen
+import com.joasasso.minitoolbox.tools.organizacion.divisorGastos.ReunionesScreen
 import com.joasasso.minitoolbox.tools.organizacion.pomodoro.PomodoroScreen
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.EventosImportantesScreen
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.RachaScreen

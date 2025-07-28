@@ -1,4 +1,4 @@
-package com.joasasso.minitoolbox.tools.herramientas.calculadoras.divisorGastos
+package com.joasasso.minitoolbox.tools.organizacion.divisorGastos
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -75,16 +75,21 @@ fun CrearReunionScreen(
     var nuevaCantidad by remember { mutableStateOf("1") }
     val grupos = remember { mutableStateListOf<Grupo>() }
     val snackbarHostState = remember { SnackbarHostState() }
+    val snackbarError = stringResource(R.string.create_meeting_snackbar_error)
 
     Scaffold(
-        topBar = { TopBarReusable(stringResource(R.string.create_meeting_screen), onBack, { showInfo = true }) },
+        topBar = {
+            TopBarReusable(stringResource(R.string.create_meeting_screen), onBack) {
+                showInfo = true
+            }
+        },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         bottomBar = {
             Button(
                 onClick = {
                     if (nombre.isBlank() || grupos.isEmpty()) {
                         scope.launch {
-                            snackbarHostState.showSnackbar("Completa el nombre y agrega al menos una persona / grupo")
+                            snackbarHostState.showSnackbar(snackbarError)
                         }
                         return@Button
                     }
@@ -106,7 +111,7 @@ fun CrearReunionScreen(
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                Text("Guardar reunión")
+                Text(stringResource(R.string.create_meeting_button))
             }
         }
     ) { padding ->
@@ -123,7 +128,7 @@ fun CrearReunionScreen(
                 OutlinedTextField(
                     value = nombre,
                     onValueChange = { nombre = it },
-                    label = { Text("Nombre de la reunión") },
+                    label = { Text(stringResource(R.string.create_meeting_name_label)) },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -136,13 +141,13 @@ fun CrearReunionScreen(
                     OutlinedTextField(
                         value = nuevoGrupoNombre,
                         onValueChange = { nuevoGrupoNombre = it },
-                        label = { Text("Nombre") },
+                        label = { Text(stringResource(R.string.create_meeting_group_name)) },
                         modifier = Modifier.weight(1f)
                     )
                     OutlinedTextField(
                         value = nuevaCantidad,
                         onValueChange = { nuevaCantidad = it },
-                        label = { Text("Personas") },
+                        label = { Text(stringResource(R.string.expense_group_size)) },
                         modifier = Modifier.width(90.dp),
                         keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                     )
@@ -158,7 +163,10 @@ fun CrearReunionScreen(
                         },
                         enabled = nuevoGrupoNombre.isNotBlank()
                     ) {
-                        Icon(Icons.Default.PersonAdd, contentDescription = "Agregar integrante")
+                        Icon(
+                            Icons.Default.PersonAdd,
+                            contentDescription = stringResource(R.string.create_meeting_add_member)
+                        )
                     }
                 }
             }
@@ -188,7 +196,7 @@ fun CrearReunionScreen(
                                 .padding(horizontal = 20.dp, vertical = 8.dp)
                         ) {
                             Text(
-                                text = "${grupo.nombre} (${grupo.cantidad} personas)",
+                                text = "${grupo.nombre} (${stringResource(R.string.expense_group_size)}: ${grupo.cantidad})",
                                 style = MaterialTheme.typography.bodyLarge,
                                 modifier = Modifier.weight(1f),
                                 maxLines = 1,
@@ -204,7 +212,7 @@ fun CrearReunionScreen(
                             }) {
                                 Icon(
                                     imageVector = Icons.Default.Delete,
-                                    contentDescription = "Eliminar integrante"
+                                    contentDescription = stringResource(R.string.create_meeting_remove_member)
                                 )
                             }
                         }
@@ -212,26 +220,31 @@ fun CrearReunionScreen(
                 }
             }
         }
-    }
-    if (showInfo) {
-        AlertDialog(
-            onDismissRequest = { showInfo = false },
-            title = { Text("¿Cómo crear una reunión?") },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Asigna un nombre para identificar la reunión y agrega los grupos que participarán (personas, familias, amigos, etc.).")
-                    Text("• Cada grupo puede tener un nombre y una cantidad de personas asociadas.")
-                    Text("• La cantidad de personas servirá luego para repartir los gastos proporcionalmente.")
-                    Text("• Podrás agregar y editar gastos una vez creada la reunión.")
+
+        if (showInfo) {
+            AlertDialog(
+                onDismissRequest = { showInfo = false },
+                title = { Text(stringResource(R.string.create_meeting_help_title)) },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(stringResource(R.string.create_meeting_help_line1))
+                        Text(stringResource(R.string.create_meeting_help_line2))
+                        Text(stringResource(R.string.create_meeting_help_line3))
+                        Text(stringResource(R.string.create_meeting_help_line4))
+                        Text(stringResource(R.string.create_meeting_help_line5))
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showInfo = false
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    }) {
+                        Text(stringResource(R.string.close))
+                    }
                 }
-            },
-            confirmButton = {
-                TextButton(onClick = { showInfo = false
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)}) {
-                    Text("Cerrar")
-                }
-            }
-        )
+            )
+        }
     }
 }
+
 

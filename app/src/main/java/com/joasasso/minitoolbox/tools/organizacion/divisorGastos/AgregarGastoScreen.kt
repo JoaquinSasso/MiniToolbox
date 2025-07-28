@@ -1,4 +1,4 @@
-package com.joasasso.minitoolbox.tools.herramientas.calculadoras.divisorGastos
+package com.joasasso.minitoolbox.tools.organizacion.divisorGastos
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -79,7 +79,12 @@ fun AgregarGastoScreen(
     val montoTotal = aportes.values.sumOf { it.toDoubleOrNull() ?: 0.0 }
 
     Scaffold(
-        topBar = { TopBarReusable(stringResource(R.string.add_expenses_screen), onBack, { showInfo = true }) }
+        topBar = {
+            TopBarReusable(
+                stringResource(R.string.add_expenses_screen),
+                onBack,
+                { showInfo = true })
+        }
     ) { padding ->
         LazyColumn(
             modifier = Modifier
@@ -92,17 +97,23 @@ fun AgregarGastoScreen(
                 OutlinedTextField(
                     value = descripcion,
                     onValueChange = { descripcion = it },
-                    label = { Text("Descripción del gasto") },
+                    label = { Text(stringResource(R.string.expense_description_label)) },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
 
             item {
-                Text("Total: $${formatter.format(montoTotal)}", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    stringResource(R.string.total_amount_label, formatter.format(montoTotal)),
+                    style = MaterialTheme.typography.titleMedium
+                )
             }
 
             item {
-                Text("¿Quién pagó y cuánto?", style = MaterialTheme.typography.titleSmall)
+                Text(
+                    stringResource(R.string.expense_who_paid_label),
+                    style = MaterialTheme.typography.titleSmall
+                )
             }
 
             items(reunion?.integrantes.orEmpty()) { grupo ->
@@ -122,7 +133,10 @@ fun AgregarGastoScreen(
                             value = aportes[grupo.nombre] ?: "",
                             onValueChange = {
                                 aportes = aportes.toMutableMap().apply {
-                                    if (it.isNotBlank()) put(grupo.nombre, it) else remove(grupo.nombre)
+                                    if (it.isNotBlank()) put(
+                                        grupo.nombre,
+                                        it
+                                    ) else remove(grupo.nombre)
                                 }
                             },
                             modifier = Modifier.width(100.dp),
@@ -135,7 +149,10 @@ fun AgregarGastoScreen(
             }
 
             item {
-                Text("¿Quiénes consumieron? (personas por grupo)", style = MaterialTheme.typography.titleSmall)
+                Text(
+                    stringResource(R.string.expense_who_consumed_label),
+                    style = MaterialTheme.typography.titleSmall
+                )
             }
 
             items(reunion?.integrantes.orEmpty()) { grupo ->
@@ -155,7 +172,8 @@ fun AgregarGastoScreen(
                             value = consumidores[grupo.nombre]?.toString() ?: "0",
                             onValueChange = {
                                 consumidores = consumidores.toMutableMap().apply {
-                                    val cantidad = it.toIntOrNull()?.coerceIn(0, grupo.cantidad) ?: 0
+                                    val cantidad =
+                                        it.toIntOrNull()?.coerceIn(0, grupo.cantidad) ?: 0
                                     put(grupo.nombre, cantidad)
                                 }
                             },
@@ -195,22 +213,23 @@ fun AgregarGastoScreen(
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Guardar")
+                    Text(stringResource(R.string.save))
                 }
             }
         }
     }
+
     if (showInfo) {
         AlertDialog(
             onDismissRequest = { showInfo = false },
-            title = { Text("¿Cómo registrar un gasto?") },
+            title = { Text(stringResource(R.string.help_title_expense)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Escribe una breve descripción del gasto (por ejemplo: 'Pizza', 'Entrada', 'Coca-Cola').")
-                    Text("• Indica cuánto aportó cada grupo al gasto.")
-                    Text("• Luego, selecciona cuántas personas de cada grupo participaron como consumidores.")
-                    Text("• El total del gasto se calcula automáticamente a partir de los aportes.")
-                    Text("• El reparto se hará según el consumo proporcional de cada grupo.")
+                    Text(stringResource(R.string.help_expense_1))
+                    Text(stringResource(R.string.help_expense_2))
+                    Text(stringResource(R.string.help_expense_3))
+                    Text(stringResource(R.string.help_expense_4))
+                    Text(stringResource(R.string.help_expense_5))
                 }
             },
             confirmButton = {
@@ -218,13 +237,13 @@ fun AgregarGastoScreen(
                     showInfo = false
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 }) {
-                    Text("Cerrar")
+                    Text(stringResource(R.string.close))
                 }
             }
         )
     }
-
 }
+
 
 
 
