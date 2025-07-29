@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="flag_question">Which country does this flag belong to?</string>
+    <string name="flag_info_title">About Guess the Flag</string>
+    <string name="flag_info_line1">• Purpose: Test your knowledge of world flags.</string>
+    <string name="flag_info_line2">• How to play: A flag appears, and you must choose the correct country. If you’re right, you score points. If wrong, your score resets.</string>
+    <string name="flag_info_line3">• There’s a 10-second time limit per round.</string>
+    <string name="flag_info_line4">• Credits to Santiago Garcia for the idea</string>
+    <string name="result_timeout">Time’s up! Your score has been reset.</string>
+
+</resources>

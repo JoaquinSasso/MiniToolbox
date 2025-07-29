@@ -51,6 +51,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Locale
 import kotlin.math.abs
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,6 +59,8 @@ import kotlin.math.abs
 fun AdivinaBanderaScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
+    val locale = Locale.getDefault()
+    val isEnglish = locale.language == "en"
     val scope = rememberCoroutineScope()
 
     var countries by remember { mutableStateOf<List<MinimalCountry>>(emptyList()) }
@@ -74,10 +77,9 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
     var buttonsEnabled by remember { mutableStateOf(true) }
     var shuffledOptions by remember { mutableStateOf<List<MinimalCountry>>(emptyList()) }
 
-    var timeLeft by remember { mutableIntStateOf(100) } // de 0 a 100
+    var timeLeft by remember { mutableIntStateOf(100) }
     var timerRunning by remember { mutableStateOf(false) }
     var progress by remember { mutableFloatStateOf(1f) }
-
 
     val defaultBg = MaterialTheme.colorScheme.background
     var bgFlashColor by remember { mutableStateOf(defaultBg) }
@@ -85,7 +87,7 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
 
     LaunchedEffect(Unit) {
         countries = loadMinimalCountryDataset(context)
-        nextRoundFlag(countries) { q, opts, shuffled ->
+        nextRoundFlag(countries) { q, _, shuffled ->
             currentQuestion = q
             shuffledOptions = shuffled
         }
@@ -107,7 +109,7 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
                 buttonsEnabled = false
                 correctOption = currentQuestion?.name
                 bgFlashColor = Color(0xFFC53737)
-                lastResult = "¡Se acabó el tiempo! Tu puntuación se reinició."
+                lastResult = context.getString(R.string.result_timeout)
                 score = 0
                 timerRunning = false
 
@@ -119,7 +121,7 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
                     buttonsEnabled = true
                     timeLeft = 100
                     timerRunning = true
-                    nextRoundFlag(countries) { q, opts, shuffled ->
+                    nextRoundFlag(countries) { q, _, shuffled ->
                         currentQuestion = q
                         shuffledOptions = shuffled
                     }
@@ -128,26 +130,21 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
         }
     }
 
-
     Scaffold(
         topBar = { TopBarReusable(stringResource(R.string.tool_guess_flag), onBack) { showInfo = true } },
         bottomBar = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth()
+                modifier = Modifier.padding(16.dp).fillMaxWidth()
             ) {
-                Text("Tiempo restante: %.0f segundos".format(abs(progress * 10f)),
+                Text(
+                    stringResource(R.string.capital_remaining_time, abs(progress * 10f).toInt().toString()),
                     style = MaterialTheme.typography.titleMedium
                 )
-
                 LinearProgressIndicator(
-                    progress = { progress.coerceIn(0f, 1f) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(12.dp),
+                    progress = { progress },
+                    modifier = Modifier.fillMaxWidth().height(12.dp),
                     color = MaterialTheme.colorScheme.primary,
                     trackColor = ProgressIndicatorDefaults.linearTrackColor,
                     strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
@@ -166,13 +163,11 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             currentQuestion?.let { question ->
-                Text("¿De qué país es esta bandera?", style = MaterialTheme.typography.titleLarge)
+                Text(stringResource(R.string.flag_question), style = MaterialTheme.typography.titleLarge)
                 Text(question.flag, style = MaterialTheme.typography.displayLarge)
 
                 LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
+                    modifier = Modifier.fillMaxWidth().weight(1f),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -191,22 +186,18 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
                                 correctOption = currentQuestion?.name
 
                                 val correct = option.name == currentQuestion?.name
-
                                 if (correct) {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     score++
                                     if (score > record) {
                                         record = score
                                         scope.launch { FlagGameDataStore.setBestScore(context, score) }
-                                        lastResult = "¡Nuevo récord!"
-                                    } else {
-                                        lastResult = null
-                                    }
+                                        lastResult = context.getString(R.string.result_new_record)
+                                    } else lastResult = null
                                 } else {
                                     vibrate(context, duration = 400, amplitude = 255)
-
                                     bgFlashColor = Color(0xFFC53737)
-                                    lastResult = "¡Incorrecto! Tu puntuación se reinició."
+                                    lastResult = context.getString(R.string.result_wrong)
                                     score = 0
                                 }
 
@@ -219,15 +210,13 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
                                     buttonsEnabled = true
                                     timeLeft = 100
                                     timerRunning = true
-                                    nextRoundFlag(countries) { q, opts, shuffled ->
+                                    nextRoundFlag(countries) { q, _, shuffled ->
                                         currentQuestion = q
                                         shuffledOptions = shuffled
                                     }
                                 }
                             },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(48.dp),
+                            modifier = Modifier.fillMaxWidth().height(48.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = bgColor,
                                 disabledContainerColor = bgColor,
@@ -236,7 +225,7 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
                             ),
                             enabled = buttonsEnabled
                         ) {
-                            Text(option.name)
+                            Text(if (isEnglish) option.englishName else option.name)
                         }
                     }
                 }
@@ -246,8 +235,8 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Puntaje: $score", style = MaterialTheme.typography.bodyLarge)
-                Text("Récord: $record", style = MaterialTheme.typography.bodyLarge)
+                Text(stringResource(R.string.score, score), style = MaterialTheme.typography.bodyLarge)
+                Text(stringResource(R.string.record, record), style = MaterialTheme.typography.bodyLarge)
             }
 
             lastResult?.let {
@@ -259,13 +248,13 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
     if (showInfo) {
         AlertDialog(
             onDismissRequest = { showInfo = false },
-            title = { Text("Acerca de Adivina la Bandera") },
+            title = { Text(stringResource(R.string.flag_info_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Para qué sirve: Juego para poner a prueba tus conocimientos sobre banderas del mundo.")
-                    Text("• Cómo usar: Aparece una bandera y debes elegir el país correspondiente. Si acertás, sumás puntos. Si errás, perdés el puntaje actual.")
-                    Text("• Hay un límite de tiempo de 10 segundos por cada bandera.")
-                    Text("• Créditos a Santiago Garcia por la idea")
+                    Text(stringResource(R.string.flag_info_line1))
+                    Text(stringResource(R.string.flag_info_line2))
+                    Text(stringResource(R.string.flag_info_line3))
+                    Text(stringResource(R.string.flag_info_line4))
                 }
             },
             confirmButton = {
@@ -273,20 +262,27 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
                     showInfo = false
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 }) {
-                    Text("Cerrar")
+                    Text(stringResource(R.string.close))
                 }
             }
         )
     }
 }
 
+
 suspend fun loadMinimalCountryDataset(context: Context): List<MinimalCountry> = withContext(Dispatchers.IO) {
     val bytes = context.assets.open("countries_dataset.pb").readBytes()
     val protoList = CountryOuterClass.CountryList.parseFrom(bytes)
+
     protoList.countriesList.map {
-        MinimalCountry(name = it.name, flag = it.flag)
+        MinimalCountry(
+            name = it.name,                     // nombre en español
+            englishName = it.englishName,       // nombre en inglés
+            flag = it.flag                      // emoji o imagen
+        )
     }
 }
+
 
 private fun nextRoundFlag(
     all: List<MinimalCountry>,

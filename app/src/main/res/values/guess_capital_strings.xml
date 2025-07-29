@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="capital_question">Which country has this capital?</string>
+    <string name="capital_remaining_time">Time left: %1$s seconds</string>
+    <string name="score">Score: %1$d</string>
+    <string name="record">High Score: %1$d</string>
+    <string name="result_wrong">Incorrect! Your score has been reset.</string>
+    <string name="result_new_record">New high score!</string>
+    <string name="capital_help_title">About Guess the Capital</string>
+    <string name="capital_help_line1">• Purpose: A game to practice and have fun identifying world capitals.</string>
+    <string name="capital_help_line2">• How to play: A capital is shown, and you must choose the correct country.</string>
+    <string name="capital_help_line3">• If you\'re right, you score points. If you\'re wrong or time runs out, your score resets.</string>
+</resources>

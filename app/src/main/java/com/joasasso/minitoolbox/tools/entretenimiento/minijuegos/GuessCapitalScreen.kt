@@ -52,6 +52,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Locale
 import kotlin.math.abs
 
 @Composable
@@ -59,6 +60,9 @@ fun AdivinaCapitalScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
+
+    val locale = Locale.getDefault()
+    val isEnglish = locale.language == "en"
 
     var countries by remember { mutableStateOf<List<CapitalOfCountry>>(emptyList()) }
     var currentQuestion by remember { mutableStateOf<CapitalOfCountry?>(null) }
@@ -128,7 +132,12 @@ fun AdivinaCapitalScreen(onBack: () -> Unit) {
     }
 
     Scaffold(
-        topBar = { TopBarReusable(stringResource(R.string.tool_guess_capital), onBack) { showInfo = true } },
+        topBar = {
+            TopBarReusable(
+                stringResource(R.string.tool_guess_capital),
+                onBack
+            ) { showInfo = true }
+        },
         bottomBar = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -137,7 +146,11 @@ fun AdivinaCapitalScreen(onBack: () -> Unit) {
                     .padding(16.dp)
                     .fillMaxWidth()
             ) {
-                Text("Tiempo restante: %.0f segundos".format(abs(progress * 10f)),
+                Text(
+                    text = stringResource(
+                        R.string.capital_remaining_time,
+                        "%.0f".format(abs(progress * 10f))
+                    ),
                     style = MaterialTheme.typography.titleMedium
                 )
                 LinearProgressIndicator(
@@ -163,9 +176,14 @@ fun AdivinaCapitalScreen(onBack: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             currentQuestion?.let { question ->
-                Text("¿Que país tiene esta cápital?", style = MaterialTheme.typography.titleLarge)
-                Text(question.capital, style = MaterialTheme.typography.headlineLarge)
-
+                Text(
+                    text = stringResource(R.string.capital_question),
+                    style = MaterialTheme.typography.titleLarge
+                )
+                Text(
+                    text = question.capital,
+                    style = MaterialTheme.typography.headlineLarge
+                )
 
                 LazyColumn(
                     modifier = Modifier
@@ -195,15 +213,20 @@ fun AdivinaCapitalScreen(onBack: () -> Unit) {
                                     score++
                                     if (score > record) {
                                         record = score
-                                        scope.launch { CapitalGameDataStore.setBestScore(context, score) }
-                                        lastResult = "¡Nuevo récord!"
+                                        scope.launch {
+                                            CapitalGameDataStore.setBestScore(
+                                                context,
+                                                score
+                                            )
+                                        }
+                                        lastResult = context.getString(R.string.result_new_record)
                                     } else {
                                         lastResult = null
                                     }
                                 } else {
                                     vibrate(context, duration = 400, amplitude = 255)
                                     bgFlashColor = Color(0xFFC53737)
-                                    lastResult = "¡Incorrecto! Tu puntuación se reinició."
+                                    lastResult = context.getString(R.string.result_wrong)
                                     score = 0
                                 }
 
@@ -216,7 +239,7 @@ fun AdivinaCapitalScreen(onBack: () -> Unit) {
                                     buttonsEnabled = true
                                     timeLeft = 100
                                     timerRunning = true
-                                    nextRoundCapital(countries) { q, opts, shuffled ->
+                                    nextRoundCapital(countries) { q, _, shuffled ->
                                         currentQuestion = q
                                         shuffledOptions = shuffled
                                     }
@@ -233,7 +256,7 @@ fun AdivinaCapitalScreen(onBack: () -> Unit) {
                             ),
                             enabled = buttonsEnabled
                         ) {
-                            Text(option.name)
+                            Text(if (isEnglish) option.englishName else option.name)
                         }
                     }
                 }
@@ -243,25 +266,34 @@ fun AdivinaCapitalScreen(onBack: () -> Unit) {
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Puntaje: $score", style = MaterialTheme.typography.bodyLarge)
-                Text("Récord: $record", style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    stringResource(R.string.score, score),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    stringResource(R.string.record, record),
+                    style = MaterialTheme.typography.bodyLarge
+                )
             }
 
             lastResult?.let {
-                Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.secondary)
+                Text(
+                    it,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.secondary
+                )
             }
         }
     }
-
     if (showInfo) {
         AlertDialog(
             onDismissRequest = { showInfo = false },
-            title = { Text("Acerca de Adivina la Capital") },
+            title = { Text(stringResource(R.string.capital_help_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Para qué sirve: Juego para practicar y divertirte reconociendo capitales del mundo.")
-                    Text("• Cómo usar: Aparece el nombre de una capital y debes elegir el país correspondiente.")
-                    Text("• Si acertás, sumás puntos. Si errás o se termina el tiempo, tu puntaje se reinicia.")
+                    Text(stringResource(R.string.capital_help_line1))
+                    Text(stringResource(R.string.capital_help_line2))
+                    Text(stringResource(R.string.capital_help_line3))
                 }
             },
             confirmButton = {
@@ -269,23 +301,27 @@ fun AdivinaCapitalScreen(onBack: () -> Unit) {
                     showInfo = false
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 }) {
-                    Text("Cerrar")
+                    Text(stringResource(R.string.close))
                 }
             }
         )
     }
 }
 
-private suspend fun loadCapitalsFromDataset(context: Context): List<CapitalOfCountry> = withContext(Dispatchers.IO) {
+    private suspend fun loadCapitalsFromDataset(context: Context): List<CapitalOfCountry> = withContext(Dispatchers.IO) {
     val bytes = context.assets.open("countries_dataset.pb").readBytes()
     val protoList = CountryOuterClass.CountryList.parseFrom(bytes)
     protoList.countriesList
         .filter { it.capitalList.isNotEmpty() && it.capitalList.first().isNotBlank() }
         .map {
-            // capital = flag, país = name
-            CapitalOfCountry(name = it.name, capital = it.capitalList.first())
+            CapitalOfCountry(
+                name = it.name,
+                englishName = it.englishName,
+                capital = it.capitalList.first()
+            )
         }
 }
+
 
 private fun nextRoundCapital(
     all: List<CapitalOfCountry>,
