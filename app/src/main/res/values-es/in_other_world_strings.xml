@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share_image">Compartir imagen</string>
+    <string name="share_image_desc">Compartir resultado como imagen</string>
+    <string name="new_friend">Nuevo amigo</string>
+    <string name="new_friend_desc">Generar un nuevo personaje</string>
+    <string name="who_is_your_friend">¿Quién es tu amigo en otro universo?</string>
+    <string name="about_multiverse">Acerca de En otro mundo</string>
+    <string name="about_line1">• Para qué sirve: Te genera frases divertidas y virales sobre un amigo en un universo alternativo.</string>
+    <string name="about_line2">• Guía rápida:</string>
+    <string name="about_line3">   – Toca el botón principal para generar una nueva frase aleatoria.</string>
+    <string name="about_line4">   – Cada resultado incluye un emoji, un nombre absurdo, un rol inusual y un lugar extraño.</string>
+    <string name="about_line5">   – ¡Ideal para redes sociales o para compartir con amigos!</string>
+    <string name="about_fun_fact">Curiosidad: ¡Hay 10.156.250 combinaciones posibles entre emojis, letras, nombres, roles y lugares!</string>
+
+
+    <string name="multiverse_result_template">%1$s La persona con inicial %2$c es un %3$s %4$s %5$s.</string>
+
+    <string-array name="multiverse_nombres">
+        <item>hechicero jubilado</item>
+        <item>cajero automático con alma de poeta</item>
+        <item>emperador de memes</item>
+        <item>lagarto influencer</item>
+        <item>rey del karaoke intergaláctico</item>
+        <item>zombie filósofo</item>
+        <item>DJ en un culto de caracoles</item>
+        <item>vampiro vegano</item>
+        <item>bot de Twitter</item>
+        <item>dios del WiFi</item>
+        <item>pingüino emprendedor</item>
+        <item>papa frita semiconsciente</item>
+        <item>pastelero intergaláctico</item>
+        <item>dinosaurio anciano</item>
+        <item>luz de emergencia ansiosa</item>
+        <item>cebra con doble identidad</item>
+        <item>koala programador de C++</item>
+        <item>caracol filósofo estoico</item>
+        <item>drone existencialista</item>
+        <item>sandía con complejo de superioridad</item>
+        <item>código QR sensible</item>
+        <item>cactus extrovertido</item>
+        <item>pez payaso antisocial</item>
+        <item>cuadro abstracto que llora</item>
+        <item>horno microondas con sueños</item>
+    </string-array>
+
+    <string-array name="multiverse_roles">
+        <item>que cría alpacas fluorescentes</item>
+        <item>que da clases de filosofía a grillos</item>
+        <item>que canta boleros con hologramas</item>
+        <item>que dirige una secta de plantas carnívoras</item>
+        <item>que colecciona recuerdos ajenos</item>
+        <item>que hackea tostadoras</item>
+        <item>que flota en spas gravitacionales</item>
+        <item>que organiza fiestas para fantasmas</item>
+        <item>que trota en cámara lenta</item>
+        <item>que baila reguetón metafísico</item>
+        <item>que cocina sin ingredientes</item>
+        <item>que convence a piedras de cambiar de opinión</item>
+        <item>que da discursos motivacionales a hojas secas</item>
+        <item>que entrena patitos para el combate</item>
+        <item>que murmura secretos a enchufes</item>
+        <item>que juega ajedrez en 5 dimensiones</item>
+        <item>que pelea con pelusas cósmicas</item>
+        <item>que programa en BASIC por gusto</item>
+        <item>que vende NFT de pensamientos</item>
+        <item>que actúa en sueños ajenos</item>
+        <item>que resuelve acertijos de unicornios borrachos</item>
+        <item>que documenta la vida de los calcetines perdidos</item>
+        <item>que colecciona likes de galaxias lejanas</item>
+        <item>que escribe haikus en código Morse</item>
+        <item>que guarda silencio en idiomas extintos</item>
+    </string-array>
+
+    <string-array name="multiverse_ubicaciones">
+        <item>en Marte</item>
+        <item>en la dimensión 404</item>
+        <item>en una línea temporal olvidada</item>
+        <item>en el año 3022</item>
+        <item>en un mundo hecho de gelatina</item>
+        <item>en la mente de un ornitorrinco</item>
+        <item>en una app abandonada</item>
+        <item>en la deep web emocional</item>
+        <item>en una cafetería interdimensional</item>
+        <item>en un universo sin vocales</item>
+        <item>en un sueño compartido por ardillas</item>
+        <item>en la nube de datos de un tostador</item>
+        <item>en un reality show con fantasmas</item>
+        <item>en la república independiente de mi heladera</item>
+        <item>en una novela de ciencia ficción escrita por una lombriz</item>
+        <item>en un loop de TikToks infinitos</item>
+        <item>en el metaverso de los memes</item>
+        <item>en el grupo de WhatsApp de los multiversos</item>
+        <item>en la playlist de una IA deprimida</item>
+        <item>en la corte suprema de los calcetines perdidos</item>
+        <item>en un salón de belleza de dragones</item>
+        <item>en un servidor de Minecraft medieval</item>
+        <item>en un algoritmo de horóscopos falsos</item>
+        <item>en una dimensión pixelada</item>
+        <item>en una fábrica de abrazos sintéticos</item>
+    </string-array>
+
+</resources>

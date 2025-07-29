@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share_image">Share image</string>
+    <string name="share_image_desc">Share result as image</string>
+    <string name="new_friend">New friend</string>
+    <string name="new_friend_desc">Generate a new character</string>
+    <string name="who_is_your_friend">Who is your friend in another universe?</string>
+    <string name="about_multiverse">About In Other World</string>
+    <string name="about_line1">• Purpose: It generates funny, viral phrases about a friend in an alternate universe.</string>
+    <string name="about_line2">• Quick guide:</string>
+    <string name="about_line3">   – Tap the main button to generate a random phrase.</string>
+    <string name="about_line4">   – Each result includes an emoji, a weird name, an unusual role and a strange location.</string>
+    <string name="about_line5">   – Perfect for social media or to share with friends!</string>
+    <string name="about_fun_fact">Fun fact: There are 10,156,250 possible combinations of emojis, letters, names, roles, and places!</string>
+
+    <string name="multiverse_result_template">%1$s Someone whose name starts with %2$c is a %3$s who %4$s %5$s.</string>
+
+    <string-array name="multiverse_nombres">
+        <item>retired wizard</item>
+        <item>ATM with a poet\'s soul</item>
+        <item>meme emperor</item>
+        <item>lizard influencer</item>
+        <item>intergalactic karaoke king</item>
+        <item>philosopher zombie</item>
+        <item>DJ in a snail cult</item>
+        <item>vegan vampire</item>
+        <item>Twitter bot</item>
+        <item>WiFi god</item>
+        <item>entrepreneur penguin</item>
+        <item>semi-conscious french fry</item>
+        <item>galactic pastry chef</item>
+        <item>ancient dinosaur</item>
+        <item>anxious emergency light</item>
+        <item>zebra with a secret identity</item>
+        <item>C++ koala developer</item>
+        <item>stoic philosopher snail</item>
+        <item>existentialist drone</item>
+        <item>watermelon with a superiority complex</item>
+        <item>sensitive QR code</item>
+        <item>outgoing cactus</item>
+        <item>antisocial clownfish</item>
+        <item>crying abstract painting</item>
+        <item>microwave with dreams</item>
+    </string-array>
+
+    <string-array name="multiverse_roles">
+        <item>raises glowing alpacas</item>
+        <item>teaches philosophy to crickets</item>
+        <item>sings boleros with holograms</item>
+        <item>leads a carnivorous plant cult</item>
+        <item>collects other people’s memories</item>
+        <item>hacks toasters</item>
+        <item>floats in zero-gravity spas</item>
+        <item>throws parties for ghosts</item>
+        <item>jogs in slow motion</item>
+        <item>dances to metaphysical reggaeton</item>
+        <item>cooks without ingredients</item>
+        <item>convinces rocks to change opinions</item>
+        <item>gives motivational speeches to dry leaves</item>
+        <item>trains ducklings for battle</item>
+        <item>whispers secrets to outlets</item>
+        <item>plays 5D chess</item>
+        <item>battles cosmic lint</item>
+        <item>programs in BASIC for fun</item>
+        <item>sells NFT thoughts</item>
+        <item>acts in other people’s dreams</item>
+        <item>solves drunk unicorn riddles</item>
+        <item>documents the lives of lost socks</item>
+        <item>collects likes from distant galaxies</item>
+        <item>writes haikus in Morse code</item>
+        <item>stays silent in extinct languages</item>
+    </string-array>
+
+    <string-array name="multiverse_ubicaciones">
+        <item>on Mars</item>
+        <item>in dimension 404</item>
+        <item>in a forgotten timeline</item>
+        <item>in the year 3022</item>
+        <item>in a jelly-made world</item>
+        <item>inside a platypus’s mind</item>
+        <item>in an abandoned app</item>
+        <item>in the emotional deep web</item>
+        <item>in an interdimensional café</item>
+        <item>in a vowel-less universe</item>
+        <item>in a dream shared by squirrels</item>
+        <item>in a toaster’s cloud memory</item>
+        <item>in a ghost reality show</item>
+        <item>in the independent republic of my fridge</item>
+        <item>in a sci-fi novel written by a worm</item>
+        <item>in a loop of endless TikToks</item>
+        <item>in the meme metaverse</item>
+        <item>in the multiverse WhatsApp group</item>
+        <item>in a depressed AI’s playlist</item>
+        <item>in the supreme court of lost socks</item>
+        <item>in a dragon’s beauty salon</item>
+        <item>on a medieval Minecraft server</item>
+        <item>in a fake horoscope algorithm</item>
+        <item>in a pixelated dimension</item>
+        <item>in a synthetic hug factory</item>
+    </string-array>
+
+</resources>

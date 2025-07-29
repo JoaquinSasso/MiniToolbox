@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Percent
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.Receipt
+import androidx.compose.material.icons.filled.Scoreboard
 import androidx.compose.material.icons.filled.Straighten
 import androidx.compose.material.icons.filled.Timelapse
 import androidx.compose.material.icons.filled.Timer
@@ -313,6 +314,13 @@ object ToolRegistry {
             category = ToolCategory.Herramientas,
             subCategory = R.string.subcategory_calculator,
             svgResId = R.drawable.interes_compuesto
+        ),
+        Tool(
+            name = R.string.tool_scoreboard,
+            screen = Screen.Scoreboard,
+            category = ToolCategory.Entretenimiento,
+            subCategory = R.string.subcategory_scoreboards,
+            icon = Icons.Filled.Scoreboard
         )
     )
 }
