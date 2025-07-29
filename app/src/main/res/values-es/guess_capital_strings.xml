@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="capital_question">¿Qué país tiene esta capital?</string>
+    <string name="capital_remaining_time">Tiempo restante: %1$s segundos</string>
+    <string name="score">Puntaje: %1$d</string>
+    <string name="record">Récord: %1$d</string>
+    <string name="result_wrong">¡Incorrecto! Tu puntuación se reinició.</string>
+    <string name="result_new_record">¡Nuevo récord!</string>
+
+    <string name="capital_help_title">Acerca de Adivina la Capital</string>
+    <string name="capital_help_line1">• Para qué sirve: Juego para practicar y divertirte reconociendo capitales del mundo.</string>
+    <string name="capital_help_line2">• Cómo usar: Aparece el nombre de una capital y debes elegir el país correspondiente.</string>
+    <string name="capital_help_line3">• Si acertás, sumás puntos. Si errás o se termina el tiempo, tu puntaje se reinicia.</string>
+
+</resources>

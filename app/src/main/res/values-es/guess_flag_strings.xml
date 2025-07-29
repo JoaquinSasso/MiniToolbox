@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="flag_question">¿De qué país es esta bandera?</string>
+    <string name="flag_info_title">Acerca de Adivina la Bandera</string>
+    <string name="flag_info_line1">• Para qué sirve: Juego para poner a prueba tus conocimientos sobre banderas del mundo.</string>
+    <string name="flag_info_line2">• Cómo usar: Aparece una bandera y debes elegir el país correspondiente. Si acertás, sumás puntos. Si errás, perdés el puntaje actual.</string>
+    <string name="flag_info_line3">• Hay un límite de tiempo de 10 segundos por cada bandera.</string>
+    <string name="flag_info_line4">• Créditos a Santiago Garcia por la idea</string>
+    <string name="result_timeout">¡Se acabó el tiempo! Tu puntuación se reinició.</string>
+</resources>
