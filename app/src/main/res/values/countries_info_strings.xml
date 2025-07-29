@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="country_search_label">Search country</string>
+    <string name="country_common_name">Common name</string>
+    <string name="country_official_name">Official name</string>
+    <string name="country_native_name">Native name</string>
+    <string name="country_capital">Capital</string>
+    <string name="country_currency">Currency</string>
+    <string name="country_phone_code">Phone code</string>
+    <string name="country_population">Population</string>
+    <string name="country_info_title">About Country Info</string>
+    <string name="country_info_line1">• Quick country lookup (offline, Protobuf binary).</string>
+    <string name="country_info_line2">• Optimized dataset loading.</string>
+    <string name="country_info_line3">• Select a country to view detailed information.</string>
+</resources>
