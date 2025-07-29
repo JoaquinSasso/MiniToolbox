@@ -48,7 +48,7 @@ fun CountriesInfoScreen(onBack: () -> Unit) {
     val haptic = LocalHapticFeedback.current
     val locale = Locale.getDefault()
     val formatter = remember { NumberFormat.getInstance(locale) }
-    val isEnglish = locale.language == "en"
+    val espanol = locale.language == "es"
 
     var countries by remember { mutableStateOf<List<CountryResponse>>(emptyList()) }
     var search by remember { mutableStateOf(TextFieldValue("")) }
@@ -121,7 +121,7 @@ fun CountriesInfoScreen(onBack: () -> Unit) {
                                 it.official.lowercase().contains(searchText) ||
                                 it.englishName.lowercase().contains(searchText)
                     }
-                    .sortedBy { if (isEnglish) it.englishName else it.name }
+                    .sortedBy { if (!espanol) it.englishName else it.name }
 
                 if (showList && filtered.isNotEmpty()) {
                     LazyColumn(
@@ -134,14 +134,14 @@ fun CountriesInfoScreen(onBack: () -> Unit) {
                             TextButton(
                                 onClick = {
                                     selectedCountry = country
-                                    val displayName = if (isEnglish) country.englishName else country.name
+                                    val displayName = if (!espanol) country.englishName else country.name
                                     search = TextFieldValue(text = displayName, selection = TextRange(displayName.length))
                                     showList = false
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 },
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                Text("${country.flag} ${if (isEnglish) country.englishName else country.name}")
+                                Text("${country.flag} ${if (!espanol) country.englishName else country.name}")
                             }
                         }
                     }
@@ -152,7 +152,7 @@ fun CountriesInfoScreen(onBack: () -> Unit) {
                     selectedCountry?.let { country ->
                         Spacer(Modifier.height(16.dp))
                         Text(
-                            text = "🌍 ${stringResource(R.string.country_common_name)}: ${if (isEnglish) country.englishName else country.name}",
+                            text = "🌍 ${stringResource(R.string.country_common_name)}: ${if (!espanol) country.englishName else country.name}",
                             style = MaterialTheme.typography.titleMedium
                         )
                         Text("🌐 ${stringResource(R.string.country_official_name)}: ${country.official}")
