@@ -60,7 +60,7 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
     val locale = Locale.getDefault()
-    val isEnglish = locale.language == "en"
+    val espanol = locale.language == "es"
     val scope = rememberCoroutineScope()
 
     var countries by remember { mutableStateOf<List<MinimalCountry>>(emptyList()) }
@@ -225,7 +225,7 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
                             ),
                             enabled = buttonsEnabled
                         ) {
-                            Text(if (isEnglish) option.englishName else option.name)
+                            Text(if (!espanol) option.englishName else option.name)
                         }
                     }
                 }

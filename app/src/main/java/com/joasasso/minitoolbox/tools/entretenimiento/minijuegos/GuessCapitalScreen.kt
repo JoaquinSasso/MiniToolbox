@@ -62,7 +62,7 @@ fun AdivinaCapitalScreen(onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
 
     val locale = Locale.getDefault()
-    val isEnglish = locale.language == "en"
+    val espanol = locale.language == "es"
 
     var countries by remember { mutableStateOf<List<CapitalOfCountry>>(emptyList()) }
     var currentQuestion by remember { mutableStateOf<CapitalOfCountry?>(null) }
@@ -256,7 +256,7 @@ fun AdivinaCapitalScreen(onBack: () -> Unit) {
                             ),
                             enabled = buttonsEnabled
                         ) {
-                            Text(if (isEnglish) option.englishName else option.name)
+                            Text(if (!espanol) option.englishName else option.name)
                         }
                     }
                 }
