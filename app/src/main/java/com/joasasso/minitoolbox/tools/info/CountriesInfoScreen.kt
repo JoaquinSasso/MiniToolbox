@@ -1,6 +1,6 @@
 package com.joasasso.minitoolbox.tools.info
 
-import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,8 +38,6 @@ import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.data.CountryOuterClass
 import com.joasasso.minitoolbox.data.CountryResponse
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -48,7 +46,9 @@ import java.util.Locale
 fun CountriesInfoScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
-    val formatter = remember { NumberFormat.getInstance(Locale("es", "AR")) }
+    val locale = Locale.getDefault()
+    val formatter = remember { NumberFormat.getInstance(locale) }
+    val isEnglish = locale.language == "en"
 
     var countries by remember { mutableStateOf<List<CountryResponse>>(emptyList()) }
     var search by remember { mutableStateOf(TextFieldValue("")) }
@@ -56,38 +56,40 @@ fun CountriesInfoScreen(onBack: () -> Unit) {
     var showInfo by remember { mutableStateOf(false) }
     var showList by remember { mutableStateOf(true) }
 
+    //Cargar dataset con información de países
     LaunchedEffect(Unit) {
-        val t0 = System.currentTimeMillis()
-        countries = withContext(Dispatchers.IO) {
-            val tRead0 = System.currentTimeMillis()
-            val bytes = context.assets.open("countries_dataset.pb").readBytes()
-            val tRead1 = System.currentTimeMillis()
-            Log.d("CountryLoad", "Lectura binaria: ${tRead1 - tRead0} ms")
-
-            val tParse0 = System.currentTimeMillis()
-            val protoList = CountryOuterClass.CountryList.parseFrom(bytes)
-            val tParse1 = System.currentTimeMillis()
-            Log.d("CountryLoad", "Parseo binario: ${tParse1 - tParse0} ms")
-
-            protoList.countriesList.map {
-                CountryResponse(
-                    name = it.name,
-                    official = it.official,
-                    native = it.native,
-                    currency = it.currency,
-                    capital = it.capitalList,
-                    phoneCode = it.phoneCode,
-                    flag = it.flag,
-                    population = it.population
-                )
-            }
+        val bytes = context.assets.open("countries_dataset.pb").readBytes()
+        val protoList = CountryOuterClass.CountryList.parseFrom(bytes)
+        countries = protoList.countriesList.map {
+            CountryResponse(
+                name = it.name,
+                englishName = it.englishName, // nuevo campo
+                official = it.official,
+                native = it.native,
+                currency = it.currency,
+                capital = it.capitalList,
+                phoneCode = it.phoneCode,
+                flag = it.flag,
+                population = it.population
+            )
         }
-        val t1 = System.currentTimeMillis()
-        Log.d("CountryLoad", "Carga + parseo total: ${t1 - t0} ms")
     }
 
+    //Volver a la lista de países al realizar gesto de volver atras
+    BackHandler(enabled = selectedCountry != null) {
+        selectedCountry = null
+        showList = true
+        search = TextFieldValue("")
+    }
+
+
     Scaffold(
-        topBar = { TopBarReusable(stringResource(R.string.tool_country_info), onBack, { showInfo = true }) }
+        topBar = {
+            TopBarReusable(
+                stringResource(R.string.tool_country_info),
+                onBack,
+                { showInfo = true })
+        }
     ) { padding ->
         Column(
             Modifier
@@ -108,16 +110,18 @@ fun CountriesInfoScreen(onBack: () -> Unit) {
                         showList = true
                         if (it.text.isEmpty()) selectedCountry = null
                     },
-                    label = { Text("Buscar país") },
+                    label = { Text(stringResource(R.string.country_search_label)) },
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 val filtered = countries
                     .filter {
-                        it.name.contains(search.text, ignoreCase = true) ||
-                                it.official.contains(search.text, ignoreCase = true)
+                        val searchText = search.text.lowercase()
+                        it.name.lowercase().contains(searchText) ||
+                                it.official.lowercase().contains(searchText) ||
+                                it.englishName.lowercase().contains(searchText)
                     }
-                    .sortedBy { it.name }
+                    .sortedBy { if (isEnglish) it.englishName else it.name }
 
                 if (showList && filtered.isNotEmpty()) {
                     LazyColumn(
@@ -130,16 +134,14 @@ fun CountriesInfoScreen(onBack: () -> Unit) {
                             TextButton(
                                 onClick = {
                                     selectedCountry = country
-                                    search = TextFieldValue(
-                                        text = country.name,
-                                        selection = TextRange(country.name.length)
-                                    )
+                                    val displayName = if (isEnglish) country.englishName else country.name
+                                    search = TextFieldValue(text = displayName, selection = TextRange(displayName.length))
                                     showList = false
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 },
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                Text("${country.flag} ${country.name}")
+                                Text("${country.flag} ${if (isEnglish) country.englishName else country.name}")
                             }
                         }
                     }
@@ -147,37 +149,49 @@ fun CountriesInfoScreen(onBack: () -> Unit) {
 
                 selectedCountry?.let { country ->
                     Spacer(Modifier.height(16.dp))
-                    Text("🌍 Nombre (ES): ${country.name}", style = MaterialTheme.typography.titleMedium)
-                    Text("🌐 Nombre oficial: ${country.official}")
-                    Text("📝 Nombre nativo: ${country.native}")
-                    Text("🏛️ Capital: ${if (country.capital.isNotEmpty()) country.capital.joinToString() else "N/A"}")
-                    Text("💰 Moneda: ${country.currency}")
-                    Text("📞 Código tel.: ${country.phoneCode}")
-                    Text("👥 Población: ${formatter.format(country.population)}")
+                    selectedCountry?.let { country ->
+                        Spacer(Modifier.height(16.dp))
+                        Text(
+                            text = "🌍 ${stringResource(R.string.country_common_name)}: ${if (isEnglish) country.englishName else country.name}",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text("🌐 ${stringResource(R.string.country_official_name)}: ${country.official}")
+                        Text("📝 ${stringResource(R.string.country_native_name)}: ${country.native}")
+                        Text("🏛️ ${stringResource(R.string.country_capital)}: ${if (country.capital.isNotEmpty()) country.capital.joinToString() else "N/A"}")
+                        Text("💰 ${stringResource(R.string.country_currency)}: ${country.currency}")
+                        Text("📞 ${stringResource(R.string.country_phone_code)}: ${country.phoneCode}")
+                        Text(
+                            "👥 ${stringResource(R.string.country_population)}: ${
+                                formatter.format(
+                                    country.population
+                                )
+                            }"
+                        )
+                    }
                 }
             }
         }
-    }
 
-    if (showInfo) {
-        AlertDialog(
-            onDismissRequest = { showInfo = false },
-            title = { Text("Acerca de Información de Países") },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Consulta rápida de países (offline, binario Protobuf).")
-                    Text("• Carga optimizada del dataset binario.")
-                    Text("• Seleccioná un país para ver su información detallada.")
+        if (showInfo) {
+            AlertDialog(
+                onDismissRequest = { showInfo = false },
+                title = { Text(stringResource(R.string.country_info_title)) },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(stringResource(R.string.country_info_line1))
+                        Text(stringResource(R.string.country_info_line2))
+                        Text(stringResource(R.string.country_info_line3))
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showInfo = false
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    }) {
+                        Text(stringResource(R.string.close))
+                    }
                 }
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    showInfo = false
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                }) {
-                    Text("Cerrar")
-                }
-            }
-        )
+            )
+        }
     }
 }

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="country_search_label">Buscar país</string>
+    <string name="country_common_name">Nombre común</string>
+    <string name="country_official_name">Nombre oficial</string>
+    <string name="country_native_name">Nombre nativo</string>
+    <string name="country_capital">Capital</string>
+    <string name="country_currency">Moneda</string>
+    <string name="country_phone_code">Código telefónico</string>
+    <string name="country_population">Población</string>
+    <string name="country_info_title">Acerca de Información de Países</string>
+    <string name="country_info_line1">• Consulta rápida de países (offline, binario Protobuf).</string>
+    <string name="country_info_line2">• Carga optimizada del dataset binario.</string>
+    <string name="country_info_line3">• Seleccioná un país para ver su información detallada.</string>
+</resources>
