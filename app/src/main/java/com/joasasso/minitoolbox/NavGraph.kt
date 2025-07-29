@@ -11,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.joasasso.minitoolbox.nav.Screen
 import com.joasasso.minitoolbox.tools.ToolRegistry
+import com.joasasso.minitoolbox.tools.entretenimiento.MarcadorEquiposScreen
 import com.joasasso.minitoolbox.tools.entretenimiento.TrucoScoreBoardScreen
 import com.joasasso.minitoolbox.tools.entretenimiento.aleatorio.CoinFlipScreen
 import com.joasasso.minitoolbox.tools.entretenimiento.aleatorio.LanzadorDadosScreen
@@ -245,6 +246,9 @@ fun MiniToolboxNavGraph(navController: NavHostController) {
         }
         composable(Screen.InteresCompuesto.route){
             InteresCompuestoScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.Scoreboard.route){
+            MarcadorEquiposScreen(onBack = { navController.popBackStack() })
         }
     }
 }

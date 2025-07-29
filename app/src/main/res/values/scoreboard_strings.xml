@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="marcador_agregar_equipo_content_desc">Add team</string>
+    <string name="marcador_eliminar_equipo_content_desc">Remove team</string>
+    <string name="marcador_editar_equipo_content_desc">Edit team</string>
+    <string name="marcador_sumar_punto_content_desc">Add point</string>
+    <string name="marcador_restar_punto_content_desc">Subtract point</string>
+    <string name="marcador_reiniciar_todo">Reset all</string>
+    <string name="marcador_reiniciar_todo_content_desc">Reset the scoreboard</string>
+    <string name="marcador_reset_dialog_titulo">Reset scoreboard?</string>
+    <string name="marcador_reset_dialog_texto">This will delete all teams and their scores.</string>
+    <string name="marcador_reset_dialog_confirmar">Reset</string>
+    <string name="marcador_reset_dialog_cancelar">Cancel</string>
+    <string name="marcador_equipo">Team</string>
+
+    <string name="marcador_help_title">About the Scoreboard Tool</string>
+    <string name="marcador_help_linea1">• Purpose: Keep track of the score of multiple teams during any game or competition.</string>
+    <string name="marcador_help_linea2">• How to use: Tap the + and - buttons to adjust each team’s score.</string>
+    <string name="marcador_help_linea3">• You can add new teams or remove any you no longer need.</string>
+    <string name="marcador_help_linea4">• You can reset all teams and their scores by tapping the reset button.</string>
+    <string name="marcador_help_linea5">• Ideal for board games, sports, trivia, or homemade contests.</string>
+
+    <string name="marcador_editar_equipo_dialog_title">Edit Team</string>
+    <string name="marcador_editar_equipo_nombre">Team name</string>
+    <string name="marcador_editar_equipo_color">Team color</string>
+</resources>

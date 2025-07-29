@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="marcador_agregar_equipo_content_desc">Agregar equipo</string>
+    <string name="marcador_eliminar_equipo_content_desc">Eliminar equipo</string>
+    <string name="marcador_editar_equipo_content_desc">Editar equipo</string>
+    <string name="marcador_sumar_punto_content_desc">Sumar punto</string>
+    <string name="marcador_restar_punto_content_desc">Restar punto</string>
+    <string name="marcador_reiniciar_todo">Reiniciar todo</string>
+    <string name="marcador_reiniciar_todo_content_desc">Reiniciar el marcador</string>
+    <string name="marcador_reset_dialog_titulo">¿Reiniciar marcador?</string>
+    <string name="marcador_reset_dialog_texto">Esto eliminará todos los equipos y sus puntajes.</string>
+    <string name="marcador_reset_dialog_confirmar">Reiniciar</string>
+    <string name="marcador_reset_dialog_cancelar">Cancelar</string>
+    <string name="marcador_equipo">Equipo</string>
+
+    <string name="marcador_help_title">Acerca del Marcador de Puntos"</string>
+    <string name="marcador_help_linea1">• Para qué sirve: Lleva el puntaje de varios equipos en cualquier juego o competencia.</string>
+    <string name="marcador_help_linea2">• Cómo usar: Tocá los botones + y - para sumar o restar puntos a cada equipo.</string>
+    <string name="marcador_help_linea3">• Podés agregar nuevos equipos o eliminar los que ya no necesites.</string>
+    <string name="marcador_help_linea4">• Podés eliminar todos los equipos y sus puntajes pulsando el botón de reinicio.</string>
+    <string name="marcador_help_linea5">• Ideal para juegos de mesa, deportes, trivias o competencias caseras.</string>
+
+    <string name="marcador_editar_equipo_dialog_title">Editar equipo</string>
+    <string name="marcador_editar_equipo_nombre">Nombre del equipo</string>
+    <string name="marcador_editar_equipo_color">Color del equipo</string>
+
+</resources>

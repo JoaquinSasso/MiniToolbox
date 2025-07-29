@@ -1,5 +1,6 @@
 package com.joasasso.minitoolbox.tools.entretenimiento.minijuegos
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -48,6 +49,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
@@ -70,56 +72,37 @@ fun InOtherWoldScreen(onBack: () -> Unit) {
     var backgroundColor by remember { mutableStateOf(ComposeColor(0xFFFFF176)) }
     var textBackgroundColor: Int = 0
 
+    val nombres = stringArrayResource(R.array.multiverse_nombres)
+    val roles = stringArrayResource(R.array.multiverse_roles)
+    val ubicaciones = stringArrayResource(R.array.multiverse_ubicaciones)
 
-    val emojis = listOf(
-        "🧙", "🤖", "👑", "🐸", "👻", "🐉", "🧞", "🛸", "🐍", "☠️",
-        "🦄", "🍕", "🍄", "🐐", "🦕", "🧛", "👽", "🐙", "🎩", "👾",
-        "🎃", "🧠", "🧃", "🪩", "🐢"
-    )
-    val nombres = listOf(
-        "hechicero jubilado", "cajero automático con alma de poeta", "emperador de memes", "lagarto influencer",
-        "rey del karaoke intergaláctico", "zombie filósofo", "DJ en un culto de caracoles", "vampiro vegano",
-        "bot de Twitter", "dios del WiFi", "pingüino emprendedor", "papa frita semiconsciente", "pastelero intergaláctico",
-        "dinosaurio anciano", "luz de emergencia ansiosa", "cebra con doble identidad", "koala programador de C++",
-        "caracol filósofo estoico", "drone existencialista", "sandía con complejo de superioridad",
-        "código QR sensible", "cactus extrovertido", "pez payaso antisocial", "cuadro abstracto que llora",
-        "horno microondas con sueños"
-    )
-    val roles = listOf(
-        "que cría alpacas fluorescentes", "que da clases de filosofía a grillos", "que canta boleros con hologramas",
-        "que dirige una secta de plantas carnívoras", "que colecciona recuerdos ajenos", "que hackea tostadoras",
-        "que flota en spas gravitacionales", "que organiza fiestas para fantasmas", "que trota en cámara lenta",
-        "que baila reguetón metafísico", "que cocina sin ingredientes", "que convence a piedras de cambiar de opinión",
-        "que da discursos motivacionales a hojas secas", "que entrena patitos para el combate", "que murmura secretos a enchufes",
-        "que juega ajedrez en 5 dimensiones", "que pelea con pelusas cósmicas", "que programa en BASIC por gusto",
-        "que vende NFT de pensamientos", "que actúa en sueños ajenos", "que resuelve acertijos de unicornios borrachos",
-        "que documenta la vida de los calcetines perdidos", "que colecciona likes de galaxias lejanas",
-        "que escribe haikus en código Morse", "que guarda silencio en idiomas extintos"
-    )
-    val ubicaciones = listOf(
-        "en Marte", "en la dimensión 404", "en una línea temporal olvidada", "en el año 3022",
-        "en un mundo hecho de gelatina", "en la mente de un ornitorrinco", "en una app abandonada",
-        "en la deep web emocional", "en una cafetería interdimensional", "en un universo sin vocales",
-        "en un sueño compartido por ardillas", "en la nube de datos de un tostador", "en un reality show con fantasmas",
-        "en la república independiente de mi heladera", "en una novela de ciencia ficción escrita por una lombriz",
-        "en un loop de TikToks infinitos", "en el metaverso de los memes", "en el grupo de WhatsApp de los multiversos",
-        "en la playlist de una IA deprimida", "en la corte suprema de los calcetines perdidos",
-        "en un salón de belleza de dragones", "en un servidor de Minecraft medieval", "en un algoritmo de horóscopos falsos",
-        "en una dimensión pixelada", "en una fábrica de abrazos sintéticos"
-    )
 
-    fun generarResultadoAleatorio(): String {
+    fun generarResultadoAleatorio(context: Context): String {
+        val emojis = listOf(
+            "🧙", "🤖", "👑", "🐸", "👻", "🐉", "🧞", "🛸", "🐍", "☠️",
+            "🦄", "🍕", "🍄", "🐐", "🦕", "🧛", "👽", "🐙", "🎩", "👾",
+            "🎃", "🧠", "🧃", "🪩", "🐢"
+        )
+
         val emoji = emojis.random()
         val letra = ('A'..'Z').random()
         val nombre = nombres.random()
         val rol = roles.random()
         val ubicacion = ubicaciones.random()
-        return "$emoji La persona con inicial $letra es un $nombre $rol $ubicacion."
+
+        return context.getString(
+            R.string.multiverse_result_template,
+            emoji,
+            letra,
+            nombre,
+            rol,
+            ubicacion
+        )
     }
 
     var imagenResultado by remember { mutableStateOf<Bitmap?>(null) }
 
-    fun compartirImagen(){
+    fun compartirImagen() {
         try {
             val cacheDir = context.cacheDir
             val file = File(cacheDir, "multiverso.png")
@@ -169,25 +152,37 @@ fun InOtherWoldScreen(onBack: () -> Unit) {
 
 
     Scaffold(
-        topBar = { TopBarReusable(stringResource(R.string.tool_multiverse_me), onBack, {showInfo = true}) },
+        topBar = {
+            TopBarReusable(stringResource(R.string.tool_multiverse_me), onBack, { showInfo = true })
+        },
         floatingActionButton = {
             Column(horizontalAlignment = Alignment.End) {
                 if (imagenResultado != null) {
                     ExtendedFloatingActionButton(
-                        onClick = {compartirImagen()},
-                        icon = { Icon(Icons.Default.Share, contentDescription = null) },
-                        text = { Text("Compartir imagen") }
+                        onClick = { compartirImagen() },
+                        icon = {
+                            Icon(
+                                Icons.Default.Share,
+                                contentDescription = stringResource(R.string.share_image_desc)
+                            )
+                        },
+                        text = { Text(stringResource(R.string.share_image)) }
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                 }
 
                 ExtendedFloatingActionButton(
                     onClick = {
-                        resultado = generarResultadoAleatorio()
+                        resultado = generarResultadoAleatorio(context)
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     },
-                    icon = { Icon(Icons.Default.Refresh, contentDescription = null) },
-                    text = { Text("Nuevo amigo") }
+                    icon = {
+                        Icon(
+                            Icons.Default.Refresh,
+                            contentDescription = stringResource(R.string.new_friend_desc)
+                        )
+                    },
+                    text = { Text(stringResource(R.string.new_friend)) }
                 )
             }
         }
@@ -210,7 +205,14 @@ fun InOtherWoldScreen(onBack: () -> Unit) {
                     }
 
                     val fondoColores = listOf(
-                        "#FFF176", "#AED581", "#81D4FA", "#FFAB91", "#CE93D8", "#FFD54F", "#B39DDB", "#FFCDD2"
+                        "#FFF176",
+                        "#AED581",
+                        "#81D4FA",
+                        "#FFAB91",
+                        "#CE93D8",
+                        "#FFD54F",
+                        "#B39DDB",
+                        "#FFCDD2"
                     )
 
                     val fondoColor = fondoColores.random().toColorInt()
@@ -268,7 +270,7 @@ fun InOtherWoldScreen(onBack: () -> Unit) {
                         .padding(16.dp, bottom = 24.dp)
                         .alpha(fadeAnim)
                         .clickable(onClick = {
-                            resultado = generarResultadoAleatorio()
+                            resultado = generarResultadoAleatorio(context)
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         }),
                     contentAlignment = Alignment.Center
@@ -287,31 +289,33 @@ fun InOtherWoldScreen(onBack: () -> Unit) {
             } else {
                 Button(
                     onClick = {
-                        resultado = generarResultadoAleatorio()
+                        resultado = generarResultadoAleatorio(context)
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(24.dp)
                 ) {
-                    Text("¿Quién es tu amigo en otro universo?", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        stringResource(R.string.who_is_your_friend),
+                        style = MaterialTheme.typography.titleMedium
+                    )
                 }
             }
         }
     }
+
     if (showInfo) {
         AlertDialog(
             onDismissRequest = { showInfo = false },
-            title = { Text("Acerca de En otro mundo") },
+            title = { Text(stringResource(R.string.about_multiverse)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Para qué sirve: Te genera frases divertidas y virales sobre un amigo en un universo alternativo.")
-                    Text("• Guía rápida:")
-                    Text("   – Toca el botón principal para generar una nueva frase aleatoria.")
-                    Text("   – Cada resultado incluye un emoji, un nombre absurdo, un rol inusual y un lugar extraño.")
-                    Text("   – Podés compartir el resultado con tus amigos usando el botón de compartir.")
-                    Text("   – ¡Ideal para redes sociales, para enviárselo a tu grupo o para reírte un rato!")
-                    Text("Curiosidad: ¡Hay 10.156.250 combinaciones posibles entre emojis, letras, nombres, roles y lugares!")
-
+                    Text(stringResource(R.string.about_line1))
+                    Text(stringResource(R.string.about_line2))
+                    Text(stringResource(R.string.about_line3))
+                    Text(stringResource(R.string.about_line4))
+                    Text(stringResource(R.string.about_line5))
+                    Text(stringResource(R.string.about_fun_fact))
                 }
             },
             confirmButton = {
@@ -319,10 +323,9 @@ fun InOtherWoldScreen(onBack: () -> Unit) {
                     showInfo = false
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 }) {
-                    Text("Cerrar")
+                    Text(stringResource(R.string.close))
                 }
             }
         )
     }
-
 }
