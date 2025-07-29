@@ -61,7 +61,7 @@ import kotlin.coroutines.resume
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RachaScreen(onBack: () -> Unit) {
+fun HabitTrackerScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
     var showAddDialog by remember { mutableStateOf(false) }
@@ -76,14 +76,24 @@ fun RachaScreen(onBack: () -> Unit) {
     }
 
     Scaffold(
-        topBar = { TopBarReusable(stringResource(R.string.tool_habit_tracker), onBack, { showInfo = true }) },
+        topBar = {
+            TopBarReusable(
+                stringResource(R.string.tool_habit_tracker),
+                onBack,
+                { showInfo = true })
+        },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
                     showAddDialog = true
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 }
-            ) { Icon(Icons.Default.Add, contentDescription = "Agregar actividad") }
+            ) {
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = stringResource(R.string.habit_add_activity)
+                )
+            }
         }
     ) { padding ->
         LazyColumn(
@@ -94,14 +104,14 @@ fun RachaScreen(onBack: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             if (rachas.isEmpty()) {
-                item(){
+                item {
                     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)) {
                         Column(
                             Modifier.padding(16.dp)
                                 .fillMaxWidth()
                         ) {
-                            Text("Todavía no has agregado ningún hábito", fontSize = 20.sp)
-                            Text("Pulsa el botón + para agregarlos.", fontSize = 20.sp)
+                            Text(stringResource(R.string.habit_empty_title), fontSize = 20.sp)
+                            Text(stringResource(R.string.habit_empty_description), fontSize = 20.sp)
                         }
                     }
                 }
@@ -121,27 +131,47 @@ fun RachaScreen(onBack: () -> Unit) {
                         Spacer(Modifier.width(12.dp))
                         Column(Modifier.weight(1f)) {
                             Text(racha.nombre, fontSize = 20.sp, color = fg)
-                            Text(rangoMotivador(dias), fontSize = 14.sp, color = fg.copy(alpha = 0.7f))
+                            Text(
+                                rangoMotivador(dias),
+                                fontSize = 14.sp,
+                                color = fg.copy(alpha = 0.7f)
+                            )
                         }
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("$dias días", fontSize = 24.sp, color = fg)
+                            Text(
+                                stringResource(R.string.habit_days_count, dias),
+                                fontSize = 24.sp,
+                                color = fg
+                            )
                             Spacer(Modifier.height(4.dp))
                             Row(
                                 Modifier.clickable {
                                     CoroutineScope(Dispatchers.Main).launch {
-                                        val confirm = confirmResetDialog(context, racha.nombre, haptic)
+                                        val confirm =
+                                            confirmResetDialog(context, racha.nombre, haptic)
                                         if (confirm) {
                                             rachas = rachas.map {
-                                                if (it == racha) it.copy(inicio = LocalDate.now().toString()) else it
+                                                if (it == racha) it.copy(
+                                                    inicio = LocalDate.now().toString()
+                                                ) else it
                                             }
                                         }
                                     }
                                 }.padding(4.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Icon(Icons.Default.Refresh, contentDescription = null, tint = fg, modifier = Modifier.size(18.dp))
+                                Icon(
+                                    Icons.Default.Refresh,
+                                    contentDescription = null,
+                                    tint = fg,
+                                    modifier = Modifier.size(18.dp)
+                                )
                                 Spacer(Modifier.width(4.dp))
-                                Text("Resetear", fontSize = 12.sp, color = fg)
+                                Text(
+                                    stringResource(R.string.habit_reset),
+                                    fontSize = 12.sp,
+                                    color = fg
+                                )
                             }
                             Row(
                                 Modifier.clickable {
@@ -149,9 +179,18 @@ fun RachaScreen(onBack: () -> Unit) {
                                 }.padding(4.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Icon(Icons.Default.Delete, contentDescription = null, tint = fg, modifier = Modifier.size(18.dp))
+                                Icon(
+                                    Icons.Default.Delete,
+                                    contentDescription = null,
+                                    tint = fg,
+                                    modifier = Modifier.size(18.dp)
+                                )
                                 Spacer(Modifier.width(4.dp))
-                                Text("Eliminar", fontSize = 12.sp, color = fg)
+                                Text(
+                                    stringResource(R.string.habit_delete),
+                                    fontSize = 12.sp,
+                                    color = fg
+                                )
                             }
                         }
                     }
@@ -177,18 +216,18 @@ fun RachaScreen(onBack: () -> Unit) {
                 showInfo = false
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
             },
-            title = { Text("¿Cómo funciona?") },
+            title = { Text(stringResource(R.string.habit_help_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Puedes usar este contador para seguir buenos hábitos o dejar malos.")
-                    Text("• Las rachas se calculan a partir de la fecha de inicio.")
-                    Text("• Si ya llevabas una racha, puedes cargar la cantidad de días y se ajustará la fecha.")
-                    Text("• Los colores y frases cambian según tu progreso.")
+                    Text(stringResource(R.string.habit_help_1))
+                    Text(stringResource(R.string.habit_help_2))
+                    Text(stringResource(R.string.habit_help_3))
+                    Text(stringResource(R.string.habit_help_4))
                 }
             },
             confirmButton = {
                 TextButton(onClick = { showInfo = false }) {
-                    Text("Cerrar")
+                    Text(stringResource(R.string.close))
                 }
             }
         )
@@ -208,25 +247,41 @@ fun AddActividadDialog(onDismiss: () -> Unit, onAdd: (String, String, Int) -> Un
             onDismiss()
             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
         },
-        title = { Text("Agregar actividad") },
+        title = { Text(stringResource(R.string.habit_dialog_add_title)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(emoji, { emoji = it.take(2) }, label = { Text("Emoji") })
-                OutlinedTextField(nombre, { nombre = it }, label = { Text("Nombre") })
-                OutlinedTextField(dias, { dias = it.filter(Char::isDigit) }, label = { Text("Días") })
+                OutlinedTextField(
+                    value = emoji,
+                    onValueChange = { emoji = it.take(2) },
+                    label = { Text(stringResource(R.string.habit_dialog_emoji)) }
+                )
+                OutlinedTextField(
+                    value = nombre,
+                    onValueChange = { nombre = it },
+                    label = { Text(stringResource(R.string.habit_dialog_name)) }
+                )
+                OutlinedTextField(
+                    value = dias,
+                    onValueChange = { dias = it.filter(Char::isDigit) },
+                    label = { Text(stringResource(R.string.habit_dialog_days)) }
+                )
             }
         },
         confirmButton = {
             TextButton(enabled = ok, onClick = {
                 onAdd(emoji, nombre.text, dias.toInt())
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-            }) { Text("Agregar") }
+            }) {
+                Text(stringResource(R.string.habit_dialog_confirm))
+            }
         },
         dismissButton = {
             TextButton(onClick = {
                 onDismiss()
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-            }) { Text("Cancelar") }
+            }) {
+                Text(stringResource(R.string.cancel))
+            }
         }
     )
 }
@@ -237,13 +292,13 @@ suspend fun confirmResetDialog(
     haptic: HapticFeedback
 ): Boolean = suspendCancellableCoroutine { cont ->
     val dialog = AlertDialog.Builder(context)
-        .setTitle("Resetear contador")
-        .setMessage("¿Seguro que quieres reiniciar el contador de \"$nombre\" a cero?")
-        .setPositiveButton("Sí") { _, _ ->
+        .setTitle(context.getString(R.string.habit_dialog_reset_title))
+        .setMessage(context.getString(R.string.habit_dialog_reset_message, nombre))
+        .setPositiveButton(context.getString(R.string.yes)) { _, _ ->
             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
             cont.resume(true)
         }
-        .setNegativeButton("No") { _, _ ->
+        .setNegativeButton(context.getString(R.string.no)) { _, _ ->
             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
             cont.resume(false)
         }
@@ -252,27 +307,33 @@ suspend fun confirmResetDialog(
     dialog.show()
 }
 
+
 // Utils
 
 // Frases motivacionales/niveles según días
-fun rangoMotivador(dias: Int): String = when (dias) {
-    0 -> "¡Hoy arranca la racha! 🏁"
-    1 -> "¡Sobreviviste el primer día! 🥳"
-    2 -> "¡Dos días! ¡Ya es tendencia! 📈"
-    3 -> "¡Tres días! ¡Esto va en serio! 😎"
-    in 4..6 -> "¡Casi una semana! Ya puedes dar consejos. 👏"
-    in 7..9 -> "¡Una semana entera! Tu familia estaría orgullosa. 👨‍👩‍👧‍👦"
-    in 10..13 -> "¡Doble dígito! Ahora ya puedes presumir. 💬"
-    in 14..20 -> "¡Dos semanas! Dicen que ya es hábito... ¿Será? 🤔"
-    in 21..29 -> "¡Tres semanas! ¡Mira esa constancia! 🚴"
-    in 30..44 -> "¡Un mes! ¡Eres una máquina! 🤖"
-    in 45..59 -> "¡Ya perdí la cuenta! ¿Quién eres? 👀"
-    in 60..89 -> "¡Dos meses! ¡Esto dura más que mi serie favorita! 📺"
-    in 90..179 -> "¡Tres meses! Leyenda en progreso. 🏅"
-    in 180..364 -> "¡Medio año! Ya puedes darte el lujo de olvidar cómo era antes. 🧠"
-    in 365..729 -> "¡Un año! Si hubiera un club, ya serías presidente. 🏅"
-    in 730..1094 -> "¡Dos años! Seguro ya eres una leyenda urbana. 🕵️‍♂️"
-    else -> "¡Racha épica! ¿Ya te hiciste famoso? 🦸"
+@Composable
+fun rangoMotivador(dias: Int): String {
+    return stringResource(
+        when (dias) {
+            0 -> R.string.habit_motivation_0
+            1 -> R.string.habit_motivation_1
+            2 -> R.string.habit_motivation_2
+            3 -> R.string.habit_motivation_3
+            in 4..6 -> R.string.habit_motivation_4_6
+            in 7..9 -> R.string.habit_motivation_7_9
+            in 10..13 -> R.string.habit_motivation_10_13
+            in 14..20 -> R.string.habit_motivation_14_20
+            in 21..29 -> R.string.habit_motivation_21_29
+            in 30..44 -> R.string.habit_motivation_30_44
+            in 45..59 -> R.string.habit_motivation_45_59
+            in 60..89 -> R.string.habit_motivation_60_89
+            in 90..179 -> R.string.habit_motivation_90_179
+            in 180..364 -> R.string.habit_motivation_180_364
+            in 365..729 -> R.string.habit_motivation_365_729
+            in 730..1094 -> R.string.habit_motivation_730_1094
+            else -> R.string.habit_motivation_default
+        }
+    )
 }
 
 

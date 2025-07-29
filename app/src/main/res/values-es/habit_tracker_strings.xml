@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="habit_add_activity">Agregar actividad</string>
+    <string name="habit_empty_title">Todavía no has agregado ningún hábito</string>
+    <string name="habit_empty_description">Pulsa el botón + para agregarlos.</string>
+    <string name="habit_days_count">%1$d días</string>
+    <string name="habit_reset">Resetear</string>
+    <string name="habit_delete">Eliminar</string>
+
+    <string name="habit_help_title">¿Cómo funciona?</string>
+    <string name="habit_help_1">• Puedes usar este contador para seguir buenos hábitos o dejar malos.</string>
+    <string name="habit_help_2">• Las rachas se calculan a partir de la fecha de inicio.</string>
+    <string name="habit_help_3">• Si ya llevabas una racha, puedes cargar la cantidad de días y se ajustará la fecha.</string>
+    <string name="habit_help_4">• Los colores y frases cambian según tu progreso.</string>
+
+    <string name="habit_dialog_add_title">Agregar actividad</string>
+    <string name="habit_dialog_emoji">Emoji</string>
+    <string name="habit_dialog_name">Nombre</string>
+    <string name="habit_dialog_days">Días</string>
+    <string name="habit_dialog_confirm">Agregar</string>
+    <string name="habit_dialog_reset_title">Resetear contador</string>
+    <string name="habit_dialog_reset_message">¿Seguro que quieres reiniciar el contador de "%1$s" a cero?</string>
+
+    <string name="habit_motivation_0">¡Hoy arranca la racha! 🏁</string>
+    <string name="habit_motivation_1">¡Sobreviviste el primer día! 🥳</string>
+    <string name="habit_motivation_2">¡Dos días! ¡Ya es tendencia! 📈</string>
+    <string name="habit_motivation_3">¡Tres días! ¡Esto va en serio! 😎</string>
+    <string name="habit_motivation_4_6">¡Casi una semana! Ya puedes dar consejos. 👏</string>
+    <string name="habit_motivation_7_9">¡Una semana entera! Tu familia estaría orgullosa. 👨‍👩‍👧‍👦</string>
+    <string name="habit_motivation_10_13">¡Doble dígito! Ahora ya puedes presumir. 💬</string>
+    <string name="habit_motivation_14_20">¡Dos semanas! Dicen que ya es hábito… ¿Será? 🤔</string>
+    <string name="habit_motivation_21_29">¡Tres semanas! ¡Mira esa constancia! 🚴</string>
+    <string name="habit_motivation_30_44">¡Un mes! ¡Eres una máquina! 🤖</string>
+    <string name="habit_motivation_45_59">¡Ya perdí la cuenta! ¿Quién eres? 👀</string>
+    <string name="habit_motivation_60_89">¡Dos meses! ¡Esto dura más que mi serie favorita! 📺</string>
+    <string name="habit_motivation_90_179">¡Tres meses! Leyenda en progreso. 🏅</string>
+    <string name="habit_motivation_180_364">¡Medio año! Ya puedes darte el lujo de olvidar cómo era antes. 🧠</string>
+    <string name="habit_motivation_365_729">¡Un año! Si hubiera un club, ya serías presidente. 🏅</string>
+    <string name="habit_motivation_730_1094">¡Dos años! Seguro ya eres una leyenda urbana. 🕵️‍♂️</string>
+    <string name="habit_motivation_default">¡Racha épica! ¿Ya te hiciste famoso? 🦸</string>
+
+
+</resources>

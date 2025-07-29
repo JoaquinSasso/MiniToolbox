@@ -51,7 +51,7 @@ import com.joasasso.minitoolbox.tools.organizacion.divisorGastos.EditarGastoScre
 import com.joasasso.minitoolbox.tools.organizacion.divisorGastos.ReunionesScreen
 import com.joasasso.minitoolbox.tools.organizacion.pomodoro.PomodoroScreen
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.EventosImportantesScreen
-import com.joasasso.minitoolbox.tools.organizacion.recordatorios.RachaScreen
+import com.joasasso.minitoolbox.tools.organizacion.recordatorios.HabitTrackerScreen
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.ToDoListScreen
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AguaReminderScreen
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AguaStatisticsScreen
@@ -145,7 +145,7 @@ fun MiniToolboxNavGraph(navController: NavHostController) {
             FlashScreen(onBack = {navController.popBackStack() })
         }
         composable(Screen.Rachas.route){
-            RachaScreen(onBack = {navController.popBackStack() })
+            HabitTrackerScreen(onBack = {navController.popBackStack() })
         }
         composable(Screen.Agua.route){
             AguaReminderScreen(

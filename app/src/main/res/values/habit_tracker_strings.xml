@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="habit_add_activity">Add activity</string>
+    <string name="habit_empty_title">You haven\'t added any habit yet</string>
+    <string name="habit_empty_description">Tap the + button to add one.</string>
+    <string name="habit_days_count">%1$d days</string>
+    <string name="habit_reset">Reset</string>
+    <string name="habit_delete">Delete</string>
+
+    <string name="habit_help_title">How does it work?</string>
+    <string name="habit_help_1">• Use this tracker to follow good habits or quit bad ones.</string>
+    <string name="habit_help_2">• Streaks are calculated from the start date.</string>
+    <string name="habit_help_3">• If you already have a streak, you can load the number of days and it will adjust the start date.</string>
+    <string name="habit_help_4">• Colors and messages change based on your progress.</string>
+
+    <string name="habit_dialog_add_title">Add activity</string>
+    <string name="habit_dialog_emoji">Emoji</string>
+    <string name="habit_dialog_name">Name</string>
+    <string name="habit_dialog_days">Days</string>
+    <string name="habit_dialog_confirm">Add</string>
+    <string name="habit_dialog_reset_title">Reset counter</string>
+    <string name="habit_dialog_reset_message">Are you sure you want to reset the counter for "%1$s" to zero?</string>
+
+    <string name="habit_motivation_0">Day one. Let’s go! 🚀</string>
+    <string name="habit_motivation_1">You made it through the first day! 🔥</string>
+    <string name="habit_motivation_2">Two days? You\'re on a roll! 🛼</string>
+    <string name="habit_motivation_3">Three days strong. You\’re serious about this! 💪</string>
+    <string name="habit_motivation_4_6">Almost a week! You\'re building momentum. 🎯</string>
+    <string name="habit_motivation_7_9">One full week! Legends start like this. 🏁</string>
+    <string name="habit_motivation_10_13">Double digits! Not just a phase. 📆</string>
+    <string name="habit_motivation_14_20">Two weeks! It’s getting real. 👊</string>
+    <string name="habit_motivation_21_29">Three weeks? You’re basically unstoppable. 🚴</string>
+    <string name="habit_motivation_30_44">One month strong! You\'re a force of habit. 🌟</string>
+    <string name="habit_motivation_45_59">Lost count? That’s a good sign. 😎</string>
+    <string name="habit_motivation_60_89">Two months in! This beats most New Year’s resolutions. 🎉</string>
+    <string name="habit_motivation_90_179">Three months? You\'re in beast mode. 🐉</string>
+    <string name="habit_motivation_180_364">Half a year! You’ve built a whole new you. 🧠</string>
+    <string name="habit_motivation_365_729">One year! That’s next-level commitment. 👑</string>
+    <string name="habit_motivation_730_1094">Two years?! You’re the stuff of legend. 🦾</string>
+    <string name="habit_motivation_default">Epic streak! Teach us your ways, master. 🙇</string>
+
+</resources>
