@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--Main screen-->
+    <string name="water_goal_label">Daily goal: %1$.2fL</string>
+    <string name="water_add_title">Add water</string>
+    <string name="water_add">+%1$d ml</string>
+    <string name="water_remove">-%1$d ml</string>
+    <string name="water_change_glass">Change glass amount</string>
+
+    <string name="water_notif_title">Water reminder</string>
+    <string name="water_notif_enabled">Notifications</string>
+    <string name="water_notif_freq">Frequency: %1$.1f hrs</string>
+    <string name="notif_enabled_snackbar">Notifications enabled</string>
+    <string name="notif_disabled_snackbar">Notifications disabled</string>
+
+    <string name="reset_content_desc">Reset</string>
+    <string name="stats">Statistics</string>
+    <string name="stats_content_desc">Statistics</string>
+    <string name="water_widget_hint">You can add the widget to your home screen to track your water intake more easily.</string>
+
+    <string name="glass_amount_title">Glass amount</string>
+    <string name="glass_amount_label">ml</string>
+
+    <string name="water_help_title">About the water reminder</string>
+    <string name="water_help_line1">• Track the amount of water you drink daily.</string>
+    <string name="water_help_line2">• You can set your daily goal and the amount added per button press.</string>
+    <string name="water_help_line3">• If you enable notifications, the app will remind you to drink water based on the chosen interval.</string>
+    <string name="water_help_line4">• All data is stored locally and never shared outside your device.</string>
+    <string name="water_help_line5">• You can add the widget to your home screen to see your daily progress and quickly add/remove water without opening the app.</string>
+    <string name="water_help_line6">💧 Tip: An adult should drink between 1.5 and 3 liters of pure water per day. The suggested goal is 2 liters, but you can adjust it based on your needs, activity level, and climate.</string>
+
+</resources>
