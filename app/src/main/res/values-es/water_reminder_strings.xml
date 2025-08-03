@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--Pantalla principal-->
+    <string name="water_goal_label">Meta diaria: %1$.2fL</string>
+    <string name="water_add_title">Agregar agua</string>
+    <string name="water_add">+%1$d ml</string>
+    <string name="water_remove">-%1$d ml</string>
+    <string name="water_change_glass">Cambiar cantidad del vaso</string>
+
+    <string name="water_notif_title">Recordatorio de agua</string>
+    <string name="water_notif_enabled">Notificaciones</string>
+    <string name="water_notif_freq">Frecuencia: %1$.1f hs</string>
+    <string name="notif_enabled_snackbar">Notificaciones activadas</string>
+    <string name="notif_disabled_snackbar">Notificaciones desactivadas</string>
+
+    <string name="reset_content_desc">Resetear</string>
+    <string name="stats">Estadísticas</string>
+    <string name="stats_content_desc">Estadísticas</string>
+    <string name="water_widget_hint">Puedes agregar el widget a tu pantalla de inicio para registrar tu consumo de agua más fácilmente.</string>
+
+    <string name="glass_amount_title">Cantidad por vaso</string>
+    <string name="glass_amount_label">ml</string>
+
+    <string name="water_help_title">Sobre el recordatorio de agua</string>
+    <string name="water_help_line1">• Lleva el control de la cantidad de agua que consumes a diario.</string>
+    <string name="water_help_line2">• Puedes configurar tu meta diaria y la cantidad que sumas con cada botón.</string>
+    <string name="water_help_line3">• Si activas las notificaciones, la app te recordará tomar agua según el intervalo elegido.</string>
+    <string name="water_help_line4">• Todo se almacena localmente y no se comparte fuera de tu dispositivo.</string>
+    <string name="water_help_line5">• Puedes agregar el widget a tu pantalla de inicio para ver tu progreso diario y sumar o restar agua rápidamente sin abrir la app.</string>
+    <string name="water_help_line6">💧 Recomendación: un adulto debe consumir entre 1.5 y 3 litros de agua pura al día. La meta diaria sugerida es de 2 litros, pero puedes ajustarla según tus necesidades, actividad y clima.</string>
+
+</resources>
