@@ -12,6 +12,7 @@
     <string name="water_notif_freq">Frecuencia: %1$.1f hs</string>
     <string name="notif_enabled_snackbar">Notificaciones activadas</string>
     <string name="notif_disabled_snackbar">Notificaciones desactivadas</string>
+    <string name="notif_permission_denied">No se otorgó permiso para notificaciones.</string>
 
     <string name="reset_content_desc">Resetear</string>
     <string name="stats">Estadísticas</string>
@@ -28,5 +29,10 @@
     <string name="water_help_line4">• Todo se almacena localmente y no se comparte fuera de tu dispositivo.</string>
     <string name="water_help_line5">• Puedes agregar el widget a tu pantalla de inicio para ver tu progreso diario y sumar o restar agua rápidamente sin abrir la app.</string>
     <string name="water_help_line6">💧 Recomendación: un adulto debe consumir entre 1.5 y 3 litros de agua pura al día. La meta diaria sugerida es de 2 litros, pero puedes ajustarla según tus necesidades, actividad y clima.</string>
+
+    <string name="water_zero_warning">Ya no hay agua</string>
+    <string name="water_added_feedback">Agregaste %1$d ml 💧</string>
+    <string name="water_removed_feedback">Quitaste %1$d ml 💧</string>
+    <string name="water_reset_feedback">¡Contador de agua reiniciado!</string>
 
 </resources>
