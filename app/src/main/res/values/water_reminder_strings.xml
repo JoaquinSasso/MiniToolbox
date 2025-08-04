@@ -34,4 +34,20 @@
     <string name="water_added_feedback">You added %1$d ml 💧</string>
     <string name="water_removed_feedback">You removed %1$d ml 💧</string>
     <string name="water_reset_feedback">Water counter reset!</string>
+
+    <!--Statistics screen-->
+    <string name="water_statistics_screen_no_data">No data</string>
+    <string name="water_statistics_ultimos7">Last 7 days of water consumption</string>
+    <string name="water_statistics_sin_registros">No saved records</string>
+    <string name="water_statistics_promedio">Weekly average: %1$.2fL/day</string>
+    <string name="water_statistics_mejor_dia">Best day: %1$s</string>
+    <string name="water_statistics_historial">Full history</string>
+    <string name="water_statistics_historial_vacio">You haven\'t logged any water intake yet.</string>
+
+    <string name="water_statistics_help_title">About the statistics</string>
+    <string name="water_statistics_help_line1">• The chart shows your daily intake: green bars indicate you reached or exceeded your goal, red bars mean you didn\'t.</string>
+    <string name="water_statistics_help_line2">• In the history, the liters consumed appear in green if you met your goal that day, or red if not.</string>
+    <string name="water_statistics_help_line3">• The weekly average is based on your last 7 recorded days.</string>
+    <string name="water_statistics_help_line4">• All data is stored locally on your device.</string>
+
 </resources>

@@ -35,4 +35,19 @@
     <string name="water_removed_feedback">Quitaste %1$d ml 💧</string>
     <string name="water_reset_feedback">¡Contador de agua reiniciado!</string>
 
+    <!--Pantalla de estadisticas-->
+    <string name="water_statistics_screen_no_data">No hay datos</string>
+    <string name="water_statistics_ultimos7">Consumo últimos 7 días</string>
+    <string name="water_statistics_sin_registros">Sin registros guardados</string>
+    <string name="water_statistics_promedio">Promedio semanal: %1$.2fL/día</string>
+    <string name="water_statistics_mejor_dia">Mejor día: %1$s</string>
+    <string name="water_statistics_historial">Historial completo</string>
+    <string name="water_statistics_historial_vacio">Aún no has registrado consumo de agua.</string>
+
+    <string name="water_statistics_help_title">Sobre las estadísticas</string>
+    <string name="water_statistics_help_line1">• El gráfico muestra tu consumo diario: las barras en verde indican que alcanzaste o superaste tu objetivo, y las barras en rojo indican que no lo alcanzaste.</string>
+    <string name="water_statistics_help_line2">• En el historial, los litros consumidos aparecen en verde si ese día cumpliste tu meta, y en rojo si no.</string>
+    <string name="water_statistics_help_line3">• El promedio semanal se calcula sobre los últimos 7 días registrados.</string>
+    <string name="water_statistics_help_line4">• Todos los datos se guardan localmente en tu dispositivo.</string>
+
 </resources>

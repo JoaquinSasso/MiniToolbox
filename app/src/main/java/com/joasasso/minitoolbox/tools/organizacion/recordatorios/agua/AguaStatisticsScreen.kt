@@ -97,7 +97,7 @@ fun AguaStatisticsScreen(
                 .padding(horizontal = 24.dp, vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Consumo últimos 7 días", fontSize = 17.sp, color = MaterialTheme.colorScheme.primary)
+            Text(stringResource(R.string.water_statistics_ultimos7), fontSize = 17.sp, color = MaterialTheme.colorScheme.primary)
             Spacer(Modifier.height(8.dp))
             // --- Barra semanal ---
             BarChartAguaSemana(
@@ -107,29 +107,31 @@ fun AguaStatisticsScreen(
             Spacer(Modifier.height(16.dp))
             // --- Datos ---
             if (historico.isEmpty()) {
-                Text("Sin registros guardados", color = MaterialTheme.colorScheme.error)
+                Text(stringResource(R.string.water_statistics_sin_registros), color = MaterialTheme.colorScheme.error)
             } else {
                 Text(
-                    "Promedio semanal: ${(promedioSemana/1000f).let { "%.2f".format(it) }}L/día",
+                    stringResource(R.string.water_statistics_promedio, promedioSemana / 1000f),
                     fontSize = 18.sp,
                     color = MaterialTheme.colorScheme.primary
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    "Mejor día: " +
-                            historico.maxByOrNull { it.second }?.let {
-                                "${it.first.dayOfMonth}/${it.first.monthValue} - ${(it.second/1000f).let { f-> "%.2f".format(f)}}L"
-                            }.orEmpty(),
+                    stringResource(
+                        R.string.water_statistics_mejor_dia,
+                        historico.maxByOrNull { it.second }?.let {
+                            "${it.first.dayOfMonth}/${it.first.monthValue} - ${(it.second / 1000f).let { f -> "%.2f".format(f) }}L"
+                        }.orEmpty()
+                    ),
                     fontSize = 15.sp
                 )
             }
             Spacer(Modifier.height(18.dp))
             HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
             Spacer(Modifier.height(18.dp))
-            Text("Historial completo", fontSize = 17.sp, color = MaterialTheme.colorScheme.secondary)
+            Text(stringResource(R.string.water_statistics_historial), fontSize = 17.sp, color = MaterialTheme.colorScheme.secondary)
             Spacer(Modifier.height(6.dp))
             if (historico.isEmpty()) {
-                Text("Aún no has registrado consumo de agua.")
+                Text(stringResource(R.string.water_statistics_historial_vacio))
             } else {
                 historico.sortedByDescending { it.first }.forEach { (fecha, ml) ->
                         Row(
@@ -162,13 +164,13 @@ fun AguaStatisticsScreen(
     if (showInfo) {
         AlertDialog(
             onDismissRequest = { showInfo = false },
-            title = { Text("Sobre las estadísticas") },
+            title = { Text(stringResource(R.string.water_statistics_help_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• El gráfico muestra tu consumo diario: las barras en verde indican que alcanzaste o superaste tu objetivo, y las barras en rojo indican que no lo alcanzaste.")
-                    Text("• En el historial, los litros consumidos aparecen en verde si ese día cumpliste tu meta, y en rojo si no.")
-                    Text("• El promedio semanal se calcula sobre los últimos 7 días registrados.")
-                    Text("• Todos los datos se guardan localmente en tu dispositivo.")
+                    Text(stringResource(R.string.water_statistics_help_line1))
+                    Text(stringResource(R.string.water_statistics_help_line2))
+                    Text(stringResource(R.string.water_statistics_help_line3))
+                    Text(stringResource(R.string.water_statistics_help_line4))
                 }
             },
             confirmButton = {
@@ -176,7 +178,7 @@ fun AguaStatisticsScreen(
                     showInfo = false
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 }) {
-                    Text("Cerrar")
+                    Text(stringResource(R.string.close))
                 }
             }
         )
@@ -193,7 +195,7 @@ fun BarChartAguaSemana(
     val rojoSuave = Color(0xFFE57373)
     if (datos.isEmpty()) {
         Box(Modifier.height(72.dp), contentAlignment = Alignment.Center) {
-            Text("Sin datos")
+            Text(stringResource(R.string.water_statistics_screen_no_data))
         }
         return
     }
