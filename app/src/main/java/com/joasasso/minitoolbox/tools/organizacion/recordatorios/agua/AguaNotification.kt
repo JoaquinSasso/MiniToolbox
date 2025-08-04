@@ -23,23 +23,36 @@ class WaterReminderReceiver : BroadcastReceiver() {
     }
 
     private fun showNotification(context: Context, consumido: Int, objetivo: Int) {
-        val channelId = "agua_reminder_channel"
+        val channelId = WATER_REMINDER_CHANNEL_ID
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        val channel = NotificationChannel(channelId, "Recordatorio de Agua", NotificationManager.IMPORTANCE_DEFAULT)
+        val channel = NotificationChannel(
+            channelId,
+            context.getString(R.string.water_reminder_channel_name),
+            NotificationManager.IMPORTANCE_DEFAULT
+        ).apply {
+            description = context.getString(R.string.water_reminder_channel_description)
+        }
         manager.createNotificationChannel(channel)
 
         val intent = Intent(context, MainActivity::class.java).apply {
             putExtra("startRoute", "agua")
         }
+
         val pi = PendingIntent.getActivity(
             context, 0, intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
         val notification = NotificationCompat.Builder(context, channelId)
-            .setContentTitle("Hora de beber agua 💧")
-            .setContentText("Has consumido ${(consumido / 1000f).let { "%.2f".format(it) }}L de ${(objetivo / 1000f).let { "%.2f".format(it) }}L")
+            .setContentTitle(context.getString(R.string.water_reminder_title))
+            .setContentText(
+                context.getString(
+                    R.string.water_reminder_content,
+                    consumido / 1000f,
+                    objetivo / 1000f
+                )
+            )
             .setContentIntent(pi)
             .setSmallIcon(R.drawable.ic_water)
             .setAutoCancel(true)
@@ -49,21 +62,23 @@ class WaterReminderReceiver : BroadcastReceiver() {
     }
 }
 
+
 const val WATER_REMINDER_CHANNEL_ID = "water_reminder_channel"
 
 /** Crea el canal de notificación para el recordatorio de agua */
 fun createWaterReminderChannel(context: Context) {
-    val mgr = ContextCompat.getSystemService(context, NotificationManager::class.java)
-        ?: return
+    val mgr = ContextCompat.getSystemService(context, NotificationManager::class.java) ?: return
+
     val channel = NotificationChannel(
         WATER_REMINDER_CHANNEL_ID,
-        "Recordatorio de Agua",
+        context.getString(R.string.water_reminder_channel_name),
         NotificationManager.IMPORTANCE_HIGH
     ).apply {
-        description = "Recordatorios para beber agua durante el día"
+        description = context.getString(R.string.water_reminder_channel_description)
         enableLights(true)
         lightColor = android.graphics.Color.BLUE
         setShowBadge(false)
     }
     mgr.createNotificationChannel(channel)
 }
+

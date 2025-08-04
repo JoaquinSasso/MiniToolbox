@@ -50,4 +50,11 @@
     <string name="water_statistics_help_line3">• El promedio semanal se calcula sobre los últimos 7 días registrados.</string>
     <string name="water_statistics_help_line4">• Todos los datos se guardan localmente en tu dispositivo.</string>
 
+    <!-- Notificacion -->
+    <string name="water_reminder_title">Hora de beber agua 💧</string>
+    <string name="water_reminder_content">Has consumido %1$.2fL de %2$.2fL</string>
+    <string name="water_reminder_channel_name">Recordatorio de Agua</string>
+    <string name="water_reminder_channel_description">Recordatorios para beber agua durante el día</string>
+
+
 </resources>

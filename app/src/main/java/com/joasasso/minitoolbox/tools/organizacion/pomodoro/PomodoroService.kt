@@ -12,6 +12,7 @@ import android.os.Vibrator
 import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationManagerCompat
+import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.data.PomodoroStateRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -66,8 +67,13 @@ class PomodoroService : Service() {
         // Mostrar notificación de conteo inicial (MM:00)
         startForeground(
             NOTIFICATION_ID,
-            buildCountdownNotification(this, "Pomodoro iniciado", "%02d:00".format(workMin))
+            buildCountdownNotification(
+                this,
+                getString(R.string.pomodoro_started),
+                "%02d:00".format(workMin)
+            )
         )
+
 
         scope.launch {
             try {
@@ -78,35 +84,34 @@ class PomodoroService : Service() {
                     else                    runPhase("Descanso corto", shortMin)
                 }
             }
-            catch (e: SecurityException) { }
+            catch (_: SecurityException) { }
         }
         return START_STICKY
     }
 
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
-    private suspend fun runPhase(name: String, minutes: Int) {
-        // Descontar 5 segundos de heads-up del siguiente ciclo
-        val pauseSec = 5L
-        val totalSec = if (cycleCount > 0) minutes * 60L - pauseSec
-        else                 minutes * 60L
+    private suspend fun runPhase(nameRaw: String, minutes: Int) {
+        val name = when (nameRaw) {
+            "Trabajo" -> getString(R.string.pomodoro_work)
+            "Descanso corto" -> getString(R.string.pomodoro_short_break)
+            "Descanso largo" -> getString(R.string.pomodoro_long_break)
+            else -> nameRaw
+        }
 
+        val pauseSec = 5L
+        val totalSec = if (cycleCount > 0) minutes * 60L - pauseSec else minutes * 60L
         val startMs = System.currentTimeMillis()
         val endMs = startMs + totalSec * 1000L
 
-        // Guardar estado
         stateRepo.updatePhase(name, endMs, totalSec)
 
-        // Vibrar breve al inicio de fase
         getSystemService(Vibrator::class.java)
             ?.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE))
 
-        // Loop de actualización de notificación por tiempo real
         while (true) {
             val now = System.currentTimeMillis()
             val remainingMs = endMs - now
             val remainingSec = (remainingMs / 1000L).coerceAtLeast(0L)
-
-            // Mostrar tiempo en la notificación
             val mm = remainingSec / 60
             val ss = remainingSec % 60
             NotificationManagerCompat.from(this)
@@ -114,30 +119,26 @@ class PomodoroService : Service() {
                     NOTIFICATION_ID,
                     buildCountdownNotification(this, "⏳ $name", "%02d:%02d".format(mm, ss))
                 )
-
-            // Salir si se acabó el tiempo (o lo sobrepasó)
             if (remainingMs <= 0) break
-
-            // Esperar solo hasta el siguiente segundo, pero sin confiar en delay exacto
-            val delayMs = (remainingMs % 1000L).let { if (it > 0) it else 1000L }
-            delay(delayMs)
+            delay((remainingMs % 1000L).let { if (it > 0) it else 1000L })
         }
 
-        // Heads-up de fin de fase
         NotificationManagerCompat.from(this)
             .notify(
                 NOTIFICATION_ID,
-                buildAlarmNotification(this, "✅ $name terminado", "Pulsa para silenciar o detener")
+                buildAlarmNotification(
+                    this,
+                    getString(R.string.pomodoro_finished, name),
+                    getString(R.string.pomodoro_tap_to_stop)
+                )
             )
 
-        // Vibración y sonido de alarma
         getSystemService(Vibrator::class.java)
             ?.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE))
         playSound()
-
-        // Mantener heads-up visible al menos 5 s (esto sí puede ser delay)
         delay(5_000L)
     }
+
 
     private fun playSound() {
         try {
