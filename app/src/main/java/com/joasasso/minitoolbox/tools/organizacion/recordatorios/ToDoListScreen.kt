@@ -41,8 +41,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -58,6 +60,10 @@ import kotlinx.coroutines.launch
 fun ToDoListScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+
+    var showInfo by remember { mutableStateOf(false) }
+    val haptics = LocalHapticFeedback.current
+
 
     var selectedTab by remember { mutableIntStateOf(0) } // 0 = Pendiente, 1 = Hecho
     var showDialog by remember { mutableStateOf(false) }
@@ -77,10 +83,14 @@ fun ToDoListScreen(onBack: () -> Unit) {
     }
 
     Scaffold(
-        topBar = { TopBarReusable(stringResource(R.string.tool_todo_list), onBack) },
+        topBar = { TopBarReusable(stringResource(R.string.tool_todo_list), onBack, { showInfo = true }) },
         floatingActionButton = {
-            FloatingActionButton(onClick = { showDialog = true }) {
-                Icon(Icons.Default.Add, contentDescription = "Agregar tarea")
+            FloatingActionButton(onClick = { showDialog = true
+                haptics.performHapticFeedback(HapticFeedbackType.LongPress)}) {
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = stringResource(R.string.todo_add_task_desc)
+                )
             }
         }
     ) { padding ->
@@ -100,16 +110,17 @@ fun ToDoListScreen(onBack: () -> Unit) {
                         contentColor = if (selectedTab == 0) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 ) {
-                    Text("Pendientes")
+                    Text(stringResource(R.string.todo_tab_pending))
                 }
                 Button(
-                    onClick = { selectedTab = 1 },
+                    onClick = { selectedTab = 1
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)},
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (selectedTab == 1) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
                         contentColor = if (selectedTab == 1) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 ) {
-                    Text("Hechas")
+                    Text(stringResource(R.string.todo_tab_done))
                 }
             }
 
@@ -120,7 +131,7 @@ fun ToDoListScreen(onBack: () -> Unit) {
                 if (itemsToShow.isEmpty()) {
                     item {
                         Text(
-                            "No hay tareas",
+                            stringResource(R.string.todo_empty),
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Center
@@ -128,7 +139,7 @@ fun ToDoListScreen(onBack: () -> Unit) {
                     }
                 }
                 items(itemsToShow, key = { it.id }) { item ->
-                val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+                    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
                     val scope = rememberCoroutineScope()
 
                     var transitioning by remember { mutableStateOf(false) }
@@ -137,8 +148,7 @@ fun ToDoListScreen(onBack: () -> Unit) {
                     var visible by remember { mutableStateOf(item.isDone == (selectedTab == 1)) }
                     var bgColor by remember {
                         mutableStateOf(
-                            if (item.isDone) primaryContainerColor
-                            else surfaceVariantColor
+                            if (item.isDone) primaryContainerColor else surfaceVariantColor
                         )
                     }
 
@@ -148,7 +158,6 @@ fun ToDoListScreen(onBack: () -> Unit) {
                             animationSpec = tween(durationMillis = 500),
                             label = "offsetAnim"
                         )
-
                         val animatedAlpha by animateFloatAsState(
                             targetValue = alpha,
                             animationSpec = tween(durationMillis = 500),
@@ -175,23 +184,20 @@ fun ToDoListScreen(onBack: () -> Unit) {
                                 Checkbox(
                                     checked = item.isDone,
                                     onCheckedChange = {
+                                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                                         if (!transitioning) {
                                             transitioning = true
-
-                                            // Cambio inmediato de color
                                             bgColor = if (!item.isDone)
-                                                primaryContainerColor
-                                            else
-                                                surfaceVariantColor
-
-                                            // Salida hacia la derecha si se marca como hecho, izquierda si se desmarca
-                                            offsetX = if (selectedTab == 0) screenWidth.value * 2f else -screenWidth.value * 2f
+                                                primaryContainerColor else surfaceVariantColor
+                                            offsetX = if (selectedTab == 0)
+                                                screenWidth.value * 2f else -screenWidth.value * 2f
                                             alpha = 0f
-
                                             scope.launch {
                                                 delay(500)
                                                 val updated = toDoList.map {
-                                                    if (it.id == item.id) it.copy(isDone = !it.isDone) else it
+                                                    if (it.id == item.id)
+                                                        it.copy(isDone = !it.isDone)
+                                                    else it
                                                 }
                                                 updateList(updated)
                                                 offsetX = 0f
@@ -209,6 +215,7 @@ fun ToDoListScreen(onBack: () -> Unit) {
                                 )
                                 if (selectedTab == 1) {
                                     IconButton(onClick = {
+                                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                                         val updated = toDoList.filter { it.id != item.id }
                                         alpha = 0f
                                         scope.launch {
@@ -218,12 +225,11 @@ fun ToDoListScreen(onBack: () -> Unit) {
                                     }) {
                                         Icon(
                                             imageVector = Icons.Default.Delete,
-                                            contentDescription = "Eliminar",
+                                            contentDescription = stringResource(R.string.todo_delete_task_desc),
                                             tint = MaterialTheme.colorScheme.onPrimaryContainer
                                         )
                                     }
                                 }
-
                             }
                         }
                     }
@@ -234,17 +240,18 @@ fun ToDoListScreen(onBack: () -> Unit) {
         if (showDialog) {
             AlertDialog(
                 onDismissRequest = { showDialog = false },
-                title = { Text("Nueva tarea") },
+                title = { Text(stringResource(R.string.todo_dialog_title)) },
                 text = {
                     OutlinedTextField(
                         value = newItemText,
                         onValueChange = { newItemText = it },
-                        label = { Text("Descripción") },
+                        label = { Text(stringResource(R.string.todo_dialog_label)) },
                         singleLine = true
                     )
                 },
                 confirmButton = {
                     TextButton(onClick = {
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                         if (newItemText.isNotBlank()) {
                             val new = ToDoItem(
                                 id = toDoList.maxOfOrNull { it.id + 1 } ?: 0,
@@ -256,18 +263,42 @@ fun ToDoListScreen(onBack: () -> Unit) {
                             showDialog = false
                         }
                     }) {
-                        Text("Agregar")
+                        Text(stringResource(R.string.todo_dialog_add))
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = {
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                         newItemText = ""
                         showDialog = false
                     }) {
-                        Text("Cancelar")
+                        Text(stringResource(R.string.close))
                     }
                 }
             )
         }
     }
+    if (showInfo) {
+        AlertDialog(
+            onDismissRequest = { showInfo = false },
+            title = { Text(stringResource(R.string.todo_help_title)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(stringResource(R.string.todo_help_line1))
+                    Text(stringResource(R.string.todo_help_line2))
+                    Text(stringResource(R.string.todo_help_line3))
+                    Text(stringResource(R.string.todo_help_line4))
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                    showInfo = false
+                }) {
+                    Text(stringResource(R.string.close))
+                }
+            }
+        )
+    }
+
 }

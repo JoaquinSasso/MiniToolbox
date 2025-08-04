@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="todo_tab_pending">Pending</string>
+    <string name="todo_tab_done">Done</string>
+    <string name="todo_empty">No tasks</string>
+    <string name="todo_add_task_desc">Add task</string>
+    <string name="todo_delete_task_desc">Delete</string>
+    <string name="todo_dialog_title">New Task</string>
+    <string name="todo_dialog_label">Description</string>
+    <string name="todo_dialog_add">Add</string>
+
+    <!-- Help -->
+    <string name="todo_help_title">How does it work?</string>
+    <string name="todo_help_line1">• Add pending tasks using the “+” floating button.</string>
+    <string name="todo_help_line2">• Check the box to mark a task as done; it will move automatically.</string>
+    <string name="todo_help_line3">• Switch between pending and completed tasks using the top buttons.</string>
+    <string name="todo_help_line4">• On the Done tab, you can permanently delete tasks.</string>
+
+</resources>
