@@ -117,13 +117,20 @@ fun AguaReminderScreen(
     // Inicializa el índice del slider acorde al valor actual, o usa el más cercano si no está en la lista
     var sliderIndex by remember { mutableIntStateOf(minutosList.indexOf(freqMinDS).takeIf { it >= 0 } ?: 0) }
 
+    // Strings para el snackbar
+    val zeroWarning = stringResource(R.string.water_zero_warning)
+    val addedText = stringResource(R.string.water_added_feedback)
+    val removedText = stringResource(R.string.water_removed_feedback)
+    val resetText = stringResource(R.string.water_reset_feedback)
+    val deniedText = stringResource(R.string.notif_permission_denied)
+
     // --- Lanzador de permiso de notificaciones ---
     val notifLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         if (!granted) {
             scope.launch {
-                snackbarHostState.showSnackbar("No se otorgó permiso para notificaciones.")
+                snackbarHostState.showSnackbar(deniedText)
             }
         }
     }
@@ -134,17 +141,22 @@ fun AguaReminderScreen(
     LaunchedEffect(porVasoDS) { mlPorVaso = porVasoDS }
 
     // -- Lógica agregar agua --
-    fun agregarAgua(cantidad: Int) {
-        if (totalAgua == 0 && cantidad < 0){
+    fun agregarAgua(
+        cantidad: Int,
+        zeroWarning: String,
+        addedText: String,
+        removedText: String
+    ) {
+        if (totalAgua == 0 && cantidad < 0) {
             scope.launch {
                 snackbarHostState.currentSnackbarData?.dismiss()
-                snackbarHostState.showSnackbar("Ya no hay agua")
+                snackbarHostState.showSnackbar(zeroWarning)
             }
             return
         }
         totalAgua += cantidad
         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-        val text = if (cantidad > 0) "Agregaste $cantidad ml 💧" else "Quitaste $cantidad ml 💧"
+        val text = if (cantidad > 0) addedText.format(cantidad) else removedText.format(kotlin.math.abs(cantidad))
         scope.launch {
             context.guardarAguaHoy(totalAgua.coerceAtLeast(0))
             actualizarWidgetAgua(context)
@@ -157,14 +169,14 @@ fun AguaReminderScreen(
     }
 
     // -- Reset de consumo --
-    fun resetear() {
+    fun resetear(resetText: String) {
         totalAgua = 0
         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
         scope.launch {
             context.guardarAguaHoy(0)
             actualizarWidgetAgua(context)
             snackbarHostState.currentSnackbarData?.dismiss()
-            snackbarHostState.showSnackbar("¡Contador de agua reiniciado!")
+            snackbarHostState.showSnackbar(resetText)
         }
         if (notifDS) {
             programarRecordatorioAgua(context, freqMinDS, totalAgua, objetivoML)
@@ -232,7 +244,7 @@ fun AguaReminderScreen(
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Meta diaria: ${(objetivoML / 1000f).let { "%.2f".format(it) }}L", fontSize = 16.sp)
+                Text("${context.getString(R.string.water_goal_label)} ${(objetivoML / 1000f).let { "%.2f".format(it) }}L", fontSize = 16.sp)
                 Spacer(Modifier.width(6.dp))
 
                 var lastSliderValue by remember { mutableFloatStateOf(objetivoML.toFloat()) }
@@ -252,7 +264,6 @@ fun AguaReminderScreen(
                     modifier = Modifier.weight(1f)
                 )
             }
-            Text("Agregar agua", fontSize = 17.sp, color = MaterialTheme.colorScheme.primary)
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -260,11 +271,11 @@ fun AguaReminderScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Button(
-                    onClick = { agregarAgua(mlPorVaso) }
+                    onClick = { agregarAgua(mlPorVaso, zeroWarning, addedText, removedText) }
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.water_full),
-                        contentDescription = "Agregar agua",
+                        contentDescription = stringResource(R.string.water_add),
                         Modifier.size(18.dp)
                     )
                     Spacer(Modifier.width(6.dp))
@@ -272,11 +283,11 @@ fun AguaReminderScreen(
                 }
                 Spacer(Modifier.width(32.dp))
                 Button(
-                    onClick = { agregarAgua(-mlPorVaso) }
+                    onClick = { agregarAgua(-mlPorVaso, zeroWarning, addedText, removedText) }
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.water_loss),
-                        contentDescription = "Quitar agua",
+                        contentDescription = stringResource(R.string.water_remove),
                         Modifier.size(18.dp)
                     )
                     Spacer(Modifier.width(6.dp))
@@ -288,9 +299,10 @@ fun AguaReminderScreen(
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                TextButton(
-                    onClick = { showDialogVaso = true }
-                ) { Text("Cambiar cantidad del vaso") }
+                Button(
+                    onClick = { showDialogVaso = true },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                ) { Text(stringResource(R.string.water_change_glass)) }
             }
 
             // --- Area de Notificaciones ---
@@ -299,13 +311,13 @@ fun AguaReminderScreen(
                 DividerDefaults.Thickness,
                 DividerDefaults.color
             )
-            Text("Recordatorio de beber agua", fontSize = 17.sp, color = MaterialTheme.colorScheme.primary)
+            Text(stringResource(R.string.water_notif_title), fontSize = 17.sp, color = MaterialTheme.colorScheme.primary)
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Notificaciones", fontSize = 16.sp)
+                Text(stringResource(R.string.water_notif_enabled), fontSize = 16.sp)
                 Switch(
                     checked = notifDS,
                     onCheckedChange = { checked ->
@@ -322,11 +334,11 @@ fun AguaReminderScreen(
                             if (checked) {
                                 programarRecordatorioAgua(context, freqMinDS, totalAgua, objetivoML)
                                 snackbarHostState.currentSnackbarData?.dismiss()
-                                snackbarHostState.showSnackbar("Notificaciones activadas")
+                                snackbarHostState.showSnackbar(context.getString(R.string.notif_enabled_snackbar))
                             } else {
                                 cancelarRecordatorioAgua(context)
                                 snackbarHostState.currentSnackbarData?.dismiss()
-                                snackbarHostState.showSnackbar("Notificaciones desactivadas")
+                                snackbarHostState.showSnackbar(context.getString(R.string.notif_disabled_snackbar))
                             }
                         }
                     }
@@ -339,7 +351,7 @@ fun AguaReminderScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Frecuencia: ${minutosList[sliderIndex] / 60f} hs", fontSize = 16.sp)
+                    Text(stringResource(R.string.water_notif_freq, minutosList[sliderIndex] / 60f), fontSize = 16.sp)
                     Slider(
                         value = sliderIndex.toFloat(),
                         onValueChange = { value ->
@@ -368,13 +380,12 @@ fun AguaReminderScreen(
                 Button(
                     onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        resetear()
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                        resetear(resetText)
+                    }
                 ) {
-                    Icon(Icons.Filled.Refresh, contentDescription = "Resetear")
+                    Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.reset_content_desc))
                     Spacer(Modifier.width(6.dp))
-                    Text("Resetear")
+                    Text(stringResource(R.string.reset_content_desc))
                 }
                 Spacer(Modifier.width(8.dp))
                 Button(
@@ -383,9 +394,9 @@ fun AguaReminderScreen(
                         onShowEstadisticas()
                     }
                 ) {
-                    Icon(Icons.Filled.BarChart, contentDescription = "Estadísticas")
+                    Icon(Icons.Filled.BarChart, contentDescription = stringResource(R.string.stats_content_desc))
                     Spacer(Modifier.width(6.dp))
-                    Text("Estadísticas")
+                    Text(stringResource(R.string.stats))
                 }
             }
             Spacer(Modifier.height(16.dp))
@@ -395,7 +406,7 @@ fun AguaReminderScreen(
                 modifier = Modifier.fillMaxWidth()
             )
             {
-                Text("Puedes agregar el widget a tu pantalla de inicio para registrar tu consumo de agua más fácilmente.")
+                Text(stringResource(R.string.water_widget_hint))
             }
         }
     }
@@ -405,12 +416,12 @@ fun AguaReminderScreen(
         var tempMl by remember { mutableStateOf(mlPorVaso.toString()) }
         AlertDialog(
             onDismissRequest = { showDialogVaso = false },
-            title = { Text("Cantidad por vaso") },
+            title = { Text(stringResource(R.string.glass_amount_title)) },
             text = {
                 OutlinedTextField(
                     value = tempMl,
                     onValueChange = { tempMl = it.filter { c -> c.isDigit() } },
-                    label = { Text("ml") },
+                    label = { Text(stringResource(R.string.glass_amount_label)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
             },
@@ -421,13 +432,13 @@ fun AguaReminderScreen(
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         showDialogVaso = false
                     }
-                }) { Text("Aceptar") }
+                }) { Text(stringResource(R.string.accept)) }
             },
             dismissButton = {
                 TextButton(onClick = {
                     showDialogVaso = false
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                }) { Text("Cancelar") }
+                }) { Text(stringResource(R.string.cancel)) }
             }
         )
     }
@@ -436,22 +447,22 @@ fun AguaReminderScreen(
     if (showInfo) {
         AlertDialog(
             onDismissRequest = { showInfo = false },
-            title = { Text("Sobre el recordatorio de agua") },
+            title = { Text(stringResource(R.string.water_help_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Lleva el control de la cantidad de agua que consumes a diario.")
-                    Text("• Puedes configurar tu meta diaria y la cantidad que sumas con cada botón.")
-                    Text("• Si activas las notificaciones, la app te recordará tomar agua según el intervalo elegido.")
-                    Text("• Todo se almacena localmente y no se comparte fuera de tu dispositivo.")
-                    Text("• Puedes agregar el widget a tu pantalla de inicio para ver tu progreso diario y sumar o restar agua rápidamente sin abrir la app.")
-                    Text("💧 Recomendación: un adulto debe consumir entre 1.5 y 3 litros de agua pura al día. La meta diaria sugerida es de 2 litros, pero puedes ajustarla según tus necesidades, actividad y clima.")
+                    Text(stringResource(R.string.water_help_line1))
+                    Text(stringResource(R.string.water_help_line2))
+                    Text(stringResource(R.string.water_help_line3))
+                    Text(stringResource(R.string.water_help_line4))
+                    Text(stringResource(R.string.water_help_line5))
+                    Text(stringResource(R.string.water_help_line6))
                 }
             },
             confirmButton = {
                 TextButton(onClick = {
                     showInfo = false
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                }) { Text("Cerrar") }
+                }) { Text(stringResource(R.string.close)) }
             }
         )
     }
