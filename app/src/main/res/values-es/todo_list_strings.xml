@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="todo_tab_pending">Pendientes</string>
+    <string name="todo_tab_done">Hechas</string>
+    <string name="todo_empty">No hay tareas</string>
+    <string name="todo_add_task_desc">Agregar tarea</string>
+    <string name="todo_delete_task_desc">Eliminar</string>
+    <string name="todo_dialog_title">Nueva tarea</string>
+    <string name="todo_dialog_label">Descripción</string>
+    <string name="todo_dialog_add">Agregar</string>
+
+    <!-- Ayuda -->
+    <string name="todo_help_title">¿Cómo funciona?</string>
+    <string name="todo_help_line1">• Puedes agregar tareas pendientes desde el botón flotante “+”.</string>
+    <string name="todo_help_line2">• Marca una tarea como hecha tocando la casilla; se moverá automáticamente.</string>
+    <string name="todo_help_line3">• Cambia entre tareas pendientes y hechas con los botones superiores.</string>
+    <string name="todo_help_line4">• En la pestaña de tareas hechas puedes eliminarlas definitivamente.</string>
+
+</resources>
