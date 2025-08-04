@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pomodoro_start">Iniciar</string>
+    <string name="pomodoro_stop">Detener</string>
+    <string name="pomodoro_silence">Silenciar</string>
+    <string name="pomodoro_work_label">Trabajo (min)</string>
+    <string name="pomodoro_short_label">Descanso corto (min)</string>
+    <string name="pomodoro_long_label">Descanso largo (min)</string>
+    <string name="pomodoro_help_title">Acerca de Pomodoro Timer</string>
+    <string name="pomodoro_help_line1">• Para qué sirve: Temporizador que alterna ciclos de trabajo y descanso para mejorar tu productividad.</string>
+    <string name="pomodoro_help_line2">• Guía rápida:</string>
+    <string name="pomodoro_help_line3">   – Ingresa la duración (min) de trabajo, descanso corto y descanso largo.\n   – Pulsa “Iniciar” para arrancar el ciclo.\n   – Usa “Silenciar” o “Detener” desde la notificación cuando lo necesites.\n   – El progreso y el tiempo restante se muestran aquí con barra y contador.</string>
+    <string name="pomodoro_help_line4">• Todos los datos se guardan localmente y nunca se comparten.</string>
+
+    <!-- Strings de notificación -->
+    <string name="pomodoro_channel_countdown_name">Pomodoro (Conteo)</string>
+    <string name="pomodoro_channel_countdown_desc">Actualizaciones de tiempo restante del Pomodoro</string>
+
+    <string name="pomodoro_channel_alarm_name">Pomodoro (Alarma)</string>
+    <string name="pomodoro_channel_alarm_desc">Alertas de fin de ciclo Pomodoro</string>
+
+    <string name="pomodoro_action_silence">Silenciar</string>
+    <string name="pomodoro_action_stop">Detener</string>
+
+    <!-- Strings del service -->
+    <string name="pomodoro_started">Pomodoro iniciado</string>
+    <string name="pomodoro_work">Trabajo</string>
+    <string name="pomodoro_short_break">Descanso corto</string>
+    <string name="pomodoro_long_break">Descanso largo</string>
+    <string name="pomodoro_finished">✅ %1$s terminado</string>
+    <string name="pomodoro_tap_to_stop">Pulsa para silenciar o detener</string>
+
+</resources>

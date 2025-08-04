@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pomodoro_start">Start</string>
+    <string name="pomodoro_stop">Stop</string>
+    <string name="pomodoro_silence">Silence</string>
+    <string name="pomodoro_work_label">Work (min)</string>
+    <string name="pomodoro_short_label">Short break (min)</string>
+    <string name="pomodoro_long_label">Long break (min)</string>
+    <string name="pomodoro_help_title">About Pomodoro Timer</string>
+    <string name="pomodoro_help_line1">• Purpose: Timer that alternates work and rest cycles to boost your productivity.</string>
+    <string name="pomodoro_help_line2">• Quick guide:</string>
+    <string name="pomodoro_help_line3">   – Enter the duration (min) for work, short break, and long break.\n   – Tap “Start” to begin the cycle.\n   – Use “Silence” or “Stop” from the notification as needed.\n   – Progress and remaining time are shown here with a bar and timer.</string>
+    <string name="pomodoro_help_line4">• All data is stored locally and never shared.</string>
+
+
+    <!-- Strings de notificación -->
+    <string name="pomodoro_channel_countdown_name">Pomodoro (Countdown)</string>
+    <string name="pomodoro_channel_countdown_desc">Time remaining updates for Pomodoro</string>
+
+    <string name="pomodoro_channel_alarm_name">Pomodoro (Alarm)</string>
+    <string name="pomodoro_channel_alarm_desc">Pomodoro cycle end alerts</string>
+
+    <string name="pomodoro_action_silence">Silence</string>
+    <string name="pomodoro_action_stop">Stop</string>
+
+    <!-- Strings del service -->
+    <string name="pomodoro_started">Pomodoro started</string>
+    <string name="pomodoro_work">Work</string>
+    <string name="pomodoro_short_break">Short break</string>
+    <string name="pomodoro_long_break">Long break</string>
+    <string name="pomodoro_finished">✅ %1$s finished</string>
+    <string name="pomodoro_tap_to_stop">Tap to silence or stop</string>
+
+</resources>

@@ -19,27 +19,24 @@ const val ALARM_CHANNEL_ID     = "pomodoro_alarm_channel"
 const val NOTIFICATION_ID       = 1337
 
 fun createPomodoroChannels(context: Context) {
-    val mgr = ContextCompat.getSystemService(context, NotificationManager::class.java)
-        ?: return
+    val mgr = ContextCompat.getSystemService(context, NotificationManager::class.java) ?: return
 
-    // Canal para conteo (baja importancia: sólo bandeja)
     val countdownChan = NotificationChannel(
         COUNTDOWN_CHANNEL_ID,
-        "Pomodoro (Conteo)",
+        context.getString(R.string.pomodoro_channel_countdown_name),
         NotificationManager.IMPORTANCE_LOW
     ).apply {
-        description = "Actualizaciones de tiempo restante del Pomodoro"
+        description = context.getString(R.string.pomodoro_channel_countdown_desc)
         setShowBadge(false)
     }
     mgr.createNotificationChannel(countdownChan)
 
-    // Canal para alarma (alta importancia: heads-up banner)
     val alarmChan = NotificationChannel(
         ALARM_CHANNEL_ID,
-        "Pomodoro (Alarma)",
+        context.getString(R.string.pomodoro_channel_alarm_name),
         NotificationManager.IMPORTANCE_HIGH
     ).apply {
-        description = "Alertas de fin de ciclo Pomodoro"
+        description = context.getString(R.string.pomodoro_channel_alarm_desc)
         enableLights(true)
         lightColor = Color.RED
         setShowBadge(false)
@@ -47,9 +44,9 @@ fun createPomodoroChannels(context: Context) {
     mgr.createNotificationChannel(alarmChan)
 }
 
+
 /** Notificación de conteo: MM:SS, sólo en bandeja */
 fun buildCountdownNotification(context: Context, title: String, timeLeft: String): Notification {
-    // Intent que abre PomodoroScreen
     val intent = Intent(context, MainActivity::class.java).apply {
         putExtra("startRoute", "pomodoro")
     }
@@ -64,26 +61,32 @@ fun buildCountdownNotification(context: Context, title: String, timeLeft: String
         .setContentText(timeLeft)
         .setContentIntent(pi)
         .setOngoing(true)
-        .setOnlyAlertOnce(true)                // no volver a sonar/vibrar
-        .addAction(R.drawable.ic_silence, "Silenciar",  // siempre disponibles
+        .setOnlyAlertOnce(true)
+        .addAction(
+            R.drawable.ic_silence,
+            context.getString(R.string.pomodoro_action_silence),
             PendingIntent.getService(
                 context, 1,
                 Intent(context, PomodoroService::class.java).setAction(ACTION_SILENCE),
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-            ))
-        .addAction(R.drawable.ic_stop,    "Detener",
+            )
+        )
+        .addAction(
+            R.drawable.ic_stop,
+            context.getString(R.string.pomodoro_action_stop),
             PendingIntent.getService(
                 context, 2,
                 Intent(context, PomodoroService::class.java).setAction(ACTION_STOP),
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-            ))
-        .setPriority(NotificationCompat.PRIORITY_LOW)     // no heads-up en conteo
+            )
+        )
+        .setPriority(NotificationCompat.PRIORITY_LOW)
         .build()
 }
 
+
 /** Notificación de alarma: heads-up banner, sonido/vibración */
 fun buildAlarmNotification(context: Context, title: String, text: String): Notification {
-    // Intents de acción
     val stopPI = PendingIntent.getService(
         context, 1,
         Intent(context, PomodoroService::class.java).setAction(ACTION_STOP),
@@ -94,10 +97,9 @@ fun buildAlarmNotification(context: Context, title: String, text: String): Notif
         Intent(context, PomodoroService::class.java).setAction(ACTION_SILENCE),
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
     )
-    // Intent para banner que abra PomodoroScreen
     val fsIntent = Intent(context, MainActivity::class.java).apply {
         putExtra("startRoute", "pomodoro")
-        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP // Correct
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
     }
     val fsPI = PendingIntent.getActivity(
         context, 3, fsIntent,
@@ -108,12 +110,13 @@ fun buildAlarmNotification(context: Context, title: String, text: String): Notif
         .setSmallIcon(R.drawable.ic_pomodoro)
         .setContentTitle(title)
         .setContentText(text)
-        .setFullScreenIntent(fsPI, false)     // false para banner, true pondría pantalla completa
+        .setFullScreenIntent(fsPI, false)
         .setCategory(NotificationCompat.CATEGORY_ALARM)
-        .addAction(R.drawable.ic_silence, "Silenciar", silencePI)
-        .addAction(R.drawable.ic_stop,    "Detener",  stopPI)
+        .addAction(R.drawable.ic_silence, context.getString(R.string.pomodoro_action_silence), silencePI)
+        .addAction(R.drawable.ic_stop, context.getString(R.string.pomodoro_action_stop), stopPI)
         .setOngoing(true)
-        .setDefaults(NotificationCompat.DEFAULT_ALL)  // sonido y vibración
-        .setPriority(NotificationCompat.PRIORITY_HIGH) // heads-up
+        .setDefaults(NotificationCompat.DEFAULT_ALL)
+        .setPriority(NotificationCompat.PRIORITY_HIGH)
         .build()
 }
+

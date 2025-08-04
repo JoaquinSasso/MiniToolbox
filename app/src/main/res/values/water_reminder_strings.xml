@@ -50,4 +50,10 @@
     <string name="water_statistics_help_line3">• The weekly average is based on your last 7 recorded days.</string>
     <string name="water_statistics_help_line4">• All data is stored locally on your device.</string>
 
+    <!-- Notification -->
+    <string name="water_reminder_title">Time to drink water 💧</string>
+    <string name="water_reminder_content">You have drunk %1$.2fL out of %2$.2fL</string>
+    <string name="water_reminder_channel_name">Water Reminder</string>
+    <string name="water_reminder_channel_description">Reminders to drink water throughout the day</string>
+
 </resources>
