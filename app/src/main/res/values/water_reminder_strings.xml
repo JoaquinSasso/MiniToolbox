@@ -56,4 +56,11 @@
     <string name="water_reminder_channel_name">Water Reminder</string>
     <string name="water_reminder_channel_description">Reminders to drink water throughout the day</string>
 
+    <!-- Widgets -->
+    <string name="widget_mini_agua_desc">Mini water widget</string>
+    <string name="widget_mini_agua_label">Water (Mini)</string>
+
+    <string name="widget_agua_desc">Water widget</string>
+    <string name="widget_agua_label">Water widget</string>
+
 </resources>

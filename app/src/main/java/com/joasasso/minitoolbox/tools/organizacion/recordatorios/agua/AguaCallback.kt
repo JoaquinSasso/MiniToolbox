@@ -4,8 +4,6 @@ import android.content.Context
 import androidx.glance.GlanceId
 import androidx.glance.action.ActionParameters
 import androidx.glance.appwidget.action.ActionCallback
-import androidx.glance.appwidget.state.updateAppWidgetState
-import androidx.glance.state.PreferencesGlanceStateDefinition
 import com.joasasso.minitoolbox.data.flujoAguaHoy
 import com.joasasso.minitoolbox.data.flujoFrecuenciaMinutos
 import com.joasasso.minitoolbox.data.flujoObjetivo
@@ -21,15 +19,7 @@ class AgregarAguaCallback : ActionCallback {
         val nuevo = actual + porVaso
         context.guardarAguaHoy(nuevo)
 
-        //Actualizar los datos del widget
-        updateAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId) { prefs ->
-            prefs.toMutablePreferences().apply {
-                this[AguaWidget.KEY_AGUA] = nuevo
-                this[AguaWidget.KEY_OBJETIVO] = context.flujoObjetivo().first()
-                this[AguaWidget.KEY_POR_VASO] = porVaso
-            }
-        }
-        AguaWidget().update(context, glanceId)
+        actualizarWidgetAgua(context)
 
         //Reprogramar la notificacion para beber agua
         val frecuenciaMinutos = context.flujoFrecuenciaMinutos().first()
@@ -46,15 +36,7 @@ class QuitarAguaCallback : ActionCallback {
         val nuevo = (actual - porVaso).coerceAtLeast(0)
         context.guardarAguaHoy(nuevo)
 
-        //Actualizar los datos del widget
-        updateAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId) { prefs ->
-            prefs.toMutablePreferences().apply {
-                this[AguaWidget.KEY_AGUA] = nuevo
-                this[AguaWidget.KEY_OBJETIVO] = context.flujoObjetivo().first()
-                this[AguaWidget.KEY_POR_VASO] = porVaso
-            }
-        }
-        AguaWidget().update(context, glanceId)
+        actualizarWidgetAgua(context)
 
         //Reprogramar la notificacion para beber agua
         val frecuenciaMinutos = context.flujoFrecuenciaMinutos().first()
