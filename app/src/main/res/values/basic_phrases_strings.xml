@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frases_idioma">Language</string>
+    <string name="frases_categoria">Category</string>
+    <string name="frases_help_title">How it works</string>
+    <string name="frases_play">Play</string>
+    <string name="frases_help_line1">• Use this tool to learn useful phrases for travel situations.</string>
+    <string name="frases_help_line2">• Select a language and a category to see common phrases.</string>
+    <string name="frases_help_line3">• Tap the speaker icon to hear the pronunciation.</string>
+    <string name="frases_help_line4">• No internet connection is required.</string>
+
+    <string name="frases_idioma_ingles">English</string>
+    <string name="frases_idioma_espanol">Spanish</string>
+    <string name="frases_idioma_frances">French</string>
+    <string name="frases_idioma_italiano">Italian</string>
+    <string name="frases_idioma_aleman">German</string>
+    <string name="frases_idioma_portugues">Portuguese</string>
+    <string name="frases_idioma_japones">Japanese</string>
+    <string name="frases_idioma_chino">Chinese</string>
+    <string name="frases_idioma_coreano">Korean</string>
+
+    <string name="frases_categoria_saludos">Greetings</string>
+    <string name="frases_categoria_preguntas">Basic Questions</string>
+    <string name="frases_categoria_emergencias">Emergencies</string>
+    <string name="frases_categoria_transporte">Transport</string>
+    <string name="frases_categoria_comida">Food</string>
+    <string name="frases_categoria_otros">Other</string>
+
+</resources>

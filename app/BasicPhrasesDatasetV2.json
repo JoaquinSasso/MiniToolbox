@@ -1,0 +1,330 @@
+{
+  "categorias": [
+    {
+      "id": 0,
+      "nombreResId": "phrases_categoria_saludos"
+    },
+    {
+      "id": 1,
+      "nombreResId": "phrases_categoria_preguntas"
+    },
+    {
+      "id": 2,
+      "nombreResId": "phrases_categoria_emergencias"
+    },
+    {
+      "id": 3,
+      "nombreResId": "phrases_categoria_transporte"
+    },
+    {
+      "id": 4,
+      "nombreResId": "phrases_categoria_comida"
+    },
+    {
+      "id": 5,
+      "nombreResId": "phrases_categoria_otros"
+    }
+  ],
+  "idiomas": [
+    {
+      "codigo": "es",
+      "nombreResId": "idioma_espanol",
+      "locale": "es"
+    },
+    {
+      "codigo": "en",
+      "nombreResId": "idioma_ingles",
+      "locale": "en"
+    }
+  ],
+  "frases": [
+    {
+      "id": 0,
+      "categoriaId": 0,
+      "traducciones": {
+        "es": "Hola",
+        "en": "Hello"
+      }
+    },
+    {
+      "id": 1,
+      "categoriaId": 0,
+      "traducciones": {
+        "es": "Buenos días",
+        "en": "Good morning"
+      }
+    },
+    {
+      "id": 2,
+      "categoriaId": 0,
+      "traducciones": {
+        "es": "Buenas tardes",
+        "en": "Good afternoon"
+      }
+    },
+    {
+      "id": 3,
+      "categoriaId": 0,
+      "traducciones": {
+        "es": "Buenas noches",
+        "en": "Good night"
+      }
+    },
+    {
+      "id": 4,
+      "categoriaId": 0,
+      "traducciones": {
+        "es": "Adiós",
+        "en": "Goodbye"
+      }
+    },
+    {
+      "id": 5,
+      "categoriaId": 0,
+      "traducciones": {
+        "es": "Hasta luego",
+        "en": "See you later"
+      }
+    },
+    {
+      "id": 6,
+      "categoriaId": 0,
+      "traducciones": {
+        "es": "Mucho gusto",
+        "en": "Nice to meet you"
+      }
+    },
+    {
+      "id": 7,
+      "categoriaId": 1,
+      "traducciones": {
+        "es": "¿Cómo estás?",
+        "en": "How are you?"
+      }
+    },
+    {
+      "id": 8,
+      "categoriaId": 1,
+      "traducciones": {
+        "es": "¿Qué hora es?",
+        "en": "What time is it?"
+      }
+    },
+    {
+      "id": 9,
+      "categoriaId": 1,
+      "traducciones": {
+        "es": "¿Cuánto cuesta?",
+        "en": "How much is it?"
+      }
+    },
+    {
+      "id": 10,
+      "categoriaId": 1,
+      "traducciones": {
+        "es": "¿Dónde está el baño?",
+        "en": "Where is the bathroom?"
+      }
+    },
+    {
+      "id": 11,
+      "categoriaId": 1,
+      "traducciones": {
+        "es": "¿Habla español?",
+        "en": "Do you speak Spanish?"
+      }
+    },
+    {
+      "id": 12,
+      "categoriaId": 1,
+      "traducciones": {
+        "es": "¿Puede ayudarme?",
+        "en": "Can you help me?"
+      }
+    },
+    {
+      "id": 13,
+      "categoriaId": 2,
+      "traducciones": {
+        "es": "¡Ayuda!",
+        "en": "Help!"
+      }
+    },
+    {
+      "id": 14,
+      "categoriaId": 2,
+      "traducciones": {
+        "es": "Llame a la policía",
+        "en": "Call the police"
+      }
+    },
+    {
+      "id": 15,
+      "categoriaId": 2,
+      "traducciones": {
+        "es": "Necesito un médico",
+        "en": "I need a doctor"
+      }
+    },
+    {
+      "id": 16,
+      "categoriaId": 2,
+      "traducciones": {
+        "es": "Estoy perdido",
+        "en": "I’m lost"
+      }
+    },
+    {
+      "id": 17,
+      "categoriaId": 2,
+      "traducciones": {
+        "es": "Me siento mal",
+        "en": "I feel sick"
+      }
+    },
+    {
+      "id": 18,
+      "categoriaId": 2,
+      "traducciones": {
+        "es": "Es una emergencia",
+        "en": "It’s an emergency"
+      }
+    },
+    {
+      "id": 19,
+      "categoriaId": 3,
+      "traducciones": {
+        "es": "¿Dónde está la estación?",
+        "en": "Where is the station?"
+      }
+    },
+    {
+      "id": 20,
+      "categoriaId": 3,
+      "traducciones": {
+        "es": "¿A qué hora sale el tren?",
+        "en": "What time does the train leave?"
+      }
+    },
+    {
+      "id": 21,
+      "categoriaId": 3,
+      "traducciones": {
+        "es": "Quisiera un boleto",
+        "en": "I’d like a ticket"
+      }
+    },
+    {
+      "id": 22,
+      "categoriaId": 3,
+      "traducciones": {
+        "es": "¿Cuánto cuesta el pasaje?",
+        "en": "How much is the fare?"
+      }
+    },
+    {
+      "id": 23,
+      "categoriaId": 3,
+      "traducciones": {
+        "es": "Este es mi destino",
+        "en": "This is my destination"
+      }
+    },
+    {
+      "id": 24,
+      "categoriaId": 4,
+      "traducciones": {
+        "es": "Tengo hambre",
+        "en": "I’m hungry"
+      }
+    },
+    {
+      "id": 25,
+      "categoriaId": 4,
+      "traducciones": {
+        "es": "Tengo sed",
+        "en": "I’m thirsty"
+      }
+    },
+    {
+      "id": 26,
+      "categoriaId": 4,
+      "traducciones": {
+        "es": "Quisiera una mesa para dos",
+        "en": "I’d like a table for two"
+      }
+    },
+    {
+      "id": 27,
+      "categoriaId": 4,
+      "traducciones": {
+        "es": "¿Cuál es el menú?",
+        "en": "What’s the menu?"
+      }
+    },
+    {
+      "id": 28,
+      "categoriaId": 4,
+      "traducciones": {
+        "es": "Sin picante, por favor",
+        "en": "No spicy, please"
+      }
+    },
+    {
+      "id": 29,
+      "categoriaId": 4,
+      "traducciones": {
+        "es": "La cuenta, por favor",
+        "en": "The check, please"
+      }
+    },
+    {
+      "id": 30,
+      "categoriaId": 5,
+      "traducciones": {
+        "es": "Gracias",
+        "en": "Thank you"
+      }
+    },
+    {
+      "id": 31,
+      "categoriaId": 5,
+      "traducciones": {
+        "es": "De nada",
+        "en": "You’re welcome"
+      }
+    },
+    {
+      "id": 32,
+      "categoriaId": 5,
+      "traducciones": {
+        "es": "Perdón",
+        "en": "Excuse me"
+      }
+    },
+    {
+      "id": 33,
+      "categoriaId": 5,
+      "traducciones": {
+        "es": "Lo siento",
+        "en": "I’m sorry"
+      }
+    },
+    {
+      "id": 34,
+      "categoriaId": 5,
+      "traducciones": {
+        "es": "No entiendo",
+        "en": "I don’t understand"
+      }
+    },
+    {
+      "id": 35,
+      "categoriaId": 5,
+      "traducciones": {
+        "es": "¿Puede repetirlo?",
+        "en": "Can you repeat that?"
+      }
+    }
+  ]
+}
