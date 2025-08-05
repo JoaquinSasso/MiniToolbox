@@ -563,23 +563,41 @@ fun cancelarRecordatorioAgua(context: Context) {
 
 /**Funcion para actualizar el progreso del consumo de agua en el widget desde la app*/
 fun actualizarWidgetAgua(context: Context) {
-    // Lanza la actualización en un hilo de fondo
     CoroutineScope(Dispatchers.IO).launch {
-        val glanceManager = GlanceAppWidgetManager(context)
-        val glanceIds = glanceManager.getGlanceIds(AguaWidget::class.java)
+        val agua = context.flujoAguaHoy().first()
+        val objetivo = context.flujoObjetivo().first()
+        val porVaso = context.flujoPorVaso().first()
 
-        glanceIds.forEach { glanceId ->
+        val glanceManager = GlanceAppWidgetManager(context)
+
+        // Actualiza AguaWidget (el largo)
+        val idsLargos = glanceManager.getGlanceIds(AguaWidget::class.java)
+        idsLargos.forEach { glanceId ->
             updateAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId) { prefs ->
                 prefs.toMutablePreferences().apply {
-                    this[AguaWidget.KEY_AGUA] = context.flujoAguaHoy().first()
-                    this[AguaWidget.KEY_OBJETIVO] = context.flujoObjetivo().first()
-                    this[AguaWidget.KEY_POR_VASO] = context.flujoPorVaso().first()
+                    this[AguaWidget.KEY_AGUA] = agua
+                    this[AguaWidget.KEY_OBJETIVO] = objetivo
+                    this[AguaWidget.KEY_POR_VASO] = porVaso
                 }
             }
         }
         AguaWidget().updateAll(context)
+
+        // Actualiza AguaMiniWidget (el compacto)
+        val idsMini = glanceManager.getGlanceIds(AguaMiniWidget::class.java)
+        idsMini.forEach { glanceId ->
+            updateAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId) { prefs ->
+                prefs.toMutablePreferences().apply {
+                    this[AguaMiniWidget.KEY_AGUA] = agua
+                    this[AguaMiniWidget.KEY_OBJETIVO] = objetivo
+                    this[AguaMiniWidget.KEY_POR_VASO] = porVaso
+                }
+            }
+        }
+        AguaMiniWidget().updateAll(context)
     }
 }
+
 
 fun programarResetAguaDiario(context: Context) {
     val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager

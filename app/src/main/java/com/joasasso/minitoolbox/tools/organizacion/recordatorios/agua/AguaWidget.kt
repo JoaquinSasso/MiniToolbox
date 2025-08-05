@@ -77,12 +77,12 @@ class AguaWidget : GlanceAppWidget() {
                     Spacer(GlanceModifier.height(8.dp))
                     Row(horizontalAlignment = Alignment.CenterHorizontally) {
                         Button(
-                            text = "+$porVaso ml",
+                            text = "+$porVaso",
                             onClick = actionRunCallback<AgregarAguaCallback>()
                         )
                         Spacer(GlanceModifier.width(8.dp))
                         Button(
-                            text = "-$porVaso ml",
+                            text = "-$porVaso",
                             onClick = actionRunCallback<QuitarAguaCallback>()
                         )
                     }
@@ -103,7 +103,7 @@ fun ProgressBarWidget(ml: Int, objetivo: Int) {
             .width(totalWidth)
             .height(altura)
             .cornerRadius(12.dp)
-            .background(ColorProvider(day = Color(0xFF0D47A1), night = Color(0xFF0D47A1))),
+            .background(ColorProvider(day = Color(0xFF0F5E9C), night = Color(0xFF0F5E9C))),
         contentAlignment = Alignment.CenterStart
     ) {
         // Barra de progreso
@@ -112,7 +112,7 @@ fun ProgressBarWidget(ml: Int, objetivo: Int) {
                 .width(totalWidth * frac)
                 .height(altura)
                 .cornerRadius(12.dp)
-                .background(ColorProvider(day = Color(0xFF90CAF9), night = Color(0xFF90CAF9)))
+                .background(ColorProvider(day = Color(0xFF2389DA), night = Color(0xFF2389DA)))
         ) { }
 
     }

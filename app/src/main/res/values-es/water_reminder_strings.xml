@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--Pantalla principal-->
-    <string name="water_goal_label">Meta diaria: %1$.2fL</string>
+    <string name="water_goal_label">Meta diaria:</string>
     <string name="water_add_title">Agregar agua</string>
     <string name="water_add">+%1$d ml</string>
     <string name="water_remove">-%1$d ml</string>
@@ -55,6 +55,14 @@
     <string name="water_reminder_content">Has consumido %1$.2fL de %2$.2fL</string>
     <string name="water_reminder_channel_name">Recordatorio de Agua</string>
     <string name="water_reminder_channel_description">Recordatorios para beber agua durante el día</string>
+
+    <!-- Widgets -->
+    <string name="widget_mini_agua_desc">Mini widget de agua</string>
+    <string name="widget_mini_agua_label">Agua (Mini)</string>
+
+    <string name="widget_agua_desc">Widget de agua</string>
+    <string name="widget_agua_label">Agua</string>
+
 
 
 </resources>
