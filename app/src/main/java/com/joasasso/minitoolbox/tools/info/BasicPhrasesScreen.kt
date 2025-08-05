@@ -1,6 +1,8 @@
-package com.joasasso.minitoolbox.tools.info
+package com.joasasso.minitoolbox.ui.screens
 
+import android.content.Context
 import android.speech.tts.TextToSpeech
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,7 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.VolumeUp
+import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -34,14 +36,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.joasasso.minitoolbox.R
-import com.joasasso.minitoolbox.data.categoriasDisponibles
+import com.joasasso.minitoolbox.data.Categoria
+import com.joasasso.minitoolbox.data.Frase
 import com.joasasso.minitoolbox.data.idiomasDisponibles
-import com.joasasso.minitoolbox.data.todasLasFrases
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import java.util.Locale
 
@@ -51,166 +56,164 @@ fun BasicPhrasesScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val tts = remember {
         TextToSpeech(context, null).apply {
-            this.language = Locale("es") // Or language = Locale("es")
+            this.language = Locale.getDefault()
         }
     }
     val haptic = LocalHapticFeedback.current
 
-    var selectedLanguage by remember { mutableStateOf(idiomasDisponibles.first()) }
-    var selectedCategory by remember { mutableStateOf(categoriasDisponibles.first()) }
-
-    val filteredPhrases = todasLasFrases.filter {
-        it.categoria == selectedCategory && selectedLanguage.codigo in it.traducciones
+    val frases: List<Frase> = remember {
+        cargarFrasesDesdeJson(context)
     }
 
-    // Dropdown states
+    val locale = LocalConfiguration.current.locales[0]
+    val mostrarCodigo = locale.language
+
+    var selectedLanguage by remember { mutableStateOf(idiomasDisponibles.first({ it.codigo != mostrarCodigo })) }
+    var selectedCategory by remember { mutableStateOf(Categoria.GREETINGS) }
+
+    val filteredPhrases = frases.filter {
+        it.categoria == selectedCategory.id &&
+                it.traducciones.containsKey(mostrarCodigo) &&
+                it.traducciones.containsKey(selectedLanguage.codigo)
+    }
+
     var expandedLanguage by remember { mutableStateOf(false) }
     var expandedCategory by remember { mutableStateOf(false) }
-
-    // Ayuda
     var showInfo by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
             TopBarReusable(stringResource(R.string.tool_basic_phrases), onBack = onBack, { showInfo = true })
-        },
-        content = { padding ->
-            Column(
-                modifier = Modifier
-                    .padding(padding)
-                    .fillMaxSize()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                // Idioma
+                ExposedDropdownMenuBox(
+                    expanded = expandedLanguage,
+                    onExpandedChange = { expandedLanguage = !expandedLanguage },
+                    modifier = Modifier.weight(1f)
                 ) {
-                    // Selector de idioma
-                    ExposedDropdownMenuBox(
+                    TextField(
+                        value = stringResource(id = selectedLanguage.nombreResId),
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text(stringResource(R.string.frases_idioma)) },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedLanguage) },
+                        colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                        modifier = Modifier.menuAnchor()
+                    )
+                    ExposedDropdownMenu(
                         expanded = expandedLanguage,
-                        onExpandedChange = { expandedLanguage = !expandedLanguage },
-                        modifier = Modifier.weight(1f)
+                        onDismissRequest = { expandedLanguage = false }
                     ) {
-                        TextField(
-                            value = selectedLanguage.nombre,
-                            onValueChange = {},
-                            readOnly = true,
-                            label = { Text("Idioma") },
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedLanguage) },
-                            colors = ExposedDropdownMenuDefaults.textFieldColors(),
-                            modifier = Modifier.menuAnchor()
-                        )
-
-                        ExposedDropdownMenu(
-                            expanded = expandedLanguage,
-                            onDismissRequest = { expandedLanguage = false }
-                        ) {
-                            idiomasDisponibles.forEach { idioma ->
-                                DropdownMenuItem(
-                                    text = { Text(idioma.nombre) },
-                                    onClick = {
-                                        selectedLanguage = idioma
-                                        expandedLanguage = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-
-                    // Selector de categoría
-                    ExposedDropdownMenuBox(
-                        expanded = expandedCategory,
-                        onExpandedChange = { expandedCategory = !expandedCategory },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        TextField(
-                            value = selectedCategory,
-                            onValueChange = {},
-                            readOnly = true,
-                            label = { Text("Categoría") },
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedCategory) },
-                            colors = ExposedDropdownMenuDefaults.textFieldColors(),
-                            modifier = Modifier.menuAnchor()
-                        )
-
-                        ExposedDropdownMenu(
-                            expanded = expandedCategory,
-                            onDismissRequest = { expandedCategory = false }
-                        ) {
-                            categoriasDisponibles.forEach { categoria ->
-                                DropdownMenuItem(
-                                    text = { Text(categoria) },
-                                    onClick = {
-                                        selectedCategory = categoria
-                                        expandedCategory = false
-                                    }
-                                )
-                            }
+                        idiomasDisponibles.forEach { idioma ->
+                            DropdownMenuItem(
+                                text = { Text(stringResource(id = idioma.nombreResId)) },
+                                onClick = {
+                                    selectedLanguage = idioma
+                                    expandedLanguage = false
+                                }
+                            )
                         }
                     }
                 }
 
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.fillMaxSize()
+                // Categoría
+                ExposedDropdownMenuBox(
+                    expanded = expandedCategory,
+                    onExpandedChange = { expandedCategory = !expandedCategory },
+                    modifier = Modifier.weight(1f)
                 ) {
-                    items(filteredPhrases) { frase ->
-                        Card(
+                    TextField(
+                        value = stringResource(id = selectedCategory.nombreResId),
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text(stringResource(R.string.frases_categoria)) },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedCategory) },
+                        colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                        modifier = Modifier.menuAnchor()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expandedCategory,
+                        onDismissRequest = { expandedCategory = false }
+                    ) {
+                        Categoria.entries.forEach { categoria ->
+                            DropdownMenuItem(
+                                text = { Text(stringResource(id = categoria.nombreResId)) },
+                                onClick = {
+                                    selectedCategory = categoria
+                                    expandedCategory = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                items(filteredPhrases) { frase ->
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                        elevation = CardDefaults.cardElevation(4.dp),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Row(
                             modifier = Modifier
-                                .fillMaxWidth(),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-                            elevation = CardDefaults.cardElevation(4.dp),
-                            shape = RoundedCornerShape(12.dp)
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Column {
-                                    Text(
-                                        text = frase.fraseBase,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                    Text(
-                                        text = frase.traducciones[selectedLanguage.codigo] ?: "",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = frase.traducciones[mostrarCodigo] ?: "",
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                                Text(
+                                    text = frase.traducciones[selectedLanguage.codigo] ?: "",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                            IconButton(onClick = {
+                                frase.traducciones[selectedLanguage.codigo]?.let {
+                                    tts.language = selectedLanguage.locale
+                                    tts.speak(it, TextToSpeech.QUEUE_FLUSH, null, null)
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 }
-                                IconButton(onClick = {
-                                    val frasePronunciar = frase.traducciones[selectedLanguage.codigo]
-                                    frasePronunciar?.let {
-                                        tts.language = selectedLanguage.locale
-                                        tts.speak(it, TextToSpeech.QUEUE_FLUSH, null, null)
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    }
-                                }) {
-                                    Icon(Icons.AutoMirrored.Filled.VolumeUp, contentDescription = "Reproducir")
-                                }
+                            }) {
+                                Icon(Icons.Default.VolumeUp, contentDescription = stringResource(R.string.frases_play))
                             }
                         }
                     }
                 }
             }
         }
-    )
+    }
 
-    // Ventana de ayuda
     if (showInfo) {
         AlertDialog(
             onDismissRequest = { showInfo = false },
-            title = { Text("¿Cómo funciona?") },
+            title = { Text(stringResource(R.string.frases_help_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("• Usa esta herramienta para aprender frases útiles en situaciones turísticas.")
-                    Text("• Selecciona un idioma y una categoría para ver frases comunes.")
-                    Text("• Toca el ícono de altavoz para escuchar la pronunciación con el lector de voz de tu dispositivo.")
-                    Text("• No se requiere conexión a internet.")
+                    Text(stringResource(R.string.frases_help_line1))
+                    Text(stringResource(R.string.frases_help_line2))
+                    Text(stringResource(R.string.frases_help_line3))
+                    Text(stringResource(R.string.frases_help_line4))
                 }
             },
             confirmButton = {
@@ -218,11 +221,26 @@ fun BasicPhrasesScreen(onBack: () -> Unit) {
                     showInfo = false
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 }) {
-                    Text("Cerrar")
+                    Text(stringResource(R.string.close))
                 }
             }
         )
     }
 }
 
+fun cargarFrasesDesdeJson(context: Context): List<Frase> {
+    return try {
+        val input = context.assets.open("basic_phrases.json")
+        val json = input.bufferedReader().use { it.readText() }
+        Log.d("BasicPhrasesScreen", "Contenido JSON: ${json.take(300)}")
+
+        val tipo = object : TypeToken<List<Frase>>() {}.type
+        val frases = Gson().fromJson<List<Frase>>(json, tipo)
+        Log.d("BasicPhrasesScreen", "Cantidad de frases cargadas: ${frases.size}")
+        frases
+    } catch (e: Exception) {
+        Log.e("BasicPhrasesScreen", "Error al cargar frases", e)
+        emptyList()
+    }
+}
 

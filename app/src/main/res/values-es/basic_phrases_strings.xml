@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frases_idioma">Idioma</string>
+    <string name="frases_categoria">Categoría</string>
+    <string name="frases_help_title">¿Cómo funciona?</string>
+    <string name="frases_play">Reproducir</string>
+    <string name="frases_help_line1">• Usa esta herramienta para aprender frases útiles en situaciones turísticas.</string>
+    <string name="frases_help_line2">• Selecciona un idioma y una categoría para ver frases comunes.</string>
+    <string name="frases_help_line3">• Toca el ícono de altavoz para escuchar la pronunciación.</string>
+    <string name="frases_help_line4">• No se requiere conexión a internet.</string>
+
+    <string name="frases_idioma_ingles">Inglés</string>
+    <string name="frases_idioma_espanol">Español</string>
+    <string name="frases_idioma_frances">Francés</string>
+    <string name="frases_idioma_italiano">Italiano</string>
+    <string name="frases_idioma_aleman">Alemán</string>
+    <string name="frases_idioma_portugues">Portugués</string>
+    <string name="frases_idioma_japones">Japonés</string>
+    <string name="frases_idioma_chino">Chino</string>
+    <string name="frases_idioma_coreano">Coreano</string>
+
+    <string name="frases_categoria_saludos">Saludos</string>
+    <string name="frases_categoria_preguntas">Preguntas básicas</string>
+    <string name="frases_categoria_emergencias">Emergencias</string>
+    <string name="frases_categoria_transporte">Transporte</string>
+    <string name="frases_categoria_comida">Comida</string>
+    <string name="frases_categoria_otros">Otros</string>
+
+</resources>

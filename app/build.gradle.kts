@@ -87,6 +87,7 @@ dependencies {
     //Librerias para manejar datasets
     implementation(libs.protobuf.java)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.gson)
 
 
     // 7) Testing

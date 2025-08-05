@@ -1,0 +1,506 @@
+[
+  {
+    "categoria": "greetings",
+    "traducciones": {
+      "es": "Hola",
+      "en": "Hello",
+      "fr": "Bonjour",
+      "it": "Ciao",
+      "de": "Hallo",
+      "pt": "Olá",
+      "ja": "Kon'nichiwa",
+      "zh": "Nǐ hǎo",
+      "ko": "Annyeonghaseyo"
+    }
+  },
+  {
+    "categoria": "greetings",
+    "traducciones": {
+      "es": "Buenos días",
+      "en": "Good morning",
+      "fr": "Bonjour",
+      "it": "Buongiorno",
+      "de": "Guten Morgen",
+      "pt": "Bom dia",
+      "ja": "Ohayō gozaimasu",
+      "zh": "Zǎoshang hǎo",
+      "ko": "Joitnalibnida"
+    }
+  },
+  {
+    "categoria": "greetings",
+    "traducciones": {
+      "es": "Buenas tardes",
+      "en": "Good afternoon",
+      "fr": "Bon après-midi",
+      "it": "Buon pomeriggio",
+      "de": "Guten Tag",
+      "pt": "Boa tarde",
+      "ja": "Konnichiwa",
+      "zh": "Xiàwǔ hǎo",
+      "ko": "Joaheun ohuibnida"
+    }
+  },
+  {
+    "categoria": "greetings",
+    "traducciones": {
+      "es": "Buenas noches",
+      "en": "Good evening",
+      "fr": "Bonsoir",
+      "it": "Buonasera",
+      "de": "Guten Abend",
+      "pt": "Boa noite",
+      "ja": "Konbanwa",
+      "zh": "Wǎn'ān",
+      "ko": "Jal jayo"
+    }
+  },
+  {
+    "categoria": "greetings",
+    "traducciones": {
+      "es": "Adiós",
+      "en": "Goodbye",
+      "fr": "Au revoir",
+      "it": "Arrivederci",
+      "de": "Auf Wiedersehen",
+      "pt": "Adeus",
+      "ja": "Sayōnara",
+      "zh": "Zàijiàn",
+      "ko": "Annyeonghi gaseyo"
+    }
+  },
+  {
+    "categoria": "greetings",
+    "traducciones": {
+      "es": "Hasta luego",
+      "en": "See you later",
+      "fr": "À plus tard",
+      "it": "A dopo",
+      "de": "Bis später",
+      "pt": "Até logo",
+      "ja": "Mata ne",
+      "zh": "Dāihuì jiàn",
+      "ko": "Najung-e bwaeyo"
+    }
+  },
+  {
+    "categoria": "greetings",
+    "traducciones": {
+      "es": "Mucho gusto",
+      "en": "Nice to meet you",
+      "fr": "Enchanté",
+      "it": "Piacere di conoscerti",
+      "de": "Freut mich, Sie kennenzulernen",
+      "pt": "Muito prazer",
+      "ja": "Hajimemashite",
+      "zh": "Hěn gāoxìng rènshí nǐ",
+      "ko": "Mannaseo bangapseumnida"
+    }
+  },
+  {
+    "categoria": "questions",
+    "traducciones": {
+      "es": "¿Cómo estás?",
+      "en": "How are you?",
+      "fr": "Comment ça va ?",
+      "it": "Come stai?",
+      "de": "Wie geht es Ihnen?",
+      "pt": "Como vai?",
+      "ja": "Ogenki desu ka?",
+      "zh": "Nǐ hǎo ma?",
+      "ko": "Eotteohge jinaeseyo?"
+    }
+  },
+  {
+    "categoria": "questions",
+    "traducciones": {
+      "es": "¿Qué hora es?",
+      "en": "What time is it?",
+      "fr": "Quelle heure est-il ?",
+      "it": "Che ore sono?",
+      "de": "Wie spät ist es?",
+      "pt": "Que horas são?",
+      "ja": "Ima nanji desu ka?",
+      "zh": "Xiànzài jǐ diǎn?",
+      "ko": "Myeot si ibnikka?"
+    }
+  },
+  {
+    "categoria": "questions",
+    "traducciones": {
+      "es": "¿Cuánto cuesta?",
+      "en": "How much does it cost?",
+      "fr": "Combien ça coûte ?",
+      "it": "Quanto costa?",
+      "de": "Wie viel kostet das?",
+      "pt": "Quanto custa?",
+      "ja": "Ikura desu ka?",
+      "zh": "Duōshǎo qián?",
+      "ko": "Eolmaibnikka?"
+    }
+  },
+  {
+    "categoria": "questions",
+    "traducciones": {
+      "es": "¿Dónde está el baño?",
+      "en": "Where is the bathroom?",
+      "fr": "Où sont les toilettes ?",
+      "it": "Dov'è il bagno?",
+      "de": "Wo ist die Toilette?",
+      "pt": "Onde fica o banheiro?",
+      "ja": "Toire wa doko desu ka?",
+      "zh": "Xǐshǒujiān zài nǎlǐ?",
+      "ko": "Hwajangsil-eodiibnikka?"
+    }
+  },
+  {
+    "categoria": "questions",
+    "traducciones": {
+      "es": "¿Habla español?",
+      "en": "Do you speak Spanish?",
+      "fr": "Parlez-vous espagnol ?",
+      "it": "Parla spagnolo?",
+      "de": "Sprechen Sie Spanisch?",
+      "pt": "Você fala espanhol?",
+      "ja": "Supeingo o hanasemasu ka?",
+      "zh": "Nǐ huì shuō xībānyá yǔ ma?",
+      "ko": "Seupein-eoleul halsu iss-eoyo?"
+    }
+  },
+  {
+    "categoria": "questions",
+    "traducciones": {
+      "es": "¿Puede ayudarme?",
+      "en": "Can you help me?",
+      "fr": "Pouvez-vous m'aider ?",
+      "it": "Può aiutarmi?",
+      "de": "Können Sie mir helfen?",
+      "pt": "Você pode me ajudar?",
+      "ja": "Tetsudatte kuremasu ka?",
+      "zh": "Nǐ kěyǐ bāng wǒ ma?",
+      "ko": "Dowajusigess-eoyo?"
+    }
+  },
+  {
+    "categoria": "emergencies",
+    "traducciones": {
+      "es": "¡Ayuda!",
+      "en": "Help!",
+      "fr": "À l'aide !",
+      "it": "Aiuto!",
+      "de": "Hilfe!",
+      "pt": "Socorro!",
+      "ja": "Tasukete!",
+      "zh": "Jiùmìng!",
+      "ko": "Dowajuseyo!"
+    }
+  },
+  {
+    "categoria": "emergencies",
+    "traducciones": {
+      "es": "Llame a la policía",
+      "en": "Call the police",
+      "fr": "Appelez la police",
+      "it": "Chiami la polizia",
+      "de": "Rufen Sie die Polizei",
+      "pt": "Chame a polícia",
+      "ja": "Keisatsu o yonde kudasai",
+      "zh": "Qǐng jiào jǐngchá",
+      "ko": "Gyeongchal-eul bureujuseyo"
+    }
+  },
+  {
+    "categoria": "emergencies",
+    "traducciones": {
+      "es": "Necesito un médico",
+      "en": "I need a doctor",
+      "fr": "J'ai besoin d'un médecin",
+      "it": "Ho bisogno di un medico",
+      "de": "Ich brauche einen Arzt",
+      "pt": "Preciso de um médico",
+      "ja": "Isha ga hitsuyō desu",
+      "zh": "Wǒ xūyào yīshēng",
+      "ko": "Uisaga pil-yohaeyo"
+    }
+  },
+  {
+    "categoria": "emergencies",
+    "traducciones": {
+      "es": "Estoy perdido",
+      "en": "I'm lost",
+      "fr": "Je suis perdu",
+      "it": "Mi sono perso",
+      "de": "Ich habe mich verirrt",
+      "pt": "Estou perdido",
+      "ja": "Mayoimashita",
+      "zh": "Wǒ mílù le",
+      "ko": "Gilgeul ilheoss-eoyo"
+    }
+  },
+  {
+    "categoria": "emergencies",
+    "traducciones": {
+      "es": "Me siento mal",
+      "en": "I feel sick",
+      "fr": "Je ne me sens pas bien",
+      "it": "Mi sento male",
+      "de": "Ich fühle mich schlecht",
+      "pt": "Estou me sentindo mal",
+      "ja": "Kibun ga warui desu",
+      "zh": "Wǒ bù shūfu",
+      "ko": "Geunyang an joeun gibunibnida"
+    }
+  },
+  {
+    "categoria": "emergencies",
+    "traducciones": {
+      "es": "Es una emergencia",
+      "en": "It's an emergency",
+      "fr": "C'est une urgence",
+      "it": "È un'emergenza",
+      "de": "Es ist ein Notfall",
+      "pt": "É uma emergência",
+      "ja": "Kinkyū jitai desu",
+      "zh": "Zhè shì jǐnjí qíngkuàng",
+      "ko": "Geos-i gung-geubhabnida"
+    }
+  },
+  {
+    "categoria": "transport",
+    "traducciones": {
+      "es": "¿Dónde está la estación?",
+      "en": "Where is the station?",
+      "fr": "Où est la gare ?",
+      "it": "Dov'è la stazione?",
+      "de": "Wo ist der Bahnhof?",
+      "pt": "Onde fica a estação?",
+      "ja": "Eki wa doko desu ka?",
+      "zh": "Huǒchē zhàn zài nǎlǐ?",
+      "ko": "Yeog-eodi ibnikka?"
+    }
+  },
+  {
+    "categoria": "transport",
+    "traducciones": {
+      "es": "¿A qué hora sale el tren?",
+      "en": "What time does the train leave?",
+      "fr": "À quelle heure part le train ?",
+      "it": "A che ora parte il treno?",
+      "de": "Wann fährt der Zug ab?",
+      "pt": "Que horas o trem parte?",
+      "ja": "Densha wa nanji ni demasu ka?",
+      "zh": "Huǒchē jǐ diǎn kāi?",
+      "ko": "Gicha neun myeot si-e chulbalhaeyo?"
+    }
+  },
+  {
+    "categoria": "transport",
+    "traducciones": {
+      "es": "Quisiera un boleto",
+      "en": "I would like a ticket",
+      "fr": "Je voudrais un billet",
+      "it": "Vorrei un biglietto",
+      "de": "Ich hätte gern eine Fahrkarte",
+      "pt": "Gostaria de uma passagem",
+      "ja": "Kippu o kudasai",
+      "zh": "Wǒ xiǎng mǎi yī zhāng piào",
+      "ko": "Pyo hana juseyo"
+    }
+  },
+  {
+    "categoria": "transport",
+    "traducciones": {
+      "es": "¿Cuánto cuesta el pasaje?",
+      "en": "How much is the fare?",
+      "fr": "Combien coûte le billet ?",
+      "it": "Quanto costa il biglietto?",
+      "de": "Wie viel kostet das Ticket?",
+      "pt": "Quanto custa a passagem?",
+      "ja": "Ryōkin wa ikura desu ka?",
+      "zh": "Chéngkè fèi duōshǎo?",
+      "ko": "Yos-eun eolmaibnikka?"
+    }
+  },
+  {
+    "categoria": "transport",
+    "traducciones": {
+      "es": "Este es mi destino",
+      "en": "This is my destination",
+      "fr": "C'est ma destination",
+      "it": "Questa è la mia destinazione",
+      "de": "Das ist mein Ziel",
+      "pt": "Este é meu destino",
+      "ja": "Koko ga watashi no mokuteki desu",
+      "zh": "Zhè shì wǒ de mùdìdì",
+      "ko": "Yeog-i nae mogjeogjiibnida"
+    }
+  },
+  {
+    "categoria": "food",
+    "traducciones": {
+      "es": "Tengo hambre",
+      "en": "I'm hungry",
+      "fr": "J'ai faim",
+      "it": "Ho fame",
+      "de": "Ich habe Hunger",
+      "pt": "Estou com fome",
+      "ja": "Onaka ga sukimashita",
+      "zh": "Wǒ è le",
+      "ko": "Baegopayo"
+    }
+  },
+  {
+    "categoria": "food",
+    "traducciones": {
+      "es": "Tengo sed",
+      "en": "I'm thirsty",
+      "fr": "J'ai soif",
+      "it": "Ho sete",
+      "de": "Ich habe Durst",
+      "pt": "Estou com sede",
+      "ja": "Nodo ga kawakimashita",
+      "zh": "Wǒ kě le",
+      "ko": "Mogmalla"
+    }
+  },
+  {
+    "categoria": "food",
+    "traducciones": {
+      "es": "Quisiera una mesa para dos",
+      "en": "I'd like a table for two",
+      "fr": "Je voudrais une table pour deux",
+      "it": "Vorrei un tavolo per due",
+      "de": "Ich hätte gern einen Tisch für zwei",
+      "pt": "Gostaria de uma mesa para dois",
+      "ja": "Futari yō no tēburu o onegai shimasu",
+      "zh": "Qǐng gěi wǒ yī zhāng liǎng rén de zhuōzi",
+      "ko": "Dubeon jari juseyo"
+    }
+  },
+  {
+    "categoria": "food",
+    "traducciones": {
+      "es": "¿Cuál es el menú?",
+      "en": "What is the menu?",
+      "fr": "Quel est le menu ?",
+      "it": "Qual è il menù?",
+      "de": "Was gibt es auf der Speisekarte?",
+      "pt": "Qual é o cardápio?",
+      "ja": "Menyū wa nan desu ka?",
+      "zh": "Càidān shì shénme?",
+      "ko": "Menyu-ga mwoyeyo?"
+    }
+  },
+  {
+    "categoria": "food",
+    "traducciones": {
+      "es": "Sin picante, por favor",
+      "en": "No spicy, please",
+      "fr": "Sans épices, s'il vous plaît",
+      "it": "Senza piccante, per favore",
+      "de": "Bitte nicht scharf",
+      "pt": "Sem pimenta, por favor",
+      "ja": "Karai mono wa nashi de onegai shimasu",
+      "zh": "Qǐng búyào là de",
+      "ko": "Maepge haji maseyo"
+    }
+  },
+  {
+    "categoria": "food",
+    "traducciones": {
+      "es": "La cuenta, por favor",
+      "en": "The check, please",
+      "fr": "L'addition, s'il vous plaît",
+      "it": "Il conto, per favore",
+      "de": "Die Rechnung, bitte",
+      "pt": "A conta, por favor",
+      "ja": "Okanjō o onegai shimasu",
+      "zh": "Qǐng jiézhàng",
+      "ko": "Gyesanseo juseyo"
+    }
+  },
+  {
+    "categoria": "other",
+    "traducciones": {
+      "es": "Gracias",
+      "en": "Thank you",
+      "fr": "Merci",
+      "it": "Grazie",
+      "de": "Danke",
+      "pt": "Obrigado",
+      "ja": "Arigatō gozaimasu",
+      "zh": "Xièxiè",
+      "ko": "Gamsahamnida"
+    }
+  },
+  {
+    "categoria": "other",
+    "traducciones": {
+      "es": "De nada",
+      "en": "You're welcome",
+      "fr": "De rien",
+      "it": "Prego",
+      "de": "Gern geschehen",
+      "pt": "De nada",
+      "ja": "Dōitashimashite",
+      "zh": "Bù kèqì",
+      "ko": "Cheonmaneyo"
+    }
+  },
+  {
+    "categoria": "other",
+    "traducciones": {
+      "es": "Perdón",
+      "en": "Excuse me",
+      "fr": "Pardon",
+      "it": "Scusa",
+      "de": "Entschuldigung",
+      "pt": "Desculpe",
+      "ja": "Sumimasen",
+      "zh": "Duìbùqǐ",
+      "ko": "Joesonghamnida"
+    }
+  },
+  {
+    "categoria": "other",
+    "traducciones": {
+      "es": "Lo siento",
+      "en": "I'm sorry",
+      "fr": "Je suis désolé",
+      "it": "Mi dispiace",
+      "de": "Es tut mir leid",
+      "pt": "Sinto muito",
+      "ja": "Gomen nasai",
+      "zh": "Bàoqiàn",
+      "ko": "Mianhamnida"
+    }
+  },
+  {
+    "categoria": "other",
+    "traducciones": {
+      "es": "No entiendo",
+      "en": "I don't understand",
+      "fr": "Je ne comprends pas",
+      "it": "Non capisco",
+      "de": "Ich verstehe nicht",
+      "pt": "Não entendo",
+      "ja": "Wakarimasen",
+      "zh": "Wǒ bù míngbái",
+      "ko": "Ihaega an dwaeyo"
+    }
+  },
+  {
+    "categoria": "other",
+    "traducciones": {
+      "es": "¿Puede repetirlo?",
+      "en": "Can you repeat that?",
+      "fr": "Pouvez-vous répéter ?",
+      "it": "Può ripetere?",
+      "de": "Können Sie das wiederholen?",
+      "pt": "Pode repetir?",
+      "ja": "Mō ichido itte kudasai",
+      "zh": "Qǐng zài shuō yībiàn",
+      "ko": "Dasi hanbeon malhaejuseyo"
+    }
+  }
+]

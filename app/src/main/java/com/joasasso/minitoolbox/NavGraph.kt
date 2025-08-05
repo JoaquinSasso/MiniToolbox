@@ -40,7 +40,6 @@ import com.joasasso.minitoolbox.tools.herramientas.instrumentos.FlashScreen
 import com.joasasso.minitoolbox.tools.herramientas.instrumentos.LightSensorScreen
 import com.joasasso.minitoolbox.tools.herramientas.instrumentos.ReglaScreen
 import com.joasasso.minitoolbox.tools.info.AgeCalculatorScreen
-import com.joasasso.minitoolbox.tools.info.BasicPhrasesScreen
 import com.joasasso.minitoolbox.tools.info.CountriesInfoScreen
 import com.joasasso.minitoolbox.tools.info.RemainingTimeScreen
 import com.joasasso.minitoolbox.tools.info.TextBinaryConverterScreen
@@ -56,6 +55,7 @@ import com.joasasso.minitoolbox.tools.organizacion.recordatorios.HabitTrackerScr
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.ToDoListScreen
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AguaReminderScreen
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AguaStatisticsScreen
+import com.joasasso.minitoolbox.ui.screens.BasicPhrasesScreen
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
