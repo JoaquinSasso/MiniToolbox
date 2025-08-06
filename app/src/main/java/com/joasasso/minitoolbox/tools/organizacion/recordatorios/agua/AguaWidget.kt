@@ -56,7 +56,7 @@ class AguaWidget : GlanceAppWidget() {
             Box(
                 modifier = GlanceModifier
                     .fillMaxSize()
-                    .background(ColorProvider(day = Color(0xFFE0F7FA), night = Color(0xFF263238)))
+                    .background(ColorProvider(day = Color(0xFF263238), night = Color(0xFF263238)))
                     .cornerRadius(16.dp)
                     .padding(6.dp)
                     .clickable(actionStartActivity(launchIntent))
@@ -70,7 +70,7 @@ class AguaWidget : GlanceAppWidget() {
                         text = "💧${(agua / 1000f).let { "%.2f".format(it) }} L / ${(objetivo / 1000f).let { "%.2f".format(it) }} L",
                         style = TextStyle(
                             fontWeight = FontWeight.Bold,
-                            color = ColorProvider(day = Color.Black, night = Color.White)
+                            color = ColorProvider(day = Color.White, night = Color.White)
                         )
                     )
                     ProgressBarWidget(agua, objetivo)
