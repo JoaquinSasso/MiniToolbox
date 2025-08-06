@@ -89,7 +89,7 @@ class AguaMiniWidget : GlanceAppWidget() {
                     style = TextStyle(
                         fontWeight = FontWeight.Bold,
                         fontSize = 10.sp,
-                        color = ColorProvider(day = Color.Black, night = Color.White)
+                        color = ColorProvider(day = Color.White, night = Color.White)
                     )
                 )
 
