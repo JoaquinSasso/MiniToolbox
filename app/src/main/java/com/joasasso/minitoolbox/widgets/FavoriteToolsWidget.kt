@@ -10,6 +10,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.glance.ColorFilter
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
+import androidx.glance.GlanceTheme
 import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.LocalSize
@@ -17,6 +18,7 @@ import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.action.actionStartActivity
+import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
 import androidx.glance.color.ColorProvider
@@ -24,11 +26,12 @@ import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
-import androidx.glance.layout.fillMaxHeight
+import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
+import androidx.glance.layout.width
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
@@ -47,22 +50,23 @@ class AccesosDirectosWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
             val fondo = Color(0xFF1E88E5)
-            val tools = listOf("frases", "adivina_capital", "interes_compuesto", "bubble_level")
+            val tools = listOf("frases", "adivina_capital", "interes_compuesto", "bubble_level", "brujula", "text_binary_converter")
             val size = LocalSize.current
 
             Column(
                 modifier = GlanceModifier
                     .fillMaxSize()
-                    .background(ColorProvider(fondo, fondo))
-                    .padding(8.dp),
+                    .padding(8.dp)
+                    .cornerRadius(12.dp)
+                    .background(GlanceTheme.colors.background),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                for (i in 0 until 2) {
+                for (i in 0 until 3) {
                     Row(
                         modifier = GlanceModifier
                             .fillMaxWidth()
-                            .defaultWeight(),
+                            .padding(vertical = 4.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -74,22 +78,25 @@ class AccesosDirectosWidget : GlanceAppWidget() {
                             val intent = Intent(context, MainActivity::class.java).apply {
                                 putExtra("startRoute", route)
                             }
+                            if (j == 1)
+                            {
+                                Spacer(modifier = GlanceModifier.width(8.dp))
+                            }
 
                             Box(
                                 modifier = GlanceModifier
-                                    .defaultWeight()
-                                    .fillMaxHeight()
-                                    .padding(4.dp)
+                                    .padding(12.dp)
                                     .clickable(actionStartActivity(intent))
-                                    .background(ColorProvider(Color.White, Color.White)),
+                                    .background(GlanceTheme.colors.primary)
+                                    .cornerRadius(12.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 if (tool?.svgResId != null) {
                                     Image(
                                         provider = ImageProvider(resId = tool.svgResId),
                                         contentDescription = tool.name.toString(),
-                                        modifier = GlanceModifier.size(28.dp),
-                                        colorFilter = ColorFilter.tint(ColorProvider(Color.Black, Color.Black))
+                                        modifier = GlanceModifier.size(35.dp),
+                                        colorFilter = ColorFilter.tint(GlanceTheme.colors.onPrimary)
                                     )
                                 } else {
                                     Text(
@@ -97,7 +104,7 @@ class AccesosDirectosWidget : GlanceAppWidget() {
                                         style = TextStyle(
                                             fontSize = 20.sp,
                                             fontWeight = FontWeight.Bold,
-                                            color = ColorProvider(Color.Black, Color.Black)
+                                            color = ColorProvider(Color.Black, Color.White)
                                         )
                                     )
                                 }
