@@ -2,6 +2,8 @@
 package com.joasasso.minitoolbox
 
 import ZodiacSignScreen
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -59,6 +61,7 @@ import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AguaRemind
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AguaStatisticsScreen
 import com.joasasso.minitoolbox.ui.screens.BasicPhrasesScreen
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun MiniToolboxNavGraph(navController: NavHostController) {
     val animationDuration = 150
