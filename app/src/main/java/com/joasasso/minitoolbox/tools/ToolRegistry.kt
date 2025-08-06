@@ -1,30 +1,5 @@
 // app/src/main/java/com/example/minitoolbox/tools/ToolRegistry.kt
 package com.joasasso.minitoolbox.tools
-
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ShortText
-import androidx.compose.material.icons.filled.Cake
-import androidx.compose.material.icons.filled.Calculate
-import androidx.compose.material.icons.filled.Casino
-import androidx.compose.material.icons.filled.Checklist
-import androidx.compose.material.icons.filled.Code
-import androidx.compose.material.icons.filled.ColorLens
-import androidx.compose.material.icons.filled.Flag
-import androidx.compose.material.icons.filled.FlashlightOn
-import androidx.compose.material.icons.filled.Groups
-import androidx.compose.material.icons.filled.Lightbulb
-import androidx.compose.material.icons.filled.Password
-import androidx.compose.material.icons.filled.Percent
-import androidx.compose.material.icons.filled.PersonAdd
-import androidx.compose.material.icons.filled.QrCode
-import androidx.compose.material.icons.filled.Receipt
-import androidx.compose.material.icons.filled.Scoreboard
-import androidx.compose.material.icons.filled.Straighten
-import androidx.compose.material.icons.filled.Timelapse
-import androidx.compose.material.icons.filled.Timer
-import androidx.compose.material.icons.filled.TravelExplore
-import androidx.compose.material.icons.filled.WaterDrop
-import androidx.compose.material.icons.filled.WbSunny
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.nav.Screen
 
@@ -36,14 +11,14 @@ object ToolRegistry {
             screen = Screen.RandomColor,
             category = ToolCategory.Herramientas,
             subCategory = R.string.subcategory_generator,
-            icon = Icons.Filled.ColorLens
+            svgResId = R.drawable.colorgenerator
         ),
         Tool(
             name = R.string.tool_team_generator,
             screen = Screen.GroupSelector,
             category = ToolCategory.Herramientas,
             subCategory = R.string.subcategory_generator,
-            icon = Icons.Filled.Groups
+            svgResId = R.drawable.teamselector
         ),
         Tool(
             name = R.string.tool_coin_flip,
@@ -57,7 +32,7 @@ object ToolRegistry {
             screen = Screen.DecimalBinaryConverter,
             category = ToolCategory.Herramientas,
             subCategory = R.string.subcategory_calculator,
-            icon = Icons.Filled.Code
+            svgResId = R.drawable.decimal_binary
         ),
         Tool(
             name = R.string.tool_text_binary,
@@ -78,7 +53,7 @@ object ToolRegistry {
             screen = Screen.AgeCalculator,
             category = ToolCategory.Informacion,
             subCategory = R.string.subcategory_dates,
-            icon = Icons.Filled.Cake
+            svgResId = R.drawable.age_calculator
     ),
         Tool(
             name = R.string.tool_zodiac_sign,
@@ -99,7 +74,7 @@ object ToolRegistry {
             screen = Screen.Porcentaje,
             category = ToolCategory.Herramientas,
             subCategory = R.string.subcategory_calculator,
-            icon = Icons.Filled.Percent
+            svgResId = R.drawable.percentage
     ),
         Tool(
             name = R.string.tool_hour_converter,
@@ -135,21 +110,21 @@ object ToolRegistry {
             screen = Screen.GeneradorContrasena,
             category = ToolCategory.Herramientas,
             subCategory = R.string.subcategory_generator,
-            icon = Icons.Filled.Password
+            svgResId = R.drawable.password
         ),
         Tool(
             name = R.string.tool_activity_suggester,
             screen = Screen.SugeridorActividades,
             category = ToolCategory.Organizacion,
             subCategory = R.string.subcategory_habits,
-            icon = Icons.Filled.Lightbulb
+            svgResId = R.drawable.activity_suggester
         ),
         Tool(
             name = R.string.tool_pomodoro_timer,
             screen = Screen.Pomodoro,
             category = ToolCategory.Organizacion,
             subCategory = R.string.subcategory_others,
-            icon = Icons.Filled.Timer
+            svgResId = R.drawable.timer
         ),
         Tool(
             name = R.string.tool_name_generator,
@@ -163,21 +138,21 @@ object ToolRegistry {
             screen = Screen.GeneradorQR,
             category = ToolCategory.Herramientas,
             subCategory = R.string.subcategory_generator,
-            icon = Icons.Filled.QrCode
+            svgResId = R.drawable.qr_code
     ),
         Tool(
             name = R.string.tool_qr_vcard,
             screen = Screen.GeneradorVCard,
             category = ToolCategory.Herramientas,
             subCategory = R.string.subcategory_generator,
-            icon = Icons.Filled.PersonAdd
+            svgResId = R.drawable.vcard
         ),
         Tool(
             name = R.string.tool_lorem_ipsum,
             screen = Screen.LoremIpsum,
             category = ToolCategory.Herramientas,
             subCategory = R.string.subcategory_generator,
-            icon = Icons.AutoMirrored.Filled.ShortText
+            svgResId = R.drawable.lorem_ipsum
 
         ),
         Tool(
@@ -185,21 +160,21 @@ object ToolRegistry {
             screen = Screen.Regla,
             category = ToolCategory.Herramientas,
             subCategory = R.string.subcategory_instrument,
-            icon = Icons.Filled.Straighten
+            svgResId = R.drawable.ruler
         ),
         Tool(
             name = R.string.tool_light_meter,
             screen = Screen.MedidorLuz,
             category = ToolCategory.Herramientas,
             subCategory = R.string.subcategory_instrument,
-            icon = Icons.Filled.WbSunny
+            svgResId = R.drawable.light_meter
         ),
         Tool(
             name = R.string.tool_flashlight,
             screen = Screen.Linterna,
             category = ToolCategory.Herramientas,
             subCategory = R.string.subcategory_instrument,
-            icon = Icons.Filled.FlashlightOn
+            svgResId = R.drawable.flashlight
 
         ),
         Tool(
@@ -215,21 +190,21 @@ object ToolRegistry {
             screen = Screen.Agua,
             category = ToolCategory.Organizacion,
             subCategory = R.string.subcategory_habits,
-            icon = Icons.Filled.WaterDrop
+            svgResId = R.drawable.water_drop
         ),
         Tool(
             name = R.string.tool_day_countdown,
             screen = Screen.TiempoHasta,
             category = ToolCategory.Informacion,
             subCategory = R.string.subcategory_dates,
-            icon = Icons.Filled.Timelapse
+            svgResId = R.drawable.countdown
         ),
         Tool(
             name = R.string.tool_country_info,
             screen = Screen.PaisesInfo,
             category = ToolCategory.Informacion,
             subCategory = R.string.subcategory_general,
-            icon = Icons.Filled.TravelExplore
+            svgResId = R.drawable.countries_info
         ),
         Tool(
             name = R.string.tool_option_selector,
@@ -243,28 +218,28 @@ object ToolRegistry {
             screen = Screen.AdivinaBandera,
             category = ToolCategory.Entretenimiento,
             subCategory = R.string.subcategory_minigames,
-            icon = Icons.Filled.Flag
+            svgResId = R.drawable.flag
     ),
         Tool(
             name = R.string.tool_expense_splitter,
             screen = Screen.Reuniones,
             category = ToolCategory.Organizacion,
             subCategory = R.string.subcategory_others,
-            icon = Icons.Filled.Receipt
+            svgResId = R.drawable.expense_splitter
         ),
         Tool(
             name = R.string.tool_dice,
             screen = Screen.Dados,
             category = ToolCategory.Entretenimiento,
             subCategory = R.string.subcategory_random,
-            icon = Icons.Filled.Casino
+            svgResId = R.drawable.dice
         ),
         Tool(
             name = R.string.tool_quick_math,
             screen = Screen.CalculosRapidos,
             category = ToolCategory.Entretenimiento,
             subCategory = R.string.subcategory_minigames,
-            icon = Icons.Filled.Calculate
+            svgResId = R.drawable.quick_math
         ),
         Tool(
             name = R.string.tool_basic_phrases,
@@ -292,14 +267,14 @@ object ToolRegistry {
             screen = Screen.Brujula,
             category = ToolCategory.Herramientas,
             subCategory = R.string.subcategory_instrument,
-            svgResId = R.drawable.arrow_north
+            svgResId = R.drawable.compass
         ),
         Tool(
             name = R.string.tool_todo_list,
             screen = Screen.ToDo,
             category = ToolCategory.Organizacion,
             subCategory = R.string.subcategory_others,
-            icon = Icons.Filled.Checklist
+            svgResId = R.drawable.todo_list
         ),
         Tool(
             name = R.string.tool_event_tracker,
@@ -320,7 +295,7 @@ object ToolRegistry {
             screen = Screen.Scoreboard,
             category = ToolCategory.Entretenimiento,
             subCategory = R.string.subcategory_scoreboards,
-            icon = Icons.Filled.Scoreboard
+            svgResId = R.drawable.scoreboard
         )
     )
 }
