@@ -5,4 +5,8 @@
     <string name="edit_expenses_screen">Edit expenses</string>
     <string name="meeting_details_screen">Meeting details</string>
     <string name="water_statistics_screen">Water statistics</string>
+
+    <string name="widget_access_desc">Shortcut to favorite tools</string>
+    <string name="widget_access_label">Favorite tools</string>
+
 </resources>

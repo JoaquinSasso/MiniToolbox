@@ -5,4 +5,8 @@
     <string name="edit_expenses_screen">Editar gastos</string>
     <string name="meeting_details_screen">Detalles de la reunión</string>
     <string name="water_statistics_screen">Estadísticas de agua</string>
+
+    <string name="widget_access_desc">Acceso directo a herramientas favoritas</string>
+    <string name="widget_access_label">Herramientas favoritas</string>
+
 </resources>

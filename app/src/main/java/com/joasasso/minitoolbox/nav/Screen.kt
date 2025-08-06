@@ -53,4 +53,13 @@ sealed class Screen(val route: String) {
     object Scoreboard               : Screen("scoreboard")
 
     // Añade aquí nuevos objetos para cada herramienta…
+
+    companion object {
+        fun isValidRoute(route: String?): Boolean {
+            return Screen::class.sealedSubclasses
+                .mapNotNull { it.objectInstance }
+                .any { it.route == route }
+        }
+    }
+
 }

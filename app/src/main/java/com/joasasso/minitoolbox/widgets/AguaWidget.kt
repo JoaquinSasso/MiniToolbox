@@ -1,4 +1,4 @@
-package com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua
+package com.joasasso.minitoolbox.widgets
 
 import android.content.Context
 import android.content.Intent
@@ -33,6 +33,8 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.joasasso.minitoolbox.MainActivity
+import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AgregarAguaCallback
+import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.QuitarAguaCallback
 
 class AguaWidget : GlanceAppWidget() {
 
