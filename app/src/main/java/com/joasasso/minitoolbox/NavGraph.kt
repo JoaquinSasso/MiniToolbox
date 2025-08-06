@@ -2,8 +2,8 @@
 package com.joasasso.minitoolbox
 
 import ZodiacSignScreen
-import android.os.Build
-import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
@@ -57,20 +57,28 @@ import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AguaRemind
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AguaStatisticsScreen
 import com.joasasso.minitoolbox.ui.screens.BasicPhrasesScreen
 
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun MiniToolboxNavGraph(navController: NavHostController) {
     NavHost(
         navController    = navController,
-        startDestination = Screen.Categories.route
+        startDestination = Screen.Categories.route,
+        enterTransition = {
+            slideIntoContainer(
+                AnimatedContentTransitionScope.SlideDirection.Left,
+                animationSpec = tween(200)
+            )
+        },
+        popExitTransition = {
+            slideOutOfContainer(
+                AnimatedContentTransitionScope.SlideDirection.Right,
+                animationSpec = tween(200)
+            )
+        }
     ) {
         composable(Screen.Categories.route) {
             CategoriesScreen(
                 tools       = ToolRegistry.tools,
-                onToolClick = { tool ->
-                    // Navegamos usando la ruta definida en Screen, no el objeto Tool
-                    navController.navigate(tool.screen.route)
-                }
+                onToolClick = { tool -> navController.navigate(tool.screen.route) }
             )
         }
         composable(Screen.RandomColor.route) {

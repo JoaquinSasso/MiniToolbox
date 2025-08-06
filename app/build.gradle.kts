@@ -13,7 +13,7 @@ android {
 
     defaultConfig {
         applicationId = "com.joasasso.minitoolbox"
-        minSdk = 28
+        minSdk = 33
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -100,4 +100,6 @@ dependencies {
     // 8) Debug
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
 }

@@ -79,6 +79,8 @@ import com.joasasso.minitoolbox.data.guardarNotificacionesActivas
 import com.joasasso.minitoolbox.data.guardarObjetivo
 import com.joasasso.minitoolbox.data.guardarPorVaso
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
+import com.joasasso.minitoolbox.widgets.AguaMiniWidget
+import com.joasasso.minitoolbox.widgets.AguaWidget
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
