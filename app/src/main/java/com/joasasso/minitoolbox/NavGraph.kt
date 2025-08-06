@@ -4,6 +4,8 @@ package com.joasasso.minitoolbox
 import ZodiacSignScreen
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
@@ -59,19 +61,29 @@ import com.joasasso.minitoolbox.ui.screens.BasicPhrasesScreen
 
 @Composable
 fun MiniToolboxNavGraph(navController: NavHostController) {
+    val animationDuration = 150
     NavHost(
         navController    = navController,
         startDestination = Screen.Categories.route,
-        enterTransition = {
+        enterTransition = { // Cuando una Tool entra
             slideIntoContainer(
                 AnimatedContentTransitionScope.SlideDirection.Left,
-                animationSpec = tween(200)
+                animationSpec = tween(animationDuration)
             )
         },
-        popExitTransition = {
+        exitTransition = { // Cuando CategoriesScreen sale (al ir a una Tool)
+            fadeOut(animationSpec = tween(animationDuration)) // Ejemplo: CategoriesScreen se desvanece
+        },
+        popEnterTransition = { // Cuando CategoriesScreen VUELVE a entrar
+            slideIntoContainer(
+                AnimatedContentTransitionScope.SlideDirection.Right,
+                animationSpec = tween(animationDuration)
+            ) + fadeIn(animationSpec = tween(animationDuration))
+        },
+        popExitTransition = { // Cuando una Tool SALE (al volver atrás)
             slideOutOfContainer(
                 AnimatedContentTransitionScope.SlideDirection.Right,
-                animationSpec = tween(200)
+                animationSpec = tween(animationDuration)
             )
         }
     ) {
