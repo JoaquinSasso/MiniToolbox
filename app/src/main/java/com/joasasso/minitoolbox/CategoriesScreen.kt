@@ -35,6 +35,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,10 +46,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.joasasso.minitoolbox.data.FavoritosManager
+import com.joasasso.minitoolbox.data.flujoToolsFavoritas
+import com.joasasso.minitoolbox.data.toogleFavorite
 import com.joasasso.minitoolbox.tools.Tool
 import com.joasasso.minitoolbox.tools.ToolCategory
 import com.joasasso.minitoolbox.viewmodel.CategoryViewModel
+import com.joasasso.minitoolbox.widgets.actualizarWidgetFavoritos
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,8 +68,8 @@ fun CategoriesScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    val favoritos by FavoritosManager.getFavoritosFlow(context)
-        .collectAsState(initial = emptySet()) // NUEVO
+    val favoritosFlow = remember(context) { context.flujoToolsFavoritas() }
+    val favoritos by favoritosFlow.collectAsState(initial = emptySet())
 
     val filteredTools = if (selectedCategory == ToolCategory.Favoritos) {
         tools.filter { favoritos.contains(it.screen.route) }
@@ -166,7 +169,8 @@ fun CategoriesScreen(
                         onToggleFavorito = {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             scope.launch {
-                                FavoritosManager.toggleFavorito(context, tool.screen.route)
+                                context.toogleFavorite(tool.screen.route)
+                                actualizarWidgetFavoritos(context) // para que se refleje en el widget
                             }
                         }
                     )
