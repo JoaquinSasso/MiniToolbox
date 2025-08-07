@@ -2,6 +2,7 @@ package com.joasasso.minitoolbox.widgets
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.Preferences
 import androidx.glance.ColorFilter
@@ -10,10 +11,12 @@ import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
 import androidx.glance.Image
 import androidx.glance.ImageProvider
+import androidx.glance.LocalSize
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
@@ -39,15 +42,44 @@ import com.joasasso.minitoolbox.tools.ToolRegistry
 import kotlinx.coroutines.flow.first
 
 class FavoriteToolsWidget : GlanceAppWidget() {
+
     override val stateDefinition = PreferencesGlanceStateDefinition
+    override val sizeMode = SizeMode.Exact
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
+
             val prefs = currentState<Preferences>()
+            val size = LocalSize.current
+
             val routesFavoritas = FAVORITOS_KEYS.mapNotNull { prefs[it] }
             val toolsFavoritas = routesFavoritas.mapNotNull { route ->
                 ToolRegistry.tools.find { it.screen.route == route }
             }
+
+            val columns = when {
+                size.width >= 350.dp -> 5
+                size.width >= 300.dp -> 4
+                size.width >= 250.dp -> 3
+                size.width >= 150.dp -> 2
+                else -> 1
+            }
+
+            val rows = when {
+                size.height >= 500.dp -> 8
+                size.height >= 350.dp -> 6
+                size.height >= 300.dp -> 5
+                size.height >= 250.dp -> 4
+                size.height >= 150.dp -> 3
+                else -> 1
+            }
+
+            Log.d("FavoriteToolsWidget", "columns: $columns, rows: $rows")
+            Log.d("FavoriteToolsWidget", "size: ${size.width}x${size.height}")
+
+            val totalCeldas = columns * rows
+            val toolsAMostrar = toolsFavoritas.take(totalCeldas)
+
             Column(
                 modifier = GlanceModifier
                     .fillMaxSize()
@@ -57,7 +89,7 @@ class FavoriteToolsWidget : GlanceAppWidget() {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                for (i in 0 until 3) {
+                for (i in 0 until rows) {
                     Row(
                         modifier = GlanceModifier
                             .fillMaxWidth()
@@ -65,11 +97,11 @@ class FavoriteToolsWidget : GlanceAppWidget() {
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        for (j in 0 until 2) {
-                            val index = i * 2 + j
-                            val tool = toolsFavoritas.getOrNull(index)
+                        for (j in 0 until columns) {
+                            val index = i * columns + j
+                            val tool = toolsAMostrar.getOrNull(index)
 
-                            if (j == 1) {
+                            if (j != 0) {
                                 Spacer(modifier = GlanceModifier.width(8.dp))
                             }
 
@@ -99,7 +131,7 @@ class FavoriteToolsWidget : GlanceAppWidget() {
                                 } else {
                                     Image(
                                         provider = ImageProvider(R.drawable.close),
-                                        contentDescription = "No tool",
+                                        contentDescription = "Empty",
                                         modifier = GlanceModifier.size(35.dp),
                                         colorFilter = ColorFilter.tint(GlanceTheme.colors.background)
                                     )
@@ -134,7 +166,7 @@ suspend fun actualizarWidgetFavoritos(context: Context) {
                 }
             }
         }
-        FavoriteToolsWidget().update(context, id) // fuerza redibujo
+        FavoriteToolsWidget().update(context, id)
     }
 }
 
