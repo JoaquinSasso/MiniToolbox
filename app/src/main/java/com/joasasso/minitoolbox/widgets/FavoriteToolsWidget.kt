@@ -2,7 +2,6 @@ package com.joasasso.minitoolbox.widgets
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.Preferences
 import androidx.glance.ColorFilter
@@ -47,8 +46,9 @@ class FavoriteToolsWidget : GlanceAppWidget() {
     override val sizeMode = SizeMode.Exact
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        provideContent {
+        actualizarWidgetFavoritos(context) // Actualiza el widget al iniciar
 
+        provideContent {
             val prefs = currentState<Preferences>()
             val size = LocalSize.current
 
@@ -73,9 +73,6 @@ class FavoriteToolsWidget : GlanceAppWidget() {
                 size.height >= 150.dp -> 3
                 else -> 1
             }
-
-            Log.d("FavoriteToolsWidget", "columns: $columns, rows: $rows")
-            Log.d("FavoriteToolsWidget", "size: ${size.width}x${size.height}")
 
             val totalCeldas = columns * rows
             val toolsAMostrar = toolsFavoritas.take(totalCeldas)
