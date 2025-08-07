@@ -63,7 +63,7 @@
         </receiver>
         <!-- Widget de tools favoritas -->
         <receiver
-            android:name=".widgets.AccesosDirectosWidgetReceiver"
+            android:name=".widgets.FavoriteToolsWidgetReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
