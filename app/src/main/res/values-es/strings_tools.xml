@@ -40,4 +40,5 @@
     <string name="tool_event_tracker">Eventos importantes</string>
     <string name="tool_compound_interest">Interés compuesto</string>
     <string name="tool_scoreboard">Marcador</string>
+    <string name="no_tools_found">No se encontraron tools</string>
 </resources>
