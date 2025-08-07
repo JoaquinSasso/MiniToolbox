@@ -4,6 +4,7 @@
     <string name="category_organizacion">Organización</string>
     <string name="category_informacion">Información</string>
     <string name="category_entretenimiento">Entretenimiento</string>"
+    <string name="category_favoritos">Favoritos</string>"
     <string name="subcategory_generator">Generadores</string>"
     <string name="subcategory_calculator">Calculadoras</string>"
     <string name="subcategory_instrument">Instrumentos</string>"
