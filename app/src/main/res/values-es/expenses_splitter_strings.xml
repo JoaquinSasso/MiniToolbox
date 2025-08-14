@@ -51,7 +51,9 @@
     <string name="help_expense_5">• El reparto se hará según el consumo proporcional de cada grupo.</string>
 
 
-
+    <string name="expense_consumers_only">Consumieron: %1$s</string>
+    <string name="expense_consumers_with_price">Consumieron: %1$s · %2$s por persona</string>
+    <string name="expense_no_consumers">—</string>
     <string name="expenses_share_summary_button">Compartir resumen</string>
     <string name="date_label">Fecha: %1$s</string>
     <string name="total_spent_label">Total gastado: $%1$.2f</string>
