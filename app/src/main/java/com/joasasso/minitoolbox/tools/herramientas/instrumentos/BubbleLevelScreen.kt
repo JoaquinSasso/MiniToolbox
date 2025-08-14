@@ -109,6 +109,8 @@ fun BubbleLevelScreen(onBack: () -> Unit) {
     val toneGen = remember { ToneGenerator(AudioManager.STREAM_MUSIC, 100) }
     var isForeground by remember { mutableStateOf(true) }
     val lifecycleOwner = LocalLifecycleOwner.current
+    var hasSensorSample by remember { mutableStateOf(false) }
+    var isBeepArmed by remember { mutableStateOf(false) }
 
     // El valor que realmente se usa (puede estar congelado)
     val displayBubbleOffset = if (isLocked) lockedBubbleOffset else bubbleOffset
@@ -137,10 +139,26 @@ fun BubbleLevelScreen(onBack: () -> Unit) {
     }
 
     // Se reproduce el pitido si la burbuja está nivelada
-    LaunchedEffect(isLevel, isForeground, isLocked) {
-        while (isLevel && isForeground && !isLocked) {
-            toneGen.startTone(ToneGenerator.TONE_PROP_BEEP, 200)
-            delay(250)
+    LaunchedEffect(isLevel, hasSensorSample, isLocked, isForeground) {
+        if (!hasSensorSample || !isForeground || isLocked) {
+            isBeepArmed = false
+            return@LaunchedEffect
+        }
+
+        if (isLevel) {
+            // Esperar un poquito y re-chequear que siga nivelado (debounce)
+            isBeepArmed = true
+            kotlinx.coroutines.delay(300)
+            // si en ese tiempo se desarmó, no beep
+            if (!(isBeepArmed && hasSensorSample && isForeground && !isLocked)) return@LaunchedEffect
+
+            // Ahora sí: bucle de beep mientras permanezca nivelado
+            while (isForeground && !isLocked && hasSensorSample) {
+                toneGen.startTone(ToneGenerator.TONE_PROP_BEEP, 200)
+                kotlinx.coroutines.delay(250)
+            }
+        } else {
+            isBeepArmed = false
         }
     }
 
@@ -206,6 +224,7 @@ fun BubbleLevelScreen(onBack: () -> Unit) {
                     rawBubbleOffset = newBubbleOffset
                     inclinationDegX = degX
                     inclinationDegY = degY
+                    hasSensorSample = true
                 }
             }
 

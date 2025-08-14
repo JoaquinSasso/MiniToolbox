@@ -155,9 +155,6 @@ fun FlashScreen(onBack: () -> Unit) {
     // - Si soporta intensidad: 0 apaga, 1..20 mapean a 1..maxStrength.
     // - Si NO soporta: 0 apaga, 1..20 encienden (ON/OFF).
     fun applyLevel(level: Int) {
-        val safe = level.coerceIn(0, 20)
-        // Guardar siempre el nivel elegido (aunque el equipo no soporte intensidad)
-        scope.launch { context.setNivelLinterna(safe) }
         if (!soportaIntensidad) {
             if (level <= 0) setLinterna(false) else setLinterna(true)
             return
@@ -272,6 +269,13 @@ fun FlashScreen(onBack: () -> Unit) {
                             // Reflejar visualmente el 0 si quedó en la zona guard
                             uiLevel = finalLevel
                             rawSlider = finalLevel.toFloat().coerceIn(0f, 20f)
+                        },
+                        onValueChangeFinished = {
+                            val safe = uiLevel.coerceIn(0, 20)
+                            // Guardar el nivel elegido a menos que sea 0 (aunque el equipo no soporte intensidad)
+                            if(safe > 0) {
+                                scope.launch { context.setNivelLinterna(safe) }
+                            }
                         },
                         valueRange = 0f..20f,
                         steps = 19,
