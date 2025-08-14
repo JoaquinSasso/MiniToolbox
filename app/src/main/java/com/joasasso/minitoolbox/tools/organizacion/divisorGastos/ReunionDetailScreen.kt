@@ -148,36 +148,76 @@ fun DetallesReunionScreen(
             item { Text(stringResource(R.string.expenses_section), style = MaterialTheme.typography.titleSmall) }
 
             items(reunion?.gastos ?: emptyList()) { gasto ->
+                val totalGasto = gasto.aportesIndividuales.values.sum()
+                val totalPersonas = gasto.consumidoPor.values.sum()
+                val porPersona = if (totalPersonas > 0) totalGasto / totalPersonas else 0.0
+                val resumenConsumidores = if (gasto.consumidoPor.isNotEmpty()) {
+                    gasto.consumidoPor.entries.joinToString(", ") { (nombre, cant) -> "$nombre ($cant)" }
+                } else {
+                    stringResource(R.string.expense_no_consumers)
+                }
+
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surfaceVariant)
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(gasto.descripcion)
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("${formatter.format(gasto.aportesIndividuales.values.sum())}")
-                            IconButton(onClick = { onEditarGasto(reunionId, gasto.id) }) {
-                                Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.edit_expense_content_desc))
-                            }
-                            IconButton(onClick = {
-                                reunion?.let {
-                                    val nueva = it.copy(gastos = it.gastos.filterNot { g -> g.id == gasto.id })
-                                    scope.launch {
-                                        ReunionesRepository.actualizarReunion(context, nueva)
-                                        reunion = nueva
-                                        deudas = calcularDeudas(reunion!!, context)
-                                    }
+                    Column(Modifier.padding(16.dp)) {
+
+                        // Fila superior: descripción, total, acciones
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = gasto.descripcion,
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(formatter.format(totalGasto))
+                                IconButton(onClick = { onEditarGasto(reunionId, gasto.id) }) {
+                                    Icon(
+                                        Icons.Default.Edit,
+                                        contentDescription = stringResource(R.string.edit_expense_content_desc)
+                                    )
                                 }
-                            }) {
-                                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete_expense_content_desc))
+                                IconButton(onClick = {
+                                    reunion?.let {
+                                        val nueva = it.copy(gastos = it.gastos.filterNot { g -> g.id == gasto.id })
+                                        scope.launch {
+                                            ReunionesRepository.actualizarReunion(context, nueva)
+                                            reunion = nueva
+                                            deudas = calcularDeudas(reunion!!, context)
+                                        }
+                                    }
+                                }) {
+                                    Icon(
+                                        Icons.Default.Delete,
+                                        contentDescription = stringResource(R.string.delete_expense_content_desc)
+                                    )
+                                }
                             }
                         }
+
+                        Spacer(Modifier.height(8.dp))
+
+                        // Resumen por gasto
+                        val textoResumen = if (totalPersonas > 0) {
+                            stringResource(
+                                R.string.expense_consumers_with_price,
+                                resumenConsumidores,
+                                formatter.format(porPersona)
+                            )
+                        } else {
+                            stringResource(R.string.expense_consumers_only, resumenConsumidores)
+                        }
+
+                        Text(
+                            text = textoResumen,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
             }

@@ -49,6 +49,9 @@
     <string name="help_expense_5">• The expense will be split proportionally based on consumption.</string>
 
 
+    <string name="expense_consumers_only">Consumed by: %1$s</string>
+    <string name="expense_consumers_with_price">Consumed by: %1$s · %2$s per person</string>
+    <string name="expense_no_consumers">—</string>
     <string name="expenses_share_summary_button">Share summary</string>
     <string name="date_label">Date: %1$s</string>
     <string name="total_spent_label">Total spent: $%1$.2f</string>
