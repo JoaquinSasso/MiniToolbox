@@ -6,16 +6,19 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -136,21 +139,26 @@ fun CrearReunionScreen(
             item {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    OutlinedTextField(
-                        value = nuevoGrupoNombre,
-                        onValueChange = { nuevoGrupoNombre = it },
-                        label = { Text(stringResource(R.string.create_meeting_group_name)) },
-                        modifier = Modifier.weight(1f)
-                    )
-                    OutlinedTextField(
-                        value = nuevaCantidad,
-                        onValueChange = { nuevaCantidad = it },
-                        label = { Text(stringResource(R.string.expense_group_size)) },
-                        modifier = Modifier.width(90.dp),
-                        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                    )
+                    Column(horizontalAlignment = Alignment.Start,
+                        modifier = Modifier.height(140.dp)
+                        ) {
+                        OutlinedTextField(
+                            value = nuevoGrupoNombre,
+                            onValueChange = { nuevoGrupoNombre = it },
+                            label = { Text(stringResource(R.string.create_meeting_group_name)) },
+                            modifier = Modifier.weight(1f)
+                        )
+                        OutlinedTextField(
+                            value = nuevaCantidad,
+                            onValueChange = { nuevaCantidad = it },
+                            label = { Text(stringResource(R.string.expense_group_size)) },
+                            modifier = Modifier.weight(1f),
+                            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                        )
+                    }
                     IconButton(
                         onClick = {
                             val nombreGrupo = nuevoGrupoNombre.trim()
@@ -161,11 +169,14 @@ fun CrearReunionScreen(
                                 nuevaCantidad = "1"
                             }
                         },
-                        enabled = nuevoGrupoNombre.isNotBlank()
+                        modifier = Modifier
+                            .size(56.dp)
+                            .background(MaterialTheme.colorScheme.primary, CircleShape)
                     ) {
                         Icon(
                             Icons.Default.PersonAdd,
-                            contentDescription = stringResource(R.string.create_meeting_add_member)
+                            contentDescription = stringResource(R.string.create_meeting_add_member),
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 }

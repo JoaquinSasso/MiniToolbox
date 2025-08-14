@@ -79,13 +79,13 @@ class AguaWidget : GlanceAppWidget() {
                     Spacer(GlanceModifier.height(8.dp))
                     Row(horizontalAlignment = Alignment.CenterHorizontally) {
                         Button(
-                            text = "+$porVaso",
-                            onClick = actionRunCallback<AgregarAguaCallback>()
+                            text = "-$porVaso",
+                            onClick = actionRunCallback<QuitarAguaCallback>()
                         )
                         Spacer(GlanceModifier.width(8.dp))
                         Button(
-                            text = "-$porVaso",
-                            onClick = actionRunCallback<QuitarAguaCallback>()
+                            text = "+$porVaso",
+                            onClick = actionRunCallback<AgregarAguaCallback>()
                         )
                     }
                 }
