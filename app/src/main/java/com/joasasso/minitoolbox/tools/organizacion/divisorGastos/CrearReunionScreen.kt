@@ -154,7 +154,7 @@ fun CrearReunionScreen(
                         OutlinedTextField(
                             value = nuevaCantidad,
                             onValueChange = { nuevaCantidad = it },
-                            label = { Text(stringResource(R.string.expense_group_size)) },
+                            label = { Text(stringResource(R.string.create_meeting_group_size_label)) },
                             modifier = Modifier.weight(1f),
                             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                         )

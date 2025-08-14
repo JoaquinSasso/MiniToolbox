@@ -16,9 +16,12 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -40,13 +43,13 @@ import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.data.Gasto
 import com.joasasso.minitoolbox.data.Reunion
 import com.joasasso.minitoolbox.data.ReunionesRepository
+import com.joasasso.minitoolbox.ui.components.Stepper
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
 import java.util.UUID
-
 
 @Composable
 fun AgregarGastoScreen(
@@ -56,39 +59,58 @@ fun AgregarGastoScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
+
     val locale = Locale.getDefault()
     val formatter = NumberFormat.getCurrencyInstance(locale).apply {
         maximumFractionDigits = 2
         minimumFractionDigits = 0
     }
+
     var showInfo by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Mensajes (asegurate de tener estos strings; si no, te paso las claves)
+    val msgNombreOblig = stringResource(R.string.expense_name_required)
+    val msgSinAporte = stringResource(R.string.expense_amount_required)
+    val msgSinConsumidores = stringResource(R.string.expense_consumers_required)
 
     var reunion by remember { mutableStateOf<Reunion?>(null) }
     var descripcion by remember { mutableStateOf("") }
+
+    // Aportes: guardamos el texto ingresado y lo parseamos al final (coma o punto)
     var aportes by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
-    var consumidores: Map<String, Int> by remember(reunion) {
-        mutableStateOf(
-            reunion?.integrantes?.associate { it.nombre to it.cantidad } ?: emptyMap()
-        )
+
+    // Consumidores: por defecto TODOS (cantidad del grupo)
+    var consumidores by remember { mutableStateOf<Map<String, Int>>(emptyMap()) }
+
+    // --- helpers para decimales flexibles "," y "." ---
+    fun parseFlexibleDouble(text: String): Double? {
+        if (text.isBlank()) return null
+        val cleaned = text.trim()
+            .replace(',', '.')
+            .replace(Regex("[^0-9.]"), "")
+        if (cleaned.count { it == '.' } > 1) return null
+        return cleaned.toDoubleOrNull()
     }
-
-
 
     LaunchedEffect(Unit) {
         val reuniones = ReunionesRepository.flujoReuniones(context).firstOrNull().orEmpty()
         reunion = reuniones.find { it.id == reunionId }
-        reunion?.integrantes?.associate { it.nombre to 0 }?.let { consumidores = it }
+        // default: todos consumen
+        consumidores = reunion?.integrantes?.associate { it.nombre to it.cantidad } ?: emptyMap()
     }
 
-    val montoTotal = aportes.values.sumOf { it.toDoubleOrNull() ?: 0.0 }
+    val montoTotal = aportes.values.sumOf { parseFlexibleDouble(it) ?: 0.0 }
 
     Scaffold(
         topBar = {
             TopBarReusable(
-                stringResource(R.string.add_expenses_screen),
-                onBack,
-                { showInfo = true })
-        }
+                title = stringResource(R.string.add_expenses_screen),
+                onBack = onBack,
+                onShowInfo = { showInfo = true }
+            )
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         LazyColumn(
             modifier = Modifier
@@ -97,12 +119,15 @@ fun AgregarGastoScreen(
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+
+            // Nombre del gasto (obligatorio)
             item {
                 OutlinedTextField(
                     value = descripcion,
                     onValueChange = { descripcion = it },
                     label = { Text(stringResource(R.string.expense_description_label)) },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
                 )
             }
 
@@ -113,6 +138,7 @@ fun AgregarGastoScreen(
                 )
             }
 
+            // Quién pagó y cuánto (coma/punto aceptados)
             item {
                 Text(
                     stringResource(R.string.expense_who_paid_label),
@@ -135,23 +161,41 @@ fun AgregarGastoScreen(
                         Text(grupo.nombre, modifier = Modifier.weight(1f))
                         OutlinedTextField(
                             value = aportes[grupo.nombre] ?: "",
-                            onValueChange = {
+                            onValueChange = { nuevo ->
+                                // Unificar coma a punto
+                                var filtrado = nuevo.replace(',', '.')
+                                // Permitir solo dígitos y punto
+                                filtrado = filtrado.replace(Regex("[^0-9.]"), "")
+                                // Si hay más de un punto, eliminar los extra
+                                if (filtrado.count { it == '.' } > 1) {
+                                    val firstDot = filtrado.indexOf('.')
+                                    filtrado = filtrado.substring(0, firstDot + 1) +
+                                            filtrado.substring(firstDot + 1).replace(".", "")
+                                }
+                                // Limitar a 2 decimales si hay punto
+                                if (filtrado.contains('.')) {
+                                    val parts = filtrado.split('.')
+                                    val enteros = parts[0]
+                                    val decimales = parts.getOrNull(1)?.take(2) ?: ""
+                                    filtrado = if (decimales.isEmpty()) "$enteros." else "$enteros.$decimales"
+                                }
+
                                 aportes = aportes.toMutableMap().apply {
-                                    if (it.isNotBlank()) put(
-                                        grupo.nombre,
-                                        it
-                                    ) else remove(grupo.nombre)
+                                    if (filtrado.isNotBlank()) put(grupo.nombre, filtrado) else remove(grupo.nombre)
                                 }
                             },
-                            modifier = Modifier.width(100.dp),
-                            placeholder = { Text("0.0") },
+                            modifier = Modifier.width(120.dp),
+                            placeholder = { Text("0") },
                             singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                         )
                     }
                 }
             }
 
+            item { HorizontalDivider() }
+
+            // Quiénes consumieron (Stepper 0..grupo.cantidad)
             item {
                 Text(
                     stringResource(R.string.expense_who_consumed_label),
@@ -160,6 +204,7 @@ fun AgregarGastoScreen(
             }
 
             items(reunion?.integrantes.orEmpty()) { grupo ->
+                val actual = (consumidores[grupo.nombre] ?: grupo.cantidad).coerceIn(0, grupo.cantidad)
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
@@ -171,53 +216,65 @@ fun AgregarGastoScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(grupo.nombre, modifier = Modifier.weight(1f))
-                        val valorTexto = consumidores[grupo.nombre]?.takeIf { it > 0 }?.toString() ?: ""
-
-                        OutlinedTextField(
-                            value = valorTexto,
-                            onValueChange = { nuevoTexto ->
-                                consumidores = consumidores.toMutableMap().apply {
-                                    val cantidad = nuevoTexto.toIntOrNull()
-                                    if (cantidad != null) {
-                                        put(grupo.nombre, cantidad.coerceIn(0, grupo.cantidad))
-                                    } else {
-                                        put(grupo.nombre, 0)
+                        Text("${grupo.nombre} (${grupo.cantidad})", modifier = Modifier.weight(1f))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Stepper(
+                                value = actual,
+                                onValueChange = { nuevo ->
+                                    consumidores = consumidores.toMutableMap().apply {
+                                        put(grupo.nombre, nuevo.coerceIn(0, grupo.cantidad))
                                     }
-                                }
-                            },
-                            modifier = Modifier.width(80.dp),
-                            placeholder = { Text("0") },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                        )
+                                },
+                                range = 0..grupo.cantidad
+                            )
+                            Spacer(Modifier.width(8.dp))
+                        }
                     }
                 }
             }
 
+            item { Spacer(Modifier.height(16.dp)) }
+
+            // Guardar
             item {
-                Spacer(Modifier.height(16.dp))
                 Button(
                     onClick = {
-                        val aporteValido = aportes.filterValues { it.toDoubleOrNull() != null }
-                        val aportesFinales = aporteValido.mapValues { it.value.toDouble() }
-                        val consumidoresFinales = consumidores.filterValues { it > 0 }
-
-                        val nuevoGasto = Gasto(
-                            id = UUID.randomUUID().toString(),
-                            descripcion = descripcion,
-                            aportesIndividuales = aportesFinales,
-                            consumidoPor = consumidoresFinales
-                        )
-
-                        val actualizada = reunion?.copy(
-                            gastos = reunion!!.gastos + nuevoGasto
-                        )
-
                         scope.launch {
-                            if (actualizada != null) {
+                            // Validaciones
+                            if (descripcion.isBlank()) {
+                                snackbarHostState.showSnackbar(msgNombreOblig)
+                                return@launch
+                            }
+
+                            val aporteValido = aportes
+                                .mapValues { parseFlexibleDouble(it.value) }
+                                .filterValues { it != null }
+                                .mapValues { it.value!! }
+
+                            if (aporteValido.values.sum() <= 0.0) {
+                                snackbarHostState.showSnackbar(msgSinAporte)
+                                return@launch
+                            }
+
+                            val consumidoresFinales = consumidores.filterValues { it > 0 }
+                            if (consumidoresFinales.isEmpty()) {
+                                snackbarHostState.showSnackbar(msgSinConsumidores)
+                                return@launch
+                            }
+
+                            val nuevoGasto = Gasto(
+                                id = UUID.randomUUID().toString(),
+                                descripcion = descripcion.trim(),
+                                aportesIndividuales = aporteValido,
+                                consumidoPor = consumidoresFinales
+                            )
+
+                            reunion?.let { r ->
+                                val actualizada = r.copy(gastos = r.gastos + nuevoGasto)
                                 ReunionesRepository.actualizarReunion(context, actualizada)
                             }
+
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             onBack()
                         }
                     },
@@ -253,7 +310,3 @@ fun AgregarGastoScreen(
         )
     }
 }
-
-
-
-

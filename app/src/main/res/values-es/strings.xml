@@ -12,4 +12,8 @@
     <string name="delete">Borrar</string>
     <string name="share">Compartir</string>
     <string name="accept">Aceptar</string>
+    <string name="stepper_content_desc">Selector de cantidad</string>
+    <string name="stepper_decrease">Disminuir</string>
+    <string name="stepper_increase">Aumentar</string>
+
 </resources>
