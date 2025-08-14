@@ -36,6 +36,11 @@
     <string name="expense_who_paid_label">Who paid and how much?</string>
     <string name="expense_who_consumed_label">Who consumed? (people per group)</string>
     <string name="error_group_size_exceeded">%1$s group has a maximum of %2$d people</string>
+    <string name="expense_name_required">Expense must have a name</string>
+    <string name="expense_amount_required">Enter at least an amount greater than 0.</string>
+    <string name="expense_consumers_required">Select at least one consumer.</string>
+    <string name="expense_delete_member_title">Delete member</string>
+    <string name="expense_delete_member_message">Are you sure you want to delete "%1$s"? This may change the value of some expenses because their contributions and consumptions will be removed.</string>
     <string name="help_title_expense">How to record an expense?</string>
     <string name="help_expense_1">• Write a brief description of the expense (e.g. \'Pizza\', \'Ticket\', \'Coca-Cola\').</string>
     <string name="help_expense_2">• Indicate how much each group contributed.</string>

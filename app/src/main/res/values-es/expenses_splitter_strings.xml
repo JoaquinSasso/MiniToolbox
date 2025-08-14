@@ -38,6 +38,11 @@
     <string name="expense_who_paid_label">¿Quién pagó y cuánto?</string>
     <string name="error_group_size_exceeded">El grupo %1$s tiene un máximo de %2$d personas</string>
     <string name="expense_who_consumed_label">¿Quiénes consumieron? (personas por grupo)</string>
+    <string name="expense_name_required">El gasto debe tener un nombre</string>
+    <string name="expense_amount_required">Ingresá al menos un aporte mayor que 0.</string>
+    <string name="expense_consumers_required">Seleccioná al menos un consumidor.</string>
+    <string name="expense_delete_member_title">Eliminar integrante</string>
+    <string name="expense_delete_member_message">¿Seguro que querés eliminar a “%1$s”? Esto puede cambiar el valor de algunos gastos porque se eliminarán sus aportes y consumos.</string>
     <string name="help_title_expense">¿Cómo registrar un gasto?</string>
     <string name="help_expense_1">• Escribe una breve descripción del gasto (por ejemplo: \'Pizza\', \'Entrada\', \'Coca-Cola\').</string>
     <string name="help_expense_2">• Indica cuánto aportó cada grupo al gasto.</string>

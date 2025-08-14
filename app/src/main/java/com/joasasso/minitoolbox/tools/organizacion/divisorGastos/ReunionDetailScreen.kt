@@ -58,6 +58,8 @@ import java.text.NumberFormat
 import java.util.Date
 import java.util.Locale
 
+// … imports idénticos a los tuyos …
+
 @Composable
 fun DetallesReunionScreen(
     reunionId: String,
@@ -76,6 +78,9 @@ fun DetallesReunionScreen(
     var cantidadEditada by remember { mutableStateOf("") }
     var textoCompartir by remember { mutableStateOf("") }
     var deudas by remember { mutableStateOf(emptyList<String>()) }
+
+    // NEW: confirmación de borrado de integrante
+    var grupoAEliminar by remember { mutableStateOf<Grupo?>(null) }
 
     val locale = Locale.getDefault()
     val formatter = NumberFormat.getCurrencyInstance(locale).apply {
@@ -112,6 +117,7 @@ fun DetallesReunionScreen(
                 ReunionesRepository.actualizarReunion(context, actualizada)
                 reunion = actualizada
                 grupoAEditar = null
+                deudas = calcularDeudas(actualizada, context)
             }
         }
     }
@@ -154,9 +160,7 @@ fun DetallesReunionScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(gasto.descripcion)
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ){
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             Text("${formatter.format(gasto.aportesIndividuales.values.sum())}")
                             IconButton(onClick = { onEditarGasto(reunionId, gasto.id) }) {
                                 Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.edit_expense_content_desc))
@@ -212,9 +216,7 @@ fun DetallesReunionScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text("${grupo.nombre} (${grupo.cantidad})")
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ){
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(formatter.format(totalPagado))
                             IconButton(onClick = {
                                 grupoAEditar = grupo
@@ -224,22 +226,8 @@ fun DetallesReunionScreen(
                                 Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.edit_member_content_desc))
                             }
                             IconButton(onClick = {
-                                reunion?.let {
-                                    val actualizada = it.copy(
-                                        integrantes = it.integrantes - grupo,
-                                        gastos = it.gastos.map { gasto ->
-                                            gasto.copy(
-                                                aportesIndividuales = gasto.aportesIndividuales - grupo.nombre,
-                                                consumidoPor = gasto.consumidoPor - grupo.nombre
-                                            )
-                                        }
-                                    )
-                                    scope.launch {
-                                        ReunionesRepository.actualizarReunion(context, actualizada)
-                                        reunion = actualizada
-                                        deudas = calcularDeudas(reunion!!, context)
-                                    }
-                                }
+                                // En lugar de borrar directo, pedimos confirmación
+                                grupoAEliminar = grupo
                             }) {
                                 Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete_member_content_desc))
                             }
@@ -309,6 +297,7 @@ fun DetallesReunionScreen(
         }
     }
 
+    // Diálogo de edición de grupo (igual que antes, solo recalcula deudas al final)
     if (grupoAEditar != null) {
         AlertDialog(
             onDismissRequest = { grupoAEditar = null },
@@ -351,10 +340,8 @@ fun DetallesReunionScreen(
                         val grupoNuevo = Grupo(nuevoNombre, nuevaCantidad)
 
                         val integrantesActualizados = if (grupoAnterior.nombre.isBlank()) {
-                            // Es nuevo grupo
                             reunion!!.integrantes + grupoNuevo
                         } else {
-                            // Es edición de grupo existente
                             reunion!!.integrantes.map {
                                 if (it.nombre == grupoAnterior.nombre) grupoNuevo else it
                             }
@@ -364,7 +351,7 @@ fun DetallesReunionScreen(
                             val consumidoPor = gasto.consumidoPor.toMutableMap()
 
                             if (grupoAnterior.nombre.isBlank()) {
-                                // Es nuevo grupo: agregar con cantidad completa
+                                // nuevo grupo: por defecto participa con su cantidad
                                 consumidoPor[nuevoNombre] = nuevaCantidad
                             } else if (grupoAnterior.nombre in consumidoPor) {
                                 val cantidadAnterior = consumidoPor.remove(grupoAnterior.nombre) ?: 0
@@ -403,6 +390,51 @@ fun DetallesReunionScreen(
         )
     }
 
+    // NUEVO: confirmación de borrado de integrante
+    if (grupoAEliminar != null) {
+        val g = grupoAEliminar!!
+        AlertDialog(
+            onDismissRequest = { grupoAEliminar = null },
+            title = { Text(stringResource(R.string.expense_delete_member_title)) },
+            text = {
+                Text(
+                    // Aviso explícito del impacto:
+                    stringResource(R.string.expense_delete_member_message, g.nombre)
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    reunion?.let {
+                        val actualizada = it.copy(
+                            integrantes = it.integrantes - g,
+                            gastos = it.gastos.map { gasto ->
+                                gasto.copy(
+                                    // Al borrar un integrante, se quitan sus aportes y consumos (manteniendo coherencia)
+                                    aportesIndividuales = gasto.aportesIndividuales - g.nombre,
+                                    consumidoPor = gasto.consumidoPor - g.nombre
+                                )
+                            }
+                        )
+                        scope.launch {
+                            ReunionesRepository.actualizarReunion(context, actualizada)
+                            reunion = actualizada
+                            deudas = calcularDeudas(reunion!!, context)
+                            grupoAEliminar = null
+                        }
+                    }
+                }) {
+                    Text(stringResource(R.string.delete))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { grupoAEliminar = null }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
     if (showInfo) {
         AlertDialog(
             onDismissRequest = { showInfo = false },
@@ -415,7 +447,6 @@ fun DetallesReunionScreen(
                     Text(stringResource(R.string.info_meeting_line4))
                     Text(stringResource(R.string.info_meeting_line5))
                     Text(stringResource(R.string.info_meeting_line6))
-
                 }
             },
             confirmButton = {
@@ -427,9 +458,6 @@ fun DetallesReunionScreen(
         )
     }
 }
-
-
-
 
 
 fun formatearFecha(millis: Long): String {
