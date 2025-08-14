@@ -4,10 +4,13 @@
     <string name="flash_off_desc">Flashlight off</string>
     <string name="flash_button_on">Turn on flashlight</string>
     <string name="flash_button_off">Turn off flashlight</string>
+    <string name="flash_intensity">Intensity:</string>
+    <string name="flash_intensity_off">Intensity: 0 (Off)</string>
 
     <string name="flash_error_noflash">No flashlight found on this device.</string>
     <string name="flash_error_camera_access">Could not access the camera flash.</string>
     <string name="flash_error_permission">Permission denied to use the flash.</string>
+    <string name="flash_error_intensity">Could not set the flash intensity.</string>
 
     <string name="flash_help_title">How does the flashlight work?</string>
     <string name="flash_help_line1">• Uses the camera flash to illuminate in the dark.</string>

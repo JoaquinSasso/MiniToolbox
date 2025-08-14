@@ -15,9 +15,11 @@
     <string name="expense_delete_content_desc">Delete meeting</string>
     <string name="expense_group_size">Size</string>
 
+
     <string name="create_meeting_button">Save Meeting</string>
     <string name="create_meeting_name_label">Meeting name</string>
     <string name="create_meeting_group_name">Group name</string>
+    <string name="create_meeting_group_size_label">Amount of people</string>
     <string name="create_meeting_add_member">Add member</string>
     <string name="create_meeting_remove_member">Remove member</string>
     <string name="create_meeting_snackbar_error">Please enter a name and add at least one person/group</string>

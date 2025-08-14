@@ -18,7 +18,8 @@
 
     <string name="create_meeting_button">Guardar reunión</string>
     <string name="create_meeting_name_label">Nombre de la reunión</string>
-    <string name="create_meeting_group_name">Nombre del grupo</string>
+    <string name="create_meeting_group_name">Nombre de persona / grupo</string>
+    <string name="create_meeting_group_size_label">Cantidad de personas</string>
     <string name="expense_group_size">Tamaño</string>
     <string name="create_meeting_add_member">Agregar integrante</string>
     <string name="create_meeting_remove_member">Eliminar integrante</string>

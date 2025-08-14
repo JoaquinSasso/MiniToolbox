@@ -5,9 +5,12 @@
     <string name="flash_button_on">Encender linterna</string>
     <string name="flash_button_off">Apagar linterna</string>
 
+    <string name="flash_intensity">Intensidad:</string>
+    <string name="flash_intensity_off">Intensidad: 0 (apagado)</string>
     <string name="flash_error_noflash">No se encontró flash en este dispositivo.</string>
     <string name="flash_error_camera_access">No se pudo acceder al flash de la cámara.</string>
     <string name="flash_error_permission">Permiso denegado para usar el flash.</string>
+    <string name="flash_error_intensity">No se pudo establecer la intensidad del flash.</string>
 
     <string name="flash_help_title">¿Cómo funciona la linterna?</string>
     <string name="flash_help_line1">• Usa el flash de la cámara como linterna para iluminar en la oscuridad.</string>
