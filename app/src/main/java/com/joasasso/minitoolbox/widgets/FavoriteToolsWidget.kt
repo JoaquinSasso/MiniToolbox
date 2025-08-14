@@ -39,6 +39,7 @@ import com.joasasso.minitoolbox.data.FAVORITOS_KEYS
 import com.joasasso.minitoolbox.data.flujoToolsFavoritas
 import com.joasasso.minitoolbox.tools.ToolRegistry
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 class FavoriteToolsWidget : GlanceAppWidget() {
 
@@ -46,8 +47,6 @@ class FavoriteToolsWidget : GlanceAppWidget() {
     override val sizeMode = SizeMode.Exact
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        actualizarWidgetFavoritos(context) // Actualiza el widget al iniciar
-
         provideContent {
             val prefs = currentState<Preferences>()
             val size = LocalSize.current
@@ -112,6 +111,10 @@ class FavoriteToolsWidget : GlanceAppWidget() {
                                             actionStartActivity(
                                                 Intent(context, MainActivity::class.java).apply {
                                                     putExtra("startRoute", tool.screen.route)
+                                                    addFlags(
+                                                        Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                                                                Intent.FLAG_ACTIVITY_SINGLE_TOP
+                                                    )
                                                 }
                                             )
                                         ) else it
@@ -144,8 +147,28 @@ class FavoriteToolsWidget : GlanceAppWidget() {
 
 class FavoriteToolsWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = FavoriteToolsWidget()
-}
 
+    // Cuando se agrega el primer widget de este tipo
+    override fun onEnabled(context: Context) {
+        super.onEnabled(context)
+        // Sembrar estado inicial desde DataStore → estado del widget
+        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+            actualizarWidgetFavoritos(context)
+        }
+    }
+
+    // Cuando el sistema pide actualizar (al agregar una nueva instancia, cambiar tamaño, etc.)
+    override fun onUpdate(
+        context: Context,
+        appWidgetManager: android.appwidget.AppWidgetManager,
+        appWidgetIds: IntArray
+    ) {
+        super.onUpdate(context, appWidgetManager, appWidgetIds)
+        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+            actualizarWidgetFavoritos(context)
+        }
+    }
+}
 
 suspend fun actualizarWidgetFavoritos(context: Context) {
     val favoritos = context.flujoToolsFavoritas().first()
@@ -155,15 +178,10 @@ suspend fun actualizarWidgetFavoritos(context: Context) {
         updateAppWidgetState(context, FavoriteToolsWidget().stateDefinition, id) { prefs ->
             prefs.toMutablePreferences().apply {
                 FAVORITOS_KEYS.forEachIndexed { index, key ->
-                    if (index < favoritos.size) {
-                        set(key, favoritos[index])
-                    } else {
-                        remove(key)
-                    }
+                    if (index < favoritos.size) set(key, favoritos[index]) else remove(key)
                 }
             }
         }
         FavoriteToolsWidget().update(context, id)
     }
 }
-
