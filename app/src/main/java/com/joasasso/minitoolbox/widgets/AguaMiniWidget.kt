@@ -1,5 +1,6 @@
 package com.joasasso.minitoolbox.widgets
 
+import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import androidx.compose.ui.graphics.Color
@@ -31,6 +32,7 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.joasasso.minitoolbox.MainActivity
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AgregarAguaCallback
+import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.actualizarWidgetAgua
 
 
 class AguaMiniWidget : GlanceAppWidget() {
@@ -124,4 +126,17 @@ class AguaMiniWidget : GlanceAppWidget() {
 
 class AguaMiniWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = AguaMiniWidget()
+    override fun onEnabled(context: Context) {
+        super.onEnabled(context)
+        actualizarWidgetAgua(context)
+    }
+
+    override fun onUpdate(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetIds: IntArray
+    ) {
+        super.onUpdate(context, appWidgetManager, appWidgetIds)
+        actualizarWidgetAgua(context)
+    }
 }
