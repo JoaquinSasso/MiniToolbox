@@ -1,5 +1,6 @@
 package com.joasasso.minitoolbox.widgets
 
+import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import androidx.compose.runtime.Composable
@@ -35,6 +36,7 @@ import androidx.glance.text.TextStyle
 import com.joasasso.minitoolbox.MainActivity
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AgregarAguaCallback
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.QuitarAguaCallback
+import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.actualizarWidgetAgua
 
 class AguaWidget : GlanceAppWidget() {
 
@@ -122,4 +124,17 @@ fun ProgressBarWidget(ml: Int, objetivo: Int) {
 
 class AguaWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = AguaWidget()
+    override fun onEnabled(context: Context) {
+        super.onEnabled(context)
+        actualizarWidgetAgua(context)
+    }
+
+    override fun onUpdate(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetIds: IntArray
+    ) {
+        super.onUpdate(context, appWidgetManager, appWidgetIds)
+        actualizarWidgetAgua(context)
+    }
 }

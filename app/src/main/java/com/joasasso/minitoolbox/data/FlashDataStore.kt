@@ -1,6 +1,7 @@
 package com.joasasso.minitoolbox.data
 
 import android.content.Context
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -29,4 +30,14 @@ suspend fun Context.setNivelLinterna(level: Int) {
     flashDataStore.edit { prefs ->
         prefs[KEY_FLASH_LEVEL] = safe
     }
+}
+
+private val KEY_FLASH_ACTIVA = booleanPreferencesKey("flash_activa")
+
+fun Context.flujoEstadoLinterna(): Flow<Boolean> {
+    return flashDataStore.data.map { it[KEY_FLASH_ACTIVA] ?: false }
+}
+
+suspend fun Context.setEstadoLinterna(activa: Boolean) {
+    flashDataStore.edit { it[KEY_FLASH_ACTIVA] = activa }
 }
