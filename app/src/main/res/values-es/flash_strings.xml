@@ -20,9 +20,12 @@
     <string name="flash_help_line5">• La linterna solo tiene una intensidad (encendido/apagado). No es posible ajustar el brillo, ya que es una limitación del hardware en casi todos los teléfonos.</string>
 
     <!-- Widget -->
-    <string name="flash_widget_off">Apagado</string>
     <string name="flash_widget_level">Nivel: %1$d</string>
     <string name="flash_widget_increase">Aumentar intensidad</string>
     <string name="flash_widget_decrease">Disminuir intensidad</string>
+    <string name="flash_widget_low">Baja intensidad</string>
+    <string name="flash_widget_medium">Intensidad media</string>
+    <string name="flash_widget_high">Alta intensidad</string>
+    <string name="flash_widget_off">Apagar linterna</string>
 
 </resources>
