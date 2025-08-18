@@ -11,6 +11,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.glance.Button
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
+import androidx.glance.GlanceTheme
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
@@ -60,7 +61,7 @@ class AguaWidget : GlanceAppWidget() {
             Box(
                 modifier = GlanceModifier
                     .fillMaxSize()
-                    .background(ColorProvider(day = Color(0xFF263238), night = Color(0xFF263238)))
+                    .background(GlanceTheme.colors.background)
                     .cornerRadius(16.dp)
                     .padding(6.dp)
                     .clickable(actionStartActivity(launchIntent))
@@ -71,7 +72,7 @@ class AguaWidget : GlanceAppWidget() {
                     modifier = GlanceModifier.fillMaxSize()
                 ) {
                     Text(
-                        text = "💧${(agua / 1000f).let { "%.2f".format(it) }} L / ${(objetivo / 1000f).let { "%.2f".format(it) }} L",
+                        text = "${(agua / 1000f).let { "%.2f".format(it) }} L / ${(objetivo / 1000f).let { "%.2f".format(it) }} L",
                         style = TextStyle(
                             fontWeight = FontWeight.Bold,
                             color = ColorProvider(day = Color.White, night = Color.White)

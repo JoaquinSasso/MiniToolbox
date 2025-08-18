@@ -9,4 +9,5 @@
     android:widgetCategory="home_screen"
     android:initialLayout="@xml/glance_placeholder"
     android:description="@string/widget_access_desc"
-    android:label="@string/widget_access_label" />
+    android:label="@string/widget_access_label"
+    android:previewImage="@drawable/shortcuts_widget"/>

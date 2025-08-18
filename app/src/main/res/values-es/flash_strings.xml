@@ -28,4 +28,10 @@
     <string name="flash_widget_high">Alta intensidad</string>
     <string name="flash_widget_off">Apagar linterna</string>
 
+    <string name="flash_widget_label">Linterna</string>
+    <string name="flash_widget_description">Linterna</string>
+
+    <string name="minimal_flash_widget_label">Mini linterna</string>
+    <string name="minimal_flash_widget_description">Mini linterna</string>
+
 </resources>

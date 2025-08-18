@@ -28,6 +28,13 @@
     <string name="flash_widget_high">High brightness</string>
     <string name="flash_widget_off">Turn off flashlight</string>
 
+    <string name="flash_widget_label">Flashlight</string>
+    <string name="flash_widget_description">Flashlight</string>
+
+    <string name="minimal_flash_widget_label">Mini flashlight</string>
+    <string name="minimal_flash_widget_description">Mini flashlight</string>
+
+
 
 
 </resources>
