@@ -20,10 +20,14 @@
     <string name="flash_help_line5">• The flashlight has only one intensity (on/off). Brightness cannot be adjusted due to hardware limitations on most phones.</string>
 
     <!-- Widget -->
-    <string name="flash_widget_off">Off</string>
     <string name="flash_widget_level">Level: %1$d</string>
     <string name="flash_widget_increase">Increase brightness</string>
     <string name="flash_widget_decrease">Decrease brightness</string>
+    <string name="flash_widget_low">Low brightness</string>
+    <string name="flash_widget_medium">Medium brightness</string>
+    <string name="flash_widget_high">High brightness</string>
+    <string name="flash_widget_off">Turn off flashlight</string>
+
 
 
 </resources>

@@ -87,7 +87,7 @@
         <!--Widget de linterna-->
 
         <receiver
-            android:name=".widgets.FlashSliderWidgetReceiver"
+            android:name=".widgets.FlashQuickWidgetReceiver"
         android:exported="true">
         <intent-filter>
             <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
