@@ -1,6 +1,9 @@
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:minWidth="60dp"
+    android:minWidth="120dp"
     android:minHeight="60dp"
     android:updatePeriodMillis="0"
-    android:resizeMode="vertical |horizontal"
-    android:widgetCategory="home_screen" />
+    android:resizeMode="none"
+    android:description="@string/flash_widget_description"
+    android:label="@string/flash_widget_label"
+    android:widgetCategory="home_screen"
+    android:previewImage="@drawable/flashlight_widget"/>

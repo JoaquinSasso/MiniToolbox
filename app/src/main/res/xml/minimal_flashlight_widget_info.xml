@@ -4,4 +4,7 @@
     android:minHeight="40dp"
     android:updatePeriodMillis="0"
     android:resizeMode="none"
-    android:widgetCategory="home_screen" />
+    android:description="@string/minimal_flash_widget_description"
+    android:label="@string/minimal_flash_widget_label"
+    android:widgetCategory="home_screen"
+    android:previewImage="@drawable/minimal_flashlight_widget"/>

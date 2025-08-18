@@ -5,7 +5,6 @@ import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.os.Build
 import androidx.compose.ui.unit.dp
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.glance.ColorFilter
 import androidx.glance.GlanceId
@@ -26,7 +25,6 @@ import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.background
-import androidx.glance.currentState
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
@@ -52,8 +50,6 @@ class FlashQuickWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
-            val prefs = currentState<Preferences>()
-            val nivel = prefs[QuickFlashKeys.LEVEL] ?: 0
             Column(
                 modifier = GlanceModifier
                     .fillMaxSize()
@@ -72,7 +68,7 @@ class FlashQuickWidget : GlanceAppWidget() {
                     ) {
                         Box(
                             modifier = GlanceModifier
-                                .padding(12.dp)
+                                .padding(6.dp)
                                 .cornerRadius(12.dp)
                                 .background(GlanceTheme.colors.primary)
                                 .clickable(createFlashLevelAction(5)),
@@ -81,14 +77,14 @@ class FlashQuickWidget : GlanceAppWidget() {
                             Image(
                                 provider = ImageProvider(resId = R.drawable.flash_low),
                                 contentDescription = context.getString(R.string.flash_widget_low),
-                                modifier = GlanceModifier.size(35.dp),
+                                modifier = GlanceModifier.size(25.dp),
                                 colorFilter = ColorFilter.tint(GlanceTheme.colors.background)
                             )
                         }
                         Spacer(modifier = GlanceModifier.width(8.dp))
                         Box(
                             modifier = GlanceModifier
-                                .padding(12.dp)
+                                .padding(6.dp)
                                 .cornerRadius(12.dp)
                                 .background(GlanceTheme.colors.primary)
                                 .clickable(createFlashLevelAction(12)),
@@ -97,7 +93,7 @@ class FlashQuickWidget : GlanceAppWidget() {
                             Image(
                                 provider = ImageProvider(resId = R.drawable.flash_med),
                                 contentDescription = context.getString(R.string.flash_widget_medium),
-                                modifier = GlanceModifier.size(35.dp),
+                                modifier = GlanceModifier.size(25.dp),
                                 colorFilter = ColorFilter.tint(GlanceTheme.colors.background)
                             )
                         }
@@ -111,7 +107,7 @@ class FlashQuickWidget : GlanceAppWidget() {
                 ) {
                     Box(
                         modifier = GlanceModifier
-                            .padding(12.dp)
+                            .padding(6.dp)
                             .cornerRadius(12.dp)
                             .background(GlanceTheme.colors.primary)
                             .clickable(createFlashLevelAction(20)),
@@ -120,14 +116,14 @@ class FlashQuickWidget : GlanceAppWidget() {
                         Image(
                             provider = ImageProvider(resId = R.drawable.flash_high),
                             contentDescription = context.getString(R.string.flash_widget_high),
-                            modifier = GlanceModifier.size(35.dp),
+                            modifier = GlanceModifier.size(25.dp),
                             colorFilter = ColorFilter.tint(GlanceTheme.colors.background)
                         )
                     }
                     Spacer(modifier = GlanceModifier.width(8.dp))
                     Box(
                         modifier = GlanceModifier
-                            .padding(12.dp)
+                            .padding(6.dp)
                             .cornerRadius(12.dp)
                             .background(GlanceTheme.colors.primary)
                             .clickable(createFlashLevelAction(0)),
@@ -136,7 +132,7 @@ class FlashQuickWidget : GlanceAppWidget() {
                         Image(
                             provider = ImageProvider(resId = R.drawable.flash_off),
                             contentDescription = context.getString(R.string.flash_widget_off),
-                            modifier = GlanceModifier.size(35.dp),
+                            modifier = GlanceModifier.size(25.dp),
                             colorFilter = ColorFilter.tint(GlanceTheme.colors.background)
                         )
                     }
@@ -198,7 +194,7 @@ class QuickFlashSetLevel : ActionCallback {
 
             FlashQuickWidget().update(context, glanceId)
         } catch (_: Exception) {
-            // Ignore
+            // Ignorar
         }
     }
 }
