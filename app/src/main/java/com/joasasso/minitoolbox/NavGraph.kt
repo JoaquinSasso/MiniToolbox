@@ -44,12 +44,12 @@ import com.joasasso.minitoolbox.tools.herramientas.instrumentos.BrujulaScreen
 import com.joasasso.minitoolbox.tools.herramientas.instrumentos.BubbleLevelScreen
 import com.joasasso.minitoolbox.tools.herramientas.instrumentos.FlashScreen
 import com.joasasso.minitoolbox.tools.herramientas.instrumentos.LightSensorScreen
+import com.joasasso.minitoolbox.tools.herramientas.instrumentos.MagnifierScreen
 import com.joasasso.minitoolbox.tools.herramientas.instrumentos.ReglaScreen
 import com.joasasso.minitoolbox.tools.info.AgeCalculatorScreen
 import com.joasasso.minitoolbox.tools.info.CountriesInfoScreen
 import com.joasasso.minitoolbox.tools.info.RemainingTimeScreen
 import com.joasasso.minitoolbox.tools.info.TextBinaryConverterScreen
-import com.joasasso.minitoolbox.tools.magnifier.MagnifierScreen
 import com.joasasso.minitoolbox.tools.organizacion.SugeridorActividadScreen
 import com.joasasso.minitoolbox.tools.organizacion.divisorGastos.AgregarGastoScreen
 import com.joasasso.minitoolbox.tools.organizacion.divisorGastos.CrearReunionScreen

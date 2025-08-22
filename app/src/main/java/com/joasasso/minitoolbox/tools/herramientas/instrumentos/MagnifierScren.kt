@@ -1,14 +1,18 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.joasasso.minitoolbox.tools.magnifier
+package com.joasasso.minitoolbox.tools.herramientas.instrumentos
 
 import android.Manifest
 import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
+import android.graphics.Paint
 import android.graphics.RenderEffect
 import android.os.Build
 import android.view.MotionEvent
+import android.view.ScaleGestureDetector
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
@@ -18,8 +22,11 @@ import androidx.camera.core.SurfaceOrientedMeteringPointFactory
 import androidx.camera.core.TorchState
 import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.rememberTransformableState
+import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,6 +55,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -56,20 +64,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.createBitmap
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import java.util.concurrent.TimeUnit
+import kotlin.math.max
+import kotlin.math.roundToInt
 
 @Composable
 fun MagnifierScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    val haptic = LocalHapticFeedback.current
 
     // --- Permiso de cámara ---
     var hasCamPerm by remember { mutableStateOf(false) }
@@ -87,28 +104,55 @@ fun MagnifierScreen(onBack: () -> Unit) {
     // --- CameraX controller ---
     val controller = remember {
         LifecycleCameraController(context).apply {
-            // AE/AF automáticos por defecto
             cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
         }
     }
+    val minRatio = 1f
     LaunchedEffect(hasCamPerm) {
-        if (hasCamPerm) controller.bindToLifecycle(lifecycleOwner)
+        if (hasCamPerm) {
+            controller.bindToLifecycle(lifecycleOwner)
+            // En cuanto haya un ZoomState, aseguremos 1x como mínimo inicial
+            val cur = controller.zoomState.value?.zoomRatio ?: 1f
+            if (cur < minRatio) controller.setZoomRatio(minRatio)
+        }
     }
 
-    // Observables
+    // Estados observables
     val torchState by rememberTorchState(controller)
-    val zoomSnapshot by rememberZoomState(controller)
+    val zoomState by rememberZoomState(controller) // ZoomState? (zoomRatio + linearZoom)
 
-    // PreviewView ref para capturar frame al pausar
+    // PreviewView y pausa
     var previewView by remember { mutableStateOf<PreviewView?>(null) }
     var frozenBitmap by remember { mutableStateOf<Bitmap?>(null) }
     val isFrozen = frozenBitmap != null
 
+    // Tamaño del contenedor para clamp en pausa
+    var containerSize by remember { mutableStateOf(IntSize(0, 0)) }
+
+    // Gestos sobre imagen congelada (zoom + pan)
+    var frozenScale by remember { mutableStateOf(1f) }
+    var frozenOffsetX by remember { mutableStateOf(0f) }
+    var frozenOffsetY by remember { mutableStateOf(0f) }
+    val minScale = 1f
+    val maxScale = 6f
+
     // Ayuda
     var showInfo by remember { mutableStateOf(false) }
 
-    // Filtro automático: alto contraste + leve brillo (sin sliders)
-    // Contraste 1.35, brillo +10 ≈ mejora legibilidad de texto impreso frecuente
+    // Back: si está pausada, reanudar; si no, salir
+    BackHandler {
+        if (isFrozen) {
+            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            frozenBitmap = null
+            frozenScale = 1f
+            frozenOffsetX = 0f
+            frozenOffsetY = 0f
+        } else {
+            onBack()
+        }
+    }
+
+    // --- Filtro automático: alto contraste + leve brillo ---
     fun autoColorFilter(): ColorMatrixColorFilter {
         val contrast = 1.35f
         val brightness = 10f
@@ -124,107 +168,217 @@ fun MagnifierScreen(onBack: () -> Unit) {
         return ColorMatrixColorFilter(cm)
     }
 
-    // Acción pausar/reanudar (captura con PreviewView.bitmap)
+    fun applyColorFilterToBitmap(src: Bitmap, filter: ColorMatrixColorFilter): Bitmap {
+        val out = createBitmap(src.width, src.height)
+        val c = Canvas(out)
+        val p = Paint().apply { colorFilter = filter }
+        c.drawBitmap(src, 0f, 0f, p)
+        return out
+    }
+
+    // Pausar / Reanudar
     fun toggleFreeze() {
         if (isFrozen) {
             frozenBitmap = null
+            frozenScale = 1f
+            frozenOffsetX = 0f
+            frozenOffsetY = 0f
             return
         }
         val pv = previewView ?: return
-
-        // Asegura COMPATIBLE para tener TextureView detrás de escena y habilitar getBitmap()
         pv.implementationMode = PreviewView.ImplementationMode.COMPATIBLE
 
-        // Intento inmediato
-        pv.bitmap?.let { bmp ->
-            // Copia inmutable a ARGB_8888
-            frozenBitmap = bmp.copy(Bitmap.Config.ARGB_8888, /*isMutable=*/ false)
-            return
+        fun captureAndFilter(bmp: Bitmap?) {
+            if (bmp == null) return
+            val base = bmp.copy(Bitmap.Config.ARGB_8888, false)
+            frozenBitmap = applyColorFilterToBitmap(base, autoColorFilter())
+            frozenScale = 1f
+            frozenOffsetX = 0f
+            frozenOffsetY = 0f
         }
 
-        // Si todavía no hay frame (bitmap == null), probamos en el siguiente loop del UI
-        pv.post {
-            pv.bitmap?.let { bmp2 ->
-                frozenBitmap = bmp2.copy(Bitmap.Config.ARGB_8888, false)
-            }
-        }
+        pv.bitmap?.let { captureAndFilter(it); return }
+        pv.post { captureAndFilter(pv.bitmap) }
     }
 
-
     Scaffold(
-        topBar = { TopBarReusable(title = stringResource(R.string.magnifier_title), onBack = onBack, onShowInfo = {showInfo = true}) }
+        topBar = {
+            TopBarReusable(
+                title = stringResource(R.string.magnifier_title),
+                onBack = {
+                    if (isFrozen) {
+                        frozenBitmap = null
+                        frozenScale = 1f
+                        frozenOffsetX = 0f
+                        frozenOffsetY = 0f
+                    } else {
+                        onBack()
+                    }
+                },
+                onShowInfo = { showInfo = true }
+            )
+        }
     ) { inner ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(inner)
                 .background(Color.Black)
+                .onSizeChanged { containerSize = it }
         ) {
-            // Capa de cámara (PreviewView)
+            // --- Preview de cámara ---
             AndroidView(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .pointerInput(Unit) {
-                        // Pinch to zoom
-                        detectTransformGestures { _, _, zoomChange, _ ->
-                            if (!isFrozen) {
-                                zoomSnapshot?.let { zs ->
-                                    val newRatio = (zs.zoomRatio * zoomChange)
-                                        .coerceIn(zs.minZoomRatio, zs.maxZoomRatio)
-                                    controller.setZoomRatio(newRatio)
-                                }
-                            }
-                        }
-                    },
+                modifier = Modifier.fillMaxSize(),
                 factory = { ctx ->
-                    PreviewView(ctx).apply {
+                    val pv = PreviewView(ctx).apply {
                         implementationMode = PreviewView.ImplementationMode.COMPATIBLE
                         scaleType = PreviewView.ScaleType.FILL_CENTER
-                        // 1.4.x: propiedad controller; si usas 1.2.x cambia a setController(controller)
                         this.controller = controller
 
-                        // Tap‑to‑focus + AE
+                        // Detector de pinch-to-zoom nativo (fluido)
+                        val scaleDetector = ScaleGestureDetector(ctx,
+                            object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+                                override fun onScale(detector: ScaleGestureDetector): Boolean {
+                                    if (isFrozen) return false
+                                    val z = controller.zoomState.value ?: return false
+                                    val deviceMax = z.maxZoomRatio
+                                    val newRatio = (z.zoomRatio * detector.scaleFactor)
+                                        .coerceIn(minRatio, deviceMax)
+                                    controller.setZoomRatio(newRatio)
+                                    return true
+                                }
+                            })
+
+                        // Tap corto → pausar/reanudar ; Long‑press → focus+AE (solo si NO está pausado)
                         setOnTouchListener { v, event ->
-                            if (!isFrozen && event.action == MotionEvent.ACTION_UP) {
-                                val factory: MeteringPointFactory =
-                                    SurfaceOrientedMeteringPointFactory(width.toFloat(), height.toFloat())
-                                val pt = factory.createPoint(event.x, event.y)
-                                val action = FocusMeteringAction.Builder(pt)
-                                    .setAutoCancelDuration(3, TimeUnit.SECONDS)
-                                    .build()
-                                controller.cameraControl?.startFocusAndMetering(action)
-                                v?.performClick() // accesibilidad
-                                return@setOnTouchListener true
+                            // Alimentar el detector de escala SIEMPRE
+                            scaleDetector.onTouchEvent(event)
+
+                            when (event.action) {
+                                MotionEvent.ACTION_DOWN -> {
+                                    v.tag = TouchState(
+                                        downX = event.x,
+                                        downY = event.y,
+                                        downTime = System.currentTimeMillis(),
+                                        longPressTriggered = false
+                                    )
+                                    if (!isFrozen) {
+                                        v.postDelayed({
+                                            val st = v.tag as? TouchState ?: return@postDelayed
+                                            if (!st.longPressTriggered) {
+                                                val factory: MeteringPointFactory =
+                                                    SurfaceOrientedMeteringPointFactory(
+                                                        width.toFloat(), height.toFloat()
+                                                    )
+                                                val pt = factory.createPoint(st.downX, st.downY)
+                                                val action = FocusMeteringAction.Builder(pt)
+                                                    .setAutoCancelDuration(3, TimeUnit.SECONDS)
+                                                    .build()
+                                                controller.cameraControl?.startFocusAndMetering(action)
+                                                (v.tag as? TouchState)?.longPressTriggered = true
+                                            }
+                                        }, 300)
+                                    }
+                                    true
+                                }
+                                MotionEvent.ACTION_UP -> {
+                                    val st = v.tag as? TouchState
+                                    val dt = System.currentTimeMillis() - (st?.downTime ?: 0L)
+                                    val dx = (event.x - (st?.downX ?: event.x))
+                                    val dy = (event.y - (st?.downY ?: event.y))
+                                    val threshold = 12f * resources.displayMetrics.density
+                                    val moved = (dx * dx + dy * dy) > (threshold * threshold)
+
+                                    if (st?.longPressTriggered == true) {
+                                        v.performClick()
+                                        return@setOnTouchListener true
+                                    }
+
+                                    if (!moved && dt < 200) {
+                                        toggleFreeze()
+                                        v.performClick()
+                                        return@setOnTouchListener true
+                                    }
+                                    false
+                                }
+                                else -> false
                             }
-                            false
                         }
 
-                        // Filtro de alto contraste automático (API 31+)
+                        // Filtro alto‑contraste en preview
                         if (Build.VERSION.SDK_INT >= 31) {
                             setRenderEffect(RenderEffect.createColorFilterEffect(autoColorFilter()))
                         }
-                    }.also { previewView = it }
+                    }
+                    previewView = pv
+                    pv
                 },
                 update = { view ->
-                    // Reaplicar filtro por si cambia algo del ciclo de vida
                     if (Build.VERSION.SDK_INT >= 31) {
                         view.setRenderEffect(RenderEffect.createColorFilterEffect(autoColorFilter()))
                     }
-                    // Garantiza que el controller siga asignado
                     view.controller = controller
                 }
             )
 
-            // Si está congelado, superponemos el bitmap
+            // --- Overlay pausado: transformable fluido + clamp + tap para reanudar ---
             frozenBitmap?.let { bmp ->
-                androidx.compose.foundation.Image(
+                // transformableState entrega cambios continuos de zoom/pan
+                val transformState = rememberTransformableState { zoomChange, panChange, _ ->
+                    val newScale = (frozenScale * zoomChange).coerceIn(minScale, maxScale)
+
+                    // aplicar pan incremental y luego clamp según escala
+                    var nx = frozenOffsetX + panChange.x
+                    var ny = frozenOffsetY + panChange.y
+
+                    val contW = containerSize.width.toFloat().coerceAtLeast(1f)
+                    val contH = containerSize.height.toFloat().coerceAtLeast(1f)
+                    val scaledW = contW * newScale
+                    val scaledH = contH * newScale
+                    val maxTx = max(0f, (scaledW - contW) / 2f)
+                    val maxTy = max(0f, (scaledH - contH) / 2f)
+
+                    nx = nx.coerceIn(-maxTx, maxTx)
+                    ny = ny.coerceIn(-maxTy, maxTy)
+
+                    frozenScale = newScale
+                    frozenOffsetX = nx
+                    frozenOffsetY = ny
+                }
+
+                // Re‑clamp ante cambios de escala/tamaño
+                LaunchedEffect(frozenScale, containerSize) {
+                    val contW = containerSize.width.toFloat().coerceAtLeast(1f)
+                    val contH = containerSize.height.toFloat().coerceAtLeast(1f)
+                    val scaledW = contW * frozenScale
+                    val scaledH = contH * frozenScale
+                    val maxTx = max(0f, (scaledW - contW) / 2f)
+                    val maxTy = max(0f, (scaledH - contH) / 2f)
+                    frozenOffsetX = frozenOffsetX.coerceIn(-maxTx, maxTx)
+                    frozenOffsetY = frozenOffsetY.coerceIn(-maxTy, maxTy)
+                }
+
+                Image(
                     bitmap = bmp.asImageBitmap(),
                     contentDescription = null,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxSize()
+                        // Tap corto → reanudar
+                        .pointerInput(Unit) {
+                            detectTapGestures(onTap = { toggleFreeze() })
+                        }
+                        // Gestos multitouch fluidos (zoom + pan)
+                        .transformable(transformState)
+                        .graphicsLayer {
+                            scaleX = frozenScale
+                            scaleY = frozenScale
+                            translationX = frozenOffsetX
+                            translationY = frozenOffsetY
+                        }
                 )
             }
 
-            // Controles inferiores: Torch, Zoom, Pausa
+            // --- Controles inferiores ---
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -233,15 +387,17 @@ fun MagnifierScreen(onBack: () -> Unit) {
                     .padding(horizontal = 16.dp, vertical = 12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Torch + Pausar
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     FilledTonalButton(
-                        onClick = { controller.enableTorch(torchState != TorchState.ON) },
-                        enabled = !isFrozen // opcional: deshabilitar linterna cuando está congelado
+                        onClick = {
+                            controller.enableTorch(torchState != TorchState.ON)
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        },
+                        enabled = !isFrozen
                     ) {
                         if (torchState == TorchState.ON) {
                             Icon(Icons.Filled.FlashlightOn, contentDescription = stringResource(R.string.cd_torch_off))
@@ -254,7 +410,10 @@ fun MagnifierScreen(onBack: () -> Unit) {
                         }
                     }
 
-                    FilledTonalButton(onClick = { toggleFreeze() }) {
+                    FilledTonalButton(onClick = {
+                        toggleFreeze()
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    }) {
                         if (isFrozen) {
                             Icon(Icons.Filled.PlayArrow, contentDescription = stringResource(R.string.cd_resume))
                             Spacer(Modifier.width(8.dp))
@@ -269,20 +428,46 @@ fun MagnifierScreen(onBack: () -> Unit) {
 
                 Spacer(Modifier.height(10.dp))
 
-                // Slider de Zoom (único control que queda)
-                zoomSnapshot?.let { z ->
-                    Column(Modifier.fillMaxWidth()) {
-                        Text(
-                            text = stringResource(R.string.zoom_label, String.format("%.1f", z.zoomRatio)),
-                            style = MaterialTheme.typography.labelLarge
-                        )
-                        Slider(
-                            value = z.zoomRatio,
-                            onValueChange = { if (!isFrozen) controller.setZoomRatio(it) },
-                            valueRange = z.minZoomRatio..z.maxZoomRatio
-                        )
-                    }
+                // Slider de zoom (preview activa)
+                if (!isFrozen) {
+                    val deviceMax = zoomState?.maxZoomRatio ?: 8f
+                    val minRatio = 1f
+                    val allowedMax = minOf(deviceMax, 8f)
+                    val ratioFromState = (zoomState?.zoomRatio ?: minRatio).coerceIn(minRatio, allowedMax)
+
+                    // guardamos “ticks” como enteros de décimas (p. ej. 2.3x -> 23)
+                    var lastTenths by remember { mutableIntStateOf((ratioFromState * 10f).roundToInt()) }
+                    var lastInt    by remember { mutableIntStateOf(ratioFromState.roundToInt()) }
+
+                    Text(
+                        text = stringResource(R.string.zoom_label, String.format("%.1f", ratioFromState)),
+                        style = MaterialTheme.typography.labelLarge
+                    )
+
+                    Slider(
+                        value = ratioFromState,
+                        onValueChange = { raw ->
+                            val target = raw.coerceIn(minRatio, allowedMax)
+                            controller.setZoomRatio(target)
+
+                            val tenths = (target * 10f).roundToInt()                    // décima actual
+                            if (tenths != lastTenths) {                                 // cambió la décima
+                                if (tenths % 10 == 0) {                                 // es entero exacto (2.0x, 3.0x, …)
+                                    val currentInt = tenths / 10
+                                    if (currentInt != lastInt) {                        // evita doble disparo en el mismo entero
+                                        haptic.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate)
+                                        lastInt = currentInt
+                                    }
+                                } else {
+                                    haptic.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
+                                }
+                                lastTenths = tenths
+                            }
+                        },
+                        valueRange = minRatio..allowedMax
+                    )
                 }
+
             }
         }
     }
@@ -304,8 +489,10 @@ fun MagnifierScreen(onBack: () -> Unit) {
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showInfo = false }) {
-                    Text(stringResource(R.string.help_ok))
+                TextButton(onClick = { showInfo = false
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                }) {
+                    Text(stringResource(R.string.close))
                 }
             }
         )
@@ -333,3 +520,11 @@ private fun rememberZoomState(controller: LifecycleCameraController): State<andr
         awaitDispose { ld.removeObserver(obs) }
     }
 }
+
+/* ---------- Soporte tap/long‑press en PreviewView ---------- */
+private data class TouchState(
+    val downX: Float,
+    val downY: Float,
+    val downTime: Long,
+    var longPressTriggered: Boolean
+)
