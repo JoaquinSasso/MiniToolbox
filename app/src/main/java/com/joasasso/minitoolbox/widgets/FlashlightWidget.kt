@@ -53,7 +53,7 @@ class FlashQuickWidget : GlanceAppWidget() {
             Column(
                 modifier = GlanceModifier
                     .fillMaxSize()
-                    .padding(8.dp)
+                    .padding(2.dp)
                     .cornerRadius(12.dp)
                     .background(GlanceTheme.colors.background),
                 verticalAlignment = Alignment.CenterVertically,
@@ -77,7 +77,7 @@ class FlashQuickWidget : GlanceAppWidget() {
                             Image(
                                 provider = ImageProvider(resId = R.drawable.flash_low),
                                 contentDescription = context.getString(R.string.flash_widget_low),
-                                modifier = GlanceModifier.size(25.dp),
+                                modifier = GlanceModifier.size(30.dp),
                                 colorFilter = ColorFilter.tint(GlanceTheme.colors.background)
                             )
                         }
@@ -93,7 +93,7 @@ class FlashQuickWidget : GlanceAppWidget() {
                             Image(
                                 provider = ImageProvider(resId = R.drawable.flash_med),
                                 contentDescription = context.getString(R.string.flash_widget_medium),
-                                modifier = GlanceModifier.size(25.dp),
+                                modifier = GlanceModifier.size(30.dp),
                                 colorFilter = ColorFilter.tint(GlanceTheme.colors.background)
                             )
                         }
@@ -116,7 +116,7 @@ class FlashQuickWidget : GlanceAppWidget() {
                         Image(
                             provider = ImageProvider(resId = R.drawable.flash_high),
                             contentDescription = context.getString(R.string.flash_widget_high),
-                            modifier = GlanceModifier.size(25.dp),
+                            modifier = GlanceModifier.size(30.dp),
                             colorFilter = ColorFilter.tint(GlanceTheme.colors.background)
                         )
                     }
@@ -130,9 +130,9 @@ class FlashQuickWidget : GlanceAppWidget() {
                         contentAlignment = Alignment.Center
                     ) {
                         Image(
-                            provider = ImageProvider(resId = R.drawable.flash_off),
+                            provider = ImageProvider(resId = R.drawable.flashlight_off),
                             contentDescription = context.getString(R.string.flash_widget_off),
-                            modifier = GlanceModifier.size(25.dp),
+                            modifier = GlanceModifier.size(30.dp),
                             colorFilter = ColorFilter.tint(GlanceTheme.colors.background)
                         )
                     }
