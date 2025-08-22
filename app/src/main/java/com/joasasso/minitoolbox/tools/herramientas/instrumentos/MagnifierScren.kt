@@ -124,7 +124,6 @@ fun MagnifierScreen(onBack: () -> Unit) {
         return ColorMatrixColorFilter(cm)
     }
 
-    // Acción pausar/reanudar
     // Acción pausar/reanudar (captura con PreviewView.bitmap)
     fun toggleFreeze() {
         if (isFrozen) {
