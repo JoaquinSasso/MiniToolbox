@@ -88,6 +88,7 @@ dependencies {
     implementation(libs.protobuf.java)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.gson)
+    implementation(libs.androidx.camera.view)
 
 
     // 7) Testing
@@ -102,4 +103,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation("org.jetbrains.kotlin:kotlin-reflect")
+
+    // Cámara
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
 }

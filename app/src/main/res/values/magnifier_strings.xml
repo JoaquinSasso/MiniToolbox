@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="magnifier_title">Magnifier</string>
+    <string name="cd_back">Back</string>
+    <string name="cd_help">Help</string>
+
+    <string name="torch_on">Flash ON</string>
+    <string name="torch_off">Flash OFF</string>
+    <string name="cd_torch_on">Turn on flashlight</string>
+    <string name="cd_torch_off">Turn off flashlight</string>
+
+    <string name="zoom_label">Zoom: x%1$s</string>
+
+    <string name="btn_freeze">Pause</string>
+    <string name="btn_resume">Resume</string>
+    <string name="cd_freeze">Pause image</string>
+    <string name="cd_resume">Resume camera</string>
+
+    <string name="filter_invert">Invert</string>
+
+    <!-- Help -->
+    <string name="help_title">How to Use the Magnifier</string>
+    <string name="help_line1">• Pinch the screen to zoom in, or use the zoom control.</string>
+    <string name="help_line2">• Tap on the text to focus and auto-adjust exposure.</string>
+    <string name="help_line3">• Tap “Pause” to freeze the image and read without shake. “Resume” returns to the camera.</string>
+    <string name="help_line4">• Turn on the flashlight if you need more light. The app applies high contrast automatically to enhance readability.</string>
+    <string name="help_ok">Got it</string>
+</resources>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="magnifier_title">Lupa</string>
+    <string name="cd_back">Volver</string>
+    <string name="cd_help">Ayuda</string>
+
+    <string name="torch_on">Linterna ON</string>
+    <string name="torch_off">Linterna OFF</string>
+    <string name="cd_torch_on">Encender linterna</string>
+    <string name="cd_torch_off">Apagar linterna</string>
+
+    <string name="zoom_label">Zoom: x%1$s</string>
+
+    <string name="btn_freeze">Pausar</string>
+    <string name="btn_resume">Reanudar</string>
+    <string name="cd_freeze">Pausar imagen</string>
+    <string name="cd_resume">Reanudar cámara</string>
+
+    <string name="filter_invert">Invertir</string>
+
+
+    <!-- Ayuda -->
+    <string name="help_title">Cómo usar la Lupa</string>
+    <string name="help_line1">• Pellizca la pantalla para acercar o usa el control de zoom.</string>
+    <string name="help_line2">• Toca sobre el texto para enfocar y ajustar la exposición automáticamente.</string>
+    <string name="help_line3">• Pulsa “Pausar” para congelar la imagen y leer sin temblores. “Reanudar” vuelve a la cámara.</string>
+    <string name="help_line4">• Activa la linterna si necesitas más luz. La app aplica automáticamente alto contraste para mejorar la legibilidad.</string>
+    <string name="help_ok">Entendido</string>
+</resources>
+

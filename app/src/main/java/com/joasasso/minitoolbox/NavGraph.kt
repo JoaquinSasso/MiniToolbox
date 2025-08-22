@@ -49,6 +49,7 @@ import com.joasasso.minitoolbox.tools.info.AgeCalculatorScreen
 import com.joasasso.minitoolbox.tools.info.CountriesInfoScreen
 import com.joasasso.minitoolbox.tools.info.RemainingTimeScreen
 import com.joasasso.minitoolbox.tools.info.TextBinaryConverterScreen
+import com.joasasso.minitoolbox.tools.magnifier.MagnifierScreen
 import com.joasasso.minitoolbox.tools.organizacion.SugeridorActividadScreen
 import com.joasasso.minitoolbox.tools.organizacion.divisorGastos.AgregarGastoScreen
 import com.joasasso.minitoolbox.tools.organizacion.divisorGastos.CrearReunionScreen
@@ -281,6 +282,9 @@ fun MiniToolboxNavGraph(navController: NavHostController) {
         }
         composable(Screen.Scoreboard.route) {
             MarcadorEquiposScreen(onBack = onBackSmart)
+        }
+        composable(Screen.Magnifier.route) {
+            MagnifierScreen(onBack = onBackSmart)
         }
     }
 }

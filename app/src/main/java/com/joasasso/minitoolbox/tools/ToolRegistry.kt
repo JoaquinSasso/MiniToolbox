@@ -296,6 +296,13 @@ object ToolRegistry {
             category = ToolCategory.Entretenimiento,
             subCategory = R.string.subcategory_scoreboards,
             svgResId = R.drawable.scoreboard
+        ),
+        Tool(
+            name = R.string.tool_magnifier,
+            screen = Screen.Magnifier,
+            category = ToolCategory.Herramientas,
+            subCategory = R.string.subcategory_instrument,
+            svgResId = R.drawable.magnifier
         )
     )
 }
