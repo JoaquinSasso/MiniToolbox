@@ -25,6 +25,7 @@ import androidx.compose.material.icons.rounded.TipsAndUpdates
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -48,19 +49,25 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.commit
+import androidx.fragment.app.commitNow
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.ar.core.Anchor
 import com.google.ar.core.Frame
 import com.google.ar.core.HitResult
 import com.google.ar.core.Plane
 import com.google.ar.core.Point
 import com.google.ar.core.Pose
+import com.google.ar.sceneform.AnchorNode
 import com.google.ar.sceneform.ArSceneView
 import com.google.ar.sceneform.Camera
 import com.google.ar.sceneform.Node
@@ -69,10 +76,12 @@ import com.google.ar.sceneform.SceneView
 import com.google.ar.sceneform.math.Quaternion
 import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.rendering.MaterialFactory
+import com.google.ar.sceneform.rendering.Renderable
 import com.google.ar.sceneform.rendering.ShapeFactory
 import com.google.ar.sceneform.rendering.ViewRenderable
 import com.google.ar.sceneform.ux.ArFragment
 import com.joasasso.minitoolbox.R
+import kotlin.math.abs
 import kotlin.math.acos
 import kotlin.math.max
 import kotlin.math.min
@@ -93,7 +102,7 @@ fun ARRulerScreen(
     var sceneView by remember { mutableStateOf<ArSceneView?>(null) }
 
     // Lifecycle bridge to pause/resume AR session correctly
-    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(Unit) {
         val observer = object : DefaultLifecycleObserver {
             override fun onResume(owner: LifecycleOwner) {
@@ -111,8 +120,25 @@ fun ARRulerScreen(
             lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
+    val ctx = LocalContext.current
+    val fragTag = "AR_FRAGMENT"
 
-    Scaffold(
+    DisposableEffect(Unit) {
+        onDispose {
+            val act = ctx.findActivity()
+            val fm = (act as FragmentActivity).supportFragmentManager
+            val existing = fm.findFragmentByTag(fragTag)
+            if (existing != null) {
+                fm.commitNow {
+                    remove(existing)
+                }
+            }
+            arFragment = null
+            sceneView = null
+        }
+    }
+
+    Scaffold(floatingActionButtonPosition = FabPosition.Center,
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.aruler_title)) },
@@ -154,64 +180,66 @@ fun ARRulerScreen(
                     IconButton(onClick = { vm.showTips = !vm.showTips }) {
                         Icon(Icons.Rounded.TipsAndUpdates, contentDescription = "Tips")
                     }
-                },
-                floatingActionButton = {
-                    // ¿hay hit válido bajo la retícula?
-                    var isHitValid by remember { mutableStateOf(false) }
-
-                    DisposableEffect(sceneView) {
-                        val sv = sceneView
-                        if (sv == null) return@DisposableEffect onDispose {}
-                        val listener = Scene.OnUpdateListener {
-                            val frame = sv.arFrame ?: return@OnUpdateListener
-                            isHitValid = doCenterHitTest(frame, sv) != null
-                        }
-                        sv.scene.addOnUpdateListener(listener)
-                        onDispose { sv.scene.removeOnUpdateListener(listener) }
-                    }
-
-                    val container = if (isHitValid)
-                        MaterialTheme.colorScheme.primary
-                    else
-                        MaterialTheme.colorScheme.surfaceVariant
-
-                    val content = if (isHitValid)
-                        MaterialTheme.colorScheme.onPrimary
-                    else
-                        MaterialTheme.colorScheme.onSurfaceVariant
-
-                    FloatingActionButton(
-                        onClick = {
-                            val frame = sceneView?.arFrame ?: return@FloatingActionButton
-                            val hit = doCenterHitTest(frame, sceneView) ?: return@FloatingActionButton
-                            val anchor = hit.createAnchor()
-
-                            if (vm.pendingStartAnchor == null) {
-                                vm.pendingStartAnchor = anchor
-                                arFragment?.let { renderSphere(it, anchor) }
-                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            } else {
-                                val start = vm.pendingStartAnchor!!
-                                val end = anchor
-                                val distM = distanceMeters(start.pose, end.pose)
-                                vm.addMeasurement(Measurement(vm.nextId(), start, end, distM))
-                                arFragment?.let {
-                                    renderSphere(it, end)
-                                    renderLineWithLabel(it, start.pose, end.pose, vm.formatDistance(distM))
-                                }
-                                vm.pendingStartAnchor = null
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            }
-                        },
-                        containerColor = container,
-                        contentColor = content,
-                        shape = CircleShape,
-                        modifier = Modifier.size(64.dp) // más grande y cómodo
-                    ) {
-                        Icon(Icons.Filled.Add, contentDescription = "Agregar punto")
-                    }
                 }
             )
+        },
+                floatingActionButton = {
+            // ¿hay hit válido bajo la retícula?
+            var isHitValid by remember { mutableStateOf(false) }
+
+            DisposableEffect(sceneView) {
+                val sv = sceneView
+                if (sv == null) return@DisposableEffect onDispose {}
+                val listener = Scene.OnUpdateListener {
+                    val frame = sv.arFrame ?: return@OnUpdateListener
+                    isHitValid = doCenterHitTest(frame, sv) != null
+                }
+                sv.scene.addOnUpdateListener(listener)
+                onDispose { sv.scene.removeOnUpdateListener(listener) }
+            }
+
+            val container = if (isHitValid)
+                MaterialTheme.colorScheme.primary
+            else
+                MaterialTheme.colorScheme.surfaceVariant
+
+            val content = if (isHitValid)
+                MaterialTheme.colorScheme.onPrimary
+            else
+                MaterialTheme.colorScheme.onSurfaceVariant
+
+            FloatingActionButton(
+                onClick = {
+                    val frame = sceneView?.arFrame ?: return@FloatingActionButton
+                    val hit = doCenterHitTest(frame, sceneView) ?: return@FloatingActionButton
+                    val anchor = hit.createAnchor()
+
+                    if (vm.pendingStartAnchor == null) {
+                        vm.pendingStartAnchor = anchor
+                        arFragment?.let { renderSphere(it, anchor) }
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    } else {
+                        // Al seleccionar el segundo punto:
+                        val start = vm.pendingStartAnchor!!
+                        val end = anchor
+                        val distM = distanceMeters(start.pose, end.pose)
+                        vm.addMeasurement(Measurement(vm.nextId(), start, end, distM))
+
+                        arFragment?.let {
+                            renderSphere(it, end) // si ya pintás la esfera del segundo punto
+                            renderDynamicLineAndLabel(it, start, end, vm.formatDistance(distM))
+                        }
+                        vm.pendingStartAnchor = null
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    }
+                },
+                containerColor = container,
+                contentColor = content,
+                shape = CircleShape,
+                modifier = Modifier.size(64.dp) // más grande y cómodo
+            ) {
+                Icon(Icons.Filled.Add, contentDescription = "Agregar punto")
+            }
         }
     ) { inner ->
         Box(Modifier.fillMaxSize().padding(inner)) {
@@ -223,7 +251,7 @@ fun ARRulerScreen(
                     val act = parentContext.findActivity() as AppCompatActivity
                     val tag = "AR_FRAGMENT"
 
-                    val isAndroidX = androidx.fragment.app.Fragment::class.java
+                    val isAndroidX = Fragment::class.java
                         .isAssignableFrom(SimpleArFragment::class.java)
 
                     if (isAndroidX) {
@@ -232,7 +260,7 @@ fun ARRulerScreen(
                         val frag = existing ?: SimpleArFragment.newInstance().also { created ->
                             fm.commit {
                                 setReorderingAllowed(true)
-                                replace(container.id, created as androidx.fragment.app.Fragment, tag)
+                                replace(container.id, created as Fragment, tag)
                             }
                         }
                         arFragment = frag
@@ -406,7 +434,6 @@ private fun doCenterHitTest(frame: Frame, sceneView: SceneView?): HitResult? {
     val cx = vw / 2f
     val cy = vh / 2f
     return frame.hitTest(cx, cy).firstOrNull { hit ->
-        // Podés filtrar por Trackable: planos o puntos con tracking fuerte
         val trackable = hit.trackable
         (trackable is Plane && trackable.isPoseInPolygon(hit.hitPose)) ||
                 (trackable is Point && trackable.orientationMode ==
@@ -416,7 +443,7 @@ private fun doCenterHitTest(frame: Frame, sceneView: SceneView?): HitResult? {
 
 
 private fun renderSphere(fragment: ArFragment, anchor: Anchor) {
-    val anchorNode = com.google.ar.sceneform.AnchorNode(anchor)
+    val anchorNode = AnchorNode(anchor)
     fragment.arSceneView.scene.addChild(anchorNode)
 
     MaterialFactory.makeOpaqueWithColor(
@@ -434,67 +461,78 @@ private fun renderSphere(fragment: ArFragment, anchor: Anchor) {
 }
 
 
-private fun renderLineWithLabel(
+fun renderDynamicLineAndLabel(
     fragment: ArFragment,
-    p1: Pose,
-    p2: Pose,
-    labelText: String
+    startAnchor: com.google.ar.core.Anchor,
+    endAnchor:   com.google.ar.core.Anchor,
+    labelText:   String
 ) {
-    val start = Vector3(p1.tx(), p1.ty(), p1.tz())
-    val end   = Vector3(p2.tx(), p2.ty(), p2.tz())
-    val diff  = Vector3.subtract(end, start)
-    val length = diff.length()
-    val center = Vector3.add(start, end).scaled(0.5f)
+    val scene = fragment.arSceneView.scene
 
-    // Nodo padre en el centro y rotado para que su eje Y quede alineado a la dirección
-    val parent = Node().apply {
-        worldPosition = center
-        worldRotation = rotationFromUpTo(diff) // *** cambio clave ***
-    }
-    fragment.arSceneView.scene.addChild(parent)
+    // Nodo padre en el punto medio (rotará y escalará el cilindro)
+    val parent = Node().also { scene.addChild(it) }
 
-    // Material y cilindro alineado correctamente
-    MaterialFactory.makeOpaqueWithColor(
-        fragment.requireContext(),
-        com.google.ar.sceneform.rendering.Color(1f, 1f, 1f, 1f)
-    ).thenAccept { mat ->
-        val cylinderRenderable = com.google.ar.sceneform.rendering.ShapeFactory.makeCylinder(
-            /* radius = */ 0.003f,  // ~3 mm
-            /* height = */ length,
-            Vector3.zero(),
-            mat
-        )
-        parent.addChild(Node().apply { renderable = cylinderRenderable })
-    }
+    // Crea cilindro de altura 1 m (lo escalamos en Y cada frame)
+    MaterialFactory.makeOpaqueWithColor(fragment.requireContext(), com.google.ar.sceneform.rendering.Color(1f, 1f, 1f, 1f))
+        .thenAccept { mat ->
+            val unitCylinder = ShapeFactory.makeCylinder(
+                /* radius = */ 0.003f,
+                /* height = */ 1.0f,
+                Vector3.zero(),
+                mat
+            )
+            val cylNode = Node().apply { renderable = unitCylinder }
+            parent.addChild(cylNode)
 
-    // Etiqueta en el centro, mirando a cámara
-    val labelNode = com.google.ar.sceneform.Node().apply { worldPosition = center }
-    fragment.arSceneView.scene.addChild(labelNode) // 👈 importante: agregarlo antes
+            // ---- LABEL ----
+            val labelNode = Node() // aún no lo agregamos a la escena
+            ViewRenderable.builder()
+                .setView(fragment.requireContext(), R.layout.view_ar_label)
+                .build()
+                .thenAccept { r ->
+                    // Evitar artefactos / “doble fondo”
+                    r.isShadowCaster = false
+                    r.isShadowReceiver = false
+                    r.renderPriority = Renderable.RENDER_PRIORITY_LAST
 
-    ViewRenderable.builder()
-        .setView(fragment.requireContext(), R.layout.view_ar_label)
-        .build()
-        .thenAccept { viewRenderable ->
-            // evitar sombras/rectángulos
-            viewRenderable.isShadowCaster = false
-            viewRenderable.isShadowReceiver = false
+                    val tv = r.view.findViewById<android.widget.TextView>(R.id.labelText)
+                    tv.text = labelText
+                    if (tv.background == null) {
+                        tv.setBackgroundResource(R.drawable.bg_ar_label)
+                    }
 
-            val tv = viewRenderable.view.findViewById<android.widget.TextView>(R.id.labelText)
-            tv.text = labelText
-            // por si el background se perdió, lo re-forzamos:
-            if (tv.background == null) tv.setBackgroundResource(R.drawable.bg_ar_label)
+                    labelNode.renderable = r
+                    scene.addChild(labelNode)
+                }
 
-            labelNode.renderable = viewRenderable
+            // ---- ACTUALIZADOR POR FRAME ----
+            val updater = Scene.OnUpdateListener {
+                val sp = startAnchor.pose
+                val ep = endAnchor.pose
 
-            // billboard + autoscale
-            fragment.arSceneView?.let {
-                attachBillboard(labelNode, it)
-                attachAutoscale(labelNode, it)
+                val s = Vector3(sp.tx(), sp.ty(), sp.tz())
+                val e = Vector3(ep.tx(), ep.ty(), ep.tz())
+                val diff = Vector3.subtract(e, s)
+                val len  = diff.length()
+                val mid  = Vector3.add(s, e).scaled(0.5f)
+
+                // Línea
+                parent.worldPosition = mid
+                parent.worldRotation = rotationFromUpTo(diff)
+                cylNode.localScale   = Vector3(1f, len, 1f) // cilindro era de 1m
+
+                // Label (si ya está creado)
+                if (labelNode.renderable != null) {
+                    // Empújalo ~6 cm hacia la cámara para que nunca lo tape nada
+                    val cam = scene.camera.worldPosition
+                    val dirToCam = Vector3.subtract(cam, mid).normalized()
+                    labelNode.worldPosition = Vector3.add(mid, dirToCam.scaled(0.06f))
+                    labelNode.worldRotation = Quaternion.lookRotation(dirToCam, Vector3.up())
+                }
             }
+            scene.addOnUpdateListener(updater)
         }
-
 }
-
 
 private fun clearAllRendered(fragment: ArFragment) {
     fragment.arSceneView.scene.children.toList().forEach { child ->
@@ -504,14 +542,14 @@ private fun clearAllRendered(fragment: ArFragment) {
     }
 }
 
-
+/* ----------------------------- Helpers para el label ----------------------------- */
+// Orienta el eje Y hacia 'dir' (cilindro de Sceneform está en Y)
 private fun rotationFromUpTo(dir: Vector3): Quaternion {
     val from = Vector3.up().normalized()
     val to = dir.normalized()
-    val dot = max(-1f, min(1f, Vector3.dot(from, to))) // clamp
-    if (kotlin.math.abs(dot - 1f) < 1e-6f) return Quaternion.identity() // ya apuntando
-    if (kotlin.math.abs(dot + 1f) < 1e-6f) {
-        // 180°: cualquier eje ortogonal a 'from'
+    val dot = max(-1f, min(1f, Vector3.dot(from, to)))
+    if (abs(dot - 1f) < 1e-6f) return Quaternion.identity()
+    if (abs(dot + 1f) < 1e-6f) {
         val axis = Vector3.cross(from, Vector3.right()).let {
             if (it.length() < 1e-6f) Vector3.cross(from, Vector3.forward()) else it
         }.normalized()
@@ -522,18 +560,25 @@ private fun rotationFromUpTo(dir: Vector3): Quaternion {
     return Quaternion.axisAngle(axis, angleDeg)
 }
 
-/* ----------------------------- Helpers para el label ----------------------------- */
-private fun attachBillboard(node: Node, sceneView: ArSceneView) {
+// Hace billboard + offset hacia cámara en cada frame
+private fun attachBillboardWithOffset(
+    node: Node,
+    sceneView: ArSceneView,
+    basePosProvider: () -> Vector3,   // de dónde tomar el “centro actual”
+    towardsCamOffsetM: Float          // cuánto empujar hacia la cámara
+) {
     val scene = sceneView.scene
     val updater = Scene.OnUpdateListener {
+        val basePos = basePosProvider()
         val cam = scene.camera.worldPosition
-        val pos = node.worldPosition
-        val dir = Vector3.subtract(cam, pos)
+        val dir = Vector3.subtract(cam, basePos).normalized()
+        node.worldPosition = Vector3.add(basePos, dir.scaled(towardsCamOffsetM))
         node.worldRotation = Quaternion.lookRotation(dir, Vector3.up())
     }
     scene.addOnUpdateListener(updater)
 }
 
+// Autoscale para mantener tamaño legible vs distancia
 private fun attachAutoscale(node: Node, sceneView: ArSceneView, metersAt1m: Float = 0.06f) {
     val scene = sceneView.scene
     val updater = Scene.OnUpdateListener {
