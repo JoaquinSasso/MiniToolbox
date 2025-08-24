@@ -305,11 +305,11 @@ object ToolRegistry {
             svgResId = R.drawable.magnifier
         ),
         Tool(
-            name = R.string.aruler_title,
+            name = R.string.tool_ar_ruler,
             screen = Screen.ARRuler,
             category = ToolCategory.Herramientas,
             subCategory = R.string.subcategory_instrument,
-            svgResId = R.drawable.ruler
+            svgResId = R.drawable.ar_ruler
         )
     )
 }

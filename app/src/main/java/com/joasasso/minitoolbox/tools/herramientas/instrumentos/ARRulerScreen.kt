@@ -195,10 +195,10 @@ fun ARRulerScreen(onBack: () -> Unit) {
 
     Scaffold(
         topBar = {
-            TopBarReusable(title = stringResource(R.string.aruler_title), onBack = onBack)
+            TopBarReusable(title = stringResource(R.string.tool_ar_ruler), onBack = onBack)
         },
         bottomBar = {
-            BottomAppBar(){
+            BottomAppBar{
                     Row(horizontalArrangement = Arrangement.SpaceAround,
                         modifier = Modifier.fillMaxWidth()) {
 
