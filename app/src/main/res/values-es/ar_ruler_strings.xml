@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="aruler_title">Regla AR</string>
+    <string name="aruler_units_metric">Métrico</string>
+    <string name="aruler_units_imperial">Imperial</string>
+    <string name="aruler_add_point">Agregar punto</string>
+    <string name="aruler_close_measure">Cerrar medición</string>
+    <string name="aruler_reset_all">Reiniciar</string>
+    <string name="aruler_tip_scan">Mové el teléfono para detectar superficies y apuntá la cruz al objetivo.</string>
+    <string name="aruler_history">Historial</string>
+</resources>

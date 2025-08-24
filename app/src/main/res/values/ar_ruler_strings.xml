@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="aruler_title">AR Ruler</string>
+    <string name="aruler_units_metric">Metric</string>
+    <string name="aruler_units_imperial">Imperial</string>
+    <string name="aruler_add_point">Add point</string>
+    <string name="aruler_close_measure">Close measure</string>
+    <string name="aruler_reset_all">Reset</string>
+    <string name="aruler_tip_scan">Move your phone to detect surfaces and aim the crosshair at the target.</string>
+    <string name="aruler_history">History</string>
+</resources>

@@ -10,8 +10,10 @@
     <uses-feature android:name="android.hardware.camera.any" android:required="false" />
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
     <uses-feature android:name="android.hardware.camera.flash" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.ar" android:required="false"/>
 
     <application
+        android:name="MiniToolboxApp"
         android:label="MiniToolbox"
         android:icon="@drawable/ic_launcher"
         android:theme="@style/Theme.MiniToolbox"
@@ -110,6 +112,9 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+        <meta-data
+            android:name="com.google.ar.core"
+            android:value="optional" />
 
     </application>
 </manifest>

@@ -103,8 +103,20 @@ dependencies {
 
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
-    // Cámara
+    // Camera
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
+
+    //AR Camera
+    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("androidx.fragment:fragment-ktx:1.8.2")
+
+    // Sceneform mantenido (AndroidX)
+    implementation("com.gorisse.thomas.sceneform:sceneform:1.23.0")
+    implementation("com.gorisse.thomas.sceneform:ux:1.23.0")
+
+    // ARCore
+    implementation("com.google.ar:core:1.32.0")
+
 }
