@@ -2,8 +2,9 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:padding="0dp"
     android:background="@android:color/transparent"
-    android:padding="0dp">
+    android:clipToPadding="false">
 
     <TextView
         android:id="@+id/labelText"
@@ -15,7 +16,7 @@
         android:paddingRight="8dp"
         android:paddingTop="4dp"
         android:paddingBottom="4dp"
-        android:maxWidth="220dp"
+        android:maxWidth="200dp"
         android:textColor="@android:color/white"
         android:textStyle="bold"
         android:textSize="14sp"
