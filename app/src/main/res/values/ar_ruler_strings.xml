@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="aruler_title">AR Ruler</string>
     <string name="aruler_units_metric">Metric</string>
     <string name="aruler_units_imperial">Imperial</string>
     <string name="aruler_add_point">Add point</string>
