@@ -5,9 +5,17 @@
     <string name="aruler_add_point">Add point</string>
     <string name="aruler_close_measure">Close measure</string>
     <string name="aruler_reset_all">Reset</string>
-    <string name="aruler_tip_scan">Move your phone to detect surfaces and aim the crosshair at the target.</string>
     <string name="aruler_history">History</string>
     <string name="aruler_tips_toggle_off">Hide tips</string>
     <string name="aruler_tips_toggle_on">Show tips</string>
-    <string name="flash_enable_failed">Error enabling flash.</string>
+
+    <!-- Tips banner -->
+    <string name="aruler_tip_scan">Move the phone to detect surfaces. Tap + to set a point on the crosshair position.</string>
+    <string name="aruler_tip_calib_step1">Calibration (1/2): place a card on a flat surface. Align the crosshair with one corner and tap +.</string>
+    <string name="aruler_tip_calib_step2">Calibration (2/2): move the crosshair to the opposite corner (diagonal) and tap +.</string>
+
+    <!-- Button inside the tips banner -->
+    <string name="aruler_tip_cancel">Cancel</string>
+
+
 </resources>
