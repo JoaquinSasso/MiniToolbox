@@ -52,6 +52,7 @@ sealed class Screen(val route: String) {
     object InteresCompuesto          : Screen("interes_compuesto")
     object Scoreboard               : Screen("scoreboard")
     object Magnifier               : Screen("magnifier")
+    object ARRuler               : Screen("ar_ruler")
 
     // Añade aquí nuevos objetos para cada herramienta…
 
