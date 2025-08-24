@@ -12,6 +12,7 @@
     <uses-feature android:name="android.hardware.camera.flash" android:required="false" />
     <uses-feature android:name="android.hardware.camera.ar" android:required="false"/>
 
+
     <application
         android:name="MiniToolboxApp"
         android:label="MiniToolbox"
