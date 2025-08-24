@@ -5,9 +5,15 @@
     <string name="aruler_add_point">Agregar punto</string>
     <string name="aruler_close_measure">Cerrar medición</string>
     <string name="aruler_reset_all">Reiniciar</string>
-    <string name="aruler_tip_scan">Mové el teléfono para detectar superficies y apuntá la cruz al objetivo.</string>
     <string name="aruler_history">Historial</string>
     <string name="aruler_tips_toggle_off">Ocultar tips</string>
     <string name="aruler_tips_toggle_on">Mostrar tips</string>
-    <string name="flash_enable_failed">Error al habilitar flash.</string>
+
+    <!-- Cartel de tips -->
+    <string name="aruler_tip_scan">Mové el teléfono para detectar superficies. Tocá + para fijar un punto en la posición de la cruz.</string>
+    <string name="aruler_tip_calib_step1">Calibración (1/2): apoyá una tarjeta en un plano. Alineá la cruz con una esquina y tocá +.</string>
+    <string name="aruler_tip_calib_step2">Calibración (2/2): mové la cruz a la esquina opuesta (diagonal) y tocá +.</string>
+
+    <!-- Botón dentro del cartel -->
+    <string name="aruler_tip_cancel">Cancelar</string>
 </resources>

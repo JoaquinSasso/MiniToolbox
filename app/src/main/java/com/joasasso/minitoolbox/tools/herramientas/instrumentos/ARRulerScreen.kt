@@ -31,10 +31,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -155,7 +158,11 @@ private class ARulerViewModel {
     var unitSystem by mutableStateOf(Units.METRIC);       private set
     var pendingStartAnchor: Anchor? by mutableStateOf(null)
     var measurements by mutableStateOf(listOf<Measurement>())
+    private val cardDiagonal = 0.098631
+
     private var counter = 0L
+
+    var showTips by mutableStateOf(false)
     fun nextId() = ++counter
     fun addMeasurement(m: Measurement) { measurements = measurements + m }
     fun resetAll() {
@@ -165,6 +172,53 @@ private class ARulerViewModel {
     }
     fun toggleUnits() { unitSystem = unitSystem.toggle() }
     fun formatDistance(meters: Double): String = UnitConverter.format(meters, unitSystem)
+
+    // Factor de calibración (1f = sin corrección)
+    var calibrationScale by mutableFloatStateOf(1f)
+        private set
+
+    // Modo calibración
+    var isCalibrating by mutableStateOf(false)
+        private set
+    var knownCalibMeters by mutableDoubleStateOf(0.0856) // por defecto, ANCHO de tarjeta (85.60 mm)
+
+    fun cancelCalibration() { isCalibrating = false }
+
+    /** Aplica factor al valor bruto en metros (para labels e historial). */
+    fun applyCalibration(meters: Double): Double = meters * calibrationScale
+
+    fun formatDistanceCorrected(metersRaw: Double): String =
+        UnitConverter.format(applyCalibration(metersRaw), unitSystem)
+
+    fun startCalibration(knownMeters: Double) {
+        isCalibrating = true
+        knownCalibMeters = knownMeters
+        showTips = true
+        pendingStartAnchor?.detach()
+        pendingStartAnchor = null
+    }
+
+    // en ARulerViewModel
+    fun startCardCalibration() {
+        isCalibrating = true
+        knownCalibMeters = cardDiagonal
+        showTips = true
+        pendingStartAnchor?.detach()
+        pendingStartAnchor = null
+    }
+
+    // opcional: rangos más estrictos para diagonal (≈10 cm)
+    fun finishCalibration(measuredMeters: Double) {
+        // filtra medidas absurdas: entre 6 y 15 cm está OK para la diagonal
+        if (measuredMeters in 0.06..0.15) {
+            calibrationScale = (knownCalibMeters / measuredMeters)
+                .toFloat()
+                .coerceIn(0.7f, 1.3f) // rango más conservador
+        }
+        isCalibrating = false
+    }
+
+
 }
 
 /* ───────────────────────────── UI principal (Compose) ───────────────────────────── */
@@ -213,7 +267,30 @@ fun ARRulerScreen(onBack: () -> Unit) {
                             },
                             leadingIcon = {Icon(Icons.Rounded.Delete, contentDescription = stringResource(R.string.delete)) }
                         )
-                        
+
+                        AssistChip(
+                            onClick = { vm.startCardCalibration() },
+                            label = { Text("Calibrar tarjeta") },
+                            leadingIcon = { Icon(Icons.Rounded.Straighten, contentDescription = null) }
+                        )
+
+                        // Indicador de paso, alineado arriba del FAB
+                        if (vm.isCalibrating) {
+                            val step = if (vm.pendingStartAnchor == null) "1/2" else "2/2"
+                            Surface(
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+                                tonalElevation = 2.dp
+                            ) {
+                                Text(
+                                    text = step,
+                                    style = MaterialTheme.typography.labelLarge,
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                )
+                            }
+                        }
+
+
                         AssistChip(
                             onClick = {
                                 vm.toggleUnits()
@@ -256,20 +333,46 @@ fun ARRulerScreen(onBack: () -> Unit) {
                     val frame = sceneView?.arFrame ?: return@FloatingActionButton
                     val hit = doCenterHitTest(frame, sceneView) ?: return@FloatingActionButton
                     val anchor = hit.createAnchor()
+
+                    if (vm.isCalibrating) {
+                        // Flujo de calibración: 2 toques → calcula scale
+                        if (vm.pendingStartAnchor == null) {
+                            vm.pendingStartAnchor = anchor
+                            arFragment?.let { renderAutoscaledSphere(it, anchor) } // esfera chica opcional
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        } else {
+                            val start = vm.pendingStartAnchor!!
+                            val end = anchor
+                            val measured = distanceMeters(start.pose, end.pose).toDouble()
+                            vm.finishCalibration(measured)
+                            // Limpieza visual rápida (opcional)
+                            arFragment?.let { clearAllRendered(it) }
+                            vm.pendingStartAnchor = null
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            // Re-render opcional del historial/labels (ver nota al final)
+                        }
+                        return@FloatingActionButton
+                    }
+
+                    // Flujo normal de medición
                     if (vm.pendingStartAnchor == null) {
                         vm.pendingStartAnchor = anchor
-                        arFragment?.let { renderSphere(it, anchor) }
+                        arFragment?.let { renderAutoscaledSphere(it, anchor) }
                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                     } else {
                         val start = vm.pendingStartAnchor!!
                         val end = anchor
-                        val distM = distanceMeters(start.pose, end.pose).toDouble()
+                        val rawM = distanceMeters(start.pose, end.pose).toDouble()
                         val id = vm.nextId()
-                        vm.addMeasurement(Measurement(id, start, end, distM))
+                        vm.addMeasurement(Measurement(id, start, end, rawM))
                         arFragment?.let {
-                            renderSphere(it, end)
-                            // label inicial con las unidades actuales; luego se reconvierte con el toggle
-                            renderDynamicLineAndLabel(it, start, end, UnitConverter.format(distM, vm.unitSystem))
+                            renderAutoscaledSphere(it, end)
+                            renderDynamicLineAndLabel(
+                                fragment = it,
+                                startAnchor = start,
+                                endAnchor   = end,
+                                labelText   = vm.formatDistanceCorrected(rawM) // ← ya aplica scale
+                            )
                         }
                         vm.pendingStartAnchor = null
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -332,17 +435,46 @@ fun ARRulerScreen(onBack: () -> Unit) {
             )
 
             // Tips
+            // Banner de tips (dinámico)
             AnimatedVisibility(
-                visible =  vm.pendingStartAnchor == null && vm.measurements.isEmpty(),
-                modifier = Modifier.align(Alignment.TopCenter).padding(top = 12.dp)
+                visible = vm.isCalibrating || (vm.showTips && vm.pendingStartAnchor == null && vm.measurements.isEmpty()),
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 12.dp, start = 12.dp, end = 12.dp)
             ) {
-                Surface(color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
-                    tonalElevation = 3.dp, shape = MaterialTheme.shapes.medium) {
-                    Text(text = stringResource(R.string.aruler_tip_scan),
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                        style = MaterialTheme.typography.bodyMedium)
+                val isStep1 = vm.isCalibrating && vm.pendingStartAnchor == null
+                val isStep2 = vm.isCalibrating && vm.pendingStartAnchor != null
+
+                Surface(
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.88f),
+                    tonalElevation = 3.dp,
+                    shape = MaterialTheme.shapes.medium
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Texto del tip
+                        Text(
+                            text = when {
+                                isStep1 -> "Calibración (1/2): apoyá una tarjeta en un plano. Alineá la cruz con una esquina y tocá +."
+                                isStep2 -> "Calibración (2/2): mové la cruz a la esquina opuesta y tocá +."
+                                else    -> "Mové el teléfono para detectar superficies. Tocá + para fijar un punto."
+                            },
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        // Botón cancelar sólo en calibración
+                        if (vm.isCalibrating) {
+                            TextButton(
+                                onClick = { vm.cancelCalibration() }
+                            ) { Text("Cancelar") }
+                        }
+                    }
                 }
             }
+
 
             // Historial (usa el mismo formatter)
             if (vm.measurements.isNotEmpty()) {
@@ -354,7 +486,7 @@ fun ARRulerScreen(onBack: () -> Unit) {
                     Column(Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         Text(stringResource(R.string.aruler_history), style = MaterialTheme.typography.labelLarge)
                         vm.measurements.takeLast(5).reversed().forEach { m ->
-                            Text("• ${vm.formatDistance(m.meters)}")
+                            Text("• ${vm.formatDistanceCorrected(m.meters)}")
                         }
                     }
                 }
@@ -380,13 +512,35 @@ private fun doCenterHitTest(frame: Frame, sceneView: SceneView?): com.google.ar.
     }
 }
 
-private fun renderSphere(fragment: ArFragment, anchor: Anchor) {
-    val anchorNode = AnchorNode(anchor)
-    fragment.arSceneView.scene.addChild(anchorNode)
-    MaterialFactory.makeOpaqueWithColor(fragment.requireContext(), SColor(0.2f, 0.7f, 1.0f, 1f))
+fun renderAutoscaledSphere(
+    fragment: ArFragment,
+    anchor: Anchor,
+    baseRadiusAt1m: Float = 0.02f,  // 2 cm a 1 m
+    minRadius: Float = 0.007f,       // 7 mm
+    maxRadius: Float = 0.03f        // 3 cm
+) {
+    val scene = fragment.arSceneView.scene
+    val anchorNode = AnchorNode(anchor).also { scene.addChild(it) }
+
+    MaterialFactory
+        .makeOpaqueWithColor(fragment.requireContext(), SColor(0.2f, 0.7f, 1.0f, 1f))
         .thenAccept { mat ->
-            val sphere = ShapeFactory.makeSphere(0.015f, Vector3.zero(), mat)
-            anchorNode.addChild(Node().apply { renderable = sphere })
+            val renderable = ShapeFactory.makeSphere(baseRadiusAt1m, Vector3.zero(), mat)
+            val sphereNode = Node().apply { this.renderable = renderable }
+            anchorNode.addChild(sphereNode)
+
+            // Actualiza el tamaño cada frame según distancia cámara ↔ punto
+            val listener = Scene.OnUpdateListener {
+                val cam = scene.camera.worldPosition
+                val p = anchorNode.worldPosition
+                val d = Vector3.subtract(cam, p).length().coerceAtLeast(0.0001f)
+
+                // radio deseado proporcional a la distancia, con límites
+                val desiredRadius = (d * baseRadiusAt1m).coerceIn(minRadius, maxRadius)
+                val scale = desiredRadius / baseRadiusAt1m
+                sphereNode.localScale = Vector3(scale, scale, scale)
+            }
+            scene.addOnUpdateListener(listener)
         }
 }
 
