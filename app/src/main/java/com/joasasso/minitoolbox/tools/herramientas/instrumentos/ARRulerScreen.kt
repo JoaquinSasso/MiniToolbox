@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.view.View
 import android.widget.FrameLayout
+import android.widget.TextView
 import androidx.activity.compose.BackHandler
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
@@ -81,8 +82,10 @@ import com.google.ar.sceneform.rendering.ShapeFactory
 import com.google.ar.sceneform.rendering.ViewRenderable
 import com.google.ar.sceneform.ux.ArFragment
 import com.joasasso.minitoolbox.R
+import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.acos
+import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.round
@@ -96,6 +99,8 @@ fun ARRulerScreen(
 ) {
     val haptic = LocalHapticFeedback.current
     val vm = remember { ARulerViewModel() }
+
+    var currentUnits by remember { mutableStateOf(Units.METRIC) }
 
     // ----- AR Fragment host inside Compose -----
     var arFragment by remember { mutableStateOf<ArFragment?>(null) }
@@ -150,7 +155,10 @@ fun ARRulerScreen(
                 actions = {
                     // Toggle Unidades: Métrico/Imperial
                     AssistChip(
-                        onClick = { vm.toggleUnitSystem() },
+                        onClick = { vm.toggleUnitSystem()
+                            val sv = sceneView ?: return@AssistChip
+                            currentUnits = currentUnits.other()
+                            convertAllArLabels(sv, currentUnits)},
                         label = {
                             Text(
                                 if (vm.unitSystem == UnitSystem.METRIC)
@@ -463,8 +471,8 @@ private fun renderSphere(fragment: ArFragment, anchor: Anchor) {
 
 fun renderDynamicLineAndLabel(
     fragment: ArFragment,
-    startAnchor: com.google.ar.core.Anchor,
-    endAnchor:   com.google.ar.core.Anchor,
+    startAnchor: Anchor,
+    endAnchor:   Anchor,
     labelText:   String
 ) {
     val scene = fragment.arSceneView.scene
@@ -560,36 +568,6 @@ private fun rotationFromUpTo(dir: Vector3): Quaternion {
     return Quaternion.axisAngle(axis, angleDeg)
 }
 
-// Hace billboard + offset hacia cámara en cada frame
-private fun attachBillboardWithOffset(
-    node: Node,
-    sceneView: ArSceneView,
-    basePosProvider: () -> Vector3,   // de dónde tomar el “centro actual”
-    towardsCamOffsetM: Float          // cuánto empujar hacia la cámara
-) {
-    val scene = sceneView.scene
-    val updater = Scene.OnUpdateListener {
-        val basePos = basePosProvider()
-        val cam = scene.camera.worldPosition
-        val dir = Vector3.subtract(cam, basePos).normalized()
-        node.worldPosition = Vector3.add(basePos, dir.scaled(towardsCamOffsetM))
-        node.worldRotation = Quaternion.lookRotation(dir, Vector3.up())
-    }
-    scene.addOnUpdateListener(updater)
-}
-
-// Autoscale para mantener tamaño legible vs distancia
-private fun attachAutoscale(node: Node, sceneView: ArSceneView, metersAt1m: Float = 0.06f) {
-    val scene = sceneView.scene
-    val updater = Scene.OnUpdateListener {
-        val cam = scene.camera.worldPosition
-        val d = Vector3.subtract(cam, node.worldPosition).length()
-        val s = (d * metersAt1m).coerceIn(0.02f, 0.25f)
-        node.worldScale = Vector3(s, s, s)
-    }
-    scene.addOnUpdateListener(updater)
-}
-
 
 /* ----------------------------- Overlay (retícula) ----------------------------- */
 
@@ -631,3 +609,95 @@ private tailrec fun Context.findActivity(): Activity {
         else -> error("Context no es una Activity")
     }
 }
+
+// Helpers para cambiar de sistema de medicion
+
+private enum class Units { METRIC, IMPERIAL; fun other() = if (this == METRIC) IMPERIAL else METRIC }
+
+/** Recorre todos los nodos del Scene, recursivo */
+private fun traverseScene(scene: Scene, block: (Node) -> Unit) {
+    fun visit(n: Node) {
+        block(n)
+        n.children.forEach { visit(it) }
+    }
+    scene.children.forEach { visit(it) }
+}
+
+
+/** Intenta parsear un label ("12.3 cm", "1.25 m", "72.0 in", "5'7.4\"") a metros */
+private fun parseMetersFromLabel(text: String): Double? {
+    val s = text.trim()
+        .replace('’', '\'')   // prime unicode → '
+        .replace('′', '\'')
+        .replace('“', '"')    // double prime unicode → "
+        .replace('”', '"')
+        .replace(',', '.')    // por si el locale usa coma
+
+    val lower = s.lowercase(Locale.ROOT)
+
+    // 5'7.4"
+    val feetInches = Regex("""^\s*(\d+)\s*'\s*([\d.]+)\s*"\s*$""").matchEntire(lower)
+    if (feetInches != null) {
+        val feet = feetInches.groupValues[1].toDoubleOrNull() ?: return null
+        val inches = feetInches.groupValues[2].toDoubleOrNull() ?: return null
+        val totalInches = feet * 12.0 + inches
+        return totalInches * 0.0254
+    }
+
+    // 72.0 in
+    val inchesOnly = Regex("""^\s*([\d.]+)\s*in\s*$""").matchEntire(lower)
+    if (inchesOnly != null) {
+        val inches = inchesOnly.groupValues[1].toDoubleOrNull() ?: return null
+        return inches * 0.0254
+    }
+
+    // 1.25 m
+    val meters = Regex("""^\s*([\d.]+)\s*m\s*$""").matchEntire(lower)
+    if (meters != null) {
+        return meters.groupValues[1].toDoubleOrNull()
+    }
+
+    // 12.3 cm
+    val cm = Regex("""^\s*([\d.]+)\s*cm\s*$""").matchEntire(lower)
+    if (cm != null) {
+        val v = cm.groupValues[1].toDoubleOrNull() ?: return null
+        return v / 100.0
+    }
+
+    return null
+}
+
+private fun formatMetric(meters: Double): String {
+    return if (meters >= 1.0) {
+        String.format(Locale.getDefault(), "%.2f m", meters)
+    } else {
+        String.format(Locale.getDefault(), "%.1f cm", meters * 100.0)
+    }
+}
+
+private fun formatImperial(meters: Double): String {
+    val totalInches = meters / 0.0254
+    val feet = floor(totalInches / 12.0).toInt()
+    val inches = totalInches - feet * 12
+    return if (feet >= 1) {
+        // 5'7.4"
+        String.format(Locale.getDefault(), "%d'%s\"", feet,
+            String.format(Locale.getDefault(), "%.1f", inches))
+    } else {
+        String.format(Locale.getDefault(), "%.1f in", inches)
+    }
+}
+
+private fun convertAllArLabels(sceneView: ArSceneView, to: Units) {
+    traverseScene(sceneView.scene) { node ->
+        val r = node.renderable as? ViewRenderable ?: return@traverseScene
+        val tv = r.view.findViewById<TextView?>(R.id.labelText) ?: return@traverseScene
+        val current = tv.text?.toString()?.trim().orEmpty()
+        val meters = parseMetersFromLabel(current) ?: return@traverseScene
+        tv.text = when (to) {
+            Units.METRIC   -> formatMetric(meters)
+            Units.IMPERIAL -> formatImperial(meters)
+        }
+    }
+}
+
