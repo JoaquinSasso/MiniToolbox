@@ -8,4 +8,7 @@
     <string name="aruler_reset_all">Reset</string>
     <string name="aruler_tip_scan">Move your phone to detect surfaces and aim the crosshair at the target.</string>
     <string name="aruler_history">History</string>
+    <string name="aruler_tips_toggle_off">Hide tips</string>
+    <string name="aruler_tips_toggle_on">Show tips</string>
+    <string name="flash_enable_failed">Error enabling flash.</string>
 </resources>

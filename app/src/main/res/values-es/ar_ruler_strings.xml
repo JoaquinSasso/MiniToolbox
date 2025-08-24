@@ -8,4 +8,7 @@
     <string name="aruler_reset_all">Reiniciar</string>
     <string name="aruler_tip_scan">Mové el teléfono para detectar superficies y apuntá la cruz al objetivo.</string>
     <string name="aruler_history">Historial</string>
+    <string name="aruler_tips_toggle_off">Ocultar tips</string>
+    <string name="aruler_tips_toggle_on">Mostrar tips</string>
+    <string name="flash_enable_failed">Error al habilitar flash.</string>
 </resources>
