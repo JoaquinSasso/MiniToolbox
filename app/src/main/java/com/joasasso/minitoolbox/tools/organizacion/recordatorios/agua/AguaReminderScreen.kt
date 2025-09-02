@@ -273,18 +273,6 @@ fun AguaReminderScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Button(
-                    onClick = { agregarAgua(mlPorVaso, zeroWarning, addedText, removedText) }
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.water_full),
-                        contentDescription = stringResource(R.string.water_add),
-                        Modifier.size(18.dp)
-                    )
-                    Spacer(Modifier.width(6.dp))
-                    Text("+$mlPorVaso ml", fontSize = 18.sp)
-                }
-                Spacer(Modifier.width(32.dp))
-                Button(
                     onClick = { agregarAgua(-mlPorVaso, zeroWarning, addedText, removedText) }
                 ) {
                     Icon(
@@ -294,6 +282,18 @@ fun AguaReminderScreen(
                     )
                     Spacer(Modifier.width(6.dp))
                     Text("-$mlPorVaso ml", fontSize = 18.sp)
+                }
+                Spacer(Modifier.width(32.dp))
+                Button(
+                    onClick = { agregarAgua(mlPorVaso, zeroWarning, addedText, removedText) }
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.water_full),
+                        contentDescription = stringResource(R.string.water_add),
+                        Modifier.size(18.dp)
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text("+$mlPorVaso ml", fontSize = 18.sp)
                 }
             }
             Row(
