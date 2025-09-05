@@ -119,4 +119,6 @@ dependencies {
     // ARCore
     implementation("com.google.ar:core:1.32.0")
 
+    implementation("androidx.media:media:1.7.1")
+
 }

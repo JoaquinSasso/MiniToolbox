@@ -42,5 +42,6 @@
     <string name="tool_scoreboard">Scoreboard</string>
     <string name="tool_magnifier">Magnifier</string>
     <string name="tool_ar_ruler">Aumented Reality Ruler</string>
+    <string name="tool_noise_generator">Noise Generator</string>
     <string name="no_tools_found">No tools found</string>
 </resources>

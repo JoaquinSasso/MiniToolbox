@@ -310,6 +310,13 @@ object ToolRegistry {
             category = ToolCategory.Herramientas,
             subCategory = R.string.subcategory_instrument,
             svgResId = R.drawable.ar_ruler
+        ),
+        Tool(
+            name = R.string.tool_noise_generator,
+            screen = Screen.Ruido,
+            category = ToolCategory.Herramientas,
+            subCategory = R.string.subcategory_generator,
+            svgResId = R.drawable.noise_generator
         )
     )
 }

@@ -42,5 +42,6 @@
     <string name="tool_scoreboard">Marcador</string>
     <string name="tool_magnifier">Lupa</string>
     <string name="tool_ar_ruler">Regla de Realidad Aumentada</string>
+    <string name="tool_noise_generator">Generador de Ruido</string>
     <string name="no_tools_found">No se encontraron tools</string>
 </resources>

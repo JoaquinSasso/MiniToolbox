@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="noise_notif_title">Playing noise</string>
+    <string name="noise_notif_toggle">Pause/Resume</string>
+    <string name="noise_notif_stop">Stop</string>
+    <string name="noise_channel_name">Noise for relaxation</string>
+
+
+</resources>

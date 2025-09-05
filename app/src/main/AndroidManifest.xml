@@ -11,6 +11,7 @@
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
     <uses-feature android:name="android.hardware.camera.flash" android:required="false" />
     <uses-feature android:name="android.hardware.camera.ar" android:required="false"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 
 
     <application
@@ -36,6 +37,12 @@
             android:name="com.joasasso.minitoolbox.tools.organizacion.pomodoro.PomodoroService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
+
+        <!-- Servicio del generador de ruido blanco-->
+        <service
+            android:name="com.joasasso.minitoolbox.tools.herramientas.generadores.noiseGenerator.NoiseService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
 
         <!-- Receiver para recordatorio de agua -->
         <receiver
