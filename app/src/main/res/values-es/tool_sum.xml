@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sum_tool_color_generator">Obten el código hexadecimal</string>
+    <string name="sum_tool_team_generator">Arma equipos al azar</string>
+    <string name="sum_tool_coin_flip">Lanza una moneda</string>
+    <string name="sum_tool_decimal_binary">Calcula números binarios</string>
+    <string name="sum_tool_text_binary">Texto a binario</string>
+    <string name="sum_tool_truco_score">Marcador truco argentino</string>
+    <string name="sum_tool_age_calculator">Datos curiosos sobre tu edad</string>
+    <string name="sum_tool_zodiac_sign">Signo según fecha</string>
+    <string name="sum_tool_bubble_level">Mide inclinación</string>
+    <string name="sum_tool_percentage">Calcula porcentajes</string>
+    <string name="sum_tool_hour_converter">Convierte formato horario</string>
+    <string name="sum_tool_bmi_calculator">Índice de masa corporal</string>
+    <string name="sum_tool_roman_converter">Calcula números romanos</string>
+    <string name="sum_tool_unit_converter">Distancia, peso, tiempo</string>
+    <string name="sum_tool_password_generator">Generadas localmente</string>
+    <string name="sum_tool_activity_suggester">Ideas de actividades</string>
+    <string name="sum_tool_pomodoro_timer">Enfoque y descansos</string>
+    <string name="sum_tool_name_generator">Nombres aleatorios</string>
+    <string name="sum_tool_qr_generator">Genera códigos QR</string>
+    <string name="sum_tool_qr_vcard">Escanea el QR y agrega contactos</string>
+    <string name="sum_tool_lorem_ipsum">Texto de prueba</string>
+    <string name="sum_tool_ruler">Regla en pantalla</string>
+    <string name="sum_tool_light_meter">Mide luz ambiental</string>
+    <string name="sum_tool_flashlight">Usa linterna del móvil</string>
+    <string name="sum_tool_habit_tracker">Rachas y hábitos</string>
+    <string name="sum_tool_water_reminder">Sigue tu consumo de agua</string>
+    <string name="sum_tool_day_countdown">Tiempo restante hasta un día</string>
+    <string name="sum_tool_country_info">Capitales y banderas</string>
+    <string name="sum_tool_option_selector">Selector aleatorio</string>
+    <string name="sum_tool_guess_flag">Minijuego de geografía</string>
+    <string name="sum_tool_expense_splitter">Divide gastos entre amigos</string>
+    <string name="sum_tool_dice">Lanza dados</string>
+    <string name="sum_tool_quick_math">Cálculo cronometrado</string>
+    <string name="sum_tool_basic_phrases">Frases de viaje</string>
+    <string name="sum_tool_multiverse_me">Frases absurdas</string>
+    <string name="sum_tool_guess_capital">Minijuego de geografía</string>
+    <string name="sum_tool_compass">Útil para la navegación</string>
+    <string name="sum_tool_todo_list">Gestión de tareas</string>
+    <string name="sum_tool_event_tracker">Turnos, citas, etc.</string>
+    <string name="sum_tool_compound_interest">Cálculo financiero</string>
+    <string name="sum_tool_scoreboard">Marcador de puntajes</string>
+    <string name="sum_tool_magnifier">Amplía con la cámara</string>
+    <string name="sum_tool_ar_ruler">Regla con cámara</string>
+    <string name="sum_tool_noise_generator">Ruido blanco/rosa/marrón</string>
+</resources>

@@ -18,7 +18,7 @@
     <string name="tool_pomodoro_timer">Temporizador Pomodoro</string>
     <string name="tool_name_generator">Generador de Nombres</string>
     <string name="tool_qr_generator">Generador de QR</string>
-    <string name="tool_qr_vcard">Generador de QR de Contacto (vCard)</string>
+    <string name="tool_qr_vcard">Generador vCard</string>
     <string name="tool_lorem_ipsum">Generador de Lorem Ipsum</string>
     <string name="tool_ruler">Regla</string>
     <string name="tool_light_meter">Medidor de Luz</string>
