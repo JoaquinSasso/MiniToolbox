@@ -111,18 +111,18 @@ dependencies {
     implementation(libs.androidx.camera.view)
 
     //AR Camera
-    implementation("androidx.appcompat:appcompat:1.7.0")
-    implementation("androidx.fragment:fragment-ktx:1.8.2")
+    implementation("androidx.appcompat:appcompat:1.7.1")
+    implementation("androidx.fragment:fragment-ktx:1.8.9")
 
     // Sceneform mantenido (AndroidX)
     implementation("com.gorisse.thomas.sceneform:sceneform:1.23.0")
     implementation("com.gorisse.thomas.sceneform:ux:1.23.0")
 
     // ARCore
-    implementation("com.google.ar:core:1.32.0")
+    implementation("com.google.ar:core:1.50.0")
 
     implementation("androidx.media:media:1.7.1")
 
-    implementation("org.burnoutcrew.composereorderable:reorderable:0.9.6")
+    implementation(libs.reorderable)
 
 }
