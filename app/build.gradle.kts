@@ -88,6 +88,8 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.gson)
     implementation(libs.androidx.camera.view)
+    implementation(libs.androidx.ui.unit)
+    implementation(libs.androidx.material3)
 
 
     // 7) Testing
@@ -120,5 +122,7 @@ dependencies {
     implementation("com.google.ar:core:1.32.0")
 
     implementation("androidx.media:media:1.7.1")
+
+    implementation("org.burnoutcrew.composereorderable:reorderable:0.9.6")
 
 }
