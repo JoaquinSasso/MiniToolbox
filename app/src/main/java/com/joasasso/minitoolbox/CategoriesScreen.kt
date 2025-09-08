@@ -2,6 +2,7 @@ package com.joasasso.minitoolbox
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -50,6 +52,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.protobuf.LazyStringArrayList.emptyList
 import com.joasasso.minitoolbox.data.flujoToolsFavoritas
@@ -81,13 +84,6 @@ fun CategoriesScreen(
     val scope = rememberCoroutineScope()
 
     val orderedRoutes by remember(context) { context.flujoToolsFavoritas() }.collectAsState(initial = emptyList())
-
-    // Filtrado por categoría seleccionada
-    val filteredTools = if (selectedCategory == ToolCategory.Favoritos) {
-        tools.filter { orderedRoutes.contains(it.screen.route) }
-    } else {
-        tools.filter { it.category == selectedCategory }
-    }
 
     // Mantiene el orden guardado para favoritos
     val favoritesTools: List<Tool> =
@@ -152,20 +148,35 @@ fun CategoriesScreen(
                     favRoutes.move(from.index, to.index)
                 }
 
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(
+                            start = 16.dp,
+                            end = 16.dp,
+                            top = innerPadding.calculateTopPadding() + 12.dp,
+                            bottom = innerPadding.calculateBottomPadding() + 4.dp
+                        )
+                ){
+                    if (selectedCategory == ToolCategory.Favoritos) {
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(stringResource(R.string.favorites_reorder_info),fontSize = 13.sp)
+                        }
+                    }
+
                 LazyColumn(
                     state = listState,
-                    contentPadding = PaddingValues(
-                        start = 16.dp,
-                        end = 16.dp,
-                        top = innerPadding.calculateTopPadding() + 16.dp,
-                        bottom = innerPadding.calculateBottomPadding() + 16.dp
-                    ),
                     modifier = Modifier.fillMaxSize()
                 ) {
                     itemsIndexed(favRoutes, key = { _, route -> route }) { index, route ->
                         val tool = tools.find { it.screen.route == route } ?: return@itemsIndexed
                         // Lista de Tool según el orden actual para las decoraciones
-                        val toolsForDecor = favRoutes.mapNotNull { r -> tools.find { it.screen.route == r } }
+                        val toolsForDecor =
+                            favRoutes.mapNotNull { r -> tools.find { it.screen.route == r } }
                         val decor = groupDecorBySubcategory(index, toolsForDecor)
 
                         ReorderableItem(reorderState, key = route) { isDragging ->
@@ -214,6 +225,7 @@ fun CategoriesScreen(
 
                     if (favRoutes.isEmpty()) {
                         item {
+                            Spacer(Modifier.height(4.dp))
                             Card(
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = CardDefaults.cardColors(
@@ -242,6 +254,7 @@ fun CategoriesScreen(
                         }
                     }
                 }
+            }
             } else {
                 // --- RESTO DE CATEGORÍAS (sin DnD) ---
                 LazyColumn(
