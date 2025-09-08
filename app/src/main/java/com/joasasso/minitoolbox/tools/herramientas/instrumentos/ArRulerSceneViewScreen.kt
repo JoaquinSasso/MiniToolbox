@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Delete
@@ -42,6 +43,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
@@ -124,6 +126,7 @@ private class ARulerVM {
 }
 
 /* ───────────── Pantalla ───────────── */
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -232,8 +235,9 @@ fun ArRulerSceneViewScreen(onBack: () -> Unit) {
                 },
                 containerColor = container,
                 contentColor = content,
-                shape = CircleShape
-            ) { Text("+", fontSize = 22.sp) }
+                shape = CircleShape,
+                modifier = Modifier.size(80.dp)
+            ) { Text("+", fontSize = 30.sp) }
         }
     ) { padding ->
         Box(
@@ -344,15 +348,20 @@ private fun MeasurementsOverlay(
     color: Color
 ) {
     if (frame == null || viewport == IntSize.Zero || items.isEmpty()) return
+
+    //Tamaño de elementos (puntos y lineas)
+    val density = LocalDensity.current
+    val historyLinePx = with(density) { 4.dp.toPx() }
+    val historyPointPx = with(density) { 6.dp.toPx() }
     // Dibujo de líneas + puntos (primero la geometría)
     Canvas(Modifier.fillMaxSize()) {
         items.forEach { m ->
             val pa = projectWorldToScreen(frame, m.start.pose.tx(), m.start.pose.ty(), m.start.pose.tz(), viewport)
             val pb = projectWorldToScreen(frame, m.end.pose.tx(), m.end.pose.ty(), m.end.pose.tz(), viewport)
             if (pa != null && pb != null) {
-                drawLine(color, pa, pb, strokeWidth = 4f)
-                drawCircle(color, radius = 7f, center = pa)
-                drawCircle(color, radius = 7f, center = pb)
+                drawLine(color, pa, pb, strokeWidth = historyLinePx)
+                drawCircle(color, radius = historyPointPx, center = pa)
+                drawCircle(color, radius = historyPointPx, center = pb)
             }
         }
     }
@@ -385,13 +394,19 @@ private fun ActiveMeasureOverlay(
     color: Color
 ) {
     if (frame == null || viewport == IntSize.Zero) return
+
+    //Tamaño de elementos (puntos y lineas)
+    val density = LocalDensity.current
+    val activeLinePx  = with(density) { 5.dp.toPx() }
+    val activePointPx = with(density) { 7.dp.toPx() }
+
     val pa = a?.let { projectWorldToScreen(frame, it.pose.tx(), it.pose.ty(), it.pose.tz(), viewport) }
     val pb = b?.let { projectWorldToScreen(frame, it.pose.tx(), it.pose.ty(), it.pose.tz(), viewport) }
 
     Canvas(Modifier.fillMaxSize()) {
-        if (pa != null) drawCircle(color, radius = 8f, center = pa)
-        if (pb != null) drawCircle(color, radius = 8f, center = pb)
-        if (pa != null && pb != null) drawLine(color, pa, pb, strokeWidth = 5f)
+        if (pa != null) drawCircle(color, radius = activePointPx, center = pa)
+        if (pb != null) drawCircle(color, radius = activePointPx, center = pb)
+        if (pa != null && pb != null) drawLine(color, pa, pb, strokeWidth = activeLinePx)
     }
     if (pa != null && pb != null) {
         val mid = Offset((pa.x + pb.x) / 2f, (pa.y + pb.y) / 2f)
