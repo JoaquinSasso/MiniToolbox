@@ -49,7 +49,7 @@ val SubcategoryPalette: Map<Int, CategorySwatch> = mapOf(
     R.string.subcategory_dates       to swatchFromBase(Color(0xFFFF8A80)), // Coral suave
     R.string.subcategory_general     to swatchFromBase(Color(0xFF4CCDC4)), // Turquesa
     R.string.subcategory_habits      to swatchFromBase(Color(0xFF8EA6FF)), // Azul violeta
-    R.string.subcategory_others      to swatchFromBase(Color(0xFF8CD4FF)), // Azul hielo
+    R.string.subcategory_others      to swatchFromBase(Color(0xFFB0EEFF)), // Azul hielo
     R.string.subcategory_minigames   to swatchFromBase(Color(0xFFDDE25C)), // Lima cálida
     R.string.subcategory_scoreboards to swatchFromBase(Color(0xFFFF88C2))  // Rosa fresa
 )

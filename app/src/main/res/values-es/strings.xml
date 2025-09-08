@@ -15,5 +15,5 @@
     <string name="stepper_content_desc">Selector de cantidad</string>
     <string name="stepper_decrease">Disminuir</string>
     <string name="stepper_increase">Aumentar</string>
-
+    <string name="favorites_reorder_info">Ordena tus tools favoritas arrastrándolas. El orden afectará el widget de accesos directos.</string>
 </resources>

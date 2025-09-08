@@ -37,6 +37,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -66,6 +67,7 @@ import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import io.github.sceneview.ar.ARScene
 import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberModelLoader
+import java.util.Locale
 import kotlin.math.floor
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
@@ -77,14 +79,14 @@ private enum class Units { METRIC, IMPERIAL; fun toggle() = if (this == METRIC) 
 private object UnitConverter {
     fun format(meters: Double, units: Units): String = when (units) {
         Units.METRIC ->
-            if (meters >= 1.0) String.format("%.2f m", meters)
-            else String.format("%.1f cm", meters * 100.0)
+            if (meters >= 1.0) String.format(Locale.getDefault(),"%.2f m", meters)
+            else String.format(Locale.getDefault(),"%.1f cm", meters * 100.0)
         Units.IMPERIAL -> {
             val totalIn = meters / 0.0254
             val ft = floor(totalIn / 12.0).toInt()
             val inch = totalIn - ft * 12.0
-            if (ft >= 1) String.format("%d'%s\"", ft, String.format("%.1f", inch))
-            else String.format("%.1f in", inch)
+            if (ft >= 1) String.format(Locale.getDefault(),"%d'%s\"", ft, String.format(Locale.getDefault(),"%.1f", inch))
+            else String.format(Locale.getDefault(),"%.1f in", inch)
         }
     }
 }
@@ -110,8 +112,8 @@ private class ARulerVM {
 
     // Calibración por diagonal de tarjeta (~9.8631 cm)
     var isCalibrating by mutableStateOf(false);     private set
-    var knownMeters by mutableStateOf(0.098631)
-    var scale by mutableStateOf(1.0)                // 1.0 = sin corrección
+    var knownMeters by mutableDoubleStateOf(0.098631)
+    var scale by mutableDoubleStateOf(1.0)                // 1.0 = sin corrección
         private set
 
     fun startCardCalibration() {

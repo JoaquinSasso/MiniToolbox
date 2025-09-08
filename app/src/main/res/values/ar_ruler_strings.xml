@@ -8,6 +8,7 @@
     <string name="aruler_history">History</string>
     <string name="aruler_tips_toggle_off">Hide tips</string>
     <string name="aruler_tips_toggle_on">Show tips</string>
+    <string name="aruler_calibration_button">Calibrate</string>
 
     <!-- Tips banner -->
     <string name="aruler_tip_scan">Move the phone to detect surfaces. Tap + to set a point on the crosshair position.</string>
