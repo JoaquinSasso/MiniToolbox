@@ -14,4 +14,52 @@
     <string name="aruler_tip_scan">Mové el teléfono para detectar superficies. Tocá + para fijar un punto en la posición de la cruz.</string>
     <string name="aruler_tip_calib_step1">Calibración (1/2): apoyá una tarjeta en un plano. Alineá la cruz con una esquina y tocá +.</string>
     <string name="aruler_tip_calib_step2">Calibración (2/2): mové la cruz a la esquina opuesta (diagonal) y tocá +.</string>
+
+
+    <!-- Títulos y descripciones -->
+    <string name="aruler_help_title">Ayuda – Regla AR</string>
+    <string name="aruler_help_intro">Mide distancias reales colocando dos puntos sobre superficies detectadas con realidad aumentada.</string>
+
+    <!-- Secciones -->
+    <string name="aruler_help_requirements_title">Requisitos</string>
+    <string name="aruler_help_how_title">Cómo usar</string>
+    <string name="aruler_help_ui_title">Botones</string>
+    <string name="aruler_help_tips_title">Consejos</string>
+    <string name="aruler_help_troubles_title">Problemas comunes</string>
+
+    <!-- Listas (arrays) -->
+    <string-array name="aruler_help_requirements">
+        <item>Buena iluminación y una superficie con textura (madera, tela, etc.).</item>
+        <item>Mueve el teléfono en forma de “8” para ayudar a detectar el plano.</item>
+    </string-array>
+
+    <string-array name="aruler_help_steps">
+        <item>Apunta al piso o mesa hasta que la retícula se ponga verde.</item>
+        <item>Toca el botón “+” para fijar el primer punto en la posición de la retícula.</item>
+        <item>Apunta a la segunda posición y toca “+” para fijar el segundo punto.</item>
+        <item>Se dibuja una línea entre los puntos y aparece la distancia en el centro.</item>
+        <item>Podés seguir creando más mediciones; las anteriores quedan visibles e irán al historial.</item>
+    </string-array>
+
+    <string-array name="aruler_help_buttons">
+        <item>“+”: coloca un punto en la posición de la retícula.</item>
+        <item>Reiniciar: limpia todos los puntos y mediciones.</item>
+        <item>cm/m ↔ in/ft: cambia el sistema de unidades.</item>
+        <item>Calibrar tarjeta: mide la diagonal de una tarjeta de credito, debito o documento para ajustar la escala.</item>
+    </string-array>
+
+    <string-array name="aruler_help_tips">
+        <item>Evita superficies brillantes o transparentes.</item>
+        <item>Para mayor estabilidad, sostén el teléfono a ~0,5–1,5 m de la superficie.</item>
+        <item>Si la retícula no se pone verde, mueve el teléfono despacio para explorar el plano.</item>
+    </string-array>
+
+    <string-array name="aruler_help_troubles">
+        <item>No detecta superficie: mejora la iluminación o apunta a materiales con textura.</item>
+        <item>Medición inestable o errática: repite la calibración o fija puntos más cercanos.</item>
+        <item>La distancia no coincide: vuelve a calibrar con la tarjeta.</item>
+    </string-array>
+
+    <!-- Otros -->
+    <string name="aruler_help_privacy">La cámara se usa solo para medición; no se graban fotos ni videos.</string>
 </resources>

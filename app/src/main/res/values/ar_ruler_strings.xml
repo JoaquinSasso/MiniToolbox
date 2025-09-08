@@ -14,8 +14,50 @@
     <string name="aruler_tip_calib_step1">Calibration (1/2): place a card on a flat surface. Align the crosshair with one corner and tap +.</string>
     <string name="aruler_tip_calib_step2">Calibration (2/2): move the crosshair to the opposite corner (diagonal) and tap +.</string>
 
-    <!-- Button inside the tips banner -->
-    <string name="aruler_tip_cancel">Cancel</string>
+    <!-- Titles & descriptions -->
+    <string name="aruler_help_title">Help – AR Ruler</string>
+    <string name="aruler_help_intro">Measure real-world distances by placing two points on AR-detected surfaces.</string>
 
+    <!-- Sections -->
+    <string name="aruler_help_requirements_title">Requirements</string>
+    <string name="aruler_help_how_title">How to use</string>
+    <string name="aruler_help_ui_title">Buttons</string>
+    <string name="aruler_help_tips_title">Tips</string>
+    <string name="aruler_help_troubles_title">Common issues</string>
 
+    <!-- Lists (arrays) -->
+    <string-array name="aruler_help_requirements">
+        <item>Good lighting and a textured surface (wood, fabric, etc.).</item>
+        <item>Move the phone in a “figure-8” pattern to help plane detection.</item>
+    </string-array>
+
+    <string-array name="aruler_help_steps">
+        <item>Point at the floor or table until the reticle turns green.</item>
+        <item>Tap the “+” button to place the first point at the reticle position.</item>
+        <item>Aim at the second position and tap “+” to place the second point.</item>
+        <item>A line is drawn between the points and the distance label appears in the middle.</item>
+        <item>You can keep creating measurements; previous ones remain visible and go to the history.</item>
+    </string-array>
+
+    <string-array name="aruler_help_buttons">
+        <item>“+”: places a point at the reticle position.</item>
+        <item>Reset: clears all points and measurements.</item>
+        <item>cm/m ↔ in/ft: switches the unit system.</item>
+        <item>Calibrate card: measure a credit or debit card diagonal to adjust the scale.</item>
+    </string-array>
+
+    <string-array name="aruler_help_tips">
+        <item>Avoid shiny or transparent surfaces.</item>
+        <item>For stability, keep the phone ~0.5–1.5 m from the surface.</item>
+        <item>If the reticle doesn’t turn green, move the phone slowly to explore the plane.</item>
+    </string-array>
+
+    <string-array name="aruler_help_troubles">
+        <item>Surface not detected: improve lighting or aim at textured materials.</item>
+        <item>Unstable measurements: recalibrate or place points closer to each other.</item>
+        <item>Distance seems off: run the card calibration again.</item>
+    </string-array>
+
+    <!-- Others -->
+    <string name="aruler_help_privacy">The camera is used only for measurement; no photos or videos are recorded.</string>
 </resources>
