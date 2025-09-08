@@ -13,13 +13,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Straighten
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -43,8 +47,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
@@ -133,6 +139,7 @@ private class ARulerVM {
 fun ArRulerSceneViewScreen(onBack: () -> Unit) {
     val vm = remember { ARulerVM() }
     val haptic = LocalHapticFeedback.current
+    var showInfo by remember { mutableStateOf(false) }
 
     val engine = rememberEngine()
     val modelLoader = rememberModelLoader(engine)
@@ -150,8 +157,10 @@ fun ArRulerSceneViewScreen(onBack: () -> Unit) {
     val activeColor = Color(0xFFFFC107)   // ámbar (alta visibilidad)
     val historyColor = Color(0xFF40C4FF)  // celeste (buena separación)
 
+
+
     Scaffold(
-        topBar = { TopBarReusable(title = stringResource(R.string.tool_ar_ruler), onBack = onBack) },
+        topBar = { TopBarReusable(title = stringResource(R.string.tool_ar_ruler), onBack = onBack, onShowInfo = { showInfo = true })},
         bottomBar = {
             BottomAppBar {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
@@ -319,7 +328,9 @@ fun ArRulerSceneViewScreen(onBack: () -> Unit) {
             // --- Historial (lista, igual que antes) ---
             if (vm.measurements.isNotEmpty()) {
                 Surface(
-                    modifier = Modifier.align(Alignment.TopStart).padding(12.dp),
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(12.dp),
                     color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
                     tonalElevation = 2.dp
                 ) {
@@ -335,6 +346,60 @@ fun ArRulerSceneViewScreen(onBack: () -> Unit) {
     }
 
     BackHandler { onBack() }
+    if (showInfo) {
+        val cfg = LocalConfiguration.current
+        val maxHeight = (cfg.screenHeightDp * 0.75f).dp   // ocupa hasta ~75% de la pantalla
+        val scroll = rememberScrollState()
+        AlertDialog(
+            onDismissRequest = {
+                showInfo = false
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            },
+            title = { Text(stringResource(R.string.aruler_help_title)) },
+            text = {
+                Column(modifier = Modifier
+                    .heightIn(max = maxHeight)       // limita el alto del contenido
+                    .verticalScroll(scroll),         // y habilita el scroll
+                    verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(stringResource(R.string.aruler_help_intro))
+
+                    Section(
+                        title = stringResource(R.string.aruler_help_requirements_title),
+                        bullets = stringArrayResource(R.array.aruler_help_requirements)
+                    )
+                    Section(
+                        title = stringResource(R.string.aruler_help_how_title),
+                        bullets = stringArrayResource(R.array.aruler_help_steps)
+                    )
+                    Section(
+                        title = stringResource(R.string.aruler_help_ui_title),
+                        bullets = stringArrayResource(R.array.aruler_help_buttons)
+                    )
+                    Section(
+                        title = stringResource(R.string.aruler_help_tips_title),
+                        bullets = stringArrayResource(R.array.aruler_help_tips)
+                    )
+                    Section(
+                        title = stringResource(R.string.aruler_help_troubles_title),
+                        bullets = stringArrayResource(R.array.aruler_help_troubles)
+                    )
+
+                    Text(
+                        text = stringResource(R.string.aruler_help_privacy),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showInfo = false
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                }) {
+                    Text(stringResource(R.string.close))
+                }
+            }
+        )
+    }
 }
 
 /* ───────────── Overlays 2D ───────────── */
@@ -497,3 +562,14 @@ private tailrec fun Context.findActivity(): Activity = when (this) {
     is ContextWrapper -> baseContext.findActivity()
     else -> error("Context no es una Activity")
 }
+
+@Composable
+private fun Section(title: String, bullets: Array<String>) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(title, style = MaterialTheme.typography.titleSmall)
+        bullets.forEach { line ->
+            Text("• $line", style = MaterialTheme.typography.bodyMedium)
+        }
+    }
+}
+
