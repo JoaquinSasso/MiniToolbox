@@ -90,7 +90,6 @@ dependencies {
     implementation(libs.androidx.camera.view)
     implementation(libs.androidx.ui.unit)
     implementation(libs.androidx.material3)
-    implementation(libs.core)
 
 
     // 7) Testing
@@ -111,11 +110,14 @@ dependencies {
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
 
-    // Sceneview
-    implementation("io.github.sceneview:sceneview:2.3.0")
+    //AR Camera
+    implementation("androidx.appcompat:appcompat:1.7.1")
+    implementation("androidx.fragment:fragment-ktx:1.8.9")
 
-    // ARCore
-    implementation("com.google.ar:core:1.50.0")
+    // --- AR / SceneView ---
+    implementation(libs.arsceneview)
+    implementation(libs.arcore)
+
 
     implementation("androidx.media:media:1.7.1")
 
