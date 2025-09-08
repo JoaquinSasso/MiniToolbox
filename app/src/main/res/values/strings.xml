@@ -15,5 +15,6 @@
     <string name="stepper_content_desc">Quantity selector</string>
     <string name="stepper_decrease">Decrease</string>
     <string name="stepper_increase">Increase</string>
+    <string name="aruler_calibration_button">Calibrate</string>
 
 </resources>

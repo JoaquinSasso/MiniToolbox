@@ -154,7 +154,7 @@ fun ArRulerSceneViewScreen(onBack: () -> Unit) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
                     AssistChip(
                         onClick = {
-                            // limpiar todo
+                            // limpiar todas las mediciones
                             firstAnchor?.detach(); secondAnchor?.detach()
                             firstAnchor = null; secondAnchor = null
                             vm.resetAll()
@@ -166,7 +166,7 @@ fun ArRulerSceneViewScreen(onBack: () -> Unit) {
 
                     AssistChip(
                         onClick = { vm.startCardCalibration() },
-                        label = { Text("Calibrar tarjeta") },
+                        label = { Text(stringResource(R.string.aruler_calibration_button)) },
                         leadingIcon = { Icon(Icons.Rounded.Straighten, contentDescription = null) }
                     )
 
@@ -298,15 +298,15 @@ fun ArRulerSceneViewScreen(onBack: () -> Unit) {
                     Row(Modifier.padding(horizontal = 12.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = when {
-                                isStep1 -> "Calibración (1/2): apoyá una tarjeta en un plano. Alineá la cruz con una esquina y tocá +."
-                                isStep2 -> "Calibración (2/2): mové la cruz a la esquina opuesta y tocá +."
-                                else    -> "Mové el teléfono para detectar superficies. Tocá + para fijar un punto."
+                                isStep1 -> stringResource(R.string.aruler_tip_calib_step1)
+                                isStep2 -> stringResource(R.string.aruler_tip_calib_step2)
+                                else    -> stringResource(R.string.aruler_tip_scan)
                             },
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.weight(1f)
                         )
                         if (vm.isCalibrating) {
-                            TextButton(onClick = { vm.cancelCalibration() }) { Text("Cancelar") }
+                            TextButton(onClick = { vm.cancelCalibration() }) { Text(stringResource(R.string.cancel)) }
                         }
                     }
                 }
