@@ -1,6 +1,7 @@
 package com.joasasso.minitoolbox
 
 //TODO Hacer que las cards que aparecerian en el widget se agurpen entre ellas
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -8,9 +9,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -55,6 +58,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -82,6 +87,7 @@ import kotlinx.coroutines.launch
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import java.util.Locale
+
 
 @OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
 @Composable
@@ -116,6 +122,8 @@ fun CategoriesScreen(
 
     // ===== Buscador global =====
     var query by rememberSaveable { mutableStateOf("") }
+    val focusManager = LocalFocusManager.current
+    val density = LocalDensity.current
 
     val locales = LocalConfiguration.current.locales
     val locale = locales.get(0) ?: Locale.getDefault()
@@ -146,6 +154,31 @@ fun CategoriesScreen(
             tools.filter { it.screen.route in matchingRoutes }
         }
     }
+    // Limpia query al cambiar de categoría
+    LaunchedEffect(selectedCategory) {
+        query = ""
+    }
+
+    // Limpia query al volver a la screen desde una tool
+    LaunchedEffect(Unit) {
+        query = ""
+    }
+
+    // Detecta si el teclado (IME) está visible.
+    // En Compose recientes también podés usar: val isKeyboardOpen = WindowInsets.isImeVisible
+    val isKeyboardOpen = WindowInsets.ime.getBottom(density) > 0
+
+    // 1) Primer back: si el teclado está abierto, lo cierra (consume el back)
+    BackHandler(enabled = isKeyboardOpen) {
+        focusManager.clearFocus() // cierra el teclado
+    }
+
+    // 2) Segundo back: si no hay teclado pero hay texto, limpia la búsqueda (consume el back)
+    BackHandler(enabled = !isKeyboardOpen && query.isNotBlank()) {
+        query = ""
+    }
+
+
 
     Scaffold(
         topBar = {
@@ -219,7 +252,7 @@ fun CategoriesScreen(
                         imeAction = ImeAction.Search
                     ),
                     keyboardActions = KeyboardActions(
-                        onSearch = { /* opcional: ocultar el teclado */ }
+                        onSearch = { focusManager.clearFocus()} //Ocultar el teclado al buscar
                     ),
                     shape = RoundedCornerShape(24.dp)
                 )
