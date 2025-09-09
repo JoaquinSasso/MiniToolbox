@@ -9,4 +9,9 @@
     <string name="widget_access_desc">Acceso directo a herramientas favoritas</string>
     <string name="widget_access_label">Herramientas favoritas</string>
 
+    <!-- Buscador de tools -->
+    <string name="categories_search_hint">Buscar tools…</string>
+    <string name="categories_search_clear_cd">Borrar búsqueda</string>
+    <string name="categories_search_no_results">Sin resultados</string>
+
 </resources>

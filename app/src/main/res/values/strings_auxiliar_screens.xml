@@ -9,4 +9,9 @@
     <string name="widget_access_desc">Shortcut to favorite tools</string>
     <string name="widget_access_label">Favorite tools</string>
 
+    <!-- Tools search -->
+    <string name="categories_search_hint">Search tools…</string>
+    <string name="categories_search_clear_cd">Clear search</string>
+    <string name="categories_search_no_results">No results</string>
+
 </resources>

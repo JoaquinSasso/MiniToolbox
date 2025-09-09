@@ -93,6 +93,7 @@ dependencies {
     implementation(libs.androidx.camera.view)
     implementation(libs.androidx.ui.unit)
     implementation(libs.androidx.material3)
+    implementation(libs.foundation)
 
 
     // 7) Testing
