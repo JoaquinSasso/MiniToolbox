@@ -362,7 +362,7 @@ object ToolRegistry {
         Tool(
             name = R.string.about_title,
             screen = Screen.About,
-            category = ToolCategory.Herramientas,
+            category = ToolCategory.Favoritos,
             subCategory = R.string.subcategory_generator
         )
     )
