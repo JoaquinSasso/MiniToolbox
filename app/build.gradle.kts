@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.oss.licenses)
 }
 
 android {
@@ -22,15 +23,16 @@ android {
     }
 
     buildTypes {
-        buildTypes {
-            getByName("release") {
-                isMinifyEnabled = true
-                isShrinkResources = true
-                proguardFiles(
-                    getDefaultProguardFile("proguard-android-optimize.txt"),
-                    "proguard-rules.pro"
-                )
-            }
+        // hereda configuración de release para que AGP lo considere "publicable"
+        create("oss") {
+            initWith(getByName("release"))
+            // firma con debug para poder instalar fácil desde Run
+            signingConfig = signingConfigs.getByName("debug")
+            isDebuggable = false               // mantenerlo no-depurable = publicable
+            applicationIdSuffix = ".oss"       // opcional, para instalar junto a debug
+            versionNameSuffix = "-oss"         // opcional
+            // si tu release tiene minifyEnabled=true y te molesta:
+            // isMinifyEnabled = false
         }
     }
 
@@ -46,6 +48,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -122,5 +125,7 @@ dependencies {
     implementation("androidx.media:media:1.7.1")
 
     implementation(libs.reorderable)
+
+    implementation(libs.play.services.oss.licenses)
 
 }

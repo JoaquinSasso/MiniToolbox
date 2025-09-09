@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Sections -->
+    <string name="about_title">About MiniToolbox</string>
+    <string name="about_section_app_title">About the app</string>
+    <string name="about_section_me_title">About me</string>
+    <string name="about_section_credits_title">Credits</string>
+    <string name="about_section_actions_title">Actions</string>
+
+    <!-- Version (name only, e.g., 1.0) -->
+    <string name="about_version_label">Version %1$s</string>
+
+    <!-- App blurb -->
+    <string name="about_app_summary">
+MiniToolbox packs simple, useful tools in one offline app with a clean design.
+The goal is to solve everyday tasks in seconds, no fuss.
+</string>
+
+    <!-- About me (short, indie tone) -->
+    <string name="about_me_blurb">
+Hi, I’m Joa. I developed MiniToolbox independently from San Juan, Argentina.
+I like creating things that are useful, simple, and distraction-free.
+If the app is helpful to you, then it was already worth it.
+</string>
+
+    <!-- Credits -->
+    <string name="about_icons_uicons_line">Interface icons: Uicons by Flaticon.</string>
+    <string name="about_material_icons_line">Some icons: Google Material Icons (Apache-2.0 license).</string>
+    <string name="about_flaticon_authors_title">Flaticon authors</string>
+    <string name="about_flaticon_line_per_author">Icons by %1$s (Flaticon).</string>
+    <string name="about_flaticon_and_others">Some additional icons via Flaticon.</string>
+
+    <!-- Buttons -->
+    <string name="about_privacy">Privacy Policy</string>
+    <string name="about_licenses_button">Open-source licenses</string>
+
+    <!-- Footer -->
+    <string name="about_footer_signature">Made with care and mate 🧉</string>
+
+    <!-- Authors list -->
+    <string-array name="about_flaticon_authors">
+        <item>Freepik</item>
+        <item>deemakdaksina</item>
+        <item>Iconic Arts</item>
+        <item>RIkas Dzihab</item>
+    </string-array>
+</resources>
