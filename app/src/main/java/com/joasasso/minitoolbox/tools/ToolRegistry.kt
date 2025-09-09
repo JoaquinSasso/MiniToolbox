@@ -358,6 +358,12 @@ object ToolRegistry {
             subCategory = R.string.subcategory_generator,
             summary = R.string.sum_tool_noise_generator,
             svgResId = R.drawable.noise_generator
+        ),
+        Tool(
+            name = R.string.about_title,
+            screen = Screen.About,
+            category = ToolCategory.Herramientas,
+            subCategory = R.string.subcategory_generator
         )
     )
 }

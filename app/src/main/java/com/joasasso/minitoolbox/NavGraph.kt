@@ -294,6 +294,20 @@ fun MiniToolboxNavGraph(navController: NavHostController) {
         composable(Screen.Ruido.route) {
             WhiteNoiseScreen(onBack = onBackSmart)
         }
+        composable(Screen.About.route) {
+            AboutScreen(
+                onBack = onBackSmart,
+                onOpenPrivacy = { /* TODO: abrir URL de tu política */ },
+                onOpenLicenses = {
+                    com.google.android.gms.oss.licenses.OssLicensesMenuActivity.setActivityTitle(
+                        context.getString(R.string.about_licenses_button)
+                    )
+                    context.startActivity(
+                        android.content.Intent(context, com.google.android.gms.oss.licenses.OssLicensesMenuActivity::class.java)
+                    )
+                }
+            )
+        }
     }
 }
 

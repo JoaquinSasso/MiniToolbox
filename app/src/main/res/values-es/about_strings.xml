@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Secciones -->
+    <string name="about_title">Acerca de MiniToolbox</string>
+    <string name="about_section_app_title">Sobre la app</string>
+    <string name="about_section_me_title">Sobre mí</string>
+    <string name="about_section_credits_title">Créditos</string>
+    <string name="about_section_actions_title">Acciones</string>
+
+    <!-- Versión (solo muestra el name, ej. 1.0) -->
+    <string name="about_version_label">Versión %1$s</string>
+
+    <!-- Resumen de la app (breve y claro) -->
+    <string name="about_app_summary">
+MiniToolbox reúne herramientas simples y útiles en una sola app, sin conexión y con diseño cuidado.
+La idea es resolver cosas cotidianas en segundos, sin vueltas.
+</string>
+
+    <!-- Sobre mí (indie vibe, corto) -->
+    <string name="about_me_blurb">
+Hola, soy Joa. Desarrollé MiniToolbox de forma independiente desde San Juan, Argentina.
+Me gusta crear cosas útiles, simples y sin distracciones.
+Si la app te resulta útil, para mí ya valió la pena.
+</string>
+
+    <!-- Créditos -->
+    <string name="about_icons_uicons_line">Iconos de interfaz: Uicons de Flaticon.</string>
+    <string name="about_material_icons_line">Algunos iconos: Google Material Icons (licencia Apache-2.0).</string>
+    <string name="about_flaticon_authors_title">Autores en Flaticon</string>
+    <string name="about_flaticon_line_per_author">Iconos de %1$s (Flaticon).</string>
+    <string name="about_flaticon_and_others">Algunos iconos adicionales vía Flaticon.</string>
+
+    <!-- Botones -->
+    <string name="about_privacy">Política de privacidad</string>
+    <string name="about_licenses_button">Licencias de código abierto</string>
+
+    <!-- Pie (opcional) -->
+    <string name="about_footer_signature">Hecho con cariño y mate 🧉</string>
+
+    <!-- Lista de autores Flaticon que pasaste (edítala cuando haga falta) -->
+    <string-array name="about_flaticon_authors">
+        <item>Freepik</item>
+        <item>deemakdaksina</item>
+        <item>Iconic Arts</item>
+        <item>RIkas Dzihab</item>
+    </string-array>
+</resources>

@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.Card
@@ -60,6 +61,7 @@ import com.joasasso.minitoolbox.data.setFavoritesOrder
 import com.joasasso.minitoolbox.data.toogleFavorite
 import com.joasasso.minitoolbox.tools.Tool
 import com.joasasso.minitoolbox.tools.ToolCategory
+import com.joasasso.minitoolbox.tools.ToolRegistry
 import com.joasasso.minitoolbox.ui.theme.CategoryIcon
 import com.joasasso.minitoolbox.ui.theme.swatchForCategory
 import com.joasasso.minitoolbox.ui.theme.swatchForSubcategory
@@ -104,7 +106,14 @@ fun CategoriesScreen(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(selectedCategory.titleRes)) },
-                actions = { }
+                actions = {
+                        IconButton(onClick = {
+                            onToolClick(ToolRegistry.tools.last())
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        }) {
+                            Icon(Icons.Filled.Info, contentDescription = "Información")
+                        }
+                },
             )
         },
         bottomBar = {
