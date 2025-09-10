@@ -13,6 +13,7 @@ import androidx.compose.runtime.setValue
 import androidx.navigation.compose.rememberNavController
 import com.joasasso.minitoolbox.nav.Screen
 import com.joasasso.minitoolbox.ui.theme.MiniToolboxTheme
+import com.joasasso.minitoolbox.utils.ConsentGate
 
 class MainActivity : AppCompatActivity() {
 
@@ -26,6 +27,7 @@ class MainActivity : AppCompatActivity() {
         startRouteState = intent?.getStringExtra("startRoute")
 
         setContent {
+            ConsentGate()
             MiniToolboxTheme {
                 val navController = rememberNavController()
 
