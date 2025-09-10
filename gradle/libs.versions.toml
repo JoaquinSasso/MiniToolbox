@@ -25,6 +25,10 @@ arcore = "1.50.0"
 ossLicenses = "17.2.2"          # según doc oficial
 ossLicensesPlugin = "0.10.8"
 foundation = "1.9.0"
+# Ads / Consent
+gma = "24.6.0"
+ump = "3.2.0"
+guava = "33.4.8-android"
 
 [libraries]
 androidx-activity = { module = "androidx.activity:activity", version.ref = "activityCompose" }
@@ -64,6 +68,11 @@ arsceneview = { module = "io.github.sceneview:arsceneview", version.ref = "scene
 arcore = { module = "com.google.ar:core", version.ref = "arcore" }
 play-services-oss-licenses = { module = "com.google.android.gms:play-services-oss-licenses", version.ref = "ossLicenses" }
 foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
+
+# Ads + Consent
+google-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "gma" }
+google-ump = { module = "com.google.android.ump:user-messaging-platform", version.ref = "ump" }
+guava-android = { module = "com.google.guava:guava", version.ref = "guava" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

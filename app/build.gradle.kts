@@ -122,6 +122,15 @@ dependencies {
     implementation(libs.arsceneview)
     implementation(libs.arcore)
 
+    //Proveedor único de ListenableFuture
+    implementation(libs.guava.android)
+
+    // --- Ads + Consent ---
+    implementation(libs.google.ads) {
+        // Evita que Ads traiga el stub 1.0
+        exclude(group = "com.google.guava", module = "listenablefuture")
+    }
+    implementation(libs.google.ump)
 
     implementation("androidx.media:media:1.7.1")
 
