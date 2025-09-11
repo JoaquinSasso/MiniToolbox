@@ -94,6 +94,7 @@ dependencies {
     implementation(libs.androidx.ui.unit)
     implementation(libs.androidx.material3)
     implementation(libs.foundation)
+    implementation(libs.androidx.runtime.saveable)
 
 
     // 7) Testing

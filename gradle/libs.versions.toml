@@ -29,6 +29,7 @@ foundation = "1.9.0"
 gma = "24.6.0"
 ump = "3.2.0"
 guava = "33.4.8-android"
+runtimeSaveable = "1.9.0"
 
 [libraries]
 androidx-activity = { module = "androidx.activity:activity", version.ref = "activityCompose" }
@@ -73,6 +74,7 @@ foundation = { group = "androidx.compose.foundation", name = "foundation", versi
 google-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "gma" }
 google-ump = { module = "com.google.android.ump:user-messaging-platform", version.ref = "ump" }
 guava-android = { module = "com.google.guava:guava", version.ref = "guava" }
+androidx-runtime-saveable = { group = "androidx.compose.runtime", name = "runtime-saveable", version.ref = "runtimeSaveable" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
