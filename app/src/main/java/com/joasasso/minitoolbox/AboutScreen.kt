@@ -1,5 +1,8 @@
 package com.joasasso.minitoolbox
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.content.pm.PackageManager
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,7 +30,9 @@ import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.google.android.ump.UserMessagingPlatform
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
+import com.joasasso.minitoolbox.utils.AdsManager
 
 @Composable
 fun AboutScreen(
@@ -141,14 +146,16 @@ fun AboutScreen(
                     Text(stringResource(R.string.about_licenses_button))
                 }
             }
+            PrivacyOptionsButton()
+            ConsentDebugStatus()
 
             // Espaciado final
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(6.dp))
 
-            // Firma pequeñita (opcional, indie vibe)
+            // Firma pequeñita
             Text(
                 text = stringResource(R.string.about_footer_signature),
-                style = MaterialTheme.typography.labelSmall,
+                style = MaterialTheme.typography.labelMedium,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -165,3 +172,38 @@ private fun SectionTitle(text: String) {
         style = MaterialTheme.typography.titleMedium
     )
 }
+
+@Composable
+fun ConsentDebugStatus() {
+    val ctx = LocalContext.current
+    val info = UserMessagingPlatform.getConsentInformation(ctx)
+    val ready by remember { AdsManager.isReady }
+    Column {
+        Text("consentStatus = ${info.consentStatus}")
+        Text("privacyOptionsStatus = ${info.privacyOptionsRequirementStatus}")
+        Text("canRequestAds = ${info.canRequestAds()}")
+        Text("AdsReady = $ready")
+    }
+}
+
+@Composable
+fun PrivacyOptionsButton() {
+    val activity = LocalContext.current.findActivity()
+    Button(onClick = {
+        if (activity != null) {
+            UserMessagingPlatform.showPrivacyOptionsForm(activity) { formError ->
+                if (UserMessagingPlatform.getConsentInformation(activity).canRequestAds()) {
+                    AdsManager.initialize(activity.applicationContext)
+                }
+            }
+        }
+    }) { Text("Privacy options / Opciones de privacidad") }
+}
+
+private fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
+
+
