@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
         startRouteState = intent?.getStringExtra("startRoute")
 
         setContent {
-            ConsentGate(debugEEA = true, testDeviceHash = "9B8C765995C4CA74CAA5FB846DED2F1A")
+            ConsentGate()
             MiniToolboxTheme {
                 val navController = rememberNavController()
 

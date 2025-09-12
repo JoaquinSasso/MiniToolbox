@@ -44,4 +44,6 @@ If the app is helpful to you, then it was already worth it.
         <item>Iconic Arts</item>
         <item>RIkas Dzihab</item>
     </string-array>
+
+    <string name="privacy_options_button">Privacy Options</string>
 </resources>

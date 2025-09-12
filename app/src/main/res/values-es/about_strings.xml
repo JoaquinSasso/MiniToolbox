@@ -44,4 +44,6 @@ Si la app te resulta útil, para mí ya valió la pena.
         <item>Iconic Arts</item>
         <item>RIkas Dzihab</item>
     </string-array>
+
+    <string name="privacy_options_button">Opciones de privacidad</string>
 </resources>

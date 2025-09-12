@@ -21,18 +21,20 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.google.android.ump.ConsentInformation
 import com.google.android.ump.UserMessagingPlatform
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
-import com.joasasso.minitoolbox.utils.AdsManager
 
 @Composable
 fun AboutScreen(
@@ -147,8 +149,6 @@ fun AboutScreen(
                 }
             }
             PrivacyOptionsButton()
-            ConsentDebugStatus()
-
             // Espaciado final
             Spacer(Modifier.height(6.dp))
 
@@ -174,31 +174,36 @@ private fun SectionTitle(text: String) {
 }
 
 @Composable
-fun ConsentDebugStatus() {
-    val ctx = LocalContext.current
-    val info = UserMessagingPlatform.getConsentInformation(ctx)
-    val ready by remember { AdsManager.isReady }
-    Column {
-        Text("consentStatus = ${info.consentStatus}")
-        Text("privacyOptionsStatus = ${info.privacyOptionsRequirementStatus}")
-        Text("canRequestAds = ${info.canRequestAds()}")
-        Text("AdsReady = $ready")
+fun PrivacyOptionsButton(
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val activity = remember(context) { context.findActivity() }
+    var required by remember { mutableStateOf(false) }
+
+    // Este valor puede cambiar después de ConsentGate; refrescamos al entrar
+    LaunchedEffect(Unit) {
+        val info = UserMessagingPlatform.getConsentInformation(context)
+        required = (info.privacyOptionsRequirementStatus ==
+                ConsentInformation.PrivacyOptionsRequirementStatus.REQUIRED)
+    }
+
+    if (required) {
+        // Se muestra solo cuando corresponde (EEA/UK o ciertos estados de EE.UU.)
+        Button(
+            onClick = {
+                activity?.let { act ->
+                    com.google.android.ump.UserMessagingPlatform.showPrivacyOptionsForm(act) { /* FormError? */ }
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(stringResource(R.string.privacy_options_button))
+        }
     }
 }
 
-@Composable
-fun PrivacyOptionsButton() {
-    val activity = LocalContext.current.findActivity()
-    Button(onClick = {
-        if (activity != null) {
-            UserMessagingPlatform.showPrivacyOptionsForm(activity) { formError ->
-                if (UserMessagingPlatform.getConsentInformation(activity).canRequestAds()) {
-                    AdsManager.initialize(activity.applicationContext)
-                }
-            }
-        }
-    }) { Text("Privacy options / Opciones de privacidad") }
-}
+
 
 private fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this

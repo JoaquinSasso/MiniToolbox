@@ -38,7 +38,7 @@
         <!-- Metadata para Admob-->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-7623187138639860~2040763726"/>
+            android:value="@string/admob_app_id" />
 
         <!-- Servicio Pomodoro -->
         <service

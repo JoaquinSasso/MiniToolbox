@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="admob_app_id" translatable="false">ca-app-pub-7623187138639860~2040763726</string>
+    <string name="admob_banner_id" translatable="false">ca-app-pub-7623187138639860/6833925404</string> <!-- prod -->
+    <string name="admob_banner_test" translatable="false">ca-app-pub-3940256099942544/6300978111</string> <!-- test oficial -->
+</resources>
