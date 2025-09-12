@@ -138,5 +138,6 @@ dependencies {
     implementation(libs.reorderable)
 
     implementation(libs.play.services.oss.licenses)
+    implementation(libs.billing.ktx)
 
 }

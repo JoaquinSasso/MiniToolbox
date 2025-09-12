@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="admob_app_id" translatable="false">ca-app-pub-7623187138639860~2040763726</string>
-    <string name="admob_banner_id" translatable="false">ca-app-pub-7623187138639860/6833925404</string> <!-- prod -->
+    <string name="admob_banner_prod" translatable="false">ca-app-pub-7623187138639860/6833925404</string> <!-- prod -->
     <string name="admob_banner_test" translatable="false">ca-app-pub-3940256099942544/6300978111</string> <!-- test oficial -->
+    <string name="billing_pro_inapp" translatable="false">pro_lifetime</string>      <!-- Producto único (INAPP) -->
+    <string name="billing_pro_sub" translatable="false">pro_monthly</string>         <!-- Subscripción (SUBS), opcional -->
 </resources>
