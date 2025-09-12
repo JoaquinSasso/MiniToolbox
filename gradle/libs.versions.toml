@@ -31,6 +31,7 @@ ump = "3.2.0"
 guava = "33.4.8-android"
 runtimeSaveable = "1.9.1"
 billing = "8.0.0"
+androidx-browser = "1.8.0"
 
 [libraries]
 androidx-activity = { module = "androidx.activity:activity", version.ref = "activityCompose" }
@@ -78,6 +79,7 @@ guava-android = { module = "com.google.guava:guava", version.ref = "guava" }
 androidx-runtime-saveable = { group = "androidx.compose.runtime", name = "runtime-saveable", version.ref = "runtimeSaveable" }
 
 billing-ktx = { module = "com.android.billingclient:billing-ktx", version.ref = "billing" }
+androidx-browser = { module = "androidx.browser:browser", version.ref = "androidx-browser" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

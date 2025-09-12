@@ -139,5 +139,7 @@ dependencies {
 
     implementation(libs.play.services.oss.licenses)
     implementation(libs.billing.ktx)
+    implementation(libs.androidx.browser)
+
 
 }

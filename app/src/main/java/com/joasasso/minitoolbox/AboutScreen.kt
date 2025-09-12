@@ -35,14 +35,15 @@ import androidx.compose.ui.unit.dp
 import com.google.android.ump.ConsentInformation
 import com.google.android.ump.UserMessagingPlatform
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
+import com.joasasso.minitoolbox.utils.openPrivacyUrl
 
 @Composable
 fun AboutScreen(
     onBack: () -> Unit,
-    onOpenPrivacy: () -> Unit,
     onOpenLicenses: () -> Unit,
 ) {
     val context = LocalContext.current
+    val url = stringResource(R.string.privacy_policy_url)
 
     // Version name segura (sin BuildConfig)
     val versionName by remember {
@@ -136,7 +137,7 @@ fun AboutScreen(
 
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedButton(
-                    onClick = onOpenPrivacy,
+                    onClick = { context.openPrivacyUrl(url) },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(stringResource(R.string.about_privacy))

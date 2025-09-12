@@ -46,4 +46,7 @@ If the app is helpful to you, then it was already worth it.
     </string-array>
 
     <string name="privacy_options_button">Privacy Options</string>
+
+    <string name="privacy_policy_url" translatable="false">https://sites.google.com/view/minitoolbox-privacy</string>
+    <string name="no_navigator_available">There is no navigator available.</string>
 </resources>
