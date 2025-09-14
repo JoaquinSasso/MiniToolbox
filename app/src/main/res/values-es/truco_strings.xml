@@ -17,4 +17,7 @@
     <string name="truco_reset_title">Empezar nueva partida</string>
     <string name="truco_reset_message">¿Estás seguro de que quieres comenzar una nueva partida?\nEsto borrará los puntos actuales.</string>
 
+    <string name="truco_winner_title">La partida ha terminado</string>
+    <string name="truco_winner_our">¡Nosotros ganamos! Ellos se quedaron a %1$s puntos.</string>
+    <string name="truco_winner_their">¡Ellos ganaron! Nosotros nos quedamos a %1$s puntos.</string>
 </resources>

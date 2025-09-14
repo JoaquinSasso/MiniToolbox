@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity() {
                         val shouldShowAds = !pro.isPro && consent.canRequestAds
 
                         GlobalAdsLayer(
-                            shouldShowAds = shouldShowAds,
+                            shouldShowAds = false,
                             position = AdPosition.Top,
                             adUnitId = if (BuildConfig.DEBUG)
                                 getString(R.string.admob_banner_test)
