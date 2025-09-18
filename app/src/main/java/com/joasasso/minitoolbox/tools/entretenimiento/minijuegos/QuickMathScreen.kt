@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
@@ -20,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -59,6 +61,7 @@ fun CalculosRapidosScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
+    var showInfo by remember { mutableStateOf(false) }
 
     var currentQuestion by remember { mutableStateOf(generateQuestion()) }
     var score by remember { mutableIntStateOf(0) }
@@ -157,7 +160,7 @@ fun CalculosRapidosScreen(onBack: () -> Unit) {
     }
 
     Scaffold(
-        topBar = { TopBarReusable(stringResource(R.string.tool_quick_math), onBack) },
+        topBar = { TopBarReusable(stringResource(R.string.tool_quick_math), onBack, { showInfo = true }) },
         containerColor = animatedBgColor,
         bottomBar = {
             Column(
@@ -235,6 +238,29 @@ fun CalculosRapidosScreen(onBack: () -> Unit) {
             }
         }
     }
+    if (showInfo) {
+        AlertDialog(
+            onDismissRequest = { showInfo = false },
+            title = { Text(stringResource(R.string.quickmath_help_title)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(stringResource(R.string.quickmath_help_line1))
+                    Text(stringResource(R.string.quickmath_help_line2))
+                    Text(stringResource(R.string.quickmath_help_line3))
+                    Text(stringResource(R.string.quickmath_help_line4))
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showInfo = false
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                }) {
+                    Text(stringResource(R.string.close))
+                }
+            }
+        )
+    }
+
 }
 
 // Lógica de preguntas y puntuación
