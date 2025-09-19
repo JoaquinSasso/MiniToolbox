@@ -18,7 +18,7 @@
 
 
     <application
-        android:name="MiniToolboxApp"
+        android:name=".utils.MiniToolboxApp"
         android:label="MiniToolbox"
         android:icon="@drawable/ic_launcher"
         android:theme="@style/Theme.MiniToolbox"

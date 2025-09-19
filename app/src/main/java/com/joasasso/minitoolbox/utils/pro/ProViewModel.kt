@@ -1,4 +1,4 @@
-package com.joasasso.minitoolbox.utils
+package com.joasasso.minitoolbox.utils.pro
 
 import android.app.Activity
 import android.app.Application
@@ -42,7 +42,7 @@ class ProViewModel(app: Application) : AndroidViewModel(app) {
                 )
             }
         }
-    ).stateIn(viewModelScope, SharingStarted.Eagerly, ProState(isPro = false))
+    ).stateIn(viewModelScope, SharingStarted.Companion.Eagerly, ProState(isPro = false))
 
     init {
         // Restaurar al iniciar la app

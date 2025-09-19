@@ -6,8 +6,8 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.joasasso.minitoolbox.utils.ProSource
-import com.joasasso.minitoolbox.utils.ProState
+import com.joasasso.minitoolbox.utils.pro.ProSource
+import com.joasasso.minitoolbox.utils.pro.ProState
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 

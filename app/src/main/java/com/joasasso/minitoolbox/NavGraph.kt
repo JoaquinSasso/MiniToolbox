@@ -10,11 +10,17 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import com.joasasso.minitoolbox.metrics.storage.AggregatesRepository
 import com.joasasso.minitoolbox.nav.Screen
 import com.joasasso.minitoolbox.tools.ToolRegistry
 import com.joasasso.minitoolbox.tools.entretenimiento.MarcadorEquiposScreen
@@ -65,18 +71,70 @@ import com.joasasso.minitoolbox.tools.organizacion.recordatorios.ToDoListScreen
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AguaReminderScreen
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AguaStatisticsScreen
 import com.joasasso.minitoolbox.ui.screens.BasicPhrasesScreen
+import com.joasasso.minitoolbox.utils.ads.InterstitialManager
+import com.joasasso.minitoolbox.utils.ads.RewardedManager
+import kotlinx.coroutines.withContext
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
-fun MiniToolboxNavGraph(navController: NavHostController) {
+fun MiniToolboxNavGraph(
+    navController: NavHostController,
+    shouldShowAds: Boolean,
+    interstitialAdUnitId: String,
+    rewardedAdUnitId: String
+) {
     val animationDuration = 150
     val context = LocalContext.current
+    val activity = (context as? Activity)
+
+    LaunchedEffect(Unit) {
+        // Inicializar managers una sola vez
+        InterstitialManager.init(context.applicationContext, interstitialAdUnitId)
+        RewardedManager.init(context.applicationContext, rewardedAdUnitId)
+    }
+
+    val aggregates = remember { AggregatesRepository(context.applicationContext) }
+
+// Mapeo route -> toolId (ajustalo si tenés otro id)
+    val routeToToolId: Map<String, String> = remember {
+        ToolRegistry.tools.associate { it.screen.route to (it.screen.route) }
+    }
+    val toolRoutes: Set<String> = remember { routeToToolId.keys }
+
+    var lastRoute by remember { mutableStateOf<String?>(null) }
+    val backStackEntry by navController.currentBackStackEntryAsState()
+
+    LaunchedEffect(backStackEntry?.destination?.route) {
+        val route = backStackEntry?.destination?.route ?: return@LaunchedEffect
+        if (route != lastRoute && toolRoutes.contains(route)) {
+            val toolId = routeToToolId[route] ?: route
+
+            // 1) contador por tool
+            withContext(kotlinx.coroutines.Dispatchers.IO) {
+                aggregates.incrementToolOpen(toolId)
+            }
+
+            // 2) total y quizá interstitial
+            val total = withContext(kotlinx.coroutines.Dispatchers.IO) {
+                aggregates.incrementTotalToolOpenAndGet()
+            }
+
+            // 3) intentar interstitial si corresponde
+            if (activity != null) {
+                InterstitialManager.maybeShow(
+                    activity = activity,
+                    totalToolOpens = total,
+                    shouldShowAds = shouldShowAds
+                )
+            }
+
+            lastRoute = route
+        }
+    }
 
     val onBackSmart: () -> Unit = {
         val popped = navController.popBackStack()
-        if (!popped) {
-            (context as? Activity)?.finish()
-        }
+        if (!popped) (context as? Activity)?.finish()
     }
 
     NavHost(
@@ -88,9 +146,7 @@ fun MiniToolboxNavGraph(navController: NavHostController) {
                 animationSpec = tween(animationDuration)
             )
         },
-        exitTransition = {
-            fadeOut(animationSpec = tween(animationDuration))
-        },
+        exitTransition = { fadeOut(animationSpec = tween(animationDuration)) },
         popEnterTransition = {
             slideIntoContainer(
                 AnimatedContentTransitionScope.SlideDirection.Right,
@@ -106,7 +162,7 @@ fun MiniToolboxNavGraph(navController: NavHostController) {
     ) {
         composable(Screen.Categories.route) {
             CategoriesScreen(
-                tools       = ToolRegistry.tools,
+                tools = ToolRegistry.tools,
                 onToolClick = { tool -> navController.navigate(tool.screen.route) }
             )
         }

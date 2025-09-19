@@ -1,4 +1,4 @@
-package com.joasasso.minitoolbox.utils
+package com.joasasso.minitoolbox.utils.ads
 
 import androidx.compose.runtime.staticCompositionLocalOf
 

@@ -7,13 +7,14 @@ import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.compose.rememberNavController
+import com.joasasso.minitoolbox.metrics.storage.AggregatesRepository
 import com.joasasso.minitoolbox.ui.ads.AdPosition
 import com.joasasso.minitoolbox.ui.ads.GlobalAdsLayer
 import com.joasasso.minitoolbox.ui.theme.MiniToolboxTheme
-import com.joasasso.minitoolbox.utils.ConsentGateProvider
-import com.joasasso.minitoolbox.utils.LocalConsentState
-import com.joasasso.minitoolbox.utils.LocalProState
-import com.joasasso.minitoolbox.utils.ProStateProvider
+import com.joasasso.minitoolbox.utils.ads.ConsentGateProvider
+import com.joasasso.minitoolbox.utils.ads.LocalConsentState
+import com.joasasso.minitoolbox.utils.pro.LocalProState
+import com.joasasso.minitoolbox.utils.pro.ProStateProvider
 
 class MainActivity : AppCompatActivity() {
 
@@ -25,10 +26,17 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         supportActionBar?.hide()
         startRouteState = intent.getStringExtra("startRoute")
+        val aggregates = AggregatesRepository(applicationContext)
 
         // IDs de banner (debug/prod). Se usan más abajo en GlobalAdsLayer
         val adUnitIdDebug = getString(R.string.admob_banner_test)
         val adUnitIdProd  = getString(R.string.admob_banner_prod)
+
+        kotlinx.coroutines.runBlocking {
+            val fired = aggregates.dailyOpenIfNeeded()
+            // si fired == true, aquí podrías también loguear un evento local JSONL (más adelante)
+        }
+
 
         setContent {
             ConsentGateProvider {
@@ -39,16 +47,28 @@ class MainActivity : AppCompatActivity() {
                         val pro = LocalProState.current
                         val consent = LocalConsentState.current
                         val shouldShowAds = !pro.isPro && consent.canRequestAds
-
+0
                         GlobalAdsLayer(
-                            shouldShowAds = false,
+                            shouldShowAds = shouldShowAds,
                             position = AdPosition.Top,
                             adUnitId = if (BuildConfig.DEBUG)
                                 getString(R.string.admob_banner_test)
                             else
                                 getString(R.string.admob_banner_prod)
                         ) {
-                            MiniToolboxNavGraph(navController = navController)
+                            MiniToolboxNavGraph(
+                                navController = navController,
+                                shouldShowAds = shouldShowAds,
+                                interstitialAdUnitId = if (BuildConfig.DEBUG)
+                                    getString(R.string.admob_interstitial_test)
+                                else
+                                    getString(R.string.admob_interstitial_prod),
+                                rewardedAdUnitId = if (BuildConfig.DEBUG)
+                                    getString(R.string.admob_rewarded_test)
+                                else
+                                    getString(R.string.admob_rewarded_prod)
+                            )
+
                         }
                     }
                 }

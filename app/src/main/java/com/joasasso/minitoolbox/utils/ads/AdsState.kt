@@ -1,4 +1,4 @@
-package com.joasasso.minitoolbox.utils
+package com.joasasso.minitoolbox.utils.ads
 
 data class AdsState(
     val isPro: Boolean,

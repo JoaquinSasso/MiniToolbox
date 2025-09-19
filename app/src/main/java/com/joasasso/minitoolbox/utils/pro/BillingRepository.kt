@@ -1,4 +1,4 @@
-package com.joasasso.minitoolbox.utils
+package com.joasasso.minitoolbox.utils.pro
 
 import android.app.Activity
 import android.content.Context
@@ -44,11 +44,14 @@ class BillingRepository(
     val entitlementEvents: SharedFlow<ProState> = _entitlementEvents
 
     suspend fun connect(): Boolean = suspendCancellableCoroutine { cont ->
-        if (billingClient.isReady) { cont.resume(true); return@suspendCancellableCoroutine }
+        if (billingClient.isReady) {
+            cont.resume(true); return@suspendCancellableCoroutine
+        }
         billingClient.startConnection(object : BillingClientStateListener {
             override fun onBillingSetupFinished(result: BillingResult) {
                 cont.resume(result.responseCode == BillingClient.BillingResponseCode.OK)
             }
+
             override fun onBillingServiceDisconnected() {
                 // Se reintentará en próxima llamada
             }
@@ -157,5 +160,3 @@ class BillingRepository(
         )
     }
 }
-
-

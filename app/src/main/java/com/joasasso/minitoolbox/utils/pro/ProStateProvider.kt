@@ -1,4 +1,4 @@
-package com.joasasso.minitoolbox.utils
+package com.joasasso.minitoolbox.utils.pro
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider

@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -23,7 +22,7 @@ import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.LoadAdError
-import com.joasasso.minitoolbox.utils.AdsManager
+import com.joasasso.minitoolbox.utils.ads.AdsManager
 
 @Composable
 fun BannerAd(
@@ -38,7 +37,7 @@ fun BannerAd(
 
     val context = LocalContext.current
     val density = LocalDensity.current.density
-    var adWidthPx by remember { mutableStateOf(0) }
+    var adWidthPx by remember { mutableIntStateOf(0) }
 
     Box(
         Modifier
