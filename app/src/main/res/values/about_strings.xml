@@ -49,4 +49,7 @@ If the app is helpful to you, then it was already worth it.
 
     <string name="privacy_policy_url" translatable="false">https://sites.google.com/view/minitoolbox-privacy</string>
     <string name="no_navigator_available">There is no navigator available.</string>
+
+    <string name="about_metrics_description">Help improve MiniToolbox by sending anonymous usage metrics.</string>
+    <string name="about_metrics_label">Anonymous metrics</string>
 </resources>

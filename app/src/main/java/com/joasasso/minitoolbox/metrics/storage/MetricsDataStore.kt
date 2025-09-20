@@ -39,6 +39,8 @@ object MetricsKeys {
 
     // Privacidad / consentimiento (tu toggle interno)
     val METRICS_CONSENT_ENABLED = booleanPreferencesKey("metrics_consent_enabled")
+    val METRICS_CONSENT_DECIDED = booleanPreferencesKey("metrics_consent_decided")
+
 
     //Cantidad total de tools abiertas
     val TOTAL_TOOL_OPEN_COUNT = intPreferencesKey("total_tool_open_count")

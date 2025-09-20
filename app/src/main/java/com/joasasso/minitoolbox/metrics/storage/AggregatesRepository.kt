@@ -7,6 +7,7 @@ import com.joasasso.minitoolbox.metrics.storage.MetricsKeys.AD_IMPRESSIONS_JSON
 import com.joasasso.minitoolbox.metrics.storage.MetricsKeys.INSTALL_DATE_MS
 import com.joasasso.minitoolbox.metrics.storage.MetricsKeys.IS_PREMIUM
 import com.joasasso.minitoolbox.metrics.storage.MetricsKeys.LAST_DAILY_OPEN_YYYYMMDD
+import com.joasasso.minitoolbox.metrics.storage.MetricsKeys.METRICS_CONSENT_DECIDED
 import com.joasasso.minitoolbox.metrics.storage.MetricsKeys.METRICS_CONSENT_ENABLED
 import com.joasasso.minitoolbox.metrics.storage.MetricsKeys.PREMIUM_SINCE_MS
 import com.joasasso.minitoolbox.metrics.storage.MetricsKeys.TIME_TO_PURCHASE_MS
@@ -170,4 +171,28 @@ class AggregatesRepository(private val context: Context) {
         val prefs = context.metricsDataStore.data.first()
         return prefs[METRICS_CONSENT_ENABLED] ?: false
     }
+
+    // AggregatesRepository.kt
+    suspend fun hasDecidedMetricsConsent(): Boolean {
+        val prefs = context.metricsDataStore.data.first()
+        return prefs[METRICS_CONSENT_DECIDED] ?: false
+    }
+
+    suspend fun setMetricsConsentDecided() {
+        context.metricsDataStore.edit { it[METRICS_CONSENT_DECIDED] = true }
+    }
+
+    /**
+     * Inicializa el flag solo si el usuario no decidió aún:
+     * - EEA/UK => false (opt-in)
+     * - resto => true (opt-out)
+     */
+    suspend fun seedMetricsDefaultIfUndecided(isEeaOrUk: Boolean) {
+        val decided = hasDecidedMetricsConsent()
+        if (!decided) {
+            setMetricsConsent(enabled = !isEeaOrUk)
+            setMetricsConsentDecided()
+        }
+    }
+
 }

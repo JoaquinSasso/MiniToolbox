@@ -6,6 +6,7 @@ import android.content.ContextWrapper
 import android.content.pm.PackageManager
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,13 +20,16 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringArrayResource
@@ -36,6 +40,8 @@ import com.google.android.ump.ConsentInformation
 import com.google.android.ump.UserMessagingPlatform
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import com.joasasso.minitoolbox.utils.openPrivacyUrl
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Composable
 fun AboutScreen(
@@ -150,6 +156,8 @@ fun AboutScreen(
                 }
             }
             PrivacyOptionsButton()
+            PrivacyMetricsToggle()
+            HorizontalDivider(thickness = 3.dp, color = MaterialTheme.colorScheme.outlineVariant)
             // Espaciado final
             Spacer(Modifier.height(6.dp))
 
@@ -204,6 +212,44 @@ fun PrivacyOptionsButton(
     }
 }
 
+
+@Composable
+fun PrivacyMetricsToggle(
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val repo = remember { com.joasasso.minitoolbox.metrics.storage.AggregatesRepository(context.applicationContext) }
+
+    var enabled by remember { mutableStateOf(false) }
+
+    // Cargar estado actual
+    LaunchedEffect(Unit) {
+        enabled = repo.isMetricsConsentEnabled()
+    }
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(text = stringResource(R.string.about_metrics_label), style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(4.dp))
+            Text(text = stringResource(R.string.about_metrics_description), style = MaterialTheme.typography.bodyMedium)
+        }
+        Switch(
+            checked = enabled,
+            onCheckedChange = { checked ->
+                enabled = checked
+                scope.launch(Dispatchers.IO) {
+                    repo.setMetricsConsent(checked)
+                }
+            }
+        )
+    }
+}
 
 
 private fun Context.findActivity(): Activity? = when (this) {

@@ -1,11 +1,13 @@
 package com.joasasso.minitoolbox
 
+import MetricsConsentAfterAdsGate
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.compose.rememberNavController
 import com.joasasso.minitoolbox.metrics.storage.AggregatesRepository
 import com.joasasso.minitoolbox.ui.ads.AdPosition
@@ -15,6 +17,7 @@ import com.joasasso.minitoolbox.utils.ads.ConsentGateProvider
 import com.joasasso.minitoolbox.utils.ads.LocalConsentState
 import com.joasasso.minitoolbox.utils.pro.LocalProState
 import com.joasasso.minitoolbox.utils.pro.ProStateProvider
+import isEeaOrUk
 
 class MainActivity : AppCompatActivity() {
 
@@ -40,6 +43,11 @@ class MainActivity : AppCompatActivity() {
 
         setContent {
             ConsentGateProvider {
+                // Cuando el gate “terminó”, ya podemos consultar UMP y sembrar default
+                LaunchedEffect(Unit) {
+                    val eea = isEeaOrUk(applicationContext)
+                    aggregates.seedMetricsDefaultIfUndecided(isEeaOrUk = eea)
+                }
                 ProStateProvider {
                     MiniToolboxTheme {
                         val navController = rememberNavController()
@@ -56,6 +64,7 @@ class MainActivity : AppCompatActivity() {
                             else
                                 getString(R.string.admob_banner_prod)
                         ) {
+                            MetricsConsentAfterAdsGate()
                             MiniToolboxNavGraph(
                                 navController = navController,
                                 shouldShowAds = shouldShowAds,
