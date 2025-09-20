@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity() {
                         val pro = LocalProState.current
                         val consent = LocalConsentState.current
                         val shouldShowAds = !pro.isPro && consent.canRequestAds
-0
+
                         GlobalAdsLayer(
                             shouldShowAds = shouldShowAds,
                             position = AdPosition.Top,
@@ -82,7 +82,6 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
-
         }
     }
 

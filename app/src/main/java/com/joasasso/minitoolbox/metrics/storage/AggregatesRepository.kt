@@ -172,6 +172,18 @@ class AggregatesRepository(private val context: Context) {
         return prefs[METRICS_CONSENT_ENABLED] ?: false
     }
 
+    /**
+     * Inicializa el flag solo si el usuario no decidió aún:
+     * - EEA/UK => false (opt-in)
+     * - resto => true (opt-out)
+     */
+    suspend fun seedMetricsDefaultIfUndecided(isEeaOrUk: Boolean) {
+        val decided = isMetricsConsentEnabled()
+        if (!decided) {
+            setMetricsConsent(!isEeaOrUk)
+        }
+    }
+
     // AggregatesRepository.kt
     suspend fun hasDecidedMetricsConsent(): Boolean {
         val prefs = context.metricsDataStore.data.first()
@@ -180,19 +192,6 @@ class AggregatesRepository(private val context: Context) {
 
     suspend fun setMetricsConsentDecided() {
         context.metricsDataStore.edit { it[METRICS_CONSENT_DECIDED] = true }
-    }
-
-    /**
-     * Inicializa el flag solo si el usuario no decidió aún:
-     * - EEA/UK => false (opt-in)
-     * - resto => true (opt-out)
-     */
-    suspend fun seedMetricsDefaultIfUndecided(isEeaOrUk: Boolean) {
-        val decided = hasDecidedMetricsConsent()
-        if (!decided) {
-            setMetricsConsent(enabled = !isEeaOrUk)
-            setMetricsConsentDecided()
-        }
     }
 
 }
