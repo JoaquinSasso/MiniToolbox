@@ -3,195 +3,107 @@ package com.joasasso.minitoolbox.metrics.storage
 import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
-import com.joasasso.minitoolbox.metrics.storage.MetricsKeys.AD_IMPRESSIONS_JSON
-import com.joasasso.minitoolbox.metrics.storage.MetricsKeys.INSTALL_DATE_MS
-import com.joasasso.minitoolbox.metrics.storage.MetricsKeys.IS_PREMIUM
-import com.joasasso.minitoolbox.metrics.storage.MetricsKeys.LAST_DAILY_OPEN_YYYYMMDD
-import com.joasasso.minitoolbox.metrics.storage.MetricsKeys.METRICS_CONSENT_DECIDED
-import com.joasasso.minitoolbox.metrics.storage.MetricsKeys.METRICS_CONSENT_ENABLED
-import com.joasasso.minitoolbox.metrics.storage.MetricsKeys.PREMIUM_SINCE_MS
-import com.joasasso.minitoolbox.metrics.storage.MetricsKeys.TIME_TO_PURCHASE_MS
-import com.joasasso.minitoolbox.metrics.storage.MetricsKeys.TOOL_USE_COUNTS_JSON
-import com.joasasso.minitoolbox.metrics.storage.MetricsKeys.TOTAL_TOOL_OPEN_COUNT
-import com.joasasso.minitoolbox.metrics.storage.MetricsKeys.USES_BY_DAY_JSON
 import kotlinx.coroutines.flow.first
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import kotlin.math.max
 
-private val ISO_DAY = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-
+/**
+ * Repositorio de métricas 100% agregadas (sin IDs, sin consentimiento).
+ * Guarda contadores diarios por clave (tool_id, ad_type, etc.).
+ *
+ * Claves esperadas en MetricsKeys:
+ *  - APP_OPEN_COUNT_BY_DAY       : Map<String /*yyyy-MM-dd*/, Int>
+ *  - TOOL_USE_BY_DAY_JSON        : Map<String /*day*/, Map<String /*toolId*/, Int>>
+ *  - AD_IMPRESSIONS_BY_DAY_JSON  : Map<String /*day*/, Map<String /*adType*/, Int>>
+ *  - APP_VERSION_AT_UPLOAD       : String (opcional, si etiquetás las subidas)
+ *  - LAST_UPLOAD_DAY             : String (opcional)
+ */
 class AggregatesRepository(private val context: Context) {
 
-    // ---------- Helpers de fecha ----------
-    fun todayIso(): String = ISO_DAY.format(Date())
+    // ---------- Utils de fecha ----------
+    private val dayFmt = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+    private fun today(): String = dayFmt.format(Date())
 
-    // ---------- Instalación ----------
-    suspend fun markInstallIfNeeded(nowMs: Long = System.currentTimeMillis()): Boolean {
-        val ds = context.metricsDataStore
-        val prefs = try { ds.data.first() } catch (_: Throwable) { emptyPreferences() }
-        if (prefs[INSTALL_DATE_MS] != null) return false
+    // ---------- Helpers JSON ----------
+    private inline fun <reified K, reified V> fromJsonMap(json: String?): MutableMap<K, V> {
+        return JsonUtils.fromJsonMap(json)
+    }
+    private fun <K, V> toJsonMap(map: Map<K, V>): String = JsonUtils.toJsonMap(map)
 
-        ds.edit { it[INSTALL_DATE_MS] = nowMs }
-        return true
+    // ---------- Extensión para borrar buckets anteriores a una fecha ----------
+    private fun <V> MutableMap<String, V>.removeBefore(cutIsoDay: String) {
+        val toRemove = keys.filter { it < cutIsoDay }
+        toRemove.forEach { remove(it) }
     }
 
-    suspend fun getInstallDateMs(): Long? {
-        val prefs = context.metricsDataStore.data.first()
-        return prefs[INSTALL_DATE_MS]
-    }
-
-    // ---------- Daily open ----------
-    /**
-     * Devuelve true si registró el daily_open (cambió de día).
-     */
-    suspend fun dailyOpenIfNeeded(): Boolean {
+    // -------------------------------------------------------------------------
+    // APP OPEN (aperturas globales por día)
+    // -------------------------------------------------------------------------
+    suspend fun incrementAppOpen() {
         val ds = context.metricsDataStore
-        val today = todayIso()
-        var fired = false
+        val day = today()
         ds.edit { e ->
-            val last = e[LAST_DAILY_OPEN_YYYYMMDD]
-            if (last != today) {
-                e[LAST_DAILY_OPEN_YYYYMMDD] = today
-                // Incrementa contador usesByDay[today]++
-                val usesMap: MutableMap<String, Int> =
-                    JsonUtils.fromJsonMap<String, Int>(e[USES_BY_DAY_JSON])
-                usesMap[today] = (usesMap[today] ?: 0) + 1
-                e[USES_BY_DAY_JSON] = JsonUtils.toJsonMap(usesMap)
-
-                fired = true
-            }
+            val byDay: MutableMap<String, Int> =
+                fromJsonMap(e[MetricsKeys.APP_OPEN_COUNT_BY_DAY])
+            byDay[day] = (byDay[day] ?: 0) + 1
+            e[MetricsKeys.APP_OPEN_COUNT_BY_DAY] = toJsonMap(byDay)
         }
-        return fired
     }
 
-    // ---------- Tool opens ----------
-    suspend fun incrementToolOpen(toolId: String) {
+    // -------------------------------------------------------------------------
+    // TOOL USE (uso de herramientas por día y por toolId)
+    // -------------------------------------------------------------------------
+    suspend fun incrementToolUse(toolId: String) {
         val ds = context.metricsDataStore
+        val day = today()
         ds.edit { e ->
-            val map: MutableMap<String, Int> =
-                JsonUtils.fromJsonMap<String, Int>(e[TOOL_USE_COUNTS_JSON])
-            map[toolId] = (map[toolId] ?: 0) + 1
-            e[TOOL_USE_COUNTS_JSON] = JsonUtils.toJsonMap(map)
+            val byDay: MutableMap<String, MutableMap<String, Int>> =
+                fromJsonMap(e[MetricsKeys.TOOL_USE_BY_DAY_JSON])
+            val bucket = byDay.getOrPut(day) { mutableMapOf() }
+            bucket[toolId] = (bucket[toolId] ?: 0) + 1
+            e[MetricsKeys.TOOL_USE_BY_DAY_JSON] = toJsonMap(byDay)
         }
-
     }
 
-    suspend fun getToolUseCounts(): Map<String, Int> {
-        val prefs = context.metricsDataStore.data.first()
-        val map: MutableMap<String, Int> =
-            JsonUtils.fromJsonMap<String, Int>(prefs[TOOL_USE_COUNTS_JSON])
-        return map.toMap()
-
-    }
-
-    // ---------- Total de aperturas de tools ----------
-    suspend fun incrementTotalToolOpenAndGet(): Int {
-        var newTotal = 0
-        context.metricsDataStore.edit { e ->
-            val current = e[TOTAL_TOOL_OPEN_COUNT] ?: 0
-            newTotal = current + 1
-            e[TOTAL_TOOL_OPEN_COUNT] = newTotal
-        }
-        return newTotal
-    }
-
-    suspend fun getTotalToolOpenCount(): Int {
-        val prefs = context.metricsDataStore.data.first()
-        return prefs[TOTAL_TOOL_OPEN_COUNT] ?: 0
-    }
-
-
-    // ---------- Ads ----------
+    // -------------------------------------------------------------------------
+    // AD IMPRESSIONS (impresiones por día y por tipo de anuncio)
+    // -------------------------------------------------------------------------
     suspend fun incrementAdImpression(type: String) {
         val ds = context.metricsDataStore
+        val day = today()
         ds.edit { e ->
-            val map: MutableMap<String, Int> =
-                JsonUtils.fromJsonMap<String, Int>(e[AD_IMPRESSIONS_JSON])
-            map[type] = (map[type] ?: 0) + 1
-            e[AD_IMPRESSIONS_JSON] = JsonUtils.toJsonMap(map)
-        }
-
-    }
-
-    suspend fun getAdImpressions(): Map<String, Int> {
-        val prefs = context.metricsDataStore.data.first()
-        val map: MutableMap<String, Int> =
-            JsonUtils.fromJsonMap<String, Int>(prefs[AD_IMPRESSIONS_JSON])
-        return map.toMap()
-
-    }
-
-    // ---------- Premium ----------
-    /**
-     * Activa premium si no lo estaba. Devuelve true si hubo cambio de estado.
-     * Calcula premiumSince y timeToPurchase si corresponde.
-     */
-    suspend fun setPremiumActive(nowMs: Long = System.currentTimeMillis()): Boolean {
-        val ds = context.metricsDataStore
-        var changed = false
-        ds.edit { e ->
-            val wasPremium = e[IS_PREMIUM] ?: false
-            if (!wasPremium) {
-                e[IS_PREMIUM] = true
-                if ((e[PREMIUM_SINCE_MS] ?: 0L) == 0L) {
-                    e[PREMIUM_SINCE_MS] = nowMs
-                    val install = e[INSTALL_DATE_MS] ?: nowMs
-                    val delta = max(0L, nowMs - install)
-                    e[TIME_TO_PURCHASE_MS] = delta
-                }
-                changed = true
-            }
-        }
-        return changed
-    }
-
-    suspend fun getPremiumInfo(): PremiumInfo {
-        val prefs = context.metricsDataStore.data.first()
-        return PremiumInfo(
-            isPremium = prefs[IS_PREMIUM] ?: false,
-            premiumSinceMs = prefs[PREMIUM_SINCE_MS] ?: 0L,
-            timeToPurchaseMs = prefs[TIME_TO_PURCHASE_MS] ?: 0L
-        )
-    }
-
-    data class PremiumInfo(
-        val isPremium: Boolean,
-        val premiumSinceMs: Long,
-        val timeToPurchaseMs: Long
-    )
-
-    // ---------- Consentimiento interno (toggle “Métricas anónimas”) ----------
-    suspend fun setMetricsConsent(enabled: Boolean) {
-        context.metricsDataStore.edit { it[METRICS_CONSENT_ENABLED] = enabled }
-    }
-
-    suspend fun isMetricsConsentEnabled(): Boolean {
-        val prefs = context.metricsDataStore.data.first()
-        return prefs[METRICS_CONSENT_ENABLED] ?: false
-    }
-
-    /**
-     * Inicializa el flag solo si el usuario no decidió aún:
-     * - EEA/UK => false (opt-in)
-     * - resto => true (opt-out)
-     */
-    suspend fun seedMetricsDefaultIfUndecided(isEeaOrUk: Boolean) {
-        val decided = isMetricsConsentEnabled()
-        if (!decided) {
-            setMetricsConsent(!isEeaOrUk)
+            val byDay: MutableMap<String, MutableMap<String, Int>> =
+                fromJsonMap(e[MetricsKeys.AD_IMPRESSIONS_BY_DAY_JSON])
+            val bucket = byDay.getOrPut(day) { mutableMapOf() }
+            bucket[type] = (bucket[type] ?: 0) + 1
+            e[MetricsKeys.AD_IMPRESSIONS_BY_DAY_JSON] = toJsonMap(byDay)
         }
     }
 
-    // AggregatesRepository.kt
-    suspend fun hasDecidedMetricsConsent(): Boolean {
-        val prefs = context.metricsDataStore.data.first()
-        return prefs[METRICS_CONSENT_DECIDED] ?: false
+    // -------------------------------------------------------------------------
+    // Lecturas (para panel interno, debug o subida)
+    // -------------------------------------------------------------------------
+    suspend fun getAppOpenCounts(): Map<String, Int> {
+        val prefs = try { context.metricsDataStore.data.first() } catch (_: Throwable) { emptyPreferences() }
+        val byDay: MutableMap<String, Int> =
+            fromJsonMap(prefs[MetricsKeys.APP_OPEN_COUNT_BY_DAY])
+        return byDay.toMap()
     }
 
-    suspend fun setMetricsConsentDecided() {
-        context.metricsDataStore.edit { it[METRICS_CONSENT_DECIDED] = true }
+    suspend fun getToolUseByDay(): Map<String, Map<String, Int>> {
+        val prefs = try { context.metricsDataStore.data.first() } catch (_: Throwable) { emptyPreferences() }
+        val raw: MutableMap<String, MutableMap<String, Int>> =
+            fromJsonMap(prefs[MetricsKeys.TOOL_USE_BY_DAY_JSON])
+        // inmutable hacia afuera
+        return raw.mapValues { it.value.toMap() }
+    }
+
+    suspend fun getAdImpressionsByDay(): Map<String, Map<String, Int>> {
+        val prefs = try { context.metricsDataStore.data.first() } catch (_: Throwable) { emptyPreferences() }
+        val raw: MutableMap<String, MutableMap<String, Int>> =
+            fromJsonMap(prefs[MetricsKeys.AD_IMPRESSIONS_BY_DAY_JSON])
+        return raw.mapValues { it.value.toMap() }
     }
 
 }

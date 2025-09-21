@@ -1,7 +1,10 @@
+// InterstitialManager.kt
 package com.joasasso.minitoolbox.utils.ads
 
 import android.app.Activity
 import android.content.Context
+import android.content.SharedPreferences
+import androidx.core.content.edit
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
@@ -11,16 +14,38 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import java.util.concurrent.atomic.AtomicBoolean
 
 object InterstitialManager {
-    // Config
-    var showEveryNOpens: Int = 5 // cámbialo a 3 si querés testear agresivo
-    private var adUnitId: String? = null
+    // Config default
+    var showEveryNOpens: Int = 3
+    var graceFirstOpens: Int = 2
+    var minCooldownMs: Long = 30_000L
 
-    // State
+    private var adUnitId: String? = null
     private var interstitialAd: InterstitialAd? = null
     private val isLoading = AtomicBoolean(false)
 
-    fun init(context: Context, adUnitId: String) {
-        this.adUnitId = adUnitId
+    // --- PERSISTENCIA LIVIANA ---
+    private fun prefs(ctx: Context): SharedPreferences =
+        ctx.applicationContext.getSharedPreferences("ads_pacing", Context.MODE_PRIVATE)
+
+    private fun incToolOpenCount(ctx: Context): Int {
+        val p = prefs(ctx)
+        val newVal = p.getInt("tool_open_count", 0) + 1
+        p.edit { putInt("tool_open_count", newVal) }
+        return newVal
+    }
+
+    private fun canPassCooldown(ctx: Context): Boolean {
+        val p = prefs(ctx)
+        val last = p.getLong("last_interstitial_ms", 0L)
+        return (System.currentTimeMillis() - last) >= minCooldownMs
+    }
+
+    private fun markShownNow(ctx: Context) {
+        prefs(ctx).edit { putLong("last_interstitial_ms", System.currentTimeMillis()) }
+    }
+
+    fun init(context: Context, adUnit: String) {
+        this.adUnitId = adUnit
         if (interstitialAd == null) load(context)
     }
 
@@ -40,39 +65,45 @@ object InterstitialManager {
                 override fun onAdFailedToLoad(error: LoadAdError) {
                     interstitialAd = null
                     isLoading.set(false)
-                    // Podés reintentar más tarde automáticamente si querés
+                    // opcional: reintentar en X tiempo
                 }
             }
         )
     }
 
     /**
-     * Llama esto al abrir una tool. Decide si mostrar según el total y disponibilidad.
-     * Devuelve true si mostró, false si no.
+     * Llamala cada vez que el usuario entra a una tool.
+     * Decide si mostrar o no, sin necesidad de pasar contadores externos.
      */
-    fun maybeShow(activity: Activity, totalToolOpens: Int, shouldShowAds: Boolean): Boolean {
-        if (!shouldShowAds) return false
-        if (showEveryNOpens <= 0) return false
-        if (totalToolOpens <= 0) return false
-        if (totalToolOpens % showEveryNOpens != 0) return false
+    fun onToolOpened(activity: Activity, shouldShowAds: Boolean) {
+        if (!shouldShowAds) return
 
-        val ad = interstitialAd ?: return false
+        val ctx = activity.applicationContext
+        val total = incToolOpenCount(ctx)
+
+        if (showEveryNOpens <= 0) return
+        if (total < graceFirstOpens) return
+        if (total % showEveryNOpens != 0) return
+        if (!canPassCooldown(ctx)) return
+
+        val ad = interstitialAd ?: return
         ad.fullScreenContentCallback = object : FullScreenContentCallback() {
             override fun onAdDismissedFullScreenContent() {
                 interstitialAd = null
-                // Preload el siguiente
-                load(activity.applicationContext)
+                load(ctx)
             }
             override fun onAdFailedToShowFullScreenContent(err: AdError) {
                 interstitialAd = null
-                load(activity.applicationContext)
+                load(ctx)
             }
             override fun onAdShowedFullScreenContent() {
-                // Nada
+                // Marcar cool-down
+                markShownNow(ctx)
+                // Si querés registrar la impresión de métricas aquí:
+                // adImpression(ctx, "interstitial")
             }
         }
         ad.show(activity)
         interstitialAd = null // consumir referencia
-        return true
     }
 }

@@ -21,6 +21,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.joasasso.minitoolbox.metrics.storage.AggregatesRepository
+import com.joasasso.minitoolbox.metrics.toolUse
 import com.joasasso.minitoolbox.nav.Screen
 import com.joasasso.minitoolbox.tools.ToolRegistry
 import com.joasasso.minitoolbox.tools.entretenimiento.MarcadorEquiposScreen
@@ -73,7 +74,6 @@ import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AguaStatis
 import com.joasasso.minitoolbox.ui.screens.BasicPhrasesScreen
 import com.joasasso.minitoolbox.utils.ads.InterstitialManager
 import com.joasasso.minitoolbox.utils.ads.RewardedManager
-import kotlinx.coroutines.withContext
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
@@ -110,20 +110,12 @@ fun MiniToolboxNavGraph(
             val toolId = routeToToolId[route] ?: route
 
             // 1) contador por tool
-            withContext(kotlinx.coroutines.Dispatchers.IO) {
-                aggregates.incrementToolOpen(toolId)
-            }
+            toolUse(context, toolId)
 
-            // 2) total y quizá interstitial
-            val total = withContext(kotlinx.coroutines.Dispatchers.IO) {
-                aggregates.incrementTotalToolOpenAndGet()
-            }
-
-            // 3) intentar interstitial si corresponde
+            // 2) intentar interstitial si corresponde
             if (activity != null) {
-                InterstitialManager.maybeShow(
+                InterstitialManager.onToolOpened(
                     activity = activity,
-                    totalToolOpens = total,
                     shouldShowAds = shouldShowAds
                 )
             }

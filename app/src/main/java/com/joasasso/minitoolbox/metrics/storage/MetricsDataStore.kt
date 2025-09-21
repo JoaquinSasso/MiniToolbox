@@ -1,9 +1,6 @@
 package com.joasasso.minitoolbox.metrics.storage
 
 import android.content.Context
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.intPreferencesKey
-import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 
@@ -15,34 +12,17 @@ val Context.metricsDataStore by preferencesDataStore(name = METRICS_PREFS_NAME)
 
 // Claves de DataStore (todas en un solo lugar)
 object MetricsKeys {
-    // Identidad anónima
-    val INSTANCE_ID        = stringPreferencesKey("instance_id")         // UUID local (no se envía)
-    val INSTANCE_SALT_B64  = stringPreferencesKey("instance_salt_b64")   // salt en Base64 (no se envía)
-    val INSTANCE_HASH_HEX  = stringPreferencesKey("instance_hash_hex")   // hash que sí podrías enviar
+    val APP_OPEN_COUNT_BY_DAY       = stringPreferencesKey("app_open_count_by_day")        // Map<String, Int>
+    val TOOL_USE_BY_DAY_JSON        = stringPreferencesKey("tool_use_by_day_json")         // Map<String, Map<String,Int>>
+    val AD_IMPRESSIONS_BY_DAY_JSON  = stringPreferencesKey("ad_impr_by_day_json")          // Map<String, Map<String,Int>>
+    val APP_VERSION_AT_UPLOAD       = stringPreferencesKey("app_version_at_upload")
+    val LAST_UPLOAD_DAY             = stringPreferencesKey("last_upload_day")
 
-    // Instalación y uso diario
-    val INSTALL_DATE_MS         = longPreferencesKey("install_date_ms")       // primera vez que abrió
-    val LAST_DAILY_OPEN_YYYYMMDD= stringPreferencesKey("last_daily_open")     // última fecha YYYY-MM-DD
+    val SENT_APP_OPEN_BY_DAY        = stringPreferencesKey("sent_app_open_by_day")         // Map<String,Int>
+    val SENT_TOOL_USE_BY_DAY_JSON   = stringPreferencesKey("sent_tool_use_by_day_json")    // Map<String,Map<String,Int>>
+    val SENT_AD_IMPR_BY_DAY_JSON    = stringPreferencesKey("sent_ad_impr_by_day_json")     // Map<String,Map<String,Int>>
+    val PENDING_BATCH_ID            = stringPreferencesKey("pending_batch_id")             // String? (idempotencia)
+    val PENDING_BATCH_PAYLOAD_JSON  = stringPreferencesKey("pending_batch_payload_json")   // String? (reintentos)
 
-    // Estado premium y tiempos
-    val IS_PREMIUM          = booleanPreferencesKey("is_premium")
-    val PREMIUM_SINCE_MS    = longPreferencesKey("premium_since_ms")
-    val TIME_TO_PURCHASE_MS = longPreferencesKey("time_to_purchase_ms") // derivado (premiumSince - install)
-
-    // Contadores agregados (JSON serializado)
-    // tool_id -> count
-    val TOOL_USE_COUNTS_JSON    = stringPreferencesKey("tool_use_counts_json")
-    // yyyy-MM-dd -> count de aperturas de app ese día
-    val USES_BY_DAY_JSON        = stringPreferencesKey("uses_by_day_json")
-    // tipo anuncio (banner/interstitial/rewarded/appopen/...) -> impresiones
-    val AD_IMPRESSIONS_JSON     = stringPreferencesKey("ad_impressions_json")
-
-    // Privacidad / consentimiento (tu toggle interno)
-    val METRICS_CONSENT_ENABLED = booleanPreferencesKey("metrics_consent_enabled")
-    val METRICS_CONSENT_DECIDED = booleanPreferencesKey("metrics_consent_decided")
-
-
-    //Cantidad total de tools abiertas
-    val TOTAL_TOOL_OPEN_COUNT = intPreferencesKey("total_tool_open_count")
 
 }

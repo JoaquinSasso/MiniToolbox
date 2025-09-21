@@ -22,6 +22,7 @@ import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.LoadAdError
+import com.joasasso.minitoolbox.metrics.adImpression
 import com.joasasso.minitoolbox.utils.ads.AdsManager
 
 @Composable
@@ -59,6 +60,9 @@ fun BannerAd(
                             }
                             override fun onAdFailedToLoad(error: LoadAdError) {
                                 onHeightChange(0)
+                            }
+                            override fun onAdImpression() {
+                                adImpression(context.applicationContext, "banner")
                             }
                         }
 

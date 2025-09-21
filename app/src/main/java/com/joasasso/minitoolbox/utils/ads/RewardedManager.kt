@@ -9,6 +9,7 @@ import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.rewarded.RewardItem
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
+import com.joasasso.minitoolbox.metrics.adImpression
 import java.util.concurrent.atomic.AtomicBoolean
 
 object RewardedManager {
@@ -61,7 +62,9 @@ object RewardedManager {
                 rewardedAd = null
                 load(activity.applicationContext)
             }
-            override fun onAdShowedFullScreenContent() { /* noop */ }
+            override fun onAdShowedFullScreenContent() {
+                adImpression(activity.applicationContext, "interstitial")
+            }
         }
         ad.show(activity) { rewardItem ->
             onReward(rewardItem) // acá podés llamar a AdsMetrics.rewarded(...)
