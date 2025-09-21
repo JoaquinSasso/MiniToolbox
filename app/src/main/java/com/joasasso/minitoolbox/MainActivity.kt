@@ -3,6 +3,7 @@ package com.joasasso.minitoolbox
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -29,6 +30,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         supportActionBar?.hide()
         startRouteState = intent.getStringExtra("startRoute")
+        Log.d("Metrics", "endpoint=" + UploadConfig.getEndpoint(this))
+        Log.d("Metrics", "apiKey=" + UploadConfig.getApiKey(this).take(6) + "…")
+
 
         setContent {
             ConsentGateProvider {
@@ -36,8 +40,8 @@ class MainActivity : AppCompatActivity() {
                     // Configurar una vez (usa tu URL real cuando tengamos el backend):
                     UploadConfig.set(
                         applicationContext,
-                        endpoint = "https://<tu-futura-url>/ingest",  // TODO: reemplazar
-                        apiKey = "dev_key_123"                        // TODO: reemplazar
+                        endpoint = "https://us-central1-minitoolbox-7ab7d.cloudfunctions.net/ingest",  // TODO: reemplazar
+                        apiKey = "cc8af2654262d35c72dde40bbb42480b8f60b3a89dfed56e09368f4633187767"                        // TODO: reemplazar
                     )
 
                     // Grabar y agendar upload oportunista
