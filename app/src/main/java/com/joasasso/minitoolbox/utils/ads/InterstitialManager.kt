@@ -11,6 +11,7 @@ import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
+import com.joasasso.minitoolbox.metrics.adImpression
 import java.util.concurrent.atomic.AtomicBoolean
 
 object InterstitialManager {
@@ -99,8 +100,7 @@ object InterstitialManager {
             override fun onAdShowedFullScreenContent() {
                 // Marcar cool-down
                 markShownNow(ctx)
-                // Si querés registrar la impresión de métricas aquí:
-                // adImpression(ctx, "interstitial")
+                adImpression(activity.applicationContext, "interstitial")
             }
         }
         ad.show(activity)

@@ -41,6 +41,7 @@ import com.joasasso.minitoolbox.utils.openPrivacyUrl
 fun AboutScreen(
     onBack: () -> Unit,
     onOpenLicenses: () -> Unit,
+    onOpenDevTools: () -> Unit
 ) {
     val context = LocalContext.current
     val url = stringResource(R.string.privacy_policy_url)
@@ -147,6 +148,14 @@ fun AboutScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(stringResource(R.string.about_licenses_button))
+                }
+                if (BuildConfig.DEBUG) {
+                    OutlinedButton(
+                        onClick = onOpenDevTools,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Developer Metrics Tools")
+                    }
                 }
             }
             PrivacyOptionsButton()

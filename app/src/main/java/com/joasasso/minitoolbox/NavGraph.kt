@@ -20,6 +20,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.joasasso.minitoolbox.metrics.dev.MetricsDevScreen
 import com.joasasso.minitoolbox.metrics.storage.AggregatesRepository
 import com.joasasso.minitoolbox.metrics.toolUse
 import com.joasasso.minitoolbox.nav.Screen
@@ -352,8 +353,12 @@ fun MiniToolboxNavGraph(
                     context.startActivity(
                         android.content.Intent(context, com.google.android.gms.oss.licenses.OssLicensesMenuActivity::class.java)
                     )
-                }
+                },
+                onOpenDevTools = { navController.navigate("dev/metrics") }
             )
+        }
+        composable(Screen.DevTools.route) {
+            MetricsDevScreen()
         }
     }
 }

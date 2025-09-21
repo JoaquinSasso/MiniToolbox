@@ -1,7 +1,10 @@
 package com.joasasso.minitoolbox.metrics
 
 import android.content.Context
+import androidx.core.content.edit
 import com.joasasso.minitoolbox.metrics.storage.AggregatesRepository
+import com.joasasso.minitoolbox.metrics.uploader.UploadConfig
+import com.joasasso.minitoolbox.metrics.uploader.UploadScheduler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -9,45 +12,47 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-// ---------- Helpers ----------
+// Helpers
 private fun Context.repo() = AggregatesRepository(applicationContext)
-
 private fun io(block: suspend () -> Unit) {
     CoroutineScope(Dispatchers.IO).launch { block() }
 }
 
-// ---------- API pública ----------
-
-// Suma 1 cada vez que se abre la app (cuenta “aperturas” reales)
+/** Suma app open y agenda upload oportunista */
 fun appOpen(context: Context) = io {
-    context.repo().incrementAppOpen()
+    val ctx = context.applicationContext
+    ctx.repo().incrementAppOpen()
+    UploadScheduler.markDirty(ctx)
+    UploadScheduler.maybeSchedule(ctx, UploadConfig.getEndpoint(ctx), UploadConfig.getApiKey(ctx))
 }
 
-// Marca una “apertura diaria” (como DAU): incrementa una sola vez por día natural
+/** Marca 1 vez por día (simple) + agenda upload */
 fun dailyOpenOnce(context: Context) = io {
-    val ds = context.repo()
-    // Implementación simple: si querés evitar doble conteo en el mismo día,
-    // podés llevar un último día marcado en otro key. Si no tenés esa clave,
-    // esta versión puede delegar a incrementAppOpen() pero sólo 1 vez por día.
-    // Te dejo una mini lógica in-archivo (sin tocar el repo):
-    val dayFmt = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-    val today = dayFmt.format(Date())
-
-    // Usamos una preferencia liviana guardada por esta función
-    val prefs = context.getSharedPreferences("metrics_daily_once", Context.MODE_PRIVATE)
-    val last = prefs.getString("last_day", null)
+    val ctx = context.applicationContext
+    val fmt = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+    val today = fmt.format(Date())
+    val sp = ctx.getSharedPreferences("metrics_daily_once", Context.MODE_PRIVATE)
+    val last = sp.getString("last_day", null)
     if (last != today) {
-        context.repo().incrementAppOpen() // cuenta 1 para el día
-        prefs.edit().putString("last_day", today).apply()
+        ctx.repo().incrementAppOpen()
+        sp.edit { putString("last_day", today) }
+        UploadScheduler.markDirty(ctx)
+        UploadScheduler.maybeSchedule(ctx, UploadConfig.getEndpoint(ctx), UploadConfig.getApiKey(ctx))
     }
 }
 
-// Uso de tool por visita (agregado por día y toolId)
+/** Uso de tool + agenda upload */
 fun toolUse(context: Context, toolId: String) = io {
-    context.repo().incrementToolUse(toolId)
+    val ctx = context.applicationContext
+    ctx.repo().incrementToolUse(toolId)
+    UploadScheduler.markDirty(ctx)
+    UploadScheduler.maybeSchedule(ctx, UploadConfig.getEndpoint(ctx), UploadConfig.getApiKey(ctx))
 }
 
-// Impresión de anuncios por tipo (banner/interstitial/rewarded)
+/** Impresión de anuncio + agenda upload */
 fun adImpression(context: Context, type: String) = io {
-    context.repo().incrementAdImpression(type)
+    val ctx = context.applicationContext
+    ctx.repo().incrementAdImpression(type)
+    UploadScheduler.markDirty(ctx)
+    UploadScheduler.maybeSchedule(ctx, UploadConfig.getEndpoint(ctx), UploadConfig.getApiKey(ctx))
 }

@@ -10,6 +10,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.compose.rememberNavController
 import com.joasasso.minitoolbox.metrics.appOpen
 import com.joasasso.minitoolbox.metrics.dailyOpenOnce
+import com.joasasso.minitoolbox.metrics.uploader.UploadConfig
 import com.joasasso.minitoolbox.ui.ads.AdPosition
 import com.joasasso.minitoolbox.ui.ads.GlobalAdsLayer
 import com.joasasso.minitoolbox.ui.theme.MiniToolboxTheme
@@ -32,8 +33,16 @@ class MainActivity : AppCompatActivity() {
         setContent {
             ConsentGateProvider {
                 LaunchedEffect(Unit) {
-                    appOpen(applicationContext)          // suma cada vez que se abre la app
-                    dailyOpenOnce(applicationContext)    // 1 vez por día
+                    // Configurar una vez (usa tu URL real cuando tengamos el backend):
+                    UploadConfig.set(
+                        applicationContext,
+                        endpoint = "https://<tu-futura-url>/ingest",  // TODO: reemplazar
+                        apiKey = "dev_key_123"                        // TODO: reemplazar
+                    )
+
+                    // Grabar y agendar upload oportunista
+                    appOpen(applicationContext)
+                    dailyOpenOnce(applicationContext)
                 }
                 ProStateProvider {
                     MiniToolboxTheme {
