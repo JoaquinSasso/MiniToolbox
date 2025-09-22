@@ -140,4 +140,39 @@ class AggregatesRepository(private val context: Context) {
             e[MetricsKeys.PENDING_BATCH_PAYLOAD_JSON]= ""
         }
     }
+
+    /** Commit de envío SOLO de los deltas efectivamente enviados en el último batch. */
+    suspend fun commitSent(deltas: List<DayDelta>) {
+        val ds = context.metricsDataStore
+        val prefs = ds.data.first()
+
+        // snapshots SENT_* actuales
+        val sentApp   = JsonUtils.fromDayIntMap(prefs[MetricsKeys.SENT_APP_OPEN_BY_DAY])
+        val sentTools = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.SENT_TOOL_USE_BY_DAY_JSON])
+        val sentAds   = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.SENT_AD_IMPR_BY_DAY_JSON])
+
+        // sumar cada delta enviado
+        for (d in deltas) {
+            // app_open
+            sentApp[d.day] = (sentApp[d.day] ?: 0) + d.appOpen
+
+            // tools
+            val t = sentTools.getOrPut(d.day) { mutableMapOf() }
+            for ((k, v) in d.tools) t[k] = (t[k] ?: 0) + v
+
+            // ads
+            val a = sentAds.getOrPut(d.day) { mutableMapOf() }
+            for ((k, v) in d.ads) a[k] = (a[k] ?: 0) + v
+        }
+
+        // persistir y limpiar PENDING_*
+        ds.edit { e ->
+            e[MetricsKeys.SENT_APP_OPEN_BY_DAY]      = JsonUtils.toDayIntMap(sentApp)
+            e[MetricsKeys.SENT_TOOL_USE_BY_DAY_JSON] = JsonUtils.toDayNestedIntMap(sentTools)
+            e[MetricsKeys.SENT_AD_IMPR_BY_DAY_JSON]  = JsonUtils.toDayNestedIntMap(sentAds)
+            e[MetricsKeys.PENDING_BATCH_ID]          = ""
+            e[MetricsKeys.PENDING_BATCH_PAYLOAD_JSON]= ""
+        }
+    }
+
 }
