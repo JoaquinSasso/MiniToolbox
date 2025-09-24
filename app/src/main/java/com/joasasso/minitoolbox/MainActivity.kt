@@ -12,6 +12,7 @@ import androidx.navigation.compose.rememberNavController
 import com.joasasso.minitoolbox.metrics.appOpen
 import com.joasasso.minitoolbox.metrics.dailyOpenOnce
 import com.joasasso.minitoolbox.metrics.uploader.UploadConfig
+import com.joasasso.minitoolbox.metrics.uploader.UploadScheduler
 import com.joasasso.minitoolbox.ui.ads.AdPosition
 import com.joasasso.minitoolbox.ui.ads.GlobalAdsLayer
 import com.joasasso.minitoolbox.ui.theme.MiniToolboxTheme
@@ -22,7 +23,6 @@ import com.joasasso.minitoolbox.utils.pro.ProStateProvider
 
 class MainActivity : AppCompatActivity() {
 
-    // Ruta inicial opcional enviada por widgets / deep links
     private var startRouteState: String? = null
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -30,24 +30,32 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         supportActionBar?.hide()
         startRouteState = intent.getStringExtra("startRoute")
+
         Log.d("Metrics", "endpoint=" + UploadConfig.getEndpoint(this))
         Log.d("Metrics", "apiKey=" + UploadConfig.getApiKey(this).take(6) + "…")
-
 
         setContent {
             ConsentGateProvider {
                 LaunchedEffect(Unit) {
-                    // Configurar una vez (usa tu URL real cuando tengamos el backend):
+                    // Configurar una vez
                     UploadConfig.set(
                         applicationContext,
-                        endpoint = "https://us-central1-minitoolbox-7ab7d.cloudfunctions.net/ingest",  // TODO: reemplazar
-                        apiKey = "cc8af2654262d35c72dde40bbb42480b8f60b3a89dfed56e09368f4633187767"                        // TODO: reemplazar
+                        endpoint = "https://us-central1-minitoolbox-7ab7d.cloudfunctions.net/ingest",
+                        apiKey = "cc8af2654262d35c72dde40bbb42480b8f60b3a89dfed56e09368f4633187767"
                     )
 
-                    // Grabar y agendar upload oportunista
+                    // Registrar apertura y "open once" del día
                     appOpen(applicationContext)
                     dailyOpenOnce(applicationContext)
+
+                    // 🔸 Planificador con cotas:
+                    // Al superar 3 aperturas (o si ya hay un payload pendiente), encola envío inmediato
+                    UploadScheduler.maybeFlushOnThreshold(
+                        applicationContext,
+                        UploadScheduler.FlushThreshold(appOpens = 3, tools = Int.MAX_VALUE, ads = Int.MAX_VALUE)
+                    )
                 }
+
                 ProStateProvider {
                     MiniToolboxTheme {
                         val navController = rememberNavController()
@@ -76,7 +84,6 @@ class MainActivity : AppCompatActivity() {
                                 else
                                     getString(R.string.admob_rewarded_prod)
                             )
-
                         }
                     }
                 }

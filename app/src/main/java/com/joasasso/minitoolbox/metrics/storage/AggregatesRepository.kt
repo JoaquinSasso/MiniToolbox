@@ -10,10 +10,19 @@ import java.util.Locale
 
 class AggregatesRepository(private val context: Context) {
 
+    data class DayDelta(
+        val day: String,
+        val appOpen: Int,
+        val tools: MutableMap<String, Int>,
+        val ads: MutableMap<String, Int>
+    )
+
     private val dayFmt = SimpleDateFormat("yyyy-MM-dd", Locale.US)
     private fun today(): String = dayFmt.format(Date())
 
-    // ---- Escrituras agregadas ----
+    // ---------------------------
+    // Escrituras de contadores
+    // ---------------------------
 
     suspend fun incrementAppOpen() {
         val ds = context.metricsDataStore
@@ -47,125 +56,92 @@ class AggregatesRepository(private val context: Context) {
         }
     }
 
-    // ---- Lecturas (para el worker) ----
+    // ----------------------------------
+    // Lecturas y cálculo de DELTAS
+    // ----------------------------------
 
     suspend fun getAppOpenCounts(): Map<String, Int> {
         val prefs = try { context.metricsDataStore.data.first() } catch (_: Throwable) { emptyPreferences() }
-        return JsonUtils.fromDayIntMap(prefs[MetricsKeys.APP_OPEN_COUNT_BY_DAY]).toMap()
+        return JsonUtils.fromDayIntMap(prefs[MetricsKeys.APP_OPEN_COUNT_BY_DAY])
     }
 
-    suspend fun getToolUseByDay(): Map<String, Map<String, Int>> {
+    suspend fun getToolUseCounts(): Map<String, Map<String, Int>> {
         val prefs = try { context.metricsDataStore.data.first() } catch (_: Throwable) { emptyPreferences() }
-        val raw = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.TOOL_USE_BY_DAY_JSON])
-        return raw.mapValues { it.value.toMap() }
+        return JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.TOOL_USE_BY_DAY_JSON])
     }
 
-    suspend fun getAdImpressionsByDay(): Map<String, Map<String, Int>> {
+    suspend fun getAdImpressionCounts(): Map<String, Map<String, Int>> {
         val prefs = try { context.metricsDataStore.data.first() } catch (_: Throwable) { emptyPreferences() }
-        val raw = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.AD_IMPRESSIONS_BY_DAY_JSON])
-        return raw.mapValues { it.value.toMap() }
+        return JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.AD_IMPRESSIONS_BY_DAY_JSON])
     }
-
-    // ---- DELTAS e idempotencia ----
-
-    data class DayDelta(
-        val day: String,
-        val appOpen: Int,
-        val tools: Map<String, Int>,
-        val ads: Map<String, Int>
-    )
 
     suspend fun buildDeltasSinceLastSent(): List<DayDelta> {
-        val prefs = context.metricsDataStore.data.first()
+        val prefs = try { context.metricsDataStore.data.first() } catch (_: Throwable) { emptyPreferences() }
 
-        // actuales
-        val appOpen = JsonUtils.fromDayIntMap(prefs[MetricsKeys.APP_OPEN_COUNT_BY_DAY])
-        val tools   = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.TOOL_USE_BY_DAY_JSON])
-        val ads     = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.AD_IMPRESSIONS_BY_DAY_JSON])
+        val currentApp  = JsonUtils.fromDayIntMap(prefs[MetricsKeys.APP_OPEN_COUNT_BY_DAY])
+        val currentTool = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.TOOL_USE_BY_DAY_JSON])
+        val currentAds  = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.AD_IMPRESSIONS_BY_DAY_JSON])
 
-        // últimos enviados
-        val sentApp   = JsonUtils.fromDayIntMap(prefs[MetricsKeys.SENT_APP_OPEN_BY_DAY])
-        val sentTools = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.SENT_TOOL_USE_BY_DAY_JSON])
-        val sentAds   = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.SENT_AD_IMPR_BY_DAY_JSON])
+        val sentApp  = JsonUtils.fromDayIntMap(prefs[MetricsKeys.SENT_APP_OPEN_BY_DAY])
+        val sentTool = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.SENT_TOOL_USE_BY_DAY_JSON])
+        val sentAds  = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.SENT_AD_IMPR_BY_DAY_JSON])
 
-        val allDays = (appOpen.keys + tools.keys + ads.keys).toSortedSet()
+        val allDays = (currentApp.keys + currentTool.keys + currentAds.keys + sentApp.keys + sentTool.keys + sentAds.keys).toSortedSet()
+
         val out = mutableListOf<DayDelta>()
-
         for (day in allDays) {
-            val aNow = appOpen[day] ?: 0
-            val aSent = sentApp[day] ?: 0
-            val appDelta = (aNow - aSent).coerceAtLeast(0)
+            val appDelta = (currentApp[day] ?: 0) - (sentApp[day] ?: 0)
+            val toolsCur = currentTool[day] ?: emptyMap()
+            val toolsSent = sentTool[day] ?: emptyMap()
+            val adsCur = currentAds[day] ?: emptyMap()
+            val adsSent = sentAds[day] ?: emptyMap()
 
-            val tNow = tools[day] ?: mutableMapOf()
-            val tSent = sentTools[day] ?: mutableMapOf()
-            val tKeys = (tNow.keys + tSent.keys).toSet()
-            val tDelta = buildMap<String, Int> {
-                for (k in tKeys) {
-                    val d = (tNow[k] ?: 0) - (tSent[k] ?: 0)
-                    if (d > 0) put(k, d)
-                }
+            val toolKeys = (toolsCur.keys + toolsSent.keys).toSet()
+            val adsKeys  = (adsCur.keys + adsSent.keys).toSet()
+
+            val tMap = mutableMapOf<String, Int>()
+            for (k in toolKeys) {
+                val d = (toolsCur[k] ?: 0) - (toolsSent[k] ?: 0)
+                if (d > 0) tMap[k] = d
             }
 
-            val adNow = ads[day] ?: mutableMapOf()
-            val adSent = sentAds[day] ?: mutableMapOf()
-            val adKeys = (adNow.keys + adSent.keys).toSet()
-            val adDelta = buildMap<String, Int> {
-                for (k in adKeys) {
-                    val d = (adNow[k] ?: 0) - (adSent[k] ?: 0)
-                    if (d > 0) put(k, d)
-                }
+            val aMap = mutableMapOf<String, Int>()
+            for (k in adsKeys) {
+                val d = (adsCur[k] ?: 0) - (adsSent[k] ?: 0)
+                if (d > 0) aMap[k] = d
             }
 
-            if (appDelta > 0 || tDelta.isNotEmpty() || adDelta.isNotEmpty()) {
-                out += DayDelta(day, appDelta, tDelta, adDelta)
+            if (appDelta > 0 || tMap.isNotEmpty() || aMap.isNotEmpty()) {
+                out += DayDelta(day, appDelta.coerceAtLeast(0), tMap, aMap)
             }
         }
         return out
     }
 
-    /** Llamar SOLO si el servidor confirmó éxito del batch. */
-    suspend fun commitSentUpToCurrent() {
-        val ds = context.metricsDataStore
-        val prefs = ds.data.first()
+    // --------------------------------------------------
+    // Commit de envío (idempotencia local)
+    // --------------------------------------------------
 
-        val appOpen = JsonUtils.fromDayIntMap(prefs[MetricsKeys.APP_OPEN_COUNT_BY_DAY])
-        val tools   = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.TOOL_USE_BY_DAY_JSON])
-        val ads     = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.AD_IMPRESSIONS_BY_DAY_JSON])
-
-        ds.edit { e ->
-            e[MetricsKeys.SENT_APP_OPEN_BY_DAY]      = JsonUtils.toDayIntMap(appOpen)
-            e[MetricsKeys.SENT_TOOL_USE_BY_DAY_JSON] = JsonUtils.toDayNestedIntMap(tools)
-            e[MetricsKeys.SENT_AD_IMPR_BY_DAY_JSON]  = JsonUtils.toDayNestedIntMap(ads)
-            e[MetricsKeys.PENDING_BATCH_ID]          = ""
-            e[MetricsKeys.PENDING_BATCH_PAYLOAD_JSON]= ""
-        }
-    }
-
-    /** Commit de envío SOLO de los deltas efectivamente enviados en el último batch. */
+    /** Marca como "enviados" SOLO los deltas efectivamente enviados en el último batch. */
     suspend fun commitSent(deltas: List<DayDelta>) {
         val ds = context.metricsDataStore
-        val prefs = ds.data.first()
+        val prefs = try { ds.data.first() } catch (_: Throwable) { emptyPreferences() }
 
-        // snapshots SENT_* actuales
         val sentApp   = JsonUtils.fromDayIntMap(prefs[MetricsKeys.SENT_APP_OPEN_BY_DAY])
         val sentTools = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.SENT_TOOL_USE_BY_DAY_JSON])
         val sentAds   = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.SENT_AD_IMPR_BY_DAY_JSON])
 
-        // sumar cada delta enviado
         for (d in deltas) {
-            // app_open
+            // app
             sentApp[d.day] = (sentApp[d.day] ?: 0) + d.appOpen
-
             // tools
             val t = sentTools.getOrPut(d.day) { mutableMapOf() }
             for ((k, v) in d.tools) t[k] = (t[k] ?: 0) + v
-
             // ads
             val a = sentAds.getOrPut(d.day) { mutableMapOf() }
             for ((k, v) in d.ads) a[k] = (a[k] ?: 0) + v
         }
 
-        // persistir y limpiar PENDING_*
         ds.edit { e ->
             e[MetricsKeys.SENT_APP_OPEN_BY_DAY]      = JsonUtils.toDayIntMap(sentApp)
             e[MetricsKeys.SENT_TOOL_USE_BY_DAY_JSON] = JsonUtils.toDayNestedIntMap(sentTools)
@@ -174,5 +150,4 @@ class AggregatesRepository(private val context: Context) {
             e[MetricsKeys.PENDING_BATCH_PAYLOAD_JSON]= ""
         }
     }
-
 }

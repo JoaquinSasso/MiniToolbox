@@ -13,10 +13,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.UUID
 
 class UploadMetricsWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
-
-    // Dentro de UploadMetricsWorker.kt
 
     private fun isValidDay(s: String): Boolean = Regex("""\d{4}-\d{2}-\d{2}""").matches(s)
 
@@ -29,20 +28,20 @@ class UploadMetricsWorker(appContext: Context, params: WorkerParameters) : Corou
         var payloadJson = prefs[MetricsKeys.PENDING_BATCH_PAYLOAD_JSON].orEmpty()
         var deltasForCommit: List<AggregatesRepository.DayDelta>? = null
 
-
+        // Si no hay payload pendiente, construimos deltas y congelamos JSON para idempotencia
         if (payloadJson.isBlank()) {
             val deltas = repo.buildDeltasSinceLastSent()
             if (deltas.isEmpty()) return@withContext Result.success()
 
             // Validación rápida de deltas
             for (d in deltas) {
-                if (!isValidDay(d.day)) return@withContext Result.success() // ignora si raro
+                if (!isValidDay(d.day)) return@withContext Result.success()
                 if (d.appOpen < 0) return@withContext Result.success()
                 if (d.tools.values.any { it < 0 }) return@withContext Result.success()
                 if (d.ads.values.any { it < 0 }) return@withContext Result.success()
             }
 
-            batchId = java.util.UUID.randomUUID().toString()
+            batchId = UUID.randomUUID().toString()
 
             val itemsArr = org.json.JSONArray()
             for (d in deltas) {
@@ -61,41 +60,35 @@ class UploadMetricsWorker(appContext: Context, params: WorkerParameters) : Corou
                 .put("items", itemsArr)
 
             payloadJson = body.toString()
-
             deltasForCommit = deltas
 
             ds.edit { e ->
                 e[MetricsKeys.PENDING_BATCH_ID] = batchId
                 e[MetricsKeys.PENDING_BATCH_PAYLOAD_JSON] = payloadJson
             }
+        } else {
+            // Si ya hay pending, parseamos sus deltas para hacer commit correcto tras el 2xx
+            deltasForCommit = parseDeltasFromPendingPayload(payloadJson)
         }
-            else {
-                // 🔹 hay un payload pendiente: parsear sus deltas para el commit
-                deltasForCommit = parseDeltasFromPendingPayload(payloadJson)
-            }
 
         val endpoint = inputData.getString("endpoint") ?: return@withContext Result.failure()
         val apiKey = inputData.getString("api_key") ?: ""
 
-        // Validación HTTPS
+        // Solo HTTPS
         if (!endpoint.startsWith("https://")) return@withContext Result.failure()
 
         val ok = postJson(endpoint, payloadJson, apiKey)
         if (ok) {
-            // Commit SOLO de lo que se envió efectivamente en este batch
+            // Commit SOLO de lo enviado en este batch
             val toCommit = deltasForCommit
             repo.commitSent(toCommit)
 
-            // ¿Quedaron más deltas? (ocurrieron durante la “ventana pendiente”)
+            // ¿Queda algo nuevo para enviar? (ocurrió mientras el batch estaba pendiente)
             val remaining = repo.buildDeltasSinceLastSent()
             if (remaining.isNotEmpty()) {
-                // Seguir enviando automáticamente
                 UploadScheduler.markDirty(applicationContext)
-                val endpoint2 = endpoint
-                val apiKey2 = apiKey
-                UploadScheduler.maybeSchedule(applicationContext, endpoint2, apiKey2)
+                UploadScheduler.maybeSchedule(applicationContext, endpoint, apiKey)
             } else {
-                // Nada más por enviar
                 UploadScheduler.clearDirty(applicationContext)
             }
 
@@ -104,8 +97,6 @@ class UploadMetricsWorker(appContext: Context, params: WorkerParameters) : Corou
             Result.retry()
         }
     }
-
-
 
     private fun postJson(endpoint: String, json: String, apiKey: String): Boolean {
         val url = URL(endpoint)
@@ -132,17 +123,6 @@ class UploadMetricsWorker(appContext: Context, params: WorkerParameters) : Corou
         val p = pm.getPackageInfo(applicationContext.packageName, 0)
         p.versionName ?: "unknown"
     } catch (_: Throwable) { "unknown" }
-
-    companion object {
-        fun testEnqueueNow(ctx: Context, endpoint: String, apiKey: String) {
-            val data = workDataOf("endpoint" to endpoint, "api_key" to apiKey)
-            androidx.work.WorkManager.getInstance(ctx).enqueue(
-                androidx.work.OneTimeWorkRequestBuilder<UploadMetricsWorker>()
-                    .setInputData(data)
-                    .build()
-            )
-        }
-    }
 
     /** Reconstruye la lista de deltas (por día) a partir del JSON de payload pendiente. */
     private fun parseDeltasFromPendingPayload(json: String): List<AggregatesRepository.DayDelta> {
@@ -181,8 +161,14 @@ class UploadMetricsWorker(appContext: Context, params: WorkerParameters) : Corou
         }
     }
 
+    companion object {
+        fun testEnqueueNow(ctx: Context, endpoint: String, apiKey: String) {
+            val data = workDataOf("endpoint" to endpoint, "api_key" to apiKey)
+            androidx.work.WorkManager.getInstance(ctx).enqueue(
+                androidx.work.OneTimeWorkRequestBuilder<UploadMetricsWorker>()
+                    .setInputData(data)
+                    .build()
+            )
+        }
+    }
 }
-
-
-
-
