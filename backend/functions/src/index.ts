@@ -2,7 +2,7 @@ import { onRequest } from "firebase-functions/v2/https";
 import type { Request, Response } from "express";
 
 import { initializeApp } from "firebase-admin/app";
-import { getFirestore, FieldValue } from "firebase-admin/firestore";
+import { getFirestore, FieldValue, Firestore } from "firebase-admin/firestore";
 import { defineSecret } from "firebase-functions/params";
 import { validateBody, type IngestBody } from "./validate.js";
 
@@ -16,67 +16,146 @@ function json(res: Response, code: number, obj: any) {
 	res.status(code).send(JSON.stringify(obj));
 }
 
+function monthFromDay(day: string): string {
+	// "YYYY-MM-DD" -> "YYYY-MM"
+	return day.slice(0, 7);
+}
+
+function dailyCollection(db: Firestore, month: string) {
+	return db.collection("metrics_daily").doc(month).collection("days");
+}
+
 export const ingest = onRequest(
-	{ region: "us-central1", secrets: [METRICS_API_KEY] },
+	{ secrets: [METRICS_API_KEY] },
 	async (req: Request, res: Response) => {
 		try {
-			if (req.method !== "POST")
+			// Method + Auth
+			if (req.method !== "POST") {
 				return json(res, 405, { ok: false, error: "method_not_allowed" });
-
-			// Seguridad
-			const apiKey = req.get("X-API-Key") || "";
-			const serverKey = METRICS_API_KEY.value();
-			if (!serverKey || apiKey !== serverKey) {
-				res.status(401).json({ ok: false, error: "unauthorized" });
-				return;
+			}
+			const apiKey = (
+				req.header("x-api-key") ??
+				req.header("X-API-Key") ??
+				""
+			).trim();
+			const expected = METRICS_API_KEY.value();
+			if (!expected || apiKey !== expected) {
+				return json(res, 401, { ok: false, error: "unauthorized" });
 			}
 
-			// Validación
+			// Validate
 			const parsed = validateBody(req.body);
-			if (!parsed.ok) return json(res, 400, { ok: false, error: parsed.error });
-
+			if (!parsed.ok) {
+				return json(res, 400, { ok: false, error: parsed.error ?? "invalid" });
+			}
 			const body = parsed.data as IngestBody;
 
-			const ingRef = db.collection("ingestions").doc(body.batch_id);
-			const dailyCol = db.collection("metrics_daily");
-			let deduped = false;
+			// Idempotency via batch_id
+			const batchRef = db
+				.collection("metrics_ingest_batches")
+				.doc(body.batch_id);
+
+			// Totals for logging
+			let totalItems = 0;
+			let totalOpens = 0;
 
 			await db.runTransaction(async (tx) => {
-				const ingSnap = await tx.get(ingRef);
-				if (ingSnap.exists) {
-					deduped = true;
+				const existsSnap = await tx.get(batchRef);
+				if (existsSnap.exists) {
+					// already processed, do nothing
 					return;
 				}
 
+				// Reserve this batch id (create fails if exists)
+				tx.create(batchRef, {
+					seenAt: FieldValue.serverTimestamp(),
+					platform: body.platform,
+					app_version: body.app_version,
+					items: (body.items ?? []).length,
+				});
+
 				for (const it of body.items) {
-					const dayRef = dailyCol.doc(it.day);
+					totalItems += 1;
+					const month = monthFromDay(it.day);
+					const dayRef = dailyCollection(db, month).doc(it.day);
 
 					const updates: Record<string, any> = {
 						"meta.updatedAt": FieldValue.serverTimestamp(),
-						[`meta.versions.${body.platform}.${body.app_version}`]: true,
+						[`meta.seenVersions.${body.platform}.${body.app_version}`]: true,
 					};
 					const inc = (n: number) => FieldValue.increment(n);
 
-					if ((it.app_open ?? 0) > 0)
+					// app_open
+					if ((it.app_open ?? 0) > 0) {
 						updates["totals.app_open"] = inc(it.app_open ?? 0);
-					if (it.tools)
-						for (const [toolId, n] of Object.entries(it.tools))
-							if (n > 0) updates[`totals.tools.${toolId}`] = inc(n);
-					if (it.ads)
-						for (const [adType, n] of Object.entries(it.ads))
-							if (n > 0) updates[`totals.ads.${adType}`] = inc(n);
+						totalOpens += it.app_open ?? 0;
+					}
+
+					// tools
+					if (it.tools) {
+						for (const [k, v] of Object.entries(it.tools)) {
+							if (v > 0) updates[`tools.${k}`] = inc(v);
+						}
+					}
+
+					// ads
+					if (it.ads) {
+						for (const [k, v] of Object.entries(it.ads)) {
+							if (v > 0) updates[`ads.${k}`] = inc(v);
+						}
+					}
+
+					// NEW: DAU por versión
+					if ((it as any).versions) {
+						for (const [ver, v] of Object.entries(
+							(it as any).versions as Record<string, number>
+						)) {
+							if (v > 0) updates[`versions.${ver}`] = inc(v);
+						}
+					}
+
+					// NEW: first-seen por versión
+					if ((it as any).versions_first_seen) {
+						for (const [ver, v] of Object.entries(
+							(it as any).versions_first_seen as Record<string, number>
+						)) {
+							if (v > 0) updates[`versions_first_seen.${ver}`] = inc(v);
+						}
+					}
+
+					// NEW: lenguajes
+					const lp = (it as any).lang_primary as
+						| Record<string, number>
+						| undefined;
+					if (lp) {
+						for (const [lang, v] of Object.entries(lp)) {
+							if (v > 0) updates[`lang.primary.${lang}`] = inc(v);
+						}
+					}
+					const ls = (it as any).lang_secondary as
+						| Record<string, number>
+						| undefined;
+					if (ls) {
+						for (const [lang, v] of Object.entries(ls)) {
+							if (v > 0) updates[`lang.secondary.${lang}`] = inc(v);
+						}
+					}
+
+					// NEW: widgets
+					const w = (it as any).widgets as Record<string, number> | undefined;
+					if (w) {
+						for (const [kind, v] of Object.entries(w)) {
+							if (v > 0) updates[`widgets.${kind}`] = inc(v);
+						}
+					}
 
 					tx.set(dayRef, updates, { merge: true });
 				}
-
-				tx.set(ingRef, { createdAt: FieldValue.serverTimestamp() });
 			});
 
-			if (deduped) return json(res, 200, { ok: true, deduped: true });
-
-			const totalItems = body.items.length;
-			const totalOpens = body.items.reduce((a, b) => a + (b.app_open ?? 0), 0);
-			console.log("ingest_ok", {
+			// Log (best-effort)
+			await db.collection("metrics_ingest_logs").doc().set({
+				at: FieldValue.serverTimestamp(),
 				batch_id: body.batch_id,
 				platform: body.platform,
 				app_version: body.app_version,
