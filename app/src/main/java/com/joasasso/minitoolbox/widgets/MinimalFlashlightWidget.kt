@@ -4,7 +4,6 @@ import android.content.Context
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.os.Build
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -32,6 +31,7 @@ import androidx.glance.layout.size
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.data.flujoNivelLinterna
+import com.joasasso.minitoolbox.metrics.storage.AggregatesRepository
 import kotlinx.coroutines.flow.first
 
 object FlashWidgetKeys {
@@ -87,6 +87,8 @@ class ToggleFlashAction : ActionCallback {
         val prefs = getAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId)
         val isCurrentlyOn = prefs[FlashWidgetKeys.KEY_IS_ON] ?: false
 
+        //Agregar uso a las metricas
+        AggregatesRepository(context).incrementWidgetUse("widget_flashlight_mini")
 
         try {
             if (isCurrentlyOn) {

@@ -39,6 +39,11 @@ class UploadMetricsWorker(appContext: Context, params: WorkerParameters) : Corou
                 if (d.appOpen < 0) return@withContext Result.success()
                 if (d.tools.values.any { it < 0 }) return@withContext Result.success()
                 if (d.ads.values.any { it < 0 }) return@withContext Result.success()
+                if (d.versions.values.any { it < 0 }) return@withContext Result.success()
+                if (d.versionsFirstSeen.values.any { it < 0 }) return@withContext Result.success()
+                if (d.langPrimary.values.any { it < 0 }) return@withContext Result.success()
+                if (d.langSecondary.values.any { it < 0 }) return@withContext Result.success()
+                if (d.widgets.values.any { it < 0 }) return@withContext Result.success()
             }
 
             batchId = UUID.randomUUID().toString()
@@ -50,6 +55,12 @@ class UploadMetricsWorker(appContext: Context, params: WorkerParameters) : Corou
                     .put("app_open", d.appOpen)
                     .put("tools", org.json.JSONObject(d.tools as Map<*, *>))
                     .put("ads", org.json.JSONObject(d.ads as Map<*, *>))
+                    // NUEVOS campos:
+                    .put("versions", org.json.JSONObject(d.versions as Map<*, *>))                // DAU por versión
+                    .put("versions_first_seen", org.json.JSONObject(d.versionsFirstSeen as Map<*, *>))
+                    .put("lang_primary", org.json.JSONObject(d.langPrimary as Map<*, *>))
+                    .put("lang_secondary", org.json.JSONObject(d.langSecondary as Map<*, *>))
+                    .put("widgets", org.json.JSONObject(d.widgets as Map<*, *>))
                 itemsArr.put(obj)
             }
 
@@ -137,23 +148,36 @@ class UploadMetricsWorker(appContext: Context, params: WorkerParameters) : Corou
 
                 val app = item.optInt("app_open", 0)
 
-                val toolsObj = item.optJSONObject("tools") ?: org.json.JSONObject()
-                val toolsMap = mutableMapOf<String, Int>()
-                val itTools = toolsObj.keys()
-                while (itTools.hasNext()) {
-                    val k = itTools.next()
-                    toolsMap[k] = toolsObj.optInt(k, 0)
+                fun objToMap(obj: org.json.JSONObject?): MutableMap<String, Int> {
+                    val o = obj ?: org.json.JSONObject()
+                    val m = mutableMapOf<String, Int>()
+                    val it = o.keys()
+                    while (it.hasNext()) {
+                        val k = it.next()
+                        m[k] = o.optInt(k, 0)
+                    }
+                    return m
                 }
 
-                val adsObj = item.optJSONObject("ads") ?: org.json.JSONObject()
-                val adsMap = mutableMapOf<String, Int>()
-                val itAds = adsObj.keys()
-                while (itAds.hasNext()) {
-                    val k = itAds.next()
-                    adsMap[k] = adsObj.optInt(k, 0)
-                }
+                val toolsMap    = objToMap(item.optJSONObject("tools"))
+                val adsMap      = objToMap(item.optJSONObject("ads"))
+                val verMap      = objToMap(item.optJSONObject("versions"))
+                val verFsMap    = objToMap(item.optJSONObject("versions_first_seen"))
+                val langPMap    = objToMap(item.optJSONObject("lang_primary"))
+                val langSMap    = objToMap(item.optJSONObject("lang_secondary"))
+                val widgetsMap  = objToMap(item.optJSONObject("widgets"))
 
-                out += AggregatesRepository.DayDelta(day, app, toolsMap, adsMap)
+                out += AggregatesRepository.DayDelta(
+                    day = day,
+                    appOpen = app,
+                    tools = toolsMap,
+                    ads = adsMap,
+                    versions = verMap,
+                    versionsFirstSeen = verFsMap,
+                    langPrimary = langPMap,
+                    langSecondary = langSMap,
+                    widgets = widgetsMap
+                )
             }
             out
         } catch (_: Throwable) {
