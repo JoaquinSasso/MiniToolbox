@@ -1,3 +1,5 @@
+import java.util.Properties
+
 // app/build.gradle.kts
 
 plugins {
@@ -12,6 +14,12 @@ android {
     namespace = "com.joasasso.minitoolbox"
     compileSdk = 36
 
+    val keystoreProps = Properties()
+    val keystoreFile = project.layout.projectDirectory.file("keystore.properties").asFile
+    if (keystoreFile.exists()) {
+        keystoreFile.inputStream().use { keystoreProps.load(it) }
+    }
+
     defaultConfig {
         applicationId = "com.joasasso.minitoolbox"
         minSdk = 28
@@ -20,6 +28,18 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        // Creamos el config "release" SOLO si tenemos el archivo
+        if (keystoreProps.isNotEmpty()) {
+            create("release") {
+                storeFile = file(keystoreProps["storeFile"] as String)
+                storePassword = keystoreProps["storePassword"] as String
+                keyAlias = keystoreProps["keyAlias"] as String
+                keyPassword = keystoreProps["keyPassword"] as String
+            }
+        }
     }
 
     buildTypes {
@@ -33,6 +53,11 @@ android {
             versionNameSuffix = "-oss"         // opcional
             // si tu release tiene minifyEnabled=true y te molesta:
             // isMinifyEnabled = false
+        }
+        release {
+            isMinifyEnabled = false // puedes activarlo después con ProGuard
+            isShrinkResources = false
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 
