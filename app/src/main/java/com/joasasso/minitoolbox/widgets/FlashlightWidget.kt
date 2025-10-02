@@ -39,7 +39,7 @@ import androidx.glance.state.PreferencesGlanceStateDefinition
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.data.setEstadoLinterna
 import com.joasasso.minitoolbox.data.setNivelLinterna
-import com.joasasso.minitoolbox.metrics.storage.AggregatesRepository
+import com.joasasso.minitoolbox.metrics.widgetUse
 
 object QuickFlashKeys {
     val LEVEL = intPreferencesKey("quick_flash_level")
@@ -163,7 +163,7 @@ class QuickFlashSetLevel : ActionCallback {
         val cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
 
         //Agregar uso a las metricas
-        AggregatesRepository(context).incrementWidgetUse("widget_flashlight")
+        widgetUse(context, "widget_flashlight")
 
         val id = cameraManager.cameraIdList.firstOrNull {
             cameraManager.getCameraCharacteristics(it)

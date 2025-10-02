@@ -52,4 +52,10 @@ If the app is helpful to you, then it was already worth it.
 
     <string name="about_metrics_description">Help improve MiniToolbox by sending anonymous usage metrics.</string>
     <string name="about_metrics_label">Anonymous metrics</string>
+
+    <string name="metrics_toggle_title">Privacy and Analytics</string>
+    <string name="metrics_toggle_on_line">Send anonymous metrics</string>
+    <string name="metrics_toggle_off_line">Don’t send anonymous metrics</string>
+    <string name="metrics_toggle_caption">Help improve MiniToolbox with aggregated, non-personal usage data. You can change this anytime.</string>
+
 </resources>

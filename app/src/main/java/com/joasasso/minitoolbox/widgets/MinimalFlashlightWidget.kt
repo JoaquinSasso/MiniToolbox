@@ -31,7 +31,7 @@ import androidx.glance.layout.size
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.data.flujoNivelLinterna
-import com.joasasso.minitoolbox.metrics.storage.AggregatesRepository
+import com.joasasso.minitoolbox.metrics.widgetUse
 import kotlinx.coroutines.flow.first
 
 object FlashWidgetKeys {
@@ -88,7 +88,7 @@ class ToggleFlashAction : ActionCallback {
         val isCurrentlyOn = prefs[FlashWidgetKeys.KEY_IS_ON] ?: false
 
         //Agregar uso a las metricas
-        AggregatesRepository(context).incrementWidgetUse("widget_flashlight_mini")
+        widgetUse(context,"widget_flashlight_mini")
 
         try {
             if (isCurrentlyOn) {

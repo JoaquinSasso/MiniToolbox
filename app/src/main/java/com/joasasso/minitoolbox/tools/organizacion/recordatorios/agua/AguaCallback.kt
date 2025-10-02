@@ -10,6 +10,7 @@ import com.joasasso.minitoolbox.data.flujoObjetivo
 import com.joasasso.minitoolbox.data.flujoPorVaso
 import com.joasasso.minitoolbox.data.guardarAguaHoy
 import com.joasasso.minitoolbox.metrics.storage.AggregatesRepository
+import com.joasasso.minitoolbox.metrics.widgetUse
 import com.joasasso.minitoolbox.widgets.WidgetWaterKindResolver
 import kotlinx.coroutines.flow.first
 
@@ -25,7 +26,7 @@ class AgregarAguaCallback : ActionCallback {
 
         //Agregar uso a las metricas
         val kind = WidgetWaterKindResolver.resolve(context, glanceId) // ← mini vs normal por Receiver
-        AggregatesRepository(context).incrementWidgetUse(kind)
+        widgetUse(context,kind)
 
 
         //Reprogramar la notificacion para beber agua

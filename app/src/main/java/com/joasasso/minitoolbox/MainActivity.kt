@@ -16,9 +16,10 @@ import androidx.compose.runtime.setValue
 import androidx.navigation.compose.rememberNavController
 import com.joasasso.minitoolbox.metrics.appOpen
 import com.joasasso.minitoolbox.metrics.dailyOpenOnce
-import com.joasasso.minitoolbox.metrics.storage.AggregatesRepository
+import com.joasasso.minitoolbox.metrics.toolUse
 import com.joasasso.minitoolbox.metrics.uploader.UploadConfig
 import com.joasasso.minitoolbox.metrics.uploader.UploadScheduler
+import com.joasasso.minitoolbox.metrics.widgetUse
 import com.joasasso.minitoolbox.nav.Screen
 import com.joasasso.minitoolbox.ui.ads.AdPosition
 import com.joasasso.minitoolbox.ui.ads.GlobalAdsLayer
@@ -104,8 +105,8 @@ class MainActivity : AppCompatActivity() {
                             LaunchedEffect(startRoute) {
                                 val route = startRoute
                                 if (Screen.isValidRoute(route) && route != Screen.Categories.route) {
-                                    AggregatesRepository(applicationContext).incrementToolUse(route!!)
-                                    AggregatesRepository(applicationContext).incrementWidgetUse("widget_shortcuts")
+                                    toolUse(applicationContext,route!!)
+                                    widgetUse(applicationContext,"widget_shortcuts")
 
 
                                     // Limpiar stack hasta Categorías si está presente
