@@ -17,6 +17,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
 
+
     <application
         android:name=".utils.MiniToolboxApp"
         android:label="MiniToolbox"
@@ -27,7 +28,7 @@
         <!-- Actividad principal -->
         <activity
             android:name="com.joasasso.minitoolbox.MainActivity"
-            android:enableOnBackInvokedCallback="true"
+            android:enableOnBackInvokedCallback="true"  
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

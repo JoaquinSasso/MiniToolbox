@@ -1,6 +1,7 @@
 package com.joasasso.minitoolbox
 
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -24,6 +25,7 @@ import com.joasasso.minitoolbox.nav.Screen
 import com.joasasso.minitoolbox.ui.ads.AdPosition
 import com.joasasso.minitoolbox.ui.ads.GlobalAdsLayer
 import com.joasasso.minitoolbox.ui.theme.MiniToolboxTheme
+import com.joasasso.minitoolbox.ui.utils.LockScreenOrientationIfAllowed
 import com.joasasso.minitoolbox.utils.ads.ConsentGateProvider
 import com.joasasso.minitoolbox.utils.ads.LocalConsentState
 import com.joasasso.minitoolbox.utils.pro.LocalProState
@@ -45,6 +47,10 @@ class MainActivity : AppCompatActivity() {
         Log.d("Metrics", "apiKey=" + UploadConfig.getApiKey(this).take(6) + "…")
 
         setContent {
+            LockScreenOrientationIfAllowed(
+                orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT,
+                enabled = true
+            )
             ConsentGateProvider {
                 LaunchedEffect(Unit) {
                     // Configurar una vez
