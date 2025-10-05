@@ -18,9 +18,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -137,6 +139,8 @@ fun BrujulaScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val red = Color(0xFFF5274E)
     val onSurface = MaterialTheme.colorScheme.onSurface
+    var showInfo by remember { mutableStateOf(false) }
+    val haptic = LocalHapticFeedback.current
 
     // ¿Hay magnetómetro en el dispositivo?
     val hasMagnetometer = remember {
@@ -169,7 +173,7 @@ fun BrujulaScreen(onBack: () -> Unit) {
     )
 
     Scaffold(
-        topBar = { TopBarReusable(stringResource(R.string.tool_compass), onBack) },
+        topBar = { TopBarReusable(stringResource(R.string.tool_compass), onBack, onShowInfo = {showInfo = true}) },
         bottomBar = {
             Column(
                 Modifier
@@ -178,7 +182,7 @@ fun BrujulaScreen(onBack: () -> Unit) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = sensorHeading?.let { headingLabel(animated) } ?: "—°",
+                    text = sensorHeading?.let { headingLabel(animated, context) } ?: "—°",
                     style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold),
                     textAlign = TextAlign.Center
                 )
@@ -220,6 +224,29 @@ fun BrujulaScreen(onBack: () -> Unit) {
             }
         }
     }
+    if (showInfo) {
+        AlertDialog(
+            onDismissRequest = { showInfo = false },
+            title = { Text(stringResource(R.string.compass_help_title)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(stringResource(R.string.compass_help_line1))
+                    Text(stringResource(R.string.compass_help_line2))
+                    Text(stringResource(R.string.compass_help_line3))
+                    Text(stringResource(R.string.compass_help_line4))
+                    Text(stringResource(R.string.compass_help_line5))
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showInfo = false
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                }) {
+                    Text(stringResource(R.string.close))
+                }
+            }
+        )
+    }
 }
 
 
@@ -235,7 +262,14 @@ private fun CompassDial(
     tickColor: Color,               // onSurface para líneas
     ringColor: Color                // onSurface low alpha
 ) {
-    val directions = listOf("N", "NE", "E", "SE", "S", "SO", "O", "NO") // español
+    val directions = listOf(stringResource(R.string.compass_north_abbr),
+        stringResource(R.string.compass_northeast_abbr),
+        stringResource(R.string.compass_east_abbr),
+        stringResource(R.string.compass_southeast_abbr),
+        stringResource(R.string.compass_south_abbr),
+        stringResource(R.string.compass_southwest_abbr),
+        stringResource(R.string.compass_west_abbr),
+        stringResource(R.string.compass_northwest_abbr))
     val density = LocalDensity.current
 
     Box(
@@ -332,17 +366,17 @@ private fun CompassDial(
 
 
 
-private fun headingLabel(angle: Float): String {
+private fun headingLabel(angle: Float, context : Context): String {
     val a = ((angle % 360f) + 360f) % 360f
     val dir = when (a) {
-        in 337.5f..360f, in 0f..22.5f -> "N"
-        in 22.5f..67.5f -> "NE"
-        in 67.5f..112.5f -> "E"
-        in 112.5f..157.5f -> "SE"
-        in 157.5f..202.5f -> "S"
-        in 202.5f..247.5f -> "SW"
-        in 247.5f..292.5f -> "W"
-        else -> "NW"
+        in 337.5f..360f, in 0f..22.5f -> context.getString(R.string.compass_north_abbr)
+        in 22.5f..67.5f -> context.getString(R.string.compass_northeast_abbr)
+        in 67.5f..112.5f -> context.getString(R.string.compass_east_abbr)
+        in 112.5f..157.5f -> context.getString(R.string.compass_southeast_abbr)
+        in 157.5f..202.5f -> context.getString(R.string.compass_south_abbr)
+        in 202.5f..247.5f -> context.getString(R.string.compass_southwest_abbr)
+        in 247.5f..292.5f -> context.getString(R.string.compass_west_abbr)
+        else -> context.getString(R.string.compass_northwest_abbr)
     }
     return "${a.roundToInt()}° $dir"
 }
