@@ -25,4 +25,7 @@
     <string name="compass_help_line3">• La flecha central apunta siempre al norte magnético.</string>
     <string name="compass_help_line4">• Las direcciones cardinales se mantienen fijas.</string>
 
+    <string name="compass_mode_magnetic">Magnetico</string>
+    <string name="compass_mode_gps">GPS</string>
+
 </resources>

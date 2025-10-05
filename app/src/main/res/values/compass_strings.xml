@@ -25,4 +25,8 @@
     <string name="compass_help_line3">• The center arrow always points to magnetic north.</string>
     <string name="compass_help_line4">• The cardinal directions are fixed around the circle.</string>
 
+    <string name="compass_mode_magnetic">Magnetic</string>
+    <string name="compass_mode_gps">GPS</string>
+
+
 </resources>

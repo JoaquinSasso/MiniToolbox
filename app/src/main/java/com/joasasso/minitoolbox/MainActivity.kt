@@ -88,7 +88,7 @@ class MainActivity : AppCompatActivity() {
                         }
 
                         GlobalAdsLayer(
-                            shouldShowAds = shouldShowAds,
+                            shouldShowAds = if (BuildConfig.DEBUG) false else shouldShowAds,
                             position = AdPosition.Top,
                             adUnitId = if (BuildConfig.DEBUG)
                                 getString(R.string.admob_banner_test)
