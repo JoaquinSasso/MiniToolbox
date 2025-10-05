@@ -116,8 +116,15 @@ fun AguaReminderScreen(
     // Lista de valores posibles para la frecuencia en minutos
     val minutosList = listOf(30, 60, 90, 120, 150, 180, 210, 240)
 
-    // Inicializa el índice del slider acorde al valor actual, o usa el más cercano si no está en la lista
-    var sliderIndex by remember { mutableIntStateOf(minutosList.indexOf(freqMinDS).takeIf { it >= 0 } ?: 0) }
+    // Helper para buscar el índice más cercano si el valor no está en la lista
+    fun closestIndex(values: List<Int>, target: Int): Int =
+        values.withIndex().minByOrNull { kotlin.math.abs(it.value - target) }?.index ?: 0
+
+    // Inicializa el índice según el valor actual del DS (o el más cercano)
+    var sliderIndex by remember {
+        val exact = minutosList.indexOf(freqMinDS)
+        mutableIntStateOf(if (exact >= 0) exact else closestIndex(minutosList, freqMinDS))
+    }
 
     // Strings para el snackbar
     val zeroWarning = stringResource(R.string.water_zero_warning)
@@ -141,6 +148,8 @@ fun AguaReminderScreen(
     LaunchedEffect(aguaHoy) { totalAgua = aguaHoy }
     LaunchedEffect(objetivoDS) { objetivoML = objetivoDS }
     LaunchedEffect(porVasoDS) { mlPorVaso = porVasoDS }
+    LaunchedEffect(notifDS) { }
+    LaunchedEffect(freqMinDS) { }
 
     // -- Lógica agregar agua --
     fun agregarAgua(
@@ -214,10 +223,16 @@ fun AguaReminderScreen(
 
     //Reprogramar recordatorio si se activa las notificaciones
     LaunchedEffect(freqMinDS) {
+        // Sincroniza el knob con el valor persistido
+        val exact = minutosList.indexOf(freqMinDS)
+        sliderIndex = if (exact >= 0) exact else closestIndex(minutosList, freqMinDS)
+
+        // Si las notificaciones están activas, reprogramá con el valor persistido
         if (notifDS) {
             programarRecordatorioAgua(context, freqMinDS, totalAgua, objetivoML)
         }
     }
+
 
     Scaffold(
         topBar = {TopBarReusable(stringResource(R.string.tool_water_reminder), onBack, {showInfo = true})},
@@ -353,7 +368,7 @@ fun AguaReminderScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(stringResource(R.string.water_notif_freq, minutosList[sliderIndex] / 60f), fontSize = 16.sp)
+                    Text(stringResource(R.string.water_notif_freq, freqMinDS / 60f), fontSize = 16.sp)
                     Slider(
                         value = sliderIndex.toFloat(),
                         onValueChange = { value ->
@@ -363,7 +378,7 @@ fun AguaReminderScreen(
                         onValueChangeFinished = {
                             val minutosSeleccionados = minutosList[sliderIndex]
                             scope.launch { context.guardarFrecuenciaMinutos(minutosSeleccionados) }
-                            // Si usás alarmas, podés actualizar acá también
+                            programarRecordatorioAgua(context, minutosSeleccionados, totalAgua, objetivoML)
                         },
                         valueRange = 0f..(minutosList.size - 1).toFloat(),
                         steps = minutosList.size - 2, // Para 6 valores: 4 pasos intermedios
