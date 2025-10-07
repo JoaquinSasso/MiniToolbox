@@ -24,8 +24,8 @@ android {
         applicationId = "com.joasasso.minitoolbox"
         minSdk = 28
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 3
+        versionName = "1.1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -55,8 +55,8 @@ android {
             // isMinifyEnabled = false
         }
         release {
-            isMinifyEnabled = false // puedes activarlo después con ProGuard
-            isShrinkResources = false
+            isMinifyEnabled = true // puedes activarlo después con ProGuard
+            isShrinkResources = true
             signingConfig = signingConfigs.getByName("release")
         }
     }

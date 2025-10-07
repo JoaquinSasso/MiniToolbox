@@ -8,6 +8,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -200,18 +201,12 @@ fun CalculosRapidosScreen(onBack: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                stringResource(R.string.quickmath_record, highScore),
-                style = MaterialTheme.typography.titleMedium
-            )
-            Text(
-                stringResource(R.string.quickmath_puntaje, score),
-                style = MaterialTheme.typography.headlineSmall
-            )
-
             Text(currentQuestion.questionText, style = MaterialTheme.typography.headlineMedium)
 
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)) {
                 shuffledOptions.forEach { option ->
                     val bgColor = when {
                         selectedOption == null -> MaterialTheme.colorScheme.primaryContainer
@@ -235,6 +230,20 @@ fun CalculosRapidosScreen(onBack: () -> Unit) {
                         Text(option.toString())
                     }
                 }
+            }
+
+            Row(
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    stringResource(R.string.quickmath_record, highScore),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    stringResource(R.string.quickmath_puntaje, score),
+                    style = MaterialTheme.typography.bodyLarge
+                )
             }
         }
     }
