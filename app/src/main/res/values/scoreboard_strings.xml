@@ -23,4 +23,6 @@
     <string name="marcador_editar_equipo_dialog_title">Edit Team</string>
     <string name="marcador_editar_equipo_nombre">Team name</string>
     <string name="marcador_editar_equipo_color">Team color</string>
+
+    <string name="marcador_no_hay_equipos">There are no teams yet. Tap the\n+ Add team button to add a new team.</string>
 </resources>

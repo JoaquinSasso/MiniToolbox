@@ -6,10 +6,12 @@ import android.content.ContextWrapper
 import android.content.pm.PackageManager
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -19,28 +21,39 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.google.android.ump.ConsentInformation
 import com.google.android.ump.UserMessagingPlatform
+import com.joasasso.minitoolbox.metrics.isMetricsEnabled
+import com.joasasso.minitoolbox.metrics.setMetricsEnabled
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
-import com.joasasso.minitoolbox.utils.AdsManager
+import com.joasasso.minitoolbox.utils.openPrivacyUrl
+
 
 @Composable
 fun AboutScreen(
     onBack: () -> Unit,
-    onOpenPrivacy: () -> Unit,
     onOpenLicenses: () -> Unit,
+    onOpenDevTools: () -> Unit
 ) {
     val context = LocalContext.current
+    val url = stringResource(R.string.privacy_policy_url)
+    var hapticFeedback = LocalHapticFeedback.current
 
     // Version name segura (sin BuildConfig)
     val versionName by remember {
@@ -134,7 +147,7 @@ fun AboutScreen(
 
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedButton(
-                    onClick = onOpenPrivacy,
+                    onClick = { context.openPrivacyUrl(url) },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(stringResource(R.string.about_privacy))
@@ -145,10 +158,58 @@ fun AboutScreen(
                 ) {
                     Text(stringResource(R.string.about_licenses_button))
                 }
+                if (BuildConfig.DEBUG) {
+                    OutlinedButton(
+                        onClick = onOpenDevTools,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Developer Metrics Tools")
+                    }
+                }
             }
             PrivacyOptionsButton()
-            ConsentDebugStatus()
+            // ===== 4.1) MÉTRICAS ANÓNIMAS (Toggle) =====
+            ElevatedCard(
+                colors = CardDefaults.elevatedCardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                ),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(
+                    Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    SectionTitle(text = stringResource(R.string.metrics_toggle_title))
+                    HorizontalDivider(
+                        thickness = 3.dp,
+                        color = MaterialTheme.colorScheme.outlineVariant
+                    )
 
+                    var enabled by remember { mutableStateOf(true) }
+                    val ctx = LocalContext.current
+
+                    LaunchedEffect(Unit) {
+                        enabled = isMetricsEnabled(ctx)
+                    }
+                        Text(stringResource(R.string.metrics_toggle_on_line))
+                    Row()
+                    {
+                        Text(stringResource(R.string.metrics_toggle_caption), Modifier.padding(horizontal = 3.dp).widthIn(max = 275.dp))
+                        Spacer(Modifier.weight(1f))
+                        Switch(
+                            checked = enabled,
+                            onCheckedChange = { new ->
+                                setMetricsEnabled(ctx, new)
+                                enabled = new
+                                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                            }
+                        )
+                    }
+                }
+            }
+        }
+
+            HorizontalDivider(thickness = 3.dp, color = MaterialTheme.colorScheme.outlineVariant)
             // Espaciado final
             Spacer(Modifier.height(6.dp))
 
@@ -161,7 +222,6 @@ fun AboutScreen(
                     .fillMaxWidth()
                     .padding(bottom = 8.dp)
             )
-        }
     }
 }
 
@@ -174,31 +234,35 @@ private fun SectionTitle(text: String) {
 }
 
 @Composable
-fun ConsentDebugStatus() {
-    val ctx = LocalContext.current
-    val info = UserMessagingPlatform.getConsentInformation(ctx)
-    val ready by remember { AdsManager.isReady }
-    Column {
-        Text("consentStatus = ${info.consentStatus}")
-        Text("privacyOptionsStatus = ${info.privacyOptionsRequirementStatus}")
-        Text("canRequestAds = ${info.canRequestAds()}")
-        Text("AdsReady = $ready")
+fun PrivacyOptionsButton(
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val activity = remember(context) { context.findActivity() }
+    var required by remember { mutableStateOf(false) }
+
+    // Este valor puede cambiar después de ConsentGate; refrescamos al entrar
+    LaunchedEffect(Unit) {
+        val info = UserMessagingPlatform.getConsentInformation(context)
+        required = (info.privacyOptionsRequirementStatus ==
+                ConsentInformation.PrivacyOptionsRequirementStatus.REQUIRED)
+    }
+
+    if (required) {
+        // Se muestra solo cuando corresponde (EEA/UK o ciertos estados de EE.UU.)
+        Button(
+            onClick = {
+                activity?.let { act ->
+                    com.google.android.ump.UserMessagingPlatform.showPrivacyOptionsForm(act) { /* FormError? */ }
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(stringResource(R.string.privacy_options_button))
+        }
     }
 }
 
-@Composable
-fun PrivacyOptionsButton() {
-    val activity = LocalContext.current.findActivity()
-    Button(onClick = {
-        if (activity != null) {
-            UserMessagingPlatform.showPrivacyOptionsForm(activity) { formError ->
-                if (UserMessagingPlatform.getConsentInformation(activity).canRequestAds()) {
-                    AdsManager.initialize(activity.applicationContext)
-                }
-            }
-        }
-    }) { Text("Privacy options / Opciones de privacidad") }
-}
 
 private fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this

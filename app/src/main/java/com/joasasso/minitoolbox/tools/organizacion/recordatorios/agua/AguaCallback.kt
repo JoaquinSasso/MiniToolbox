@@ -9,17 +9,25 @@ import com.joasasso.minitoolbox.data.flujoFrecuenciaMinutos
 import com.joasasso.minitoolbox.data.flujoObjetivo
 import com.joasasso.minitoolbox.data.flujoPorVaso
 import com.joasasso.minitoolbox.data.guardarAguaHoy
+import com.joasasso.minitoolbox.metrics.storage.AggregatesRepository
+import com.joasasso.minitoolbox.metrics.widgetUse
+import com.joasasso.minitoolbox.widgets.WidgetWaterKindResolver
 import kotlinx.coroutines.flow.first
 
 class AgregarAguaCallback : ActionCallback {
-    //Obtener el valor actual de agua desde el dataStore
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
+        //Obtener el valor actual de agua desde el dataStore
         val porVaso = context.flujoPorVaso().first()
         val actual = context.flujoAguaHoy().first()
         val nuevo = actual + porVaso
         context.guardarAguaHoy(nuevo)
 
         actualizarWidgetAgua(context)
+
+        //Agregar uso a las metricas
+        val kind = WidgetWaterKindResolver.resolve(context, glanceId) // ← mini vs normal por Receiver
+        widgetUse(context,kind)
+
 
         //Reprogramar la notificacion para beber agua
         val frecuenciaMinutos = context.flujoFrecuenciaMinutos().first()
@@ -37,6 +45,11 @@ class QuitarAguaCallback : ActionCallback {
         context.guardarAguaHoy(nuevo)
 
         actualizarWidgetAgua(context)
+
+        //Agregar uso a las metricas
+        val kind = WidgetWaterKindResolver.resolve(context, glanceId) // ← mini vs normal por Receiver
+        AggregatesRepository(context).incrementWidgetUse(kind)
+
 
         //Reprogramar la notificacion para beber agua
         val frecuenciaMinutos = context.flujoFrecuenciaMinutos().first()

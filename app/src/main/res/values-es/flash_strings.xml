@@ -17,7 +17,9 @@
     <string name="flash_help_line2">• Pulsa el botón para encender o apagar la linterna.</string>
     <string name="flash_help_line3">• El flash se apaga automáticamente al salir de la pantalla.</string>
     <string name="flash_help_line4">• Si ves un error, es posible que tu dispositivo no tenga flash o que otra app lo esté usando.</string>
-    <string name="flash_help_line5">• La linterna solo tiene una intensidad (encendido/apagado). No es posible ajustar el brillo, ya que es una limitación del hardware en casi todos los teléfonos.</string>
+    <string name="flash_help_line5">• En algunos dispositivos no es posible ajustar el brillo, esto es una limitación del dispositivo.</string>
+
+    <string name="flash_widget_recommendation">Esta app incluye dos widgets para controlar tu linterna rápidamente!</string>
 
     <!-- Widget -->
     <string name="flash_widget_level">Nivel: %1$d</string>

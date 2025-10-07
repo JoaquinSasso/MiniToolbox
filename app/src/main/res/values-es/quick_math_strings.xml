@@ -3,4 +3,12 @@
     <string name="quickmath_tiempo_restante">Tiempo restante: %.0f segundos</string>
     <string name="quickmath_record">Récord: %1$d</string>
     <string name="quickmath_puntaje">Puntaje: %1$d</string>
+
+    <!-- Quick Math / Cálculos Rápidos - Ayuda -->
+    <string name="quickmath_help_title">¿Cómo se juega?</string>
+    <string name="quickmath_help_line1">Responde operaciones antes de que se acabe el tiempo.</string>
+    <string name="quickmath_help_line2">Cada acierto suma +1 punto y acelera un poco el temporizador.</string>
+    <string name="quickmath_help_line3">Si fallas o se termina el tiempo, la partida se reinicia.</string>
+    <string name="quickmath_help_line4">El récord se guarda automáticamente cuando lo superas.</string>
+
 </resources>
