@@ -1,3 +1,5 @@
+import java.util.Properties
+
 // app/build.gradle.kts
 
 plugins {
@@ -12,14 +14,32 @@ android {
     namespace = "com.joasasso.minitoolbox"
     compileSdk = 36
 
+    val keystoreProps = Properties()
+    val keystoreFile = project.layout.projectDirectory.file("keystore.properties").asFile
+    if (keystoreFile.exists()) {
+        keystoreFile.inputStream().use { keystoreProps.load(it) }
+    }
+
     defaultConfig {
         applicationId = "com.joasasso.minitoolbox"
         minSdk = 28
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 3
+        versionName = "1.1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        // Creamos el config "release" SOLO si tenemos el archivo
+        if (keystoreProps.isNotEmpty()) {
+            create("release") {
+                storeFile = file(keystoreProps["storeFile"] as String)
+                storePassword = keystoreProps["storePassword"] as String
+                keyAlias = keystoreProps["keyAlias"] as String
+                keyPassword = keystoreProps["keyPassword"] as String
+            }
+        }
     }
 
     buildTypes {
@@ -33,6 +53,11 @@ android {
             versionNameSuffix = "-oss"         // opcional
             // si tu release tiene minifyEnabled=true y te molesta:
             // isMinifyEnabled = false
+        }
+        release {
+            isMinifyEnabled = true // puedes activarlo después con ProGuard
+            isShrinkResources = true
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 
@@ -95,6 +120,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.foundation)
     implementation(libs.androidx.runtime.saveable)
+    implementation(libs.androidx.runtime)
 
 
     // 7) Testing
@@ -138,5 +164,8 @@ dependencies {
     implementation(libs.reorderable)
 
     implementation(libs.play.services.oss.licenses)
+    implementation(libs.billing.ktx)
+    implementation(libs.androidx.browser)
 
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
 }

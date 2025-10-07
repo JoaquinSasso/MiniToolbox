@@ -22,7 +22,11 @@
     <string name="compass_help_title">Acerca de Brújula</string>
     <string name="compass_help_line1">• Para qué sirve: Muestra una brújula digital que indica la dirección norte.</string>
     <string name="compass_help_line2">• Usa los sensores del teléfono para detectar orientación y rotación.</string>
-    <string name="compass_help_line3">• La flecha central apunta siempre al norte magnético.</string>
-    <string name="compass_help_line4">• Las direcciones cardinales se mantienen fijas.</string>
+    <string name="compass_help_line3">• El triángulo fijo superior marca el norte magnético; el dial gira por debajo.</string>
+    <string name="compass_help_line4">• Las etiquetas N/NE/E/SE/S/SO/O/NO se desplazan por el anillo y permanecen verticales para una lectura clara.</string>
+    <string name="compass_help_line5">• Requiere magnetómetro; si el dispositivo no lo tiene, la brújula no está disponible.</string>
+
+    <string name="compass_mode_magnetic">Magnetico</string>
+    <string name="compass_mode_gps">GPS</string>
 
 </resources>

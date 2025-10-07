@@ -17,4 +17,8 @@
     <string name="truco_reset_title">Start new game</string>
     <string name="truco_reset_message">Are you sure you want to start a new game?\nThis will reset the current score.</string>
 
+    <string name="truco_winner_title">The game is over</string>
+    <string name="truco_winner_our">We won! They were left %1$s points behind.</string>
+    <string name="truco_winner_their">They won! We were left %1$s points behind.</string>
+
 </resources>

@@ -44,4 +44,16 @@ Si la app te resulta útil, para mí ya valió la pena.
         <item>Iconic Arts</item>
         <item>RIkas Dzihab</item>
     </string-array>
+
+    <string name="privacy_options_button">Opciones de privacidad</string>
+    <string name="no_navigator_available">No hay navegador disponible.</string>
+
+    <string name="about_metrics_description">Ayudá a mejorar MiniToolbox enviando métricas de uso anónimas</string>
+    <string name="about_metrics_label">Métricas anónimas</string>
+
+    <string name="metrics_toggle_title">Privacidad y análisis</string>
+    <string name="metrics_toggle_on_line">Enviar métricas anónimas</string>
+    <string name="metrics_toggle_off_line">No enviar métricas anónimas</string>
+    <string name="metrics_toggle_caption">Ayuda a mejorar MiniToolbox con datos de uso agregados y sin información personal. Puedes cambiarlo en cualquier momento.</string>
+
 </resources>

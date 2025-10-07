@@ -22,7 +22,12 @@
     <string name="compass_help_title">About the Compass</string>
     <string name="compass_help_line1">• What it does: Displays a digital compass pointing north.</string>
     <string name="compass_help_line2">• Uses the phone\'s sensors to detect orientation and rotation.</string>
-    <string name="compass_help_line3">• The center arrow always points to magnetic north.</string>
-    <string name="compass_help_line4">• The cardinal directions are fixed around the circle.</string>
+    <string name="compass_help_line3">• The fixed top triangle marks magnetic north; the dial rotates beneath it.</string>
+    <string name="compass_help_line4">• The N/NE/E/SE/S/SW/W/NW labels move around the ring but remain upright for easy reading.</string>
+    <string name="compass_help_line5">• Requires a magnetometer; devices without it won’t support the compass.</string>
+
+    <string name="compass_mode_magnetic">Magnetic</string>
+    <string name="compass_mode_gps">GPS</string>
+
 
 </resources>

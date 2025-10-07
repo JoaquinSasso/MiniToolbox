@@ -3,4 +3,12 @@
     <string name="quickmath_tiempo_restante">Time left: %.0f seconds</string>
     <string name="quickmath_record">High Score: %1$d</string>
     <string name="quickmath_puntaje">Score: %1$d</string>
+
+    <!-- Quick Math - Help -->
+    <string name="quickmath_help_title">How to Play</string>
+    <string name="quickmath_help_line1">Answer math problems before time runs out.</string>
+    <string name="quickmath_help_line2">Each correct answer gives +1 point and speeds up the timer slightly.</string>
+    <string name="quickmath_help_line3">If you miss or time runs out, the game restarts.</string>
+    <string name="quickmath_help_line4">Your high score is saved automatically when you beat it.</string>
+
 </resources>

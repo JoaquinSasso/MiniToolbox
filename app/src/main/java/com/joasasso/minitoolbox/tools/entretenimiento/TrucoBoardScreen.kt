@@ -322,6 +322,42 @@ fun TrucoScoreBoardScreen(onBack: () -> Unit) {
             }
         )
     }
+    if (ourPoints == maxPoints || theirPoints == maxPoints)
+    {
+        AlertDialog(
+            onDismissRequest = {},
+            title = { Text(stringResource(R.string.truco_winner_title)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (ourPoints == maxPoints) {
+                    Text(stringResource(R.string.truco_winner_our, maxPoints - theirPoints))
+                } else {
+                    Text(stringResource(R.string.truco_winner_their, maxPoints - ourPoints))
+                }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    resetPoints()
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                }) {
+                    Text(stringResource(R.string.truco_reset_title))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    if (ourPoints == maxPoints) {
+                        ourPoints = 29
+                    } else {
+                        theirPoints = 29
+                    }
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
 }
 
     suspend fun confirmResetDialog(

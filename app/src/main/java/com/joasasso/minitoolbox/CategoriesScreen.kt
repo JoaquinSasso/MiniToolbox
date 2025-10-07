@@ -112,7 +112,7 @@ fun CategoriesScreen(
     val baseListForCategory = if (selectedCategory == ToolCategory.Favoritos) {
         favoritesTools                    // ← respeta el orden guardado
     } else {
-        tools.filter { it.category == selectedCategory }.sortedBy { it.subCategory }
+        tools.filter { it.category == selectedCategory }.sortedBy { it.subCategory }.reversed()
     }
 
     // Estado de scroll por categoría (persistente)

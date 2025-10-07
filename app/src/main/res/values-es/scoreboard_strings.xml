@@ -24,4 +24,6 @@
     <string name="marcador_editar_equipo_nombre">Nombre del equipo</string>
     <string name="marcador_editar_equipo_color">Color del equipo</string>
 
+    <string name="marcador_no_hay_equipos">No hay equipos todavía. Toca el botón\n+ Agregar equipo para agregar un nuevo equipo.</string>
+
 </resources>

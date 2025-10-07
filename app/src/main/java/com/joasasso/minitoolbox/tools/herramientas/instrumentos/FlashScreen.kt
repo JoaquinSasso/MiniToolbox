@@ -291,6 +291,12 @@ fun FlashScreen(onBack: () -> Unit) {
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        text = stringResource(R.string.flash_widget_recommendation),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
 
                 if (errorMsg != 0) {

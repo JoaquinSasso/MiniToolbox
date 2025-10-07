@@ -134,6 +134,21 @@ fun MarcadorEquiposScreen(onBack: () -> Unit) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            if (equipos.isEmpty()) {
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                    ) {
+                        Text(
+                            text = stringResource(R.string.marcador_no_hay_equipos),
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.fillMaxWidth().padding(all = 16.dp))
+                    }
+                }
+            }
             itemsIndexed(equipos) { index, equipo ->
                 val textColor = getContrastingTextColor(equipo.color)
                 Card(
