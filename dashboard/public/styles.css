@@ -1,0 +1,28 @@
+:root {
+   --card-gap: 0.75rem;
+ }
+ 
+ body {
+   background: var(--bs-body-bg);
+ }
+ 
+ .card-title {
+   margin-bottom: 0.5rem;
+ }
+ 
+ .navbar {
+   backdrop-filter: saturate(120%) blur(6px);
+ }
+ 
+ .table td, .table th {
+   white-space: nowrap;
+   vertical-align: middle;
+ }
+ 
+ 
+ @media (max-width: 575.98px) {
+   #summaryCards .card-body {
+     padding: .75rem;
+   }
+ }
+ 

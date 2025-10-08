@@ -97,7 +97,7 @@ class MainActivity : AppCompatActivity() {
                         ) {
                             MiniToolboxNavGraph(
                                 navController = navController,
-                                shouldShowAds = shouldShowAds,
+                                shouldShowAds = if (BuildConfig.DEBUG) false else shouldShowAds,
                                 interstitialAdUnitId = if (BuildConfig.DEBUG)
                                     getString(R.string.admob_interstitial_test)
                                 else

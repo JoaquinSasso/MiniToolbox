@@ -1,0 +1,21 @@
+{
+	"hosting": {
+		"public": "public",
+		"ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+		"rewrites": [
+			{
+				"source": "/api/metricsSummary",
+				"function": { "functionId": "metricsSummary", "region": "us-central1" }
+			},
+			{
+				"source": "/api/metricsDaily",
+				"function": { "functionId": "metricsDaily", "region": "us-central1" }
+			},
+			{
+				"source": "/api/ingest",
+				"function": { "functionId": "ingest", "region": "us-central1" }
+			},
+			{ "source": "**", "destination": "/index.html" }
+		]
+	}
+}
