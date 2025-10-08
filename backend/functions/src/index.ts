@@ -1,48 +1,38 @@
 import { onRequest } from "firebase-functions/v2/https";
-
 import { initializeApp } from "firebase-admin/app";
 import {
 	getFirestore,
 	FieldValue,
 	Firestore,
 	FieldPath,
+	Timestamp,
 } from "firebase-admin/firestore";
 import { defineSecret } from "firebase-functions/params";
 import { validateBody, type IngestBody } from "./validate.js";
-import crypto from "crypto";
 
 initializeApp();
 const db = getFirestore();
 
 const METRICS_API_KEY = defineSecret("METRICS_API_KEY");
-
-// NEW (read endpoints): API key separada para lectura (opcional)
 const READ_METRICS_API_KEY = defineSecret("READ_METRICS_API_KEY");
 
-+function json(res: any, code: number, obj: any) {
-	res.setHeader("Content-Type", "application/json; charset=utf-8");
-	res.status(code).send(JSON.stringify(obj));
-};
-
+// ------------ Helpers ------------
 function monthFromDay(day: string): string {
 	// "YYYY-MM-DD" -> "YYYY-MM"
 	return day.slice(0, 7);
 }
-
 function dailyCollection(db: Firestore, month: string) {
 	return db.collection("metrics_daily").doc(month).collection("days");
 }
-
 function sendJson(res: any, code: number, obj: any) {
-	// Express-style
-	if (typeof res.setHeader === "function") {
-		res.setHeader("Content-Type", "application/json; charset=utf-8");
-	}
-	if (typeof res.status === "function" && typeof res.send === "function") {
-		return res.status(code).send(JSON.stringify(obj));
-	}
-	// Fallback (por si cambia algo en el futuro)
 	try {
+		if (typeof res.setHeader === "function") {
+			res.setHeader("Content-Type", "application/json; charset=utf-8");
+		}
+		if (typeof res.status === "function" && typeof res.send === "function") {
+			res.status(code).send(JSON.stringify(obj));
+			return;
+		}
 		res.writeHead?.(code, {
 			"Content-Type": "application/json; charset=utf-8",
 		});
@@ -52,211 +42,40 @@ function sendJson(res: any, code: number, obj: any) {
 	}
 }
 
-function h8(s: string) {
-	try {
-		return crypto
-			.createHash("sha256")
-			.update(s || "")
-			.digest("hex")
-			.slice(0, 8);
-	} catch {
-		return "errhash";
-	}
+function readHeader(req: any, name: string): string {
+	// Express
+	const v1 = req.get?.(name) ?? req.header?.(name);
+	if (typeof v1 === "string") return v1;
+	// Fetch/Undici
+	const v2 =
+		req.headers?.get?.(name) ?? req.headers?.[String(name).toLowerCase()];
+	if (typeof v2 === "string") return v2;
+	return "";
 }
 
 function getHeaderApiKey(req: any): string {
-	const k1 = req.get?.("x-api-key") ?? req.header?.("x-api-key");
-	const k2 = req.get?.("X-API-Key") ?? req.header?.("X-API-Key");
-	const auth = req.get?.("authorization") ?? req.header?.("authorization");
-	const bearer = auth && /^Bearer\s+(.+)$/i.test(auth) ? RegExp.$1 : "";
+	const k1 = readHeader(req, "x-api-key");
+	const k2 = readHeader(req, "X-API-Key");
+	const auth = readHeader(req, "authorization");
+	const m = /^Bearer\s+(.+)$/i.exec(auth || "");
+	const bearer = m ? m[1] : "";
 	return (k1 || k2 || bearer || "").trim();
 }
 
-
-// ---------- AUTH HELPERS ----------
-function readApiKey(): string {
-	// Si hay READ_METRICS_API_KEY úsalo, sino cae a METRICS_API_KEY
-	const readK = READ_METRICS_API_KEY.value();
-	if (readK && readK.trim() !== "") return readK.trim();
-	return METRICS_API_KEY.value() || "";
-}
-
-
-
-// ---------- INGEST (TU CÓDIGO EXISTENTE) ----------
-export const ingest = onRequest({ secrets: [METRICS_API_KEY] }, async (req, res) => {
-	try {
-		if (req.method !== "POST") {
-			return sendJson(res, 405, { ok: false, error: "method_not_allowed" });
-		}
-		const apiKey = getHeaderApiKey(req);
-
-		//DEBUG POR ERROR DE KEY
-		const readK = (READ_METRICS_API_KEY.value() || "").trim();
-		const writeK = (METRICS_API_KEY.value() || "").trim();
-
-		console.log("[metricsSummary] auth_debug", {
-			got_len: apiKey.length,
-			got_h8: h8(apiKey),
-			read_len: readK.length,
-			read_h8: h8(readK),
-			write_len: writeK.length,
-			write_h8: h8(writeK),
-			eq_read: apiKey === readK,
-			eq_write: apiKey === writeK,
-			hdrs: Object.keys(req.headers || {}).slice(0, 20),
-			origin: req.headers?.origin || "",
-			host: req.headers?.host || "",
-		});
-
-		// *** parche robusto: aceptar READ o WRITE en endpoints de LECTURA ***
-		if (!(apiKey && (apiKey === readK || apiKey === writeK))) {
-			return sendJson(res, 401, { ok: false, error: "unauthorized" });
-		}
-		//FIN DE LA PARTE DEL DEBUG
-
-		const expected = METRICS_API_KEY.value();
-		if (!expected || apiKey !== expected) {
-			return sendJson(res, 401, { ok: false, error: "unauthorized" });
-		}
-
-		const parsed = validateBody(req.body);
-		if (!parsed.ok) {
-			return sendJson(res, 400, {
-				ok: false,
-				error: parsed.error ?? "invalid",
-			});
-		}
-		const body = parsed.data as IngestBody;
-
-		const batchRef = db.collection("metrics_ingest_batches").doc(body.batch_id);
-
-		let totalItems = 0;
-		let totalOpens = 0;
-
-		await db.runTransaction(async (tx) => {
-			const existsSnap = await tx.get(batchRef);
-			if (existsSnap.exists) {
-				return;
-			}
-
-			tx.create(batchRef, {
-				seenAt: FieldValue.serverTimestamp(),
-				platform: body.platform,
-				app_version: body.app_version,
-				items: (body.items ?? []).length,
-			});
-
-			for (const it of body.items) {
-				totalItems += 1;
-				const month = monthFromDay(it.day);
-				const dayRef = dailyCollection(db, month).doc(it.day);
-
-				const updates: Record<string, any> = {
-					"meta.updatedAt": FieldValue.serverTimestamp(),
-					[`meta.seenVersions.${body.platform}.${body.app_version}`]: true,
-				};
-				const inc = (n: number) => FieldValue.increment(n);
-
-				if ((it.app_open ?? 0) > 0) {
-					updates["totals.app_open"] = inc(it.app_open ?? 0);
-					totalOpens += it.app_open ?? 0;
-				}
-
-				if (it.tools) {
-					for (const [k, v] of Object.entries(it.tools)) {
-						if (v > 0) updates[`tools.${k}`] = inc(v);
-					}
-				}
-
-				if (it.ads) {
-					for (const [k, v] of Object.entries(it.ads)) {
-						if (v > 0) updates[`ads.${k}`] = inc(v);
-					}
-				}
-
-				if ((it as any).versions) {
-					for (const [ver, v] of Object.entries(
-						(it as any).versions as Record<string, number>
-					)) {
-						if (v > 0) updates[`versions.${ver}`] = inc(v);
-					}
-				}
-
-				if ((it as any).versions_first_seen) {
-					for (const [ver, v] of Object.entries(
-						(it as any).versions_first_seen as Record<string, number>
-					)) {
-						if (v > 0) updates[`versions_first_seen.${ver}`] = inc(v);
-					}
-				}
-
-				const lp = (it as any).lang_primary as
-					| Record<string, number>
-					| undefined;
-				if (lp) {
-					for (const [lang, v] of Object.entries(lp)) {
-						if (v > 0) updates[`lang.primary.${lang}`] = inc(v);
-					}
-				}
-				const ls = (it as any).lang_secondary as
-					| Record<string, number>
-					| undefined;
-				if (ls) {
-					for (const [lang, v] of Object.entries(ls)) {
-						if (v > 0) updates[`lang.secondary.${lang}`] = inc(v);
-					}
-				}
-
-				const w = (it as any).widgets as Record<string, number> | undefined;
-				if (w) {
-					for (const [kind, v] of Object.entries(w)) {
-						if (v > 0) updates[`widgets.${kind}`] = inc(v);
-					}
-				}
-
-				tx.set(dayRef, updates, { merge: true });
-			}
-		});
-
-		await db.collection("metrics_ingest_logs").doc().set({
-			at: FieldValue.serverTimestamp(),
-			batch_id: body.batch_id,
-			platform: body.platform,
-			app_version: body.app_version,
-			total_items: totalItems,
-			total_app_open_delta: totalOpens,
-		});
-
-		return sendJson(res, 200, { ok: true });
-	} catch (e) {
-		console.error("ingest_error", e);
-		return sendJson(res, 500, { ok: false, error: "internal" });
-	}
-});
-
-// ---------- NEW (read endpoints) ----------
-
-// Utils de fechas
+// ------------ Date utils ------------
 function parseYmd(s: string): Date | null {
 	if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
 	const [y, m, d] = s.split("-").map((x) => parseInt(x, 10));
 	const dt = new Date(Date.UTC(y, m - 1, d));
 	return isNaN(dt.getTime()) ? null : dt;
 }
-function ymd(d: Date): string {
-	const y = d.getUTCFullYear();
-	const m = String(d.getUTCMonth() + 1).padStart(2, "0");
-	const da = String(d.getUTCDate()).padStart(2, "0");
-	return `${y}-${m}-${da}`;
-}
+
 function addDays(d: Date, n: number): Date {
 	const t = new Date(d.getTime());
 	t.setUTCDate(t.getUTCDate() + n);
 	return t;
 }
 function monthsBetween(from: string, to: string): string[] {
-	// from/to: YYYY-MM-DD
 	const ym = (s: string) => s.slice(0, 7);
 	const out: string[] = [];
 	const [fy, fm] = ym(from).split("-").map(Number);
@@ -274,6 +93,19 @@ function monthsBetween(from: string, to: string): string[] {
 	return out;
 }
 
+// TZ helper para summary
+const DEFAULT_TZ = "America/Argentina/San_Juan";
+function ymdTZ(d: Date, tz: string): string {
+	// 'en-CA' => YYYY-MM-DD
+	return new Intl.DateTimeFormat("en-CA", {
+		timeZone: tz,
+		year: "numeric",
+		month: "2-digit",
+		day: "2-digit",
+	}).format(d);
+}
+
+// ------------ Tipos + normalización ------------
 type DailyDoc = {
 	day: string;
 	totals: {
@@ -291,6 +123,7 @@ type DailyDoc = {
 	};
 };
 
+// Para docs con claves planas (ej. "tools.linterna": 3)
 function pickPrefix(
 	obj: Record<string, any>,
 	prefix: string
@@ -306,7 +139,7 @@ function pickPrefix(
 }
 
 function normDoc(id: string, data: FirebaseFirestore.DocumentData): DailyDoc {
-	// Detección: si tiene data.tools → estructura nueva (mapa). Si no → plana.
+	// Si existen mapas, usamos esos; si no, reconstruimos desde claves planas
 	const hasNested = !!data.tools || !!data.totals;
 
 	const totals = hasNested ? data.totals || {} : {};
@@ -329,13 +162,15 @@ function normDoc(id: string, data: FirebaseFirestore.DocumentData): DailyDoc {
 
 	const widgets = hasNested ? data.widgets || {} : pickPrefix(data, "widgets");
 
-	const updatedAt = hasNested ? data?.meta?.updatedAt : data["meta.updatedAt"];
+	const updatedAt: Timestamp | any = hasNested
+		? data?.meta?.updatedAt
+		: (data as any)["meta.updatedAt"];
 
 	return {
 		day: id,
 		totals: {
 			app_open: Number(
-				hasNested ? totals.app_open ?? 0 : data["totals.app_open"] ?? 0
+				hasNested ? totals.app_open ?? 0 : (data as any)["totals.app_open"] ?? 0
 			),
 			tools,
 			ads,
@@ -354,13 +189,11 @@ function normDoc(id: string, data: FirebaseFirestore.DocumentData): DailyDoc {
 		},
 	};
 }
- 
 
 async function fetchDailyRange(from: string, to: string): Promise<DailyDoc[]> {
 	const months = monthsBetween(from, to);
 	const docs: DailyDoc[] = [];
 	for (const month of months) {
-		// Acotamos por docId (día) dentro del mes
 		const start = month === from.slice(0, 7) ? from : `${month}-01`;
 		const end = month === to.slice(0, 7) ? to : `${month}-31`;
 		const snap = await dailyCollection(db, month)
@@ -371,7 +204,6 @@ async function fetchDailyRange(from: string, to: string): Promise<DailyDoc[]> {
 
 		snap.docs.forEach((d) => docs.push(normDoc(d.id, d.data())));
 	}
-	// Orden ascendente por día
 	docs.sort((a, b) => (a.day < b.day ? -1 : a.day > b.day ? 1 : 0));
 	return docs;
 }
@@ -381,69 +213,180 @@ function sumMap(dst: Record<string, number>, src: Record<string, number>) {
 		dst[k] = (dst[k] ?? 0) + Number(v ?? 0);
 	}
 }
-
 function topK(map: Record<string, number>, k: number) {
 	return Object.entries(map)
 		.sort((a, b) => b[1] - a[1])
 		.slice(0, k);
 }
 
+// ------------ Functions ------------
+export const ingest = onRequest(
+	{ secrets: [METRICS_API_KEY] },
+	async (req, res) => {
+		try {
+			if (req.method !== "POST") {
+				sendJson(res, 405, { ok: false, error: "method_not_allowed" });
+				return;
+			}
+			const apiKey = getHeaderApiKey(req);
+			const expected = (METRICS_API_KEY.value() || "").trim();
+			if (!expected || apiKey !== expected) {
+				sendJson(res, 401, { ok: false, error: "unauthorized" });
+				return;
+			}
+
+			const parsed = validateBody(req.body);
+			if (!parsed.ok) {
+				sendJson(res, 400, { ok: false, error: parsed.error ?? "invalid" });
+				return;
+			}
+			const body = parsed.data as IngestBody;
+
+			const batchRef = db
+				.collection("metrics_ingest_batches")
+				.doc(body.batch_id);
+
+			let totalItems = 0;
+			let totalOpens = 0;
+
+			await db.runTransaction(async (tx) => {
+				const existsSnap = await tx.get(batchRef);
+				if (existsSnap.exists) return;
+
+				tx.create(batchRef, {
+					seenAt: FieldValue.serverTimestamp(),
+					platform: body.platform,
+					app_version: body.app_version,
+					items: (body.items ?? []).length,
+				});
+
+				for (const it of body.items) {
+					totalItems += 1;
+					const month = monthFromDay(it.day);
+					const dayRef = dailyCollection(db, month).doc(it.day);
+
+					const updates: Record<string, any> = {
+						"meta.updatedAt": FieldValue.serverTimestamp(),
+						[`meta.seenVersions.${body.platform}.${body.app_version}`]: true,
+					};
+					const inc = (n: number) => FieldValue.increment(n);
+
+					if ((it.app_open ?? 0) > 0) {
+						updates["totals.app_open"] = inc(it.app_open ?? 0);
+						totalOpens += it.app_open ?? 0;
+					}
+					if (it.tools) {
+						for (const [k, v] of Object.entries(it.tools)) {
+							if (v > 0) updates[`tools.${k}`] = inc(v);
+						}
+					}
+					if (it.ads) {
+						for (const [k, v] of Object.entries(it.ads)) {
+							if (v > 0) updates[`ads.${k}`] = inc(v);
+						}
+					}
+					if ((it as any).versions) {
+						for (const [ver, v] of Object.entries(
+							(it as any).versions as Record<string, number>
+						)) {
+							if (v > 0) updates[`versions.${ver}`] = inc(v);
+						}
+					}
+					if ((it as any).versions_first_seen) {
+						for (const [ver, v] of Object.entries(
+							(it as any).versions_first_seen as Record<string, number>
+						)) {
+							if (v > 0) updates[`versions_first_seen.${ver}`] = inc(v);
+						}
+					}
+					const lp = (it as any).lang_primary as
+						| Record<string, number>
+						| undefined;
+					if (lp) {
+						for (const [lang, v] of Object.entries(lp)) {
+							if (v > 0) updates[`lang.primary.${lang}`] = inc(v);
+						}
+					}
+					const ls = (it as any).lang_secondary as
+						| Record<string, number>
+						| undefined;
+					if (ls) {
+						for (const [lang, v] of Object.entries(ls)) {
+							if (v > 0) updates[`lang.secondary.${lang}`] = inc(v);
+						}
+					}
+					const w = (it as any).widgets as Record<string, number> | undefined;
+					if (w) {
+						for (const [kind, v] of Object.entries(w)) {
+							if (v > 0) updates[`widgets.${kind}`] = inc(v);
+						}
+					}
+
+					tx.set(dayRef, updates, { merge: true });
+				}
+			});
+
+			await db.collection("metrics_ingest_logs").doc().set({
+				at: FieldValue.serverTimestamp(),
+				batch_id: body.batch_id,
+				platform: body.platform,
+				app_version: body.app_version,
+				total_items: totalItems,
+				total_app_open_delta: totalOpens,
+			});
+
+			sendJson(res, 200, { ok: true });
+			return;
+		} catch (e) {
+			console.error("ingest_error", e);
+			sendJson(res, 500, { ok: false, error: "internal" });
+			return;
+		}
+	}
+);
+
 export const metricsDaily = onRequest(
 	{ secrets: [READ_METRICS_API_KEY, METRICS_API_KEY] },
 	async (req, res) => {
 		try {
-			if (req.method !== "GET")
-				return sendJson(res, 405, { ok: false, error: "method_not_allowed" });
-
+			if (req.method !== "GET") {
+				sendJson(res, 405, { ok: false, error: "method_not_allowed" });
+				return;
+			}
 			const apiKey = getHeaderApiKey(req);
-
-			//DEBUG POR ERROR DE KEY
 			const readK = (READ_METRICS_API_KEY.value() || "").trim();
 			const writeK = (METRICS_API_KEY.value() || "").trim();
-
-			console.log("[metricsSummary] auth_debug", {
-				got_len: apiKey.length,
-				got_h8: h8(apiKey),
-				read_len: readK.length,
-				read_h8: h8(readK),
-				write_len: writeK.length,
-				write_h8: h8(writeK),
-				eq_read: apiKey === readK,
-				eq_write: apiKey === writeK,
-				hdrs: Object.keys(req.headers || {}).slice(0, 20),
-				origin: req.headers?.origin || "",
-				host: req.headers?.host || "",
-			});
-
-			// *** parche robusto: aceptar READ o WRITE en endpoints de LECTURA ***
+			// Lectura acepta READ o WRITE
 			if (!(apiKey && (apiKey === readK || apiKey === writeK))) {
-				return sendJson(res, 401, { ok: false, error: "unauthorized" });
+				sendJson(res, 401, { ok: false, error: "unauthorized" });
+				return;
 			}
-			//FIN DE LA PARTE DEL DEBUG
-
-			const expected = readApiKey();
-			if (!expected || apiKey !== expected)
-				return sendJson(res, 401, { ok: false, error: "unauthorized" });
 
 			const from = String(req.query.from || "").trim();
 			const to = String(req.query.to || "").trim();
 			const df = parseYmd(from);
 			const dt = parseYmd(to);
-			if (!df || !dt)
-				return sendJson(res, 400, { ok: false, error: "bad_range" });
-			if (df.getTime() > dt.getTime())
-				return sendJson(res, 400, { ok: false, error: "bad_range_order" });
-
-			// límite de seguridad: 400 días
+			if (!df || !dt) {
+				sendJson(res, 400, { ok: false, error: "bad_range" });
+				return;
+			}
+			if (df.getTime() > dt.getTime()) {
+				sendJson(res, 400, { ok: false, error: "bad_range_order" });
+				return;
+			}
 			const max = addDays(df, 400);
-			if (dt.getTime() > max.getTime())
-				return sendJson(res, 400, { ok: false, error: "range_too_large" });
+			if (dt.getTime() > max.getTime()) {
+				sendJson(res, 400, { ok: false, error: "range_too_large" });
+				return;
+			}
 
 			const rows = await fetchDailyRange(from, to);
-			return sendJson(res, 200, rows);
+			sendJson(res, 200, rows);
+			return;
 		} catch (e) {
 			console.error("metricsDaily_error", e);
-			return sendJson(res, 500, { ok: false, error: "internal" });
+			sendJson(res, 500, { ok: false, error: "internal" });
+			return;
 		}
 	}
 );
@@ -452,47 +395,27 @@ export const metricsSummary = onRequest(
 	{ secrets: [READ_METRICS_API_KEY, METRICS_API_KEY] },
 	async (req, res) => {
 		try {
-			if (req.method !== "GET")
-				return sendJson(res, 405, { ok: false, error: "method_not_allowed" });
-
+			if (req.method !== "GET") {
+				sendJson(res, 405, { ok: false, error: "method_not_allowed" });
+				return;
+			}
 			const apiKey = getHeaderApiKey(req);
-			
-			//DEBUG POR ERROR DE KEY
 			const readK = (READ_METRICS_API_KEY.value() || "").trim();
 			const writeK = (METRICS_API_KEY.value() || "").trim();
-
-			console.log("[metricsSummary] auth_debug", {
-				got_len: apiKey.length,
-				got_h8: h8(apiKey),
-				read_len: readK.length,
-				read_h8: h8(readK),
-				write_len: writeK.length,
-				write_h8: h8(writeK),
-				eq_read: apiKey === readK,
-				eq_write: apiKey === writeK,
-				hdrs: Object.keys(req.headers || {}).slice(0, 20),
-				origin: req.headers?.origin || "",
-				host: req.headers?.host || "",
-			});
-
-			// *** parche robusto: aceptar READ o WRITE en endpoints de LECTURA ***
+			// Lectura acepta READ o WRITE
 			if (!(apiKey && (apiKey === readK || apiKey === writeK))) {
-				return sendJson(res, 401, { ok: false, error: "unauthorized" });
+				sendJson(res, 401, { ok: false, error: "unauthorized" });
+				return;
 			}
-			//FIN DE LA PARTE DEL DEBUG
-
-			const expected = readApiKey();
-			if (!expected || apiKey !== expected)
-				return sendJson(res, 401, { ok: false, error: "unauthorized" });
 
 			const last = Math.max(1, Math.min(400, Number(req.query.last ?? 30)));
-			const today = new Date();
-			const to = ymd(today);
-			const from = ymd(addDays(today, -(last - 1)));
+			const tz = String(req.query.tz || DEFAULT_TZ);
+			const now = new Date();
+			const to = ymdTZ(now, tz);
+			const from = ymdTZ(addDays(now, -(last - 1)), tz);
 
 			const rows = await fetchDailyRange(from, to);
 
-			// Agregados del rango
 			let total_app_open = 0;
 			const agg_tools: Record<string, number> = {};
 			const agg_ads: Record<string, number> = {};
@@ -526,10 +449,12 @@ export const metricsSummary = onRequest(
 					widgets: topK(agg_widgets, 10),
 				},
 			};
-			return sendJson(res, 200, payload);
+			sendJson(res, 200, payload);
+			return;
 		} catch (e) {
 			console.error("metricsSummary_error", e);
-			return sendJson(res, 500, { ok: false, error: "internal" });
+			sendJson(res, 500, { ok: false, error: "internal" });
+			return;
 		}
 	}
 );
