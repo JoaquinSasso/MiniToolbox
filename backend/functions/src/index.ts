@@ -5,7 +5,6 @@ import {
 	FieldValue,
 	Firestore,
 	FieldPath,
-	Timestamp,
 } from "firebase-admin/firestore";
 import { defineSecret } from "firebase-functions/params";
 import { validateBody, type IngestBody } from "./validate.js";
@@ -61,6 +60,123 @@ function getHeaderApiKey(req: any): string {
 	const bearer = m ? m[1] : "";
 	return (k1 || k2 || bearer || "").trim();
 }
+
+// --- Tools: legacy route -> canonical route (SIN "tool." aquí) ---
+const TOOL_ROUTE_MAP: Record<string, string> = {
+	// Ignoradas (no son herramientas)
+	"tool.": "",
+	"tools": "",
+	"dev": "",
+ 
+	// tools
+	"random_color_generator": "random_color",
+	"group_selector": "group_selector",
+	"coin_flip": "coin_flip",
+	"decimal_binary_converter": "decimal_binary",
+	"text_binary_converter": "text_binary",
+	"truco_score_board": "truco_scoreboard",
+	"age_calculator": "age_calculator",
+	"zodiac_sign": "zodiac_sign",
+	"pomodoro": "pomodoro",
+	"bubble_level": "bubble_level",
+	"porcentaje": "percentage",
+	"conversor_horas": "time_converter",
+	"calculadora_de_imc": "bmi_calculator",
+	"conversor_romanos": "roman_numerals",
+	"conversor_unidades": "unit_converter",
+	"generador_contrasena": "password_generator",
+	"sugeridor_actividades": "activity_suggester",
+	"generador_nombres": "name_generator",
+	"generador_qr": "qr_generator",
+	"generador_vcard": "vcard_generator",
+	"lorem_ipsum": "lorem_ipsum",
+	"regla": "ruler",
+	"medidor_luz": "light_meter",
+	"linterna": "flashlight",
+	"rachas": "streaks",
+	"agua": "water",
+	"estadisticas_agua": "water_stats",
+	"tiempo_hasta": "countdown",
+	"paises_info": "countries_info",
+	"ruleta_selectora": "selector_wheel",
+	"adivina_bandera": "guess_flag",
+	"crear_reunion": "meeting_create",
+	"reuniones": "meetings",
+	"detalles_reunion": "meeting_detail",
+	"editar_gasto": "expense_edit",
+	"agregar_gasto": "expense_add",
+	"dados": "dice",
+	"calculos_rapidos": "quick_calcs",
+	"frases": "quotes",
+	"mi_yo_del_multiverso": "multiverse_me",
+	"adivina_capital": "guess_capital",
+	"brujula": "compass",
+	"to_do": "todo",
+	"eventos": "events",
+	"interes_compuesto": "compound_interest",
+	"scoreboard": "scoreboard",
+	"magnifier": "magnifier",
+	"ar_ruler": "ar_ruler",
+	"ruido": "noise",
+ };
+ 
+function mergeCounts(
+	a: Record<string, number>,
+	b: Record<string, number>
+): Record<string, number> {
+	const out: Record<string, number> = { ...(a || {}) };
+	for (const [k, v] of Object.entries(b || {})) {
+		out[k] = (out[k] ?? 0) + Number(v || 0);
+	}
+	return out;
+}
+
+// Quita prefijos accidentales en keys de tools dentro de maps guardados
+function stripToolKeyInMap(
+	map: Record<string, number>
+): Record<string, number> {
+	const out: Record<string, number> = {};
+	for (const [k, v] of Object.entries(map || {})) {
+		let kk = k;
+		if (kk.startsWith("tools.")) kk = kk.slice(6);
+		else if (kk.startsWith("tool.")) kk = kk.slice(5);
+		const ck = canonToolKey(kk);
+		if (!ck) continue;
+		out[ck] = (out[ck] ?? 0) + Number(v || 0);
+	}
+	return out;
+}
+
+
+// Quita prefijos comunes que puedan venir del cliente
+function stripToolPrefix(raw: string): string {
+  if (!raw) return raw;
+  if (raw.startsWith("tools.")) return raw.slice("tools.".length);
+  if (raw.startsWith("tool."))  return raw.slice("tool.".length);
+  return raw;
+}
+
+// Canonicaliza una clave (route vieja → nueva) y quita prefijos si vinieron en payload
+function canonToolKey(raw: string): string | null {
+  if (!raw) return null;
+  const noPrefix = stripToolPrefix(raw);
+  const m = TOOL_ROUTE_MAP[noPrefix];
+  if (m === "") return null;               // explícitamente ignorada
+  return (m || noPrefix).trim();
+}
+
+ 
+ // Re-mapea un objeto {clave: número} a sus claves canónicas, agregando si hay colisiones
+ function remapToolCounters(map: Record<string, number> | undefined): Record<string, number> {
+	const out: Record<string, number> = {};
+	for (const [k, v] of Object.entries(map || {})) {
+	  const ck = canonToolKey(k);
+	  if (!ck) continue;
+	  out[ck] = (out[ck] ?? 0) + Number(v || 0);
+	}
+	return out;
+ }
+ 
 
 // ------------ Date utils ------------
 function parseYmd(s: string): Date | null {
@@ -139,40 +255,71 @@ function pickPrefix(
 }
 
 function normDoc(id: string, data: FirebaseFirestore.DocumentData): DailyDoc {
-	// Si existen mapas, usamos esos; si no, reconstruimos desde claves planas
-	const hasNested = !!data.tools || !!data.totals;
+	// Para CADA familia combinamos: (map si existe) + (planos con prefijo),
+	// en lugar de elegir solo uno. Así soporta docs "mixtos".
 
-	const totals = hasNested ? data.totals || {} : {};
-	const tools = hasNested ? data.tools || {} : pickPrefix(data, "tools");
-	const ads = hasNested ? data.ads || {} : pickPrefix(data, "ads");
-	const versions = hasNested
-		? data.versions || {}
-		: pickPrefix(data, "versions");
-	const versions_first_seen = hasNested
-		? data.versions_first_seen || {}
-		: pickPrefix(data, "versions_first_seen");
+	// --- tools ---
+	const toolsNested =
+		data.tools && typeof data.tools === "object" ? data.tools : {};
+	const toolsFlat = pickPrefix(data, "tools");
+	// Limpia prefijos dentro del map y mapea legacy→canónico; también suma flat
+	const toolsCanon = mergeCounts(
+		stripToolKeyInMap(toolsNested),
+		remapToolCounters(toolsFlat)
+	);
 
-	const lang_nested = hasNested ? data.lang || {} : {};
-	const lang_primary = hasNested
-		? lang_nested.primary || {}
-		: pickPrefix(data, "lang.primary");
-	const lang_secondary = hasNested
-		? lang_nested.secondary || {}
-		: pickPrefix(data, "lang.secondary");
+	// --- ads ---
+	const adsNested = data.ads && typeof data.ads === "object" ? data.ads : {};
+	const adsFlat = pickPrefix(data, "ads");
+	const ads = mergeCounts(adsNested, adsFlat);
 
-	const widgets = hasNested ? data.widgets || {} : pickPrefix(data, "widgets");
+	// --- versions ---
+	const versionsNested =
+		data.versions && typeof data.versions === "object" ? data.versions : {};
+	const versionsFlat = pickPrefix(data, "versions");
+	const versions = mergeCounts(versionsNested, versionsFlat);
 
-	const updatedAt: Timestamp | any = hasNested
-		? data?.meta?.updatedAt
-		: (data as any)["meta.updatedAt"];
+	// --- versions_first_seen ---
+	const vfsNested =
+		data.versions_first_seen && typeof data.versions_first_seen === "object"
+			? data.versions_first_seen
+			: {};
+	const vfsFlat = pickPrefix(data, "versions_first_seen");
+	const versions_first_seen = mergeCounts(vfsNested, vfsFlat);
+
+	// --- widgets ---
+	const widgetsNested =
+		data.widgets && typeof data.widgets === "object" ? data.widgets : {};
+	const widgetsFlat = pickPrefix(data, "widgets");
+	const widgets = mergeCounts(widgetsNested, widgetsFlat);
+
+	// --- lang ---
+	const langNested =
+		data.lang && typeof data.lang === "object" ? data.lang : {};
+	const lang_primary = mergeCounts(
+		langNested.primary || {},
+		pickPrefix(data, "lang.primary")
+	);
+	const lang_secondary = mergeCounts(
+		langNested.secondary || {},
+		pickPrefix(data, "lang.secondary")
+	);
+
+	// --- totals.app_open ---
+	const appOpenNested = Number((data.totals && data.totals.app_open) || 0);
+	const appOpenFlat = Number((data as any)["totals.app_open"] || 0);
+	const app_open = appOpenNested + appOpenFlat;
+
+	// --- meta.updatedAt ---
+	const updatedAtNested = data?.meta?.updatedAt;
+	const updatedAtFlat = (data as any)["meta.updatedAt"];
+	const updatedAt: any = updatedAtNested ?? updatedAtFlat;
 
 	return {
 		day: id,
 		totals: {
-			app_open: Number(
-				hasNested ? totals.app_open ?? 0 : (data as any)["totals.app_open"] ?? 0
-			),
-			tools,
+			app_open,
+			tools: toolsCanon,
 			ads,
 			versions,
 			versions_first_seen,
@@ -189,6 +336,7 @@ function normDoc(id: string, data: FirebaseFirestore.DocumentData): DailyDoc {
 		},
 	};
 }
+
 
 async function fetchDailyRange(from: string, to: string): Promise<DailyDoc[]> {
 	const months = monthsBetween(from, to);
@@ -275,11 +423,20 @@ export const ingest = onRequest(
 						updates["totals.app_open"] = inc(it.app_open ?? 0);
 						totalOpens += it.app_open ?? 0;
 					}
+
 					if (it.tools) {
-						for (const [k, v] of Object.entries(it.tools)) {
-							if (v > 0) updates[`tools.${k}`] = inc(v);
+						const tmp: Record<string, number> = {};
+						for (const [rawKey, v] of Object.entries(it.tools)) {
+							const ck = canonToolKey(rawKey); // <- ahora quita prefijos y mapea
+							if (!ck) continue;
+							const n = Number(v || 0);
+							if (n > 0) tmp[ck] = (tmp[ck] || 0) + n;
+						}
+						for (const [ck, n] of Object.entries(tmp)) {
+							updates[`tools.${ck}`] = inc(n); // <- siempre “tools.<canónica>”
 						}
 					}
+
 					if (it.ads) {
 						for (const [k, v] of Object.entries(it.ads)) {
 							if (v > 0) updates[`ads.${k}`] = inc(v);
@@ -322,7 +479,11 @@ export const ingest = onRequest(
 						}
 					}
 
-					tx.set(dayRef, updates, { merge: true });
+					// Asegura que el doc exista (update falla si no existe)
+					tx.set(dayRef, {}, { merge: true });
+
+					// Aplica incrementos y rutas anidadas reales
+					tx.update(dayRef, updates);
 				}
 			});
 
