@@ -386,7 +386,12 @@ fun CategoriesScreen(
                                 itemsIndexed(favRoutes, key = { _, route -> route }) { index, route ->
                                     val tool = tools.find { it.screen.route == route } ?: return@itemsIndexed
                                     val toolsForDecor = favRoutes.mapNotNull { r -> tools.find { it.screen.route == r } }
-                                    val decor = groupDecorBySubcategory(index, toolsForDecor)
+                                    val decorIndex = toolsForDecor.indexOfFirst { it.screen.route == route }
+                                    val decor = if (decorIndex >= 0) {
+                                        groupDecorBySubcategory(decorIndex, toolsForDecor)
+                                    } else {
+                                        groupDecorBySubcategory(index, toolsForDecor)
+                                    }
 
                                     ReorderableItem(reorderState, key = route) { isDragging ->
                                         val elev = animateDpAsState(
