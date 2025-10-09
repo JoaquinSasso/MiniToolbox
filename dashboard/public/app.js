@@ -3,24 +3,46 @@ const LS_BASE = "metrics_api_base";
 const LS_KEY = "metrics_api_key";
 const TOP_K = 5;
 
-function getSettings() {
-	return {
-		base: localStorage.getItem(LS_BASE) || "",
-		key: localStorage.getItem(LS_KEY) || "",
-	};
-}
-function setSettings({ base, key }) {
-	if (base != null) localStorage.setItem(LS_BASE, base.trim());
-	if (key != null) localStorage.setItem(LS_KEY, key.trim());
+// ---- Theme ----
+const LS_THEME = "metrics_theme";
+
+// ---- Chart Instances ----
+let chOpens,
+	chTools,
+	chAds,
+	chVersions,
+	chLang,
+	chBarTools,
+	chPieAds,
+	chPieVersions,
+	chPieVersionsFS,
+	chPieWidgets;
+
+/**
+ * Aplica el tema (claro u oscuro) a la página y a los gráficos.
+ * @param {'light' | 'dark'} theme - El tema a aplicar.
+ */
+function applyTheme(theme) {
+	// 1. Aplica el tema al HTML para que el CSS de Bootstrap reaccione
+	document.documentElement.setAttribute("data-bs-theme", theme);
+
+	// 2. Define los colores para los gráficos según el tema
+	const isDark = theme === "dark";
+	const gridColor = isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)";
+	const textColor = isDark ? "#dee2e6" : "#212529";
+
+	// 3. Actualiza los colores por defecto para TODOS los futuros gráficos de Chart.js
+	Chart.defaults.color = textColor;
+	Chart.defaults.borderColor = gridColor;
 }
 
 // ---- Helpers ----
 const $ = (sel) => document.querySelector(sel);
-const $$ = (sel) => document.querySelectorAll(sel);
 
 function serialize(obj) {
 	return JSON.stringify(obj ?? {});
 }
+
 function toCSV(rows) {
 	const header = [
 		"day",
@@ -40,13 +62,13 @@ function toCSV(rows) {
 			[
 				r.day,
 				r.totals.app_open ?? 0,
-				JSON.stringify(r.totals.tools ?? {}),
-				JSON.stringify(r.totals.ads ?? {}),
-				JSON.stringify(r.totals.versions ?? {}),
-				JSON.stringify(r.totals.versions_first_seen ?? {}),
-				JSON.stringify(r.totals.lang_primary ?? {}),
-				JSON.stringify(r.totals.lang_secondary ?? {}),
-				JSON.stringify(r.totals.widgets ?? {}),
+				serialize(r.totals.tools),
+				serialize(r.totals.ads),
+				serialize(r.totals.versions),
+				serialize(r.totals.versions_first_seen),
+				serialize(r.totals.lang_primary),
+				serialize(r.totals.lang_secondary),
+				serialize(r.totals.widgets),
 				r.meta.updatedAt ?? "",
 			]
 				.map((s) => `"${String(s).replace(/"/g, '""')}"`)
@@ -55,6 +77,7 @@ function toCSV(rows) {
 	}
 	return lines.join("\n");
 }
+
 function download(name, text) {
 	const blob = new Blob([text], { type: "text/csv;charset=utf-8" });
 	const a = document.createElement("a");
@@ -65,29 +88,33 @@ function download(name, text) {
 }
 
 // ---- API ----
-// Resuelve la base efectiva: en *.web.app/*.firebaseapp.com fuerza '/api' (rewrites => sin CORS).
+// ... (El resto de tus funciones como getSettings, setSettings, resolveApiBase, apiGet, ymd, addDays, etc. van aquí sin cambios)
+function getSettings() {
+	return {
+		base: localStorage.getItem(LS_BASE) || "",
+		key: localStorage.getItem(LS_KEY) || "",
+	};
+}
+function setSettings({ base, key }) {
+	if (base != null) localStorage.setItem(LS_BASE, base.trim());
+	if (key != null) localStorage.setItem(LS_KEY, key.trim());
+}
 function resolveApiBase() {
 	const s = getSettings();
 	const onHosting =
 		location.origin.endsWith(".web.app") ||
 		location.origin.endsWith(".firebaseapp.com");
 	const onEmu = location.hostname === "localhost" && location.port === "5000";
-
-	// Base por defecto si no hay setting
 	const defaultBase =
 		onHosting || onEmu
 			? "/api"
 			: "https://us-central1-minitoolbox-7ab7d.cloudfunctions.net";
-
 	let base = (s.base || "").trim() || defaultBase;
-
-	// Si estamos en Hosting, ignoramos bases absolutas para evitar CORS y usamos siempre '/api'
 	if (onHosting && /^https?:\/\//i.test(base)) {
 		base = "/api";
 	}
 	return base;
 }
-
 async function apiGet(path, params = {}) {
 	const { key } = getSettings();
 	if (!key) throw new Error("missing_settings");
@@ -108,8 +135,6 @@ async function apiGet(path, params = {}) {
 	if (!rsp.ok) throw new Error(`http_${rsp.status}`);
 	return rsp.json();
 }
-
-// ---- Date range UI ----
 function ymd(d) {
 	const y = d.getFullYear();
 	const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -121,50 +146,46 @@ function addDays(d, n) {
 	t.setDate(t.getDate() + n);
 	return t;
 }
-
 function showCustomDates(show) {
 	$("#fromWrap").classList.toggle("d-none", !show);
 	$("#toWrap").classList.toggle("d-none", !show);
 }
-
 $("#rangePreset").addEventListener("change", (e) => {
 	showCustomDates(e.target.value === "custom");
 });
 
-// Altura fija para todos los charts (evita el bucle de resize)
 const CHART_HEIGHT = 280;
 
 function lockChartHeights() {
-  const ids = [
-    "chartOpens","chartTools","chartAds","chartVersions","chartLang",
-    "pieTools","pieAds","pieVersions","pieVersionsFS","pieWidgets"
-  ];
-  ids.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.style.height = CHART_HEIGHT + "px";
-      el.style.maxHeight = CHART_HEIGHT + "px";
-      el.style.width = "100%";           // importante para el responsive
-      el.style.display = "block";        // evita que el canvas herede inline sizing raro
-    }
-  });
+	const ids = [
+		"chartOpens",
+		"chartTools",
+		"chartAds",
+		"chartVersions",
+		"chartLang",
+		"pieAds",
+		"pieVersions",
+		"pieVersionsFS",
+		"pieWidgets",
+		"barTools",
+	];
+	ids.forEach((id) => {
+		const el = document.getElementById(id);
+		if (el) {
+			if (id === "barTools") {
+				el.parentElement.style.height = "800px";
+			} else {
+				el.style.height = CHART_HEIGHT + "px";
+				el.style.maxHeight = CHART_HEIGHT + "px";
+			}
+			el.style.width = "100%";
+			el.style.display = "block";
+		}
+	});
 }
 
-
-// ---- Charts state ----
-let chOpens,
-	chTools,
-	chAds,
-	chVersions,
-	chLang,
-	chBarTools,
-	chPieAds,
-	chPieVersions,
-	chPieVersionsFS,
-	chPieWidgets;
-
 function destroyCharts() {
-	[
+	const charts = [
 		chOpens,
 		chTools,
 		chAds,
@@ -175,23 +196,12 @@ function destroyCharts() {
 		chPieVersions,
 		chPieVersionsFS,
 		chPieWidgets,
-	]
-		.filter(Boolean)
-		.forEach((c) => c.destroy());
-	chOpens =
-		chTools =
-		chAds =
-		chVersions =
-		chLang =
-		chBarTools =
-		chPieAds =
-		chPieVersions =
-		chPieVersionsFS =
-		chPieWidgets =
-			null;
+	];
+	charts.filter(Boolean).forEach((c) => c.destroy());
 }
 
 // ---- Draw charts ----
+// ... (Todas tus funciones build* como buildLineOpens, buildStackedBar, etc. van aquí sin cambios)
 function buildLineOpens(labels, series) {
 	const ctx = $("#chartOpens");
 	chOpens = new Chart(ctx, {
@@ -209,7 +219,6 @@ function buildLineOpens(labels, series) {
 	});
 }
 function stackSeriesByTopK(rows, getMap, topK = 5) {
-	// Determinar topK sobre el rango completo
 	const agg = {};
 	for (const r of rows) {
 		const m = getMap(r) || {};
@@ -226,7 +235,6 @@ function stackSeriesByTopK(rows, getMap, topK = 5) {
 		data: rows.map((r) => getMap(r)?.[k] ?? 0),
 		stack: "stack",
 	}));
-	// Otros
 	const others = rows.map((r) => {
 		const m = getMap(r) || {};
 		let sum = 0;
@@ -240,7 +248,7 @@ function stackSeriesByTopK(rows, getMap, topK = 5) {
 	}
 	return { labels, datasets };
 }
-function buildStackedBar(canvasSel, rows, getMap, title) {
+function buildStackedBar(canvasSel, rows, getMap) {
 	const { labels, datasets } = stackSeriesByTopK(rows, getMap, TOP_K);
 	const ctx = $(canvasSel);
 	return new Chart(ctx, {
@@ -259,7 +267,63 @@ function buildStackedBar(canvasSel, rows, getMap, title) {
 		},
 	});
 }
+function buildHorizontalBarChart(canvasSel, map, title) {
+	const entries = Object.entries(map || {});
+	if (!entries.length) {
+		const ctx = $(canvasSel).getContext("2d");
+		ctx.font = "14px system-ui";
+		ctx.fillText("Sin datos", 10, 20);
+		return null;
+	}
 
+	entries.sort((a, b) => a[1] - b[1]);
+
+	const labels = entries.map(([k]) => k);
+	const data = entries.map(([, v]) => v);
+
+	const colors = [
+		"rgba(255, 99, 132, 0.5)",
+		"rgba(54, 162, 235, 0.5)",
+		"rgba(255, 206, 86, 0.5)",
+		"rgba(75, 192, 192, 0.5)",
+		"rgba(153, 102, 255, 0.5)",
+		"rgba(255, 159, 64, 0.5)",
+		"rgba(255, 99, 132, 0.8)",
+		"rgba(54, 162, 235, 0.8)",
+		"rgba(255, 206, 86, 0.8)",
+		"rgba(75, 192, 192, 0.8)",
+		"rgba(153, 102, 255, 0.8)",
+		"rgba(255, 159, 64, 0.8)",
+	];
+
+	const backgroundColors = data.map((_, i) => colors[i % colors.length]);
+
+	const ctx = $(canvasSel);
+	return new Chart(ctx, {
+		type: "bar",
+		data: {
+			labels: labels,
+			datasets: [
+				{
+					label: title,
+					data: data,
+					backgroundColor: backgroundColors,
+					borderColor: backgroundColors.map((color) =>
+						color.replace("0.5", "1").replace("0.8", "1")
+					),
+					borderWidth: 1,
+				},
+			],
+		},
+		options: {
+			indexAxis: "y",
+			responsive: true,
+			maintainAspectRatio: false,
+			scales: { x: { beginAtZero: true } },
+			plugins: { legend: { display: false } },
+		},
+	});
+}
 function buildPie(canvasSel, map) {
 	const entries = Object.entries(map || {});
 	if (!entries.length) {
@@ -282,70 +346,6 @@ function buildPie(canvasSel, map) {
 		},
 	});
 }
-
-function buildHorizontalBarChart(canvasSel, map, title) {
-	const entries = Object.entries(map || {});
-	if (!entries.length) {
-		const ctx = $(canvasSel).getContext("2d");
-		ctx.font = "14px system-ui";
-		ctx.fillText("Sin datos", 10, 20);
-		return null;
-	}
-
-	// Ordena las entradas por valor para una mejor visualización
-	entries.sort((a, b) => a[1] - b[1]);
-
-	const labels = entries.map(([k]) => k);
-	const data = entries.map(([, v]) => v);
-
-	// Paleta de colores para las barras
-	const colors = [
-		"rgba(255, 99, 132, 1)",
-		"rgba(54, 162, 235, 1)",
-		"rgba(255, 206, 86, 1)",
-		"rgba(75, 192, 192, 1)",
-		"rgba(153, 102, 255, 1)",
-		"rgba(255, 159, 64, 1)",
-	];
-
-	const backgroundColors = data.map((_, i) => colors[i % colors.length]);
-
-	const ctx = $(canvasSel);
-	return new Chart(ctx, {
-		type: "bar",
-		data: {
-			labels: labels,
-			datasets: [
-				{
-					label: title,
-					data: data,
-					backgroundColor: backgroundColors,
-					borderColor: backgroundColors.map((color) =>
-						color.replace("0.5", "1").replace("0.8", "1")
-					), // Bordes más opacos
-					borderWidth: 1,
-				},
-			],
-		},
-		options: {
-			indexAxis: "y", // Esto hace que el gráfico sea horizontal
-			responsive: true,
-			maintainAspectRatio: false,
-			scales: {
-				x: {
-					beginAtZero: true,
-				},
-			},
-			plugins: {
-				legend: {
-					display: false, // Ocultamos la leyenda
-				},
-			},
-		},
-	});
-}
-
-// ---- Table ----
 function fillTable(rows) {
 	const tbody = $("#tblDaily tbody");
 	tbody.innerHTML = "";
@@ -366,35 +366,15 @@ function fillTable(rows) {
 		tbody.appendChild(tr);
 	}
 }
+function sumTo(dst, src) {
+	for (const [k, v] of Object.entries(src || {})) {
+		dst[k] = (dst[k] ?? 0) + Number(v ?? 0);
+	}
+}
 
-// ---- UI wiring ----
-let settingsModal;
-document.addEventListener("DOMContentLoaded", async () => {
-	settingsModal = new bootstrap.Modal("#settingsModal");
-	$("#btnSettings").addEventListener("click", () => {
-		const s = getSettings();
-		$("#inpBaseUrl").value = s.base;
-		$("#inpApiKey").value = s.key;
-		settingsModal.show();
-	});
-	$("#btnSaveSettings").addEventListener("click", () => {
-		setSettings({ base: $("#inpBaseUrl").value, key: $("#inpApiKey").value });
-		settingsModal.hide();
-	});
-	$("#btnReload").addEventListener("click", () => loadRange());
-
-	$("#btnApply").addEventListener("click", () => loadRange());
-
-	// defaults
-	const to = new Date();
-	const from = addDays(to, -29);
-	$("#fromDate").value = ymd(from);
-	$("#toDate").value = ymd(to);
-
-	// primera carga
-	loadRange();
-});
-
+/**
+ * Carga todos los datos y renderiza la UI.
+ */
 async function loadRange() {
 	try {
 		const preset = $("#rangePreset").value;
@@ -415,7 +395,7 @@ async function loadRange() {
 		destroyCharts();
 		lockChartHeights();
 
-		// summary
+		// Summary
 		const summary = await apiGet("metricsSummary", {
 			last: preset === "custom" ? 30 : Number(preset),
 		});
@@ -432,35 +412,24 @@ async function loadRange() {
 		$("#cardTopLang").textContent = topLang ? topLang[0] : "–";
 		$("#cardTopLangVal").textContent = topLang ? topLang[1] : "";
 
-		// daily
+		// Daily
 		const daily = await apiGet("metricsDaily", { from, to });
 
-		// charts
+		// Charts
 		buildLineOpens(
 			daily.map((d) => d.day),
 			daily.map((d) => d.totals.app_open ?? 0)
 		);
-		chTools = buildStackedBar(
-			"#chartTools",
-			daily,
-			(r) => r.totals.tools,
-			"Tools"
-		);
-		chAds = buildStackedBar("#chartAds", daily, (r) => r.totals.ads, "Ads");
+		chTools = buildStackedBar("#chartTools", daily, (r) => r.totals.tools);
+		chAds = buildStackedBar("#chartAds", daily, (r) => r.totals.ads);
 		chVersions = buildStackedBar(
 			"#chartVersions",
 			daily,
-			(r) => r.totals.versions,
-			"Versions"
+			(r) => r.totals.versions
 		);
-		chLang = buildStackedBar(
-			"#chartLang",
-			daily,
-			(r) => r.totals.lang_primary,
-			"Lang"
-		);
+		chLang = buildStackedBar("#chartLang", daily, (r) => r.totals.lang_primary);
 
-		// pies (distribuciones en el rango)
+		// Pies & Bars
 		const agg = {
 			tools: {},
 			ads: {},
@@ -483,10 +452,10 @@ async function loadRange() {
 		chPieVersionsFS = buildPie("#pieVersionsFS", agg.versions_first_seen);
 		chPieWidgets = buildPie("#pieWidgets", agg.widgets);
 
-		// tabla
+		// Tabla
 		fillTable(daily);
 
-		// export
+		// Export
 		$("#btnExport").onclick = () => {
 			const csv = toCSV(daily);
 			download(`metrics_${from}_${to}.csv`, csv);
@@ -497,11 +466,10 @@ async function loadRange() {
 			String(e.message).includes("missing_settings") ||
 			String(e.message).includes("unauthorized")
 		) {
-			// Abrir settings
 			const s = getSettings();
 			$("#inpBaseUrl").value = s.base;
 			$("#inpApiKey").value = s.key;
-			settingsModal.show();
+			new bootstrap.Modal("#settingsModal").show();
 			alert("Configura API Key (y Base URL solo si lo necesitás en dev).");
 		} else {
 			alert(`Error cargando datos: ${e.message}`);
@@ -509,8 +477,55 @@ async function loadRange() {
 	}
 }
 
-function sumTo(dst, src) {
-	for (const [k, v] of Object.entries(src || {})) {
-		dst[k] = (dst[k] ?? 0) + Number(v ?? 0);
-	}
-}
+// ---- UI wiring ----
+document.addEventListener("DOMContentLoaded", () => {
+	console.log("✔️ Página cargada. Iniciando setup del tema.");
+	// --- Theme Switcher ---
+	const themeSwitch = $("#themeSwitch");
+
+	// 1. Determinar el tema inicial
+	const storedTheme = localStorage.getItem(LS_THEME);
+	const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+	const initialTheme = storedTheme || (prefersDark ? "dark" : "light");
+
+	console.log("Tema inicial detectado:", initialTheme);
+
+	// 2. Aplicar tema inicial y estado del switch
+	themeSwitch.checked = initialTheme === "dark";
+	applyTheme(initialTheme);
+
+	// 3. Añadir el listener para futuros cambios
+	themeSwitch.addEventListener("change", () => {
+		console.log("🔘 Switch pulsado!");
+		const newTheme = themeSwitch.checked ? "dark" : "light";
+		localStorage.setItem(LS_THEME, newTheme);
+		applyTheme(newTheme);
+		loadRange(); // Vuelve a cargar los graficos con el nuevo tema
+	});
+
+	// --- Resto de la configuración de la UI ---
+	const settingsModal = new bootstrap.Modal("#settingsModal");
+	$("#btnSettings").addEventListener("click", () => {
+		const s = getSettings();
+		$("#inpBaseUrl").value = s.base;
+		$("#inpApiKey").value = s.key;
+		settingsModal.show();
+	});
+	$("#btnSaveSettings").addEventListener("click", () => {
+		setSettings({ base: $("#inpBaseUrl").value, key: $("#inpApiKey").value });
+		settingsModal.hide();
+		loadRange();
+	});
+
+	$("#btnReload").addEventListener("click", loadRange);
+	$("#btnApply").addEventListener("click", loadRange);
+
+	// Valores por defecto para el rango de fechas
+	const to = new Date();
+	const from = addDays(to, -29);
+	$("#fromDate").value = ymd(from);
+	$("#toDate").value = ymd(to);
+
+	// Carga inicial de datos
+	loadRange();
+});
