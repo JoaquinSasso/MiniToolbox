@@ -123,9 +123,19 @@ data class GroupDecor(
 )
 
 fun groupDecorBySubcategory(index: Int, list: List<Tool>): GroupDecor {
-    val cur = list[index]
-    val prevSame = index > 0 && list[index - 1].subCategory == cur.subCategory
-    val nextSame = index < list.lastIndex && list[index + 1].subCategory == cur.subCategory
+    if (list.isEmpty()) {
+        return GroupDecor(
+            RoundedCornerShape(16.dp), 8.dp, 8.dp
+        )
+    }
+
+    val safeIndex = index.coerceIn(0, list.lastIndex)
+    val cur = list.getOrNull(safeIndex)
+        ?: return GroupDecor(
+            RoundedCornerShape(16.dp), 8.dp, 8.dp
+        )
+    val prevSame = safeIndex > 0 && list[safeIndex - 1].subCategory == cur.subCategory
+    val nextSame = safeIndex < list.lastIndex && list[safeIndex + 1].subCategory == cur.subCategory
 
     return when {
         !prevSame && !nextSame -> GroupDecor(
