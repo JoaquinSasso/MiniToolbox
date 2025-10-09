@@ -156,7 +156,7 @@ class BillingRepository(
 
     private fun emitPro(isPro: Boolean, src: ProSource) {
         _entitlementEvents.tryEmit(
-            ProState(isPro = isPro, source = src, sinceMillis = System.currentTimeMillis())
+            ProState(isPro = isPro)
         )
     }
 }

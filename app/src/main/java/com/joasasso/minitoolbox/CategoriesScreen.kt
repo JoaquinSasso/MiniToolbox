@@ -1,6 +1,6 @@
 package com.joasasso.minitoolbox
 
-//TODO Hacer que las cards que aparecerian en el widget se agurpen entre ellas
+import android.app.Activity
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -55,6 +56,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -73,10 +75,13 @@ import com.joasasso.minitoolbox.data.toogleFavorite
 import com.joasasso.minitoolbox.tools.Tool
 import com.joasasso.minitoolbox.tools.ToolCategory
 import com.joasasso.minitoolbox.tools.ToolRegistry
+import com.joasasso.minitoolbox.ui.components.ProToolPaywallDialog
 import com.joasasso.minitoolbox.ui.components.ToolCard
 import com.joasasso.minitoolbox.ui.components.groupDecorBySubcategory
+import com.joasasso.minitoolbox.utils.ads.RewardedManager
 import com.joasasso.minitoolbox.utils.buildSearchIndexForAllTools
 import com.joasasso.minitoolbox.utils.matchesQuery
+import com.joasasso.minitoolbox.utils.pro.LocalProState
 import com.joasasso.minitoolbox.viewmodel.CategoryViewModel
 import com.joasasso.minitoolbox.widgets.actualizarWidgetFavoritos
 import kotlinx.coroutines.FlowPreview
@@ -94,14 +99,30 @@ import java.util.Locale
 fun CategoriesScreen(
     tools: List<Tool>,
     onToolClick: (Tool) -> Unit,
-    vm: CategoryViewModel = viewModel()
+    vm: CategoryViewModel = viewModel(),
+    onNavigateToPro: () -> Unit,
+    onNavigateToAbout: () -> Unit
 ) {
     val selectedCategory by vm.selectedCategory
     val haptic = LocalHapticFeedback.current
     val categories = ToolCategory.all
 
     val context = LocalContext.current
+    val activity = context as? Activity
     val scope = rememberCoroutineScope()
+
+    val proState = LocalProState.current
+    var showPaywallDialog by remember { mutableStateOf(false) }
+    var selectedProTool by remember { mutableStateOf<Tool?>(null) }
+
+    val handleToolClick: (Tool) -> Unit = { tool ->
+        if (tool.isPro && !proState.isPro) {
+            selectedProTool = tool
+            showPaywallDialog = true
+        } else {
+            onToolClick(tool)
+        }
+    }
 
     val orderedRoutes by remember(context) { context.flujoToolsFavoritas() }.collectAsState(initial = emptyList())
 
@@ -185,8 +206,15 @@ fun CategoriesScreen(
             TopAppBar(
                 title = { Text(stringResource(selectedCategory.titleRes)) },
                 actions = {
+                    IconButton(onClick = onNavigateToPro) {
+                        Icon(
+                            imageVector = Icons.Default.WorkspacePremium,
+                            contentDescription = stringResource(R.string.pro_screen_title),
+                            tint = Color(0xFFFFD700)
+                        )
+                    }
                     IconButton(onClick = {
-                        onToolClick(ToolRegistry.tools.last())
+                        onToolClick(ToolRegistry.tools.last()) //TODO cambiar implementacion para que en lugar de buscar el ultimo, busque la about screen
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     }) {
                         Icon(Icons.Filled.Info, contentDescription = "Información")
@@ -279,7 +307,7 @@ fun CategoriesScreen(
                                 shape = decor.shape,
                                 topPadding = decor.topPad,
                                 bottomPadding = decor.bottomPad,
-                                onToolClick = onToolClick,
+                                onToolClick = { handleToolClick(tool) },
                                 onToggleFavorito = {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     scope.launch {
@@ -387,7 +415,7 @@ fun CategoriesScreen(
                                                 shape = decor.shape,
                                                 topPadding = decor.topPad,
                                                 bottomPadding = decor.bottomPad,
-                                                onToolClick = onToolClick,
+                                                onToolClick = { handleToolClick(tool) },
                                                 onToggleFavorito = {
                                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                                     scope.launch {
@@ -456,7 +484,7 @@ fun CategoriesScreen(
                                     shape = decor.shape,
                                     topPadding = decor.topPad,
                                     bottomPadding = decor.bottomPad,
-                                    onToolClick = onToolClick,
+                                    onToolClick = { handleToolClick(tool) },
                                     onToggleFavorito = {
                                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                         scope.launch {
@@ -501,6 +529,26 @@ fun CategoriesScreen(
                 }
             }
         }
+    }
+    if (showPaywallDialog) {
+        ProToolPaywallDialog(
+            onDismiss = { showPaywallDialog = false },
+            onGoToPro = {
+                showPaywallDialog = false
+                onNavigateToPro()
+            },
+            onWatchAd = {
+                showPaywallDialog = false
+                if (activity != null) {
+                    RewardedManager.show(
+                        activity = activity,
+                        onReward = {
+                            selectedProTool?.let { onToolClick(it) }
+                        }
+                    )
+                }
+            }
+        )
     }
 }
 

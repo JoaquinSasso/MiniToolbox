@@ -61,6 +61,7 @@ sealed class Screen(val route: String) {
     object Magnifier           : Screen("magnifier")
     object ArRuler             : Screen("ar_ruler")
     object Noise               : Screen("noise")
+    object Pro : Screen("pro")
 
     companion object {
         // Valida contra las routes NUEVAS
