@@ -25,4 +25,23 @@
      padding: .75rem;
    }
  }
+
+ /* Agrega esto al final de tu archivo styles.css */
+
+[data-bs-theme="dark"] {
+  --bs-body-bg: #212529;
+  --bs-body-color: #dee2e6;
+  --bs-border-color: #495057;
+}
+
+[data-bs-theme="dark"] .card {
+  background-color: #343a40;
+  border-color: #495057;
+}
+
+[data-bs-theme="dark"] .table {
+  --bs-table-bg: #343a40;
+  --bs-table-border-color: #495057;
+  --bs-table-color: #dee2e6;
+}
  
