@@ -21,7 +21,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.joasasso.minitoolbox.metrics.dev.MetricsDevScreen
-import com.joasasso.minitoolbox.metrics.storage.AggregatesRepository
 import com.joasasso.minitoolbox.metrics.toolUse
 import com.joasasso.minitoolbox.nav.Screen
 import com.joasasso.minitoolbox.tools.ToolRegistry
@@ -73,6 +72,7 @@ import com.joasasso.minitoolbox.tools.organizacion.recordatorios.ToDoListScreen
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AguaReminderScreen
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AguaStatisticsScreen
 import com.joasasso.minitoolbox.ui.screens.BasicPhrasesScreen
+import com.joasasso.minitoolbox.ui.screens.ProScreen
 import com.joasasso.minitoolbox.utils.ads.InterstitialManager
 import com.joasasso.minitoolbox.utils.ads.RewardedManager
 
@@ -93,8 +93,6 @@ fun MiniToolboxNavGraph(
         InterstitialManager.init(context.applicationContext, interstitialAdUnitId)
         RewardedManager.init(context.applicationContext, rewardedAdUnitId)
     }
-
-    val aggregates = remember { AggregatesRepository(context.applicationContext) }
 
 // Mapeo route -> toolId (ajustalo si tenés otro id)
     val routeToToolId: Map<String, String> = remember {
@@ -156,7 +154,9 @@ fun MiniToolboxNavGraph(
         composable(Screen.Categories.route) {
             CategoriesScreen(
                 tools = ToolRegistry.tools,
-                onToolClick = { tool -> navController.navigate(tool.screen.route) }
+                onToolClick = { tool -> navController.navigate(tool.screen.route) },
+                onNavigateToPro = { navController.navigate(Screen.Pro.route) },
+                onNavigateToAbout = { navController.navigate(Screen.About.route) }
             )
         }
 
@@ -354,11 +354,15 @@ fun MiniToolboxNavGraph(
                         android.content.Intent(context, com.google.android.gms.oss.licenses.OssLicensesMenuActivity::class.java)
                     )
                 },
-                onOpenDevTools = { navController.navigate("dev_metrics") }
+                onOpenDevTools = { navController.navigate("dev_metrics") },
+                onNavigateToPro = { navController.navigate(Screen.Pro.route) }
             )
         }
         composable(Screen.DevMetrics.route) {
             MetricsDevScreen()
+        }
+        composable(Screen.Pro.route) {
+            ProScreen(onBack = onBackSmart)
         }
     }
 }

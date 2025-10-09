@@ -12,7 +12,8 @@ object ToolRegistry {
             category = ToolCategory.Herramientas,
             subCategory = R.string.subcategory_instrument,
             summary = R.string.sum_tool_bubble_level,
-            svgResId = R.drawable.bubble_level
+            svgResId = R.drawable.bubble_level,
+            isPro = true
         ),
         Tool(
             name = R.string.tool_team_generator,
@@ -117,7 +118,8 @@ object ToolRegistry {
             category = ToolCategory.Herramientas,
             subCategory = R.string.subcategory_calculator,
             summary = R.string.sum_tool_unit_converter,
-            svgResId = R.drawable.unit_conversor
+            svgResId = R.drawable.unit_conversor,
+            isPro = true
         ),
         Tool(
             name = R.string.tool_password_generator,
@@ -253,7 +255,8 @@ object ToolRegistry {
             category = ToolCategory.Organizacion,
             subCategory = R.string.subcategory_others,
             summary = R.string.sum_tool_expense_splitter,
-            svgResId = R.drawable.expense_splitter
+            svgResId = R.drawable.expense_splitter,
+            isPro = true
         ),
         Tool(
             name = R.string.tool_dice,
@@ -349,7 +352,8 @@ object ToolRegistry {
             category = ToolCategory.Herramientas,
             subCategory = R.string.subcategory_instrument,
             summary = R.string.sum_tool_ar_ruler,
-            svgResId = R.drawable.ar_ruler
+            svgResId = R.drawable.ar_ruler,
+            isPro = true
         ),
         Tool(
             name = R.string.tool_noise_generator,

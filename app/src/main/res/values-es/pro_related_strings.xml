@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pro_screen_title">Modo PRO</string>
+    <string name="pro_title">Desbloquea todo el potencial</string>
+    <string name="pro_description">Apoya el desarrollo de la app y disfruta de una experiencia mejorada sin interrupciones.</string>
+    <string name="pro_benefit_ads_title">Sin Anuncios</string>
+    <string name="pro_benefit_ads_desc">Navega por todas las herramientas sin publicidad.</string>
+    <string name="pro_benefit_tools_title">Herramientas Exclusivas</string>
+    <string name="pro_benefit_tools_desc">Acceso ilimitado a las funciones más potentes.</string>
+    <string name="pro_benefit_lifetime_title">Pago Único</string>
+    <string name="pro_benefit_lifetime_desc">Un solo pago para desbloquear todo para siempre.</string>
+    <string name="pro_buy_button">Comprar por %1$s</string>
+    <string name="pro_restore_button">Restaurar compras</string>
+    <string name="pro_feature_icon">Ícono de característica PRO</string>
+
+
+    <string name="paywall_title">Función PRO</string>
+    <string name="paywall_description">Para usar esta herramienta, actualiza a la versión PRO o mira un breve anuncio.</string>
+    <string name="paywall_go_pro">Volverse PRO</string>
+    <string name="paywall_watch_ad">Ver anuncio</string>
+    <string name="about_go_pro_button">Desbloquear Modo PRO</string>
+</resources>

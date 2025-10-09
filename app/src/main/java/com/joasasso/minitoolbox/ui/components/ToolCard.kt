@@ -31,6 +31,7 @@ import com.joasasso.minitoolbox.tools.Tool
 import com.joasasso.minitoolbox.ui.theme.CategoryIcon
 import com.joasasso.minitoolbox.ui.theme.swatchForCategory
 import com.joasasso.minitoolbox.ui.theme.swatchForSubcategory
+import com.joasasso.minitoolbox.utils.pro.LocalProState
 
 @Composable
 fun ToolCard(
@@ -44,6 +45,7 @@ fun ToolCard(
     overrideElevation: Dp? = null
 ) {
     val haptic = LocalHapticFeedback.current
+    val proState = LocalProState.current
 
     val swatch = swatchForSubcategory(tool.subCategory) ?: swatchForCategory(tool.category)
 
@@ -53,7 +55,14 @@ fun ToolCard(
             .padding(top = topPadding, bottom = bottomPadding)
             .clickable {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                onToolClick(tool)
+                if (tool.isPro && !proState.isPro) {
+                    // El usuario no es PRO e intenta acceder a una tool PRO
+                    // Aquí lanzamos el diálogo/paywall en lugar de navegar
+                    //showPaywallDialog.value = true
+                } else {
+                    // El usuario es PRO o la tool es gratuita
+                    onToolClick(tool)
+                }
             },
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
