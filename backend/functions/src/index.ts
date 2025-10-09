@@ -65,61 +65,61 @@ function getHeaderApiKey(req: any): string {
 const TOOL_ROUTE_MAP: Record<string, string> = {
 	// Ignoradas (no son herramientas)
 	"tool.": "",
-	"tools": "",
-	"dev": "",
- 
+	tools: "",
+	dev: "",
+
 	// tools
-	"random_color_generator": "random_color",
-	"group_selector": "group_selector",
-	"coin_flip": "coin_flip",
-	"decimal_binary_converter": "decimal_binary",
-	"text_binary_converter": "text_binary",
-	"truco_score_board": "truco_scoreboard",
-	"age_calculator": "age_calculator",
-	"zodiac_sign": "zodiac_sign",
-	"pomodoro": "pomodoro",
-	"bubble_level": "bubble_level",
-	"porcentaje": "percentage",
-	"conversor_horas": "time_converter",
-	"calculadora_de_imc": "bmi_calculator",
-	"conversor_romanos": "roman_numerals",
-	"conversor_unidades": "unit_converter",
-	"generador_contrasena": "password_generator",
-	"sugeridor_actividades": "activity_suggester",
-	"generador_nombres": "name_generator",
-	"generador_qr": "qr_generator",
-	"generador_vcard": "vcard_generator",
-	"lorem_ipsum": "lorem_ipsum",
-	"regla": "ruler",
-	"medidor_luz": "light_meter",
-	"linterna": "flashlight",
-	"rachas": "streaks",
-	"agua": "water",
-	"estadisticas_agua": "water_stats",
-	"tiempo_hasta": "countdown",
-	"paises_info": "countries_info",
-	"ruleta_selectora": "selector_wheel",
-	"adivina_bandera": "guess_flag",
-	"crear_reunion": "meeting_create",
-	"reuniones": "meetings",
-	"detalles_reunion": "meeting_detail",
-	"editar_gasto": "expense_edit",
-	"agregar_gasto": "expense_add",
-	"dados": "dice",
-	"calculos_rapidos": "quick_calcs",
-	"frases": "quotes",
-	"mi_yo_del_multiverso": "multiverse_me",
-	"adivina_capital": "guess_capital",
-	"brujula": "compass",
-	"to_do": "todo",
-	"eventos": "events",
-	"interes_compuesto": "compound_interest",
-	"scoreboard": "scoreboard",
-	"magnifier": "magnifier",
-	"ar_ruler": "ar_ruler",
-	"ruido": "noise",
- };
- 
+	random_color_generator: "random_color",
+	group_selector: "group_selector",
+	coin_flip: "coin_flip",
+	decimal_binary_converter: "decimal_binary",
+	text_binary_converter: "text_binary",
+	truco_score_board: "truco_scoreboard",
+	age_calculator: "age_calculator",
+	zodiac_sign: "zodiac_sign",
+	pomodoro: "pomodoro",
+	bubble_level: "bubble_level",
+	porcentaje: "percentage",
+	conversor_horas: "time_converter",
+	calculadora_de_imc: "bmi_calculator",
+	conversor_romanos: "roman_numerals",
+	conversor_unidades: "unit_converter",
+	generador_contrasena: "password_generator",
+	sugeridor_actividades: "activity_suggester",
+	generador_nombres: "name_generator",
+	generador_qr: "qr_generator",
+	generador_vcard: "vcard_generator",
+	lorem_ipsum: "lorem_ipsum",
+	regla: "ruler",
+	medidor_luz: "light_meter",
+	linterna: "flashlight",
+	rachas: "streaks",
+	agua: "water",
+	estadisticas_agua: "water_stats",
+	tiempo_hasta: "countdown",
+	paises_info: "countries_info",
+	ruleta_selectora: "selector_wheel",
+	adivina_bandera: "guess_flag",
+	crear_reunion: "meeting_create",
+	reuniones: "meetings",
+	detalles_reunion: "meeting_detail",
+	editar_gasto: "expense_edit",
+	agregar_gasto: "expense_add",
+	dados: "dice",
+	calculos_rapidos: "quick_calcs",
+	frases: "quotes",
+	mi_yo_del_multiverso: "multiverse_me",
+	adivina_capital: "guess_capital",
+	brujula: "compass",
+	to_do: "todo",
+	eventos: "events",
+	interes_compuesto: "compound_interest",
+	scoreboard: "scoreboard",
+	magnifier: "magnifier",
+	ar_ruler: "ar_ruler",
+	ruido: "noise",
+};
+
 function mergeCounts(
 	a: Record<string, number>,
 	b: Record<string, number>
@@ -147,36 +147,35 @@ function stripToolKeyInMap(
 	return out;
 }
 
-
 // Quita prefijos comunes que puedan venir del cliente
 function stripToolPrefix(raw: string): string {
-  if (!raw) return raw;
-  if (raw.startsWith("tools.")) return raw.slice("tools.".length);
-  if (raw.startsWith("tool."))  return raw.slice("tool.".length);
-  return raw;
+	if (!raw) return raw;
+	if (raw.startsWith("tools.")) return raw.slice("tools.".length);
+	if (raw.startsWith("tool.")) return raw.slice("tool.".length);
+	return raw;
 }
 
 // Canonicaliza una clave (route vieja → nueva) y quita prefijos si vinieron en payload
 function canonToolKey(raw: string): string | null {
-  if (!raw) return null;
-  const noPrefix = stripToolPrefix(raw);
-  const m = TOOL_ROUTE_MAP[noPrefix];
-  if (m === "") return null;               // explícitamente ignorada
-  return (m || noPrefix).trim();
+	if (!raw) return null;
+	const noPrefix = stripToolPrefix(raw);
+	const m = TOOL_ROUTE_MAP[noPrefix];
+	if (m === "") return null; // explícitamente ignorada
+	return (m || noPrefix).trim();
 }
 
- 
- // Re-mapea un objeto {clave: número} a sus claves canónicas, agregando si hay colisiones
- function remapToolCounters(map: Record<string, number> | undefined): Record<string, number> {
+// Re-mapea un objeto {clave: número} a sus claves canónicas, agregando si hay colisiones
+function remapToolCounters(
+	map: Record<string, number> | undefined
+): Record<string, number> {
 	const out: Record<string, number> = {};
 	for (const [k, v] of Object.entries(map || {})) {
-	  const ck = canonToolKey(k);
-	  if (!ck) continue;
-	  out[ck] = (out[ck] ?? 0) + Number(v || 0);
+		const ck = canonToolKey(k);
+		if (!ck) continue;
+		out[ck] = (out[ck] ?? 0) + Number(v || 0);
 	}
 	return out;
- }
- 
+}
 
 // ------------ Date utils ------------
 function parseYmd(s: string): Date | null {
@@ -311,7 +310,7 @@ function normDoc(id: string, data: FirebaseFirestore.DocumentData): DailyDoc {
 	const app_open = appOpenNested + appOpenFlat;
 
 	// --- meta.updatedAt ---
-	const updatedAtNested = data?.meta?.updatedAt;
+	const updatedAtNested = (data as any)?.meta?.updatedAt;
 	const updatedAtFlat = (data as any)["meta.updatedAt"];
 	const updatedAt: any = updatedAtNested ?? updatedAtFlat;
 
@@ -336,7 +335,6 @@ function normDoc(id: string, data: FirebaseFirestore.DocumentData): DailyDoc {
 		},
 	};
 }
-
 
 async function fetchDailyRange(from: string, to: string): Promise<DailyDoc[]> {
 	const months = monthsBetween(from, to);
@@ -419,6 +417,10 @@ export const ingest = onRequest(
 					};
 					const inc = (n: number) => FieldValue.increment(n);
 
+					// pares de FieldPath para versiones (evita dividir "1.1.1")
+					const verPairs: Array<[FieldPath, any]> = [];
+					const vfsPairs: Array<[FieldPath, any]> = [];
+
 					if ((it.app_open ?? 0) > 0) {
 						updates["totals.app_open"] = inc(it.app_open ?? 0);
 						totalOpens += it.app_open ?? 0;
@@ -427,41 +429,52 @@ export const ingest = onRequest(
 					if (it.tools) {
 						const tmp: Record<string, number> = {};
 						for (const [rawKey, v] of Object.entries(it.tools)) {
-							const ck = canonToolKey(rawKey); // <- ahora quita prefijos y mapea
+							const ck = canonToolKey(rawKey); // quita prefijos y mapea
 							if (!ck) continue;
 							const n = Number(v || 0);
 							if (n > 0) tmp[ck] = (tmp[ck] || 0) + n;
 						}
 						for (const [ck, n] of Object.entries(tmp)) {
-							updates[`tools.${ck}`] = inc(n); // <- siempre “tools.<canónica>”
+							updates[`tools.${ck}`] = inc(n); // siempre tools.<canónica>
 						}
 					}
 
 					if (it.ads) {
 						for (const [k, v] of Object.entries(it.ads)) {
-							if (v > 0) updates[`ads.${k}`] = inc(v);
+							const n = Number(v || 0);
+							if (n > 0) updates[`ads.${k}`] = inc(n);
 						}
 					}
+
 					if ((it as any).versions) {
 						for (const [ver, v] of Object.entries(
 							(it as any).versions as Record<string, number>
 						)) {
-							if (v > 0) updates[`versions.${ver}`] = inc(v);
+							const n = Number(v || 0);
+							if (n > 0)
+								verPairs.push([new FieldPath("versions", ver), inc(n)]);
 						}
 					}
 					if ((it as any).versions_first_seen) {
 						for (const [ver, v] of Object.entries(
 							(it as any).versions_first_seen as Record<string, number>
 						)) {
-							if (v > 0) updates[`versions_first_seen.${ver}`] = inc(v);
+							const n = Number(v || 0);
+							if (n > 0)
+								vfsPairs.push([
+									new FieldPath("versions_first_seen", ver),
+									inc(n),
+								]);
 						}
 					}
+
 					const lp = (it as any).lang_primary as
 						| Record<string, number>
 						| undefined;
 					if (lp) {
 						for (const [lang, v] of Object.entries(lp)) {
-							if (v > 0) updates[`lang.primary.${lang}`] = inc(v);
+							const n = Number(v || 0);
+							if (n > 0) updates[`lang.primary.${lang}`] = inc(n);
 						}
 					}
 					const ls = (it as any).lang_secondary as
@@ -469,21 +482,32 @@ export const ingest = onRequest(
 						| undefined;
 					if (ls) {
 						for (const [lang, v] of Object.entries(ls)) {
-							if (v > 0) updates[`lang.secondary.${lang}`] = inc(v);
+							const n = Number(v || 0);
+							if (n > 0) updates[`lang.secondary.${lang}`] = inc(n);
 						}
 					}
+
 					const w = (it as any).widgets as Record<string, number> | undefined;
 					if (w) {
 						for (const [kind, v] of Object.entries(w)) {
-							if (v > 0) updates[`widgets.${kind}`] = inc(v);
+							const n = Number(v || 0);
+							if (n > 0) updates[`widgets.${kind}`] = inc(n);
 						}
 					}
 
-					// Asegura que el doc exista (update falla si no existe)
+					// Asegura doc y escribe
 					tx.set(dayRef, {}, { merge: true });
 
-					// Aplica incrementos y rutas anidadas reales
-					tx.update(dayRef, updates);
+					if (Object.keys(updates).length) {
+						tx.update(dayRef, updates); // app_open, tools, ads, lang, widgets
+					}
+					// versions y versions_first_seen con FieldPath (sin spread)
+					for (const [path, val] of verPairs) {
+						tx.update(dayRef, path, val);
+					}
+					for (const [path, val] of vfsPairs) {
+						tx.update(dayRef, path, val);
+					}
 				}
 			});
 

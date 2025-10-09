@@ -157,7 +157,7 @@ let chOpens,
 	chAds,
 	chVersions,
 	chLang,
-	chPieTools,
+	chBarTools,
 	chPieAds,
 	chPieVersions,
 	chPieVersionsFS,
@@ -170,7 +170,7 @@ function destroyCharts() {
 		chAds,
 		chVersions,
 		chLang,
-		chPieTools,
+		chBarTools,
 		chPieAds,
 		chPieVersions,
 		chPieVersionsFS,
@@ -183,7 +183,7 @@ function destroyCharts() {
 		chAds =
 		chVersions =
 		chLang =
-		chPieTools =
+		chBarTools =
 		chPieAds =
 		chPieVersions =
 		chPieVersionsFS =
@@ -279,6 +279,68 @@ function buildPie(canvasSel, map) {
 			maintainAspectRatio: false,
 			animation: false,
 			resizeDelay: 150,
+		},
+	});
+}
+
+function buildHorizontalBarChart(canvasSel, map, title) {
+	const entries = Object.entries(map || {});
+	if (!entries.length) {
+		const ctx = $(canvasSel).getContext("2d");
+		ctx.font = "14px system-ui";
+		ctx.fillText("Sin datos", 10, 20);
+		return null;
+	}
+
+	// Ordena las entradas por valor para una mejor visualización
+	entries.sort((a, b) => a[1] - b[1]);
+
+	const labels = entries.map(([k]) => k);
+	const data = entries.map(([, v]) => v);
+
+	// Paleta de colores para las barras
+	const colors = [
+		"rgba(255, 99, 132, 1)",
+		"rgba(54, 162, 235, 1)",
+		"rgba(255, 206, 86, 1)",
+		"rgba(75, 192, 192, 1)",
+		"rgba(153, 102, 255, 1)",
+		"rgba(255, 159, 64, 1)",
+	];
+
+	const backgroundColors = data.map((_, i) => colors[i % colors.length]);
+
+	const ctx = $(canvasSel);
+	return new Chart(ctx, {
+		type: "bar",
+		data: {
+			labels: labels,
+			datasets: [
+				{
+					label: title,
+					data: data,
+					backgroundColor: backgroundColors,
+					borderColor: backgroundColors.map((color) =>
+						color.replace("0.5", "1").replace("0.8", "1")
+					), // Bordes más opacos
+					borderWidth: 1,
+				},
+			],
+		},
+		options: {
+			indexAxis: "y", // Esto hace que el gráfico sea horizontal
+			responsive: true,
+			maintainAspectRatio: false,
+			scales: {
+				x: {
+					beginAtZero: true,
+				},
+			},
+			plugins: {
+				legend: {
+					display: false, // Ocultamos la leyenda
+				},
+			},
 		},
 	});
 }
@@ -415,7 +477,7 @@ async function loadRange() {
 			sumTo(agg.widgets, r.totals.widgets);
 			sumTo(agg.lang_primary, r.totals.lang_primary);
 		}
-		chPieTools = buildPie("#pieTools", agg.tools);
+		chBarTools = buildHorizontalBarChart("#barTools", agg.tools, "Tools");
 		chPieAds = buildPie("#pieAds", agg.ads);
 		chPieVersions = buildPie("#pieVersions", agg.versions);
 		chPieVersionsFS = buildPie("#pieVersionsFS", agg.versions_first_seen);
