@@ -29,6 +29,11 @@ foundation = "1.9.1"
 gma = "24.6.0"
 ump = "3.2.0"
 guava = "33.4.8-android"
+# Mediation adapters (usa las últimas de cada partner)
+admob-unity = "4.12.5.0"      # com.google.ads.mediation:unity
+admob-meta  = "6.17.0.0"      # com.google.ads.mediation:facebook
+admob-applovin = "12.6.1.0"   # com.google.ads.mediation:applovin
+
 runtimeSaveable = "1.9.1"
 billing = "8.0.0"
 androidx-browser = "1.8.0"
@@ -79,6 +84,13 @@ google-ads = { module = "com.google.android.gms:play-services-ads", version.ref 
 google-ump = { module = "com.google.android.ump:user-messaging-platform", version.ref = "ump" }
 guava-android = { module = "com.google.guava:guava", version.ref = "guava" }
 androidx-runtime-saveable = { group = "androidx.compose.runtime", name = "runtime-saveable", version.ref = "runtimeSaveable" }
+# Mediation adapters
+admob-unity = { module = "com.google.ads.mediation:unity", version.ref = "admob-unity" }
+admob-meta = { module = "com.google.ads.mediation:facebook", version.ref = "admob-meta" }
+admob-applovin = { module = "com.google.ads.mediation:applovin", version.ref = "admob-applovin" }
+
+
+
 
 billing-ktx = { module = "com.android.billingclient:billing-ktx", version.ref = "billing" }
 androidx-browser = { module = "androidx.browser:browser", version.ref = "androidx-browser" }
