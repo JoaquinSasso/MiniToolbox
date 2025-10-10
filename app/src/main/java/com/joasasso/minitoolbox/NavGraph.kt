@@ -21,7 +21,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.joasasso.minitoolbox.metrics.dev.MetricsDevScreen
-import com.joasasso.minitoolbox.metrics.toolUse
 import com.joasasso.minitoolbox.nav.Screen
 import com.joasasso.minitoolbox.tools.ToolRegistry
 import com.joasasso.minitoolbox.tools.entretenimiento.MarcadorEquiposScreen
@@ -75,6 +74,7 @@ import com.joasasso.minitoolbox.ui.screens.BasicPhrasesScreen
 import com.joasasso.minitoolbox.ui.screens.ProScreen
 import com.joasasso.minitoolbox.utils.ads.InterstitialManager
 import com.joasasso.minitoolbox.utils.ads.RewardedManager
+import com.joasasso.minitoolbox.utils.ads.ToolUsageTracker
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
@@ -94,7 +94,7 @@ fun MiniToolboxNavGraph(
         RewardedManager.init(context.applicationContext, rewardedAdUnitId)
     }
 
-// Mapeo route -> toolId (ajustalo si tenés otro id)
+    // Mapeo route -> toolId (ajustalo si tenés otro id)
     val routeToToolId: Map<String, String> = remember {
         ToolRegistry.tools.associate { it.screen.route to (it.screen.route) }
     }
@@ -108,11 +108,11 @@ fun MiniToolboxNavGraph(
         if (route != lastRoute && toolRoutes.contains(route)) {
             val toolId = routeToToolId[route] ?: route
 
-            // 1) contador por tool
-            toolUse(context, toolId)
+            // contar solo si pasó el cooldown por herramienta
+            val isNewAccess = ToolUsageTracker.onToolOpened(context, toolId)
 
-            // 2) intentar interstitial si corresponde
-            if (activity != null) {
+            if (isNewAccess && activity != null) {
+                // Realiza conteo global y lleva cooldown de tiempo
                 InterstitialManager.onToolOpened(
                     activity = activity,
                     shouldShowAds = shouldShowAds

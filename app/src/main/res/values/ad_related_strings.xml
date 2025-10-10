@@ -7,6 +7,8 @@
     <string name="admob_interstitial_test" translatable="false">ca-app-pub-3940256099942544/1033173712</string>
     <string name="admob_rewarded_prod" translatable="false">ca-app-pub-7623187138639860/7631694262</string>
     <string name="admob_rewarded_test" translatable="false">ca-app-pub-3940256099942544/5224354917</string>
+    <string name="admob_rewarded_interstitial_prod" translatable="false">ca-app-pub-7623187138639860/9677986647</string>
+    <string name="admob_rewarded_interstitial_test" translatable="false">ca-app-pub-3940256099942544/5354046379</string>
     <string name="billing_pro_inapp" translatable="false">pro_lifetime</string>      <!-- Producto único (INAPP) -->
     <string name="billing_pro_sub" translatable="false">pro_monthly</string>         <!-- Subscripción (SUBS), opcional -->
 </resources>

@@ -1,6 +1,7 @@
 package com.joasasso.minitoolbox
 
 import android.app.Activity
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -74,12 +75,14 @@ import com.joasasso.minitoolbox.data.setFavoritesOrder
 import com.joasasso.minitoolbox.data.toogleFavorite
 import com.joasasso.minitoolbox.tools.Tool
 import com.joasasso.minitoolbox.tools.ToolCategory
+import com.joasasso.minitoolbox.ui.components.ProPassBadge
 import com.joasasso.minitoolbox.ui.components.ProToolPaywallDialog
 import com.joasasso.minitoolbox.ui.components.ToolCard
 import com.joasasso.minitoolbox.ui.components.groupDecorBySubcategory
 import com.joasasso.minitoolbox.utils.ads.RewardedManager
 import com.joasasso.minitoolbox.utils.buildSearchIndexForAllTools
 import com.joasasso.minitoolbox.utils.matchesQuery
+import com.joasasso.minitoolbox.utils.pro.CreditAccessManager
 import com.joasasso.minitoolbox.utils.pro.LocalProState
 import com.joasasso.minitoolbox.viewmodel.CategoryViewModel
 import com.joasasso.minitoolbox.widgets.actualizarWidgetFavoritos
@@ -115,7 +118,7 @@ fun CategoriesScreen(
     var selectedProTool by remember { mutableStateOf<Tool?>(null) }
 
     val handleToolClick: (Tool) -> Unit = { tool ->
-        if (tool.isPro && !proState.isPro) {
+        if (tool.isPro && !proState.isPro && !CreditAccessManager.hasActivePass(context)) {
             selectedProTool = tool
             showPaywallDialog = true
         } else {
@@ -205,6 +208,10 @@ fun CategoriesScreen(
             TopAppBar(
                 title = { Text(stringResource(selectedCategory.titleRes)) },
                 actions = {
+                    ProPassBadge(
+                        modifier = Modifier.padding(end = 6.dp),
+                        onClick = { onNavigateToPro() }
+                    )
                     IconButton(onClick = onNavigateToPro) {
                         Icon(
                             imageVector = Icons.Default.WorkspacePremium,
@@ -547,7 +554,28 @@ fun CategoriesScreen(
                     RewardedManager.show(
                         activity = activity,
                         onReward = {
+                            // ✅ Activa el pase de 10 minutos
+                            CreditAccessManager.startTimedPassForAd(activity)
+
+                            Toast
+                                .makeText(activity, R.string.pro_unlocked_toast, android.widget.Toast.LENGTH_SHORT)
+                                .show()
+
                             selectedProTool?.let { onToolClick(it) }
+                        },
+                        onUnavailable = {
+                            // ✅ No-fill: deja pasar, muestra Toast y no suma tiempo
+                            val used = CreditAccessManager.consumeGrace(activity)
+                            if (used) {
+                                Toast
+                                    .makeText(activity, R.string.free_pass_used_toast, android.widget.Toast.LENGTH_SHORT)
+                                    .show()
+                                selectedProTool?.let { onToolClick(it) }
+                            } else {
+                                android.widget.Toast
+                                    .makeText(activity, R.string.paywall_no_ad_try_later, android.widget.Toast.LENGTH_SHORT)
+                                    .show()
+                            }
                         }
                     )
                 }

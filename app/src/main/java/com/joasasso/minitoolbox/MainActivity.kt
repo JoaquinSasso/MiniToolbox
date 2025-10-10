@@ -22,8 +22,6 @@ import com.joasasso.minitoolbox.metrics.uploader.UploadConfig
 import com.joasasso.minitoolbox.metrics.uploader.UploadScheduler
 import com.joasasso.minitoolbox.metrics.widgetUse
 import com.joasasso.minitoolbox.nav.Screen
-import com.joasasso.minitoolbox.ui.ads.AdPosition
-import com.joasasso.minitoolbox.ui.ads.GlobalAdsLayer
 import com.joasasso.minitoolbox.ui.theme.MiniToolboxTheme
 import com.joasasso.minitoolbox.ui.utils.LockScreenOrientationIfAllowed
 import com.joasasso.minitoolbox.utils.ads.ConsentGateProvider
@@ -86,46 +84,36 @@ class MainActivity : AppCompatActivity() {
                             pushStartRoute = { newRoute -> startRoute = newRoute }
                             onDispose { pushStartRoute = null }
                         }
-
-                        GlobalAdsLayer(
-                            shouldShowAds = if (BuildConfig.DEBUG) false else shouldShowAds,
-                            position = AdPosition.Top,
-                            adUnitId = if (BuildConfig.DEBUG)
-                                getString(R.string.admob_banner_test)
+                        MiniToolboxNavGraph(
+                            navController = navController,
+                            shouldShowAds = if (BuildConfig.DEBUG) true else shouldShowAds,
+                            interstitialAdUnitId = if (BuildConfig.DEBUG)
+                                getString(R.string.admob_interstitial_test)
                             else
-                                getString(R.string.admob_banner_prod)
-                        ) {
-                            MiniToolboxNavGraph(
-                                navController = navController,
-                                shouldShowAds = if (BuildConfig.DEBUG) false else shouldShowAds,
-                                interstitialAdUnitId = if (BuildConfig.DEBUG)
-                                    getString(R.string.admob_interstitial_test)
-                                else
-                                    getString(R.string.admob_interstitial_prod),
-                                rewardedAdUnitId = if (BuildConfig.DEBUG)
-                                    getString(R.string.admob_rewarded_test)
-                                else
-                                    getString(R.string.admob_rewarded_prod)
-                            )
+                                getString(R.string.admob_interstitial_prod),
+                            rewardedAdUnitId = if (BuildConfig.DEBUG)
+                                getString(R.string.admob_rewarded_test)
+                            else
+                                getString(R.string.admob_rewarded_prod)
+                        )
 
-                            LaunchedEffect(startRoute) {
-                                val route = startRoute
-                                if (Screen.isValidRoute(route) && route != Screen.Categories.route) {
-                                    toolUse(applicationContext,route!!)
-                                    widgetUse(applicationContext,"widget_shortcuts")
+                        LaunchedEffect(startRoute) {
+                            val route = startRoute
+                            if (Screen.isValidRoute(route) && route != Screen.Categories.route) {
+                                toolUse(applicationContext,route!!)
+                                widgetUse(applicationContext,"widget_shortcuts")
 
 
-                                    // Limpiar stack hasta Categorías si está presente
-                                    navController.popBackStack(Screen.Categories.route, inclusive = false)
+                                // Limpiar stack hasta Categorías si está presente
+                                navController.popBackStack(Screen.Categories.route, inclusive = false)
 
-                                    navController.navigate(route) {
-                                        launchSingleTop = true
-                                        restoreState = false
-                                    }
+                                navController.navigate(route) {
+                                    launchSingleTop = true
+                                    restoreState = false
                                 }
-                                // Reset para no re-navegar en recomposiciones
-                                startRoute = null
                             }
+                            // Reset para no re-navegar en recomposiciones
+                            startRoute = null
                         }
                     }
                 }

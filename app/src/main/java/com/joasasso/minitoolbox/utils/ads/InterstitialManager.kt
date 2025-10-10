@@ -1,109 +1,98 @@
-// InterstitialManager.kt
+// InterstitialManager.kt (fragmento clave de gating)
 package com.joasasso.minitoolbox.utils.ads
 
 import android.app.Activity
 import android.content.Context
-import android.content.SharedPreferences
 import androidx.core.content.edit
-import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.FullScreenContentCallback
-import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
-import com.joasasso.minitoolbox.metrics.adImpression
-import java.util.concurrent.atomic.AtomicBoolean
 
 object InterstitialManager {
-    // Config default
-    var showEveryNOpens: Int = 3
-    var graceFirstOpens: Int = 2
-    var minCooldownMs: Long = 30_000L
+    private const val PREFS = "interstitial_prefs"
+    private const val KEY_LAST_AD_TS = "last_interstitial_ts"
 
+    // Ajustables:
+    private const val MIN_OPENS_BETWEEN_ADS = 4          // muestra 1 cada 4 accesos válidos
+    private const val GLOBAL_AD_COOLDOWN_MS = 120_000L   // 2 min entre interstitials
+
+    private var interstitial: InterstitialAd? = null
     private var adUnitId: String? = null
-    private var interstitialAd: InterstitialAd? = null
-    private val isLoading = AtomicBoolean(false)
+    private var isLoading = false
 
-    // --- PERSISTENCIA LIVIANA ---
-    private fun prefs(ctx: Context): SharedPreferences =
-        ctx.applicationContext.getSharedPreferences("ads_pacing", Context.MODE_PRIVATE)
+    private var lastRewardedShownTs = 0L
 
-    private fun incToolOpenCount(ctx: Context): Int {
-        val p = prefs(ctx)
-        val newVal = p.getInt("tool_open_count", 0) + 1
-        p.edit { putInt("tool_open_count", newVal) }
-        return newVal
+    fun notifyRewardedShown() {
+        lastRewardedShownTs = System.currentTimeMillis()
     }
 
-    private fun canPassCooldown(ctx: Context): Boolean {
-        val p = prefs(ctx)
-        val last = p.getLong("last_interstitial_ms", 0L)
-        return (System.currentTimeMillis() - last) >= minCooldownMs
+    fun init(context: Context, adUnitId: String) {
+        this.adUnitId = adUnitId
+        if (interstitial == null) load(context)
     }
 
-    private fun markShownNow(ctx: Context) {
-        prefs(ctx).edit { putLong("last_interstitial_ms", System.currentTimeMillis()) }
-    }
-
-    fun init(context: Context, adUnit: String) {
-        this.adUnitId = adUnit
-        if (interstitialAd == null) load(context)
-    }
-
-    fun load(context: Context) {
+    private fun load(context: Context) {
         val id = adUnitId ?: return
-        if (isLoading.get()) return
-        isLoading.set(true)
+        if (isLoading) return
+        isLoading = true
         InterstitialAd.load(
-            context,
-            id,
-            AdRequest.Builder().build(),
+            context, id, AdRequest.Builder().build(),
             object : InterstitialAdLoadCallback() {
                 override fun onAdLoaded(ad: InterstitialAd) {
-                    interstitialAd = ad
-                    isLoading.set(false)
+                    interstitial = ad
+                    isLoading = false
                 }
-                override fun onAdFailedToLoad(error: LoadAdError) {
-                    interstitialAd = null
-                    isLoading.set(false)
-                    // opcional: reintentar en X tiempo
+                override fun onAdFailedToLoad(error: com.google.android.gms.ads.LoadAdError) {
+                    interstitial = null
+                    isLoading = false
                 }
             }
         )
     }
 
     /**
-     * Llamala cada vez que el usuario entra a una tool.
-     * Decide si mostrar o no, sin necesidad de pasar contadores externos.
+     * Llama esto cuando se registró un "nuevo acceso" de tool (con cooldown por tool ya aplicado).
+     * Solo intentará mostrar ad si cumple reglas (aperturas mínimas y cooldown global).
      */
     fun onToolOpened(activity: Activity, shouldShowAds: Boolean) {
         if (!shouldShowAds) return
 
         val ctx = activity.applicationContext
-        val total = incToolOpenCount(ctx)
+        val opens = ToolUsageTracker.getGlobalOpenCount(ctx)
+        val now = System.currentTimeMillis()
+        val sp = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val lastTs = sp.getLong(KEY_LAST_AD_TS, 0L)
 
-        if (showEveryNOpens <= 0) return
-        if (total < graceFirstOpens) return
-        if (total % showEveryNOpens != 0) return
-        if (!canPassCooldown(ctx)) return
+        val openGate = (opens % MIN_OPENS_BETWEEN_ADS) == 0
+        val timeGate = (now - lastTs) > GLOBAL_AD_COOLDOWN_MS
 
-        val ad = interstitialAd ?: return
-        ad.fullScreenContentCallback = object : FullScreenContentCallback() {
-            override fun onAdDismissedFullScreenContent() {
-                interstitialAd = null
-                load(ctx)
-            }
-            override fun onAdFailedToShowFullScreenContent(err: AdError) {
-                interstitialAd = null
-                load(ctx)
-            }
-            override fun onAdShowedFullScreenContent() {
-                // Marcar cool-down
-                markShownNow(ctx)
-                adImpression(activity.applicationContext, "interstitial")
-            }
+        val skipBecauseRewarded = (now - lastRewardedShownTs) < 30_000L // 30 s de margen
+
+        if (skipBecauseRewarded) {
+            load(ctx)
+            return
         }
-        ad.show(activity)
-        interstitialAd = null // consumir referencia
+
+        if (openGate && timeGate && interstitial != null) {
+            interstitial?.fullScreenContentCallback = object : com.google.android.gms.ads.FullScreenContentCallback() {
+                override fun onAdDismissedFullScreenContent() {
+                    interstitial = null
+                    sp.edit { putLong(KEY_LAST_AD_TS, System.currentTimeMillis()) }
+                    load(ctx)
+                }
+                override fun onAdFailedToShowFullScreenContent(err: com.google.android.gms.ads.AdError) {
+                    interstitial = null
+                    load(ctx)
+                }
+                override fun onAdShowedFullScreenContent() {
+                    // opcional: métricas/impressions
+                }
+            }
+            interstitial?.show(activity)
+            interstitial = null
+        } else {
+            // Si no pasa el gate o no hay anuncio cargado, asegurá precarga
+            load(ctx)
+        }
     }
 }

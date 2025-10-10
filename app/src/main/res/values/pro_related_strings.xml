@@ -13,9 +13,21 @@
     <string name="pro_restore_button">Restore Purchases</string>
     <string name="pro_feature_icon">Pro feature icon</string>
 
+    <!-- Paywall -->
     <string name="paywall_title">PRO Feature</string>
-    <string name="paywall_description">To use this tool, please upgrade to PRO or watch a short ad.</string>
     <string name="paywall_go_pro">Go PRO</string>
-    <string name="paywall_watch_ad">Watch Ad</string>
+
+    <string name="paywall_description_time_only">Watch a short ad to unlock all PRO tools for a limited time. Or get lifetime PRO — one-time payment.</string>
+    <string name="paywall_watch_ad_pass">Watch ad — unlock PRO for 10 min</string>
+    <string name="paywall_pass_active">PRO active: %1$s remaining</string>
+    <string name="paywall_pass_locked_hint">Watch an ad to activate PRO for a short time.</string>
+    <string name="paywall_grace_info">Free passes left today: %1$d</string>
+    <string name="paywall_no_ad_try_later">No ad available now. Try again later or unlock PRO.</string>
+    <string name="pro_unlocked_toast">PRO unlocked for 10 minutes</string>
+    <string name="free_pass_used_toast">No ad available — free access granted</string>
+
+
+    <!-- Badge -->
+    <string name="pro_badge_active_time">PRO %1$s</string>
     <string name="about_go_pro_button">Unlock PRO Mode</string>
 </resources>
