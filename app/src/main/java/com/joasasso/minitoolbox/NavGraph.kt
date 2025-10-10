@@ -21,8 +21,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.joasasso.minitoolbox.metrics.dev.MetricsDevScreen
-import com.joasasso.minitoolbox.metrics.storage.AggregatesRepository
-import com.joasasso.minitoolbox.metrics.toolUse
 import com.joasasso.minitoolbox.nav.Screen
 import com.joasasso.minitoolbox.tools.ToolRegistry
 import com.joasasso.minitoolbox.tools.entretenimiento.MarcadorEquiposScreen
@@ -73,8 +71,10 @@ import com.joasasso.minitoolbox.tools.organizacion.recordatorios.ToDoListScreen
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AguaReminderScreen
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AguaStatisticsScreen
 import com.joasasso.minitoolbox.ui.screens.BasicPhrasesScreen
+import com.joasasso.minitoolbox.ui.screens.ProScreen
 import com.joasasso.minitoolbox.utils.ads.InterstitialManager
 import com.joasasso.minitoolbox.utils.ads.RewardedManager
+import com.joasasso.minitoolbox.utils.ads.ToolUsageTracker
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
@@ -94,9 +94,7 @@ fun MiniToolboxNavGraph(
         RewardedManager.init(context.applicationContext, rewardedAdUnitId)
     }
 
-    val aggregates = remember { AggregatesRepository(context.applicationContext) }
-
-// Mapeo route -> toolId (ajustalo si tenés otro id)
+    // Mapeo route -> toolId (ajustalo si tenés otro id)
     val routeToToolId: Map<String, String> = remember {
         ToolRegistry.tools.associate { it.screen.route to (it.screen.route) }
     }
@@ -110,11 +108,11 @@ fun MiniToolboxNavGraph(
         if (route != lastRoute && toolRoutes.contains(route)) {
             val toolId = routeToToolId[route] ?: route
 
-            // 1) contador por tool
-            toolUse(context, toolId)
+            // contar solo si pasó el cooldown por herramienta
+            val isNewAccess = ToolUsageTracker.onToolOpened(context, toolId)
 
-            // 2) intentar interstitial si corresponde
-            if (activity != null) {
+            if (isNewAccess && activity != null) {
+                // Realiza conteo global y lleva cooldown de tiempo
                 InterstitialManager.onToolOpened(
                     activity = activity,
                     shouldShowAds = shouldShowAds
@@ -156,7 +154,9 @@ fun MiniToolboxNavGraph(
         composable(Screen.Categories.route) {
             CategoriesScreen(
                 tools = ToolRegistry.tools,
-                onToolClick = { tool -> navController.navigate(tool.screen.route) }
+                onToolClick = { tool -> navController.navigate(tool.screen.route) },
+                onNavigateToPro = { navController.navigate(Screen.Pro.route) },
+                onNavigateToAbout = { navController.navigate(Screen.About.route) }
             )
         }
 
@@ -169,13 +169,13 @@ fun MiniToolboxNavGraph(
         composable(Screen.CoinFlip.route) {
             CoinFlipScreen(onBack = onBackSmart)
         }
-        composable(Screen.DecimalBinaryConverter.route) {
+        composable(Screen.DecimalBinary.route) {
             DecimalBinaryConverterScreen(onBack = onBackSmart)
         }
-        composable(Screen.TextBinaryConverter.route) {
+        composable(Screen.TextBinary.route) {
             TextBinaryConverterScreen(onBack = onBackSmart)
         }
-        composable(Screen.TrucoScoreBoard.route) {
+        composable(Screen.TrucoScoreboard.route) {
             TrucoScoreBoardScreen(onBack = onBackSmart)
         }
         composable(Screen.AgeCalculator.route) {
@@ -190,103 +190,103 @@ fun MiniToolboxNavGraph(
         composable(Screen.BubbleLevel.route) {
             BubbleLevelScreen(onBack = onBackSmart)
         }
-        composable(Screen.Porcentaje.route) {
+        composable(Screen.Percentage.route) {
             PorcentajeScreen(onBack = onBackSmart)
         }
-        composable(Screen.ConversorHoras.route) {
+        composable(Screen.TimeConverter.route) {
             ConversorHorasScreen(onBack = onBackSmart)
         }
-        composable(Screen.CalculadoraDeIMC.route) {
+        composable(Screen.BmiCalculator.route) {
             IMCScreen(onBack = onBackSmart)
         }
-        composable(Screen.ConversorRomanos.route) {
+        composable(Screen.RomanNumerals.route) {
             ConversorRomanosScreen(onBack = onBackSmart)
         }
-        composable(Screen.ConversorUnidades.route) {
+        composable(Screen.UnitConverter.route) {
             ConversorUnidadesScreen(onBack = onBackSmart)
         }
-        composable(Screen.GeneradorContrasena.route) {
+        composable(Screen.PasswordGenerator.route) {
             GeneradorContrasenaScreen(onBack = onBackSmart)
         }
-        composable(Screen.SugeridorActividades.route) {
+        composable(Screen.ActivitySuggester.route) {
             SugeridorActividadScreen(onBack = onBackSmart)
         }
-        composable(Screen.GeneradorNombres.route) {
+        composable(Screen.NameGenerator.route) {
             GeneradorNombresScreen(onBack = onBackSmart)
         }
-        composable(Screen.GeneradorQR.route) {
+        composable(Screen.QrGenerator.route) {
             GeneradorQrScreen(onBack = onBackSmart)
         }
-        composable(Screen.GeneradorVCard.route) {
+        composable(Screen.VcardGenerator.route) {
             GeneradorQrContactoScreen(onBack = onBackSmart)
         }
         composable(Screen.LoremIpsum.route) {
             GeneradorLoremIpsumScreen(onBack = onBackSmart)
         }
-        composable(Screen.Regla.route) {
+        composable(Screen.Ruler.route) {
             ReglaScreen(onBack = onBackSmart)
         }
-        composable(Screen.MedidorLuz.route) {
+        composable(Screen.LightMeter.route) {
             LightSensorScreen(onBack = onBackSmart)
         }
-        composable(Screen.Linterna.route) {
+        composable(Screen.Flashlight.route) {
             FlashScreen(onBack = onBackSmart)
         }
-        composable(Screen.Rachas.route) {
+        composable(Screen.Streaks.route) {
             HabitTrackerScreen(onBack = onBackSmart)
         }
-        composable(Screen.Agua.route) {
+        composable(Screen.Water.route) {
             AguaReminderScreen(
                 onBack = onBackSmart,
                 onShowEstadisticas = {
-                    navController.navigate(Screen.EstadisticasAgua.route)
+                    navController.navigate(Screen.WaterStats.route)
                 }
             )
         }
-        composable(Screen.TiempoHasta.route) {
+        composable(Screen.Countdown.route) {
             RemainingTimeScreen(onBack = onBackSmart)
         }
-        composable(Screen.EstadisticasAgua.route) {
+        composable(Screen.WaterStats.route) {
             AguaStatisticsScreen(onBack = onBackSmart)
         }
-        composable(Screen.PaisesInfo.route) {
+        composable(Screen.CountriesInfo.route) {
             CountriesInfoScreen(onBack = onBackSmart)
         }
-        composable(Screen.RuletaSelectora.route) {
+        composable(Screen.SelectorWheel.route) {
             OptionSelectorScreen(onBack = onBackSmart)
         }
-        composable(Screen.AdivinaBandera.route) {
+        composable(Screen.GuessFlag.route) {
             AdivinaBanderaScreen(onBack = onBackSmart)
         }
-        composable(Screen.Reuniones.route) {
+        composable(Screen.Meetings.route) {
             ReunionesScreen(
                 onBack = onBackSmart,
-                onCrearReunion = { navController.navigate(Screen.CrearReunion.route) },
+                onCrearReunion = { navController.navigate(Screen.MeetingCreate.route) },
                 onReunionClick = { reunion ->
-                    navController.navigate(Screen.DetallesReunion.route + "/${reunion.id}")
+                    navController.navigate(Screen.MeetingDetail.route + "/${reunion.id}")
                 }
             )
         }
-        composable(Screen.CrearReunion.route) {
+        composable(Screen.MeetingCreate.route) {
             CrearReunionScreen(
                 onBack = onBackSmart,
                 onReunionCreada = { navController.popBackStack() }
             )
         }
-        composable(Screen.DetallesReunion.route + "/{reunionId}") {
+        composable(Screen.MeetingDetail.route + "/{reunionId}") {
             val reunionId = it.arguments?.getString("reunionId") ?: ""
             DetallesReunionScreen(
                 onBack = onBackSmart,
                 reunionId = reunionId,
                 onEditarGasto = { idReunion, idGasto ->
-                    navController.navigate(Screen.EditarGasto.route + "/$idReunion/$idGasto")
+                    navController.navigate(Screen.ExpenseEdit.route + "/$idReunion/$idGasto")
                 },
                 onAgregarGasto = { idReunion ->
-                    navController.navigate(Screen.AgregarGasto.route + "/$idReunion")
+                    navController.navigate(Screen.ExpenseAdd.route + "/$idReunion")
                 }
             )
         }
-        composable(Screen.EditarGasto.route + "/{reunionId}/{gastoId}") {
+        composable(Screen.ExpenseEdit.route + "/{reunionId}/{gastoId}") {
             EditarGastoScreen(
                 reunionId = remember {
                     it.arguments?.getString("reunionId") ?: ""
@@ -297,38 +297,38 @@ fun MiniToolboxNavGraph(
                 onBack = onBackSmart
             )
         }
-        composable(Screen.AgregarGasto.route + "/{reunionId}") {
+        composable(Screen.ExpenseAdd.route + "/{reunionId}") {
             val reunionId = it.arguments?.getString("reunionId") ?: ""
             AgregarGastoScreen(
                 reunionId = reunionId,
                 onBack = onBackSmart
             )
         }
-        composable(Screen.Dados.route) {
+        composable(Screen.Dice.route) {
             LanzadorDadosScreen(onBack = onBackSmart)
         }
-        composable(Screen.CalculosRapidos.route) {
+        composable(Screen.QuickCalcs.route) {
             CalculosRapidosScreen(onBack = onBackSmart)
         }
-        composable(Screen.Frases.route) {
+        composable(Screen.Quotes.route) {
             BasicPhrasesScreen(onBack = onBackSmart)
         }
-        composable(Screen.MiYoDelMultiverso.route) {
+        composable(Screen.MultiverseMe.route) {
             InOtherWoldScreen(onBack = onBackSmart)
         }
-        composable(Screen.AdivinaCapital.route) {
+        composable(Screen.GuessCapital.route) {
             AdivinaCapitalScreen(onBack = onBackSmart)
         }
-        composable(Screen.Brujula.route) {
+        composable(Screen.Compass.route) {
             BrujulaScreen(onBack = onBackSmart)
         }
-        composable(Screen.ToDo.route) {
+        composable(Screen.Todo.route) {
             ToDoListScreen(onBack = onBackSmart)
         }
-        composable(Screen.Eventos.route) {
+        composable(Screen.Events.route) {
             EventosImportantesScreen(onBack = onBackSmart)
         }
-        composable(Screen.InteresCompuesto.route) {
+        composable(Screen.CompoundInterest.route) {
             InteresCompuestoScreen(onBack = onBackSmart)
         }
         composable(Screen.Scoreboard.route) {
@@ -337,10 +337,10 @@ fun MiniToolboxNavGraph(
         composable(Screen.Magnifier.route) {
             MagnifierScreen(onBack = onBackSmart)
         }
-        composable(Screen.ARRuler.route) {
+        composable(Screen.ArRuler.route) {
             ArRulerSceneViewScreen(onBack = onBackSmart)
         }
-        composable(Screen.Ruido.route) {
+        composable(Screen.Noise.route) {
             WhiteNoiseScreen(onBack = onBackSmart)
         }
         composable(Screen.About.route) {
@@ -354,11 +354,15 @@ fun MiniToolboxNavGraph(
                         android.content.Intent(context, com.google.android.gms.oss.licenses.OssLicensesMenuActivity::class.java)
                     )
                 },
-                onOpenDevTools = { navController.navigate("dev/metrics") }
+                onOpenDevTools = { navController.navigate("dev_metrics") },
+                onNavigateToPro = { navController.navigate(Screen.Pro.route) }
             )
         }
-        composable(Screen.DevTools.route) {
+        composable(Screen.DevMetrics.route) {
             MetricsDevScreen()
+        }
+        composable(Screen.Pro.route) {
+            ProScreen(onBack = onBackSmart)
         }
     }
 }

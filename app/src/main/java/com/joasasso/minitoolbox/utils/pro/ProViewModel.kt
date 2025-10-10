@@ -37,8 +37,6 @@ class ProViewModel(app: Application) : AndroidViewModel(app) {
                 ProPrefs.setPro(
                     app.applicationContext,
                     isPro = s.isPro,
-                    source = s.source,
-                    since = s.sinceMillis ?: System.currentTimeMillis()
                 )
             }
         }
