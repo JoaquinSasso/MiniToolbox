@@ -74,7 +74,6 @@ import com.joasasso.minitoolbox.data.setFavoritesOrder
 import com.joasasso.minitoolbox.data.toogleFavorite
 import com.joasasso.minitoolbox.tools.Tool
 import com.joasasso.minitoolbox.tools.ToolCategory
-import com.joasasso.minitoolbox.tools.ToolRegistry
 import com.joasasso.minitoolbox.ui.components.ProToolPaywallDialog
 import com.joasasso.minitoolbox.ui.components.ToolCard
 import com.joasasso.minitoolbox.ui.components.groupDecorBySubcategory
@@ -214,7 +213,7 @@ fun CategoriesScreen(
                         )
                     }
                     IconButton(onClick = {
-                        onToolClick(ToolRegistry.tools.last()) //TODO cambiar implementacion para que en lugar de buscar el ultimo, busque la about screen
+                        onNavigateToAbout()
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     }) {
                         Icon(Icons.Filled.Info, contentDescription = "Información")
