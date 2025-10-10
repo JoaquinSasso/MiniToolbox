@@ -54,11 +54,11 @@ android {
             // si tu release tiene minifyEnabled=true y te molesta:
             // isMinifyEnabled = false
         }
-        release {
-            isMinifyEnabled = true // puedes activarlo después con ProGuard
-            isShrinkResources = true
-            signingConfig = signingConfigs.getByName("release")
-        }
+//        release {
+//            isMinifyEnabled = true // puedes activarlo después con ProGuard
+//            isShrinkResources = true
+//            signingConfig = signingConfigs.getByName("release")
+//        }
     }
 
     compileOptions {
@@ -75,6 +75,10 @@ android {
         compose = true
         buildConfig = true
     }
+}
+
+configurations.configureEach {
+    exclude(group = "com.google.protobuf", module = "protobuf-javalite")
 }
 
 dependencies {
@@ -160,9 +164,9 @@ dependencies {
     }
 
     implementation(libs.admob.unity)
+    implementation(libs.unity.sdk)
     implementation(libs.admob.meta)
-    implementation(libs.admob.applovin)
-
+    implementation(libs.meta.sdk)
 
     implementation(libs.google.ump)
 

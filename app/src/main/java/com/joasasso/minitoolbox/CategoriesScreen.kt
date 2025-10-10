@@ -554,8 +554,8 @@ fun CategoriesScreen(
                     RewardedManager.show(
                         activity = activity,
                         onReward = {
-                            // ✅ Activa el pase de 10 minutos
-                            CreditAccessManager.startTimedPassForAd(activity)
+                            // Activa el pase de 10 minutos
+                            //CreditAccessManager.startTimedPassForAd(activity)
 
                             Toast
                                 .makeText(activity, R.string.pro_unlocked_toast, android.widget.Toast.LENGTH_SHORT)
@@ -564,7 +564,7 @@ fun CategoriesScreen(
                             selectedProTool?.let { onToolClick(it) }
                         },
                         onUnavailable = {
-                            // ✅ No-fill: deja pasar, muestra Toast y no suma tiempo
+                            // No-fill: deja pasar, muestra Toast y no suma tiempo
                             val used = CreditAccessManager.consumeGrace(activity)
                             if (used) {
                                 Toast

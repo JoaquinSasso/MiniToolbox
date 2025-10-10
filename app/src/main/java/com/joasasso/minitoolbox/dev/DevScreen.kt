@@ -1,6 +1,8 @@
-package com.joasasso.minitoolbox.metrics.dev
+package com.joasasso.minitoolbox.dev
 
+import android.app.Activity
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -27,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.google.android.gms.ads.MobileAds
 import com.joasasso.minitoolbox.metrics.storage.AggregatesRepository
 import com.joasasso.minitoolbox.metrics.storage.MetricsKeys
 import com.joasasso.minitoolbox.metrics.storage.metricsDataStore
@@ -58,13 +61,14 @@ fun MetricsDevScreen() {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(scroll)
-            .padding(16.dp),
+            .padding(16.dp, top = 48.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
             "Metrics Dev – Próximo lote a enviar",
             style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
         )
 
         Text(
@@ -77,19 +81,26 @@ fun MetricsDevScreen() {
             color = MaterialTheme.colorScheme.onBackground
         )
 
+        Button(onClick = { openAdInspector(ctx as Activity) }) { Text("Abrir Ad Inspector") }
+
         Button(onClick = { refresh() }) { Text("Refrescar") }
+
 
         HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
 
-        if (state.summary.isNotBlank()) {
-            Text("Resumen por día", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            Surface(tonalElevation = 2.dp, modifier = Modifier.fillMaxWidth()) {
-                Text(text = state.summary, modifier = Modifier.padding(12.dp))
-            }
-            Spacer(Modifier.height(8.dp))
-        }
+//        if (state.summary.isNotBlank()) {
+//            Text("Resumen por día", style = MaterialTheme.typography.titleMedium,
+//                fontWeight = FontWeight.SemiBold,
+//                color = MaterialTheme.colorScheme.onBackground)
+//            Surface(tonalElevation = 2.dp, modifier = Modifier.fillMaxWidth()) {
+//                Text(text = state.summary, modifier = Modifier.padding(12.dp))
+//            }
+//            Spacer(Modifier.height(8.dp))
+//        }
 
-        Text("Payload JSON", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text("Payload JSON", style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onBackground)
         Surface(tonalElevation = 2.dp, modifier = Modifier.fillMaxWidth()) {
             Text(text = state.prettyJson, modifier = Modifier.padding(12.dp))
         }
@@ -205,3 +216,11 @@ private fun summarizePayload(json: String): String = try {
     }
     sb.toString().trimEnd()
 } catch (_: Throwable) { "" }
+
+//Ad Inspector
+fun openAdInspector(activity: Activity) {
+    MobileAds.openAdInspector(activity) { error ->
+        // Si error == null, se abrió bien
+        Log.d("Ads", "AdInspector abierto: ${error?.message}")
+    }
+}
