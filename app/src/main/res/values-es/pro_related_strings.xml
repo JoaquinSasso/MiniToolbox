@@ -14,9 +14,23 @@
     <string name="pro_feature_icon">Ícono de característica PRO</string>
 
 
+    <!-- Paywall -->
     <string name="paywall_title">Función PRO</string>
-    <string name="paywall_description">Para usar esta herramienta, actualiza a la versión PRO o mira un breve anuncio.</string>
-    <string name="paywall_go_pro">Volverse PRO</string>
-    <string name="paywall_watch_ad">Ver anuncio</string>
-    <string name="about_go_pro_button">Desbloquear Modo PRO</string>
+    <string name="paywall_go_pro">Pasar a PRO</string>
+
+    <!-- Modelo solo tiempo -->
+    <string name="paywall_description_time_only">Mirá un anuncio breve para activar todas las herramientas PRO por un tiempo limitado. O desbloqueá PRO para siempre — pago único.</string>
+    <string name="paywall_watch_ad_pass">Mirar anuncio — PRO por 10 min</string>
+    <string name="paywall_pass_active">PRO activo: quedan %1$s</string>
+    <string name="paywall_pass_locked_hint">Mirá un anuncio para activar PRO por un rato.</string>
+    <string name="paywall_grace_info">Pases gratis hoy: %1$d</string>
+    <string name="paywall_no_ad_try_later">No hay anuncio disponible. Probá más tarde o desbloqueá PRO.</string>
+    <string name="pro_unlocked_toast">PRO activado por 10 minutos</string>
+    <string name="free_pass_used_toast">No hay anuncio — acceso libre concedido</string>
+
+
+    <!-- Badge -->
+    <string name="pro_badge_active_time">PRO %1$s</string>
+    
+    <string name="about_go_pro_button">Desbloquea modo PRO</string>
 </resources>

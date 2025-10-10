@@ -137,9 +137,11 @@ fun AboutScreen(
                     SectionTitle(text = stringResource(R.string.about_section_credits_title))
                     HorizontalDivider(thickness = 3.dp, color = MaterialTheme.colorScheme.outlineVariant)
                     // Uicons
-                    Text(stringResource(R.string.about_icons_uicons_line))
+                    Text(stringResource(R.string.about_icons_uicons_line),
+                        style = MaterialTheme.typography.bodyMedium)
                     // Material Icons
-                    Text(stringResource(R.string.about_material_icons_line))
+                    Text(stringResource(R.string.about_material_icons_line),
+                        style = MaterialTheme.typography.bodyMedium)
 
                     // Autores Flaticon
                     Text(
@@ -147,11 +149,13 @@ fun AboutScreen(
                         style = MaterialTheme.typography.titleSmall
                     )
                     flaticonAuthors.forEach { author ->
-                        Text(stringResource(R.string.about_flaticon_line_per_author, author))
+                        Text(stringResource(R.string.about_flaticon_line_per_author, author),
+                            style = MaterialTheme.typography.bodyMedium)
                     }
 
                     // Línea “comodín” por si faltó alguno
-                    Text(stringResource(R.string.about_flaticon_and_others))
+                    Text(stringResource(R.string.about_flaticon_and_others),
+                        style = MaterialTheme.typography.bodyMedium)
                 }
             }
             HorizontalDivider(thickness = 3.dp, color = MaterialTheme.colorScheme.outlineVariant)

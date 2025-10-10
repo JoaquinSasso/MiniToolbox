@@ -22,7 +22,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
@@ -31,7 +30,6 @@ import com.joasasso.minitoolbox.tools.Tool
 import com.joasasso.minitoolbox.ui.theme.CategoryIcon
 import com.joasasso.minitoolbox.ui.theme.swatchForCategory
 import com.joasasso.minitoolbox.ui.theme.swatchForSubcategory
-import com.joasasso.minitoolbox.utils.pro.LocalProState
 
 @Composable
 fun ToolCard(
@@ -44,8 +42,6 @@ fun ToolCard(
     onToggleFavorito: () -> Unit,
     overrideElevation: Dp? = null
 ) {
-    val haptic = LocalHapticFeedback.current
-    val proState = LocalProState.current
 
     val swatch = swatchForSubcategory(tool.subCategory) ?: swatchForCategory(tool.category)
 
