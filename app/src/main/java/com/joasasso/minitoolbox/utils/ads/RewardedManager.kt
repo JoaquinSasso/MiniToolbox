@@ -7,19 +7,13 @@ import com.google.android.gms.ads.*
 import com.google.android.gms.ads.rewarded.RewardItem
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
-import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd
-import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAdLoadCallback
+import com.joasasso.minitoolbox.metrics.adImpression
 import java.util.concurrent.atomic.AtomicBoolean
 
 object RewardedManager {
 
     private const val TAG = "RewardedManager"
-
-    /** Si true → usa Rewarded Interstitial; si false → usa Rewarded clásico */
-    var useRewardedInterstitial: Boolean = false
-
     private var rewarded: RewardedAd? = null
-    private var rewardedInterstitial: RewardedInterstitialAd? = null
 
     private var adUnitId: String? = null
     private val isLoading = AtomicBoolean(false)
@@ -27,14 +21,24 @@ object RewardedManager {
     private var lastLoadTs = 0L
     private const val LOAD_COOLDOWN_MS = 5_000L
 
-    fun init(context: Context, adUnitId: String, useRI: Boolean) {
+    /**
+     * IMPORTANTE: pasar siempre una Activity (Unity y otros adapters la requieren también para LOAD).
+     */
+    fun init(context : Context, adUnitId: String) {
         this.adUnitId = adUnitId
-        this.useRewardedInterstitial = useRI
-        load(context)
+        val activity = (context as Activity)
+        if (rewarded == null) load(activity)
     }
 
-    fun load(context: Context) {
-        val id = adUnitId ?: return
+    /**
+     * Carga un Rewarded con Activity (no usar applicationContext).
+     */
+    fun load(activity: Activity) {
+        val id = adUnitId ?: run {
+            Log.w(TAG, "No adUnitId set; skipping load()")
+            return
+        }
+
         val now = System.currentTimeMillis()
         if (isLoading.get() || now - lastLoadTs < LOAD_COOLDOWN_MS) return
         isLoading.set(true)
@@ -42,51 +46,50 @@ object RewardedManager {
 
         val req = AdRequest.Builder().build()
 
-        if (useRewardedInterstitial) {
-            // REWARDED INTERSTITIAL
-            RewardedInterstitialAd.load(
-                context, id, req,
-                object : RewardedInterstitialAdLoadCallback() {
-                    override fun onAdLoaded(ad: RewardedInterstitialAd) {
-                        rewardedInterstitial = ad
-                        rewarded = null
-                        isLoading.set(false)
-                        val name = ad.responseInfo.mediationAdapterClassName
-                        Log.d(TAG, "RewardedInterstitial loaded")
-                        Log.i("Ads", "RewardedInterstitial loaded by adapter: $name")
-                    }
-                    override fun onAdFailedToLoad(error: LoadAdError) {
-                        rewardedInterstitial = null
-                        isLoading.set(false)
-                        Log.e(TAG, "RewardedInterstitial failed to load: code=${error.code} message=${error.message}")
-                    }
-                }
-            )
-        } else {
-            // REWARDED CLÁSICO
-            RewardedAd.load(
-                context, id, req,
-                object : RewardedAdLoadCallback() {
-                    override fun onAdLoaded(ad: RewardedAd) {
-                        rewarded = ad
-                        rewardedInterstitial = null
-                        isLoading.set(false)
-                        val name = ad.responseInfo.mediationAdapterClassName
-                        Log.d(TAG, "Rewarded loaded")
-                        Log.i("Ads", "Rewarded loaded by adapter: $name")
-                    }
-                    override fun onAdFailedToLoad(error: LoadAdError) {
-                        rewarded = null
-                        isLoading.set(false)
-                        Log.e(TAG, "Rewarded failed to load: code=${error.code} message=${error.message}")
+        RewardedAd.load(
+            activity,
+            id,
+            req,
+            object : RewardedAdLoadCallback() {
+                override fun onAdLoaded(ad: RewardedAd) {
+                    rewarded = ad
+                    isLoading.set(false)
+                    val adapter = ad.responseInfo.mediationAdapterClassName
+                    Log.d(TAG, "Rewarded loaded")
+                    Log.i("Ads", "Rewarded loaded by adapter: $adapter")
+
+                    // Aseguramos callbacks de pantalla completa (para recarga/metricas)
+                    ad.fullScreenContentCallback = object : FullScreenContentCallback() {
+                        override fun onAdShowedFullScreenContent() {
+                            // Métrica de impresión (mantiene tu comportamiento original)
+                            adImpression(activity.applicationContext, "rewarded")
+                        }
+                        override fun onAdDismissedFullScreenContent() {
+                            rewarded = null
+                            // Precarga el siguiente anuncio usando Activity (no applicationContext)
+                            load(activity)
+                        }
+                        override fun onAdFailedToShowFullScreenContent(err: AdError) {
+                            Log.e(TAG, "Rewarded failed to show: code=${err.code} msg=${err.message}")
+                            rewarded = null
+                            load(activity)
+                        }
                     }
                 }
-            )
-        }
+
+                override fun onAdFailedToLoad(error: LoadAdError) {
+                    rewarded = null
+                    isLoading.set(false)
+                    Log.e(TAG, "Rewarded failed to load: code=${error.code} message=${error.message}")
+                    // Si fue NO_FILL (3), dejamos que el cooldown regule los reintentos.
+                }
+            }
+        )
     }
 
     /**
      * Muestra el anuncio si hay uno disponible. Si no, ejecuta onUnavailable().
+     * Siempre exige Activity (necesario para show y consistente con load).
      */
     fun show(
         activity: Activity,
@@ -98,57 +101,30 @@ object RewardedManager {
             return false
         }
 
-        val onFinally: () -> Unit = {
+        val ad = rewarded
+        if (ad == null) {
             isShowing.set(false)
-            load(activity.applicationContext)
+            onUnavailable?.invoke()
+            // Reintenta precargar con Activity
+            load(activity)
+            return false
         }
 
-        if (useRewardedInterstitial) {
-            val ad = rewardedInterstitial
-            if (ad == null) {
+        InterstitialManager.notifyRewardedShown()
+        // (El fullScreenContentCallback ya se setea en onAdLoaded para asegurar consistencia)
+        ad.show(activity) { reward ->
+            try {
+                onReward(reward)
+            } catch (t: Throwable) {
+                Log.e(TAG, "onReward callback threw", t)
+            } finally {
+                // El callback de dismissed/failed hará la recarga y limpiará estados.
                 isShowing.set(false)
-                onUnavailable?.invoke()
-                load(activity.applicationContext)
-                return false
             }
-            ad.fullScreenContentCallback = object : FullScreenContentCallback() {
-                override fun onAdShowedFullScreenContent() { /* track if needed */ }
-                override fun onAdDismissedFullScreenContent() {
-                    rewardedInterstitial = null
-                    onFinally()
-                }
-                override fun onAdFailedToShowFullScreenContent(err: AdError) {
-                    rewardedInterstitial = null
-                    onUnavailable?.invoke()
-                    onFinally()
-                }
-            }
-            ad.show(activity) { reward -> onReward(reward) }
-            rewardedInterstitial = null
-            return true
-        } else {
-            val ad = rewarded
-            if (ad == null) {
-                isShowing.set(false)
-                onUnavailable?.invoke()
-                load(activity.applicationContext)
-                return false
-            }
-            ad.fullScreenContentCallback = object : FullScreenContentCallback() {
-                override fun onAdShowedFullScreenContent() { /* track if needed */ }
-                override fun onAdDismissedFullScreenContent() {
-                    rewarded = null
-                    onFinally()
-                }
-                override fun onAdFailedToShowFullScreenContent(err: AdError) {
-                    rewarded = null
-                    onUnavailable?.invoke()
-                    onFinally()
-                }
-            }
-            ad.show(activity) { reward -> onReward(reward) }
-            rewarded = null
-            return true
         }
+
+        // Evita dobles shows con la misma instancia
+        rewarded = null
+        return true
     }
 }
