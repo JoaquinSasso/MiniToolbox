@@ -20,7 +20,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.joasasso.minitoolbox.metrics.dev.MetricsDevScreen
+import com.joasasso.minitoolbox.dev.MetricsDevScreen
 import com.joasasso.minitoolbox.nav.Screen
 import com.joasasso.minitoolbox.tools.ToolRegistry
 import com.joasasso.minitoolbox.tools.entretenimiento.MarcadorEquiposScreen
@@ -91,7 +91,7 @@ fun MiniToolboxNavGraph(
     LaunchedEffect(Unit) {
         // Inicializar managers una sola vez
         InterstitialManager.init(context.applicationContext, interstitialAdUnitId)
-        RewardedManager.init(context.applicationContext, rewardedAdUnitId)
+        RewardedManager.init(context.applicationContext, rewardedAdUnitId, false)
     }
 
     // Mapeo route -> toolId (ajustalo si tenés otro id)

@@ -1,4 +1,4 @@
-package com.joasasso.minitoolbox.metrics.dev
+package com.joasasso.minitoolbox.dev
 
 import android.content.Context
 import com.joasasso.minitoolbox.metrics.storage.AggregatesRepository

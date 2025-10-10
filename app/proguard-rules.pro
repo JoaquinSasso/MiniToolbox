@@ -19,3 +19,18 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Unity Ads
+-keep class com.unity3d.** { *; }
+-dontwarn com.unity3d.**
+
+# Facebook Audience Network
+-keep class com.facebook.ads.** { *; }
+# Estas anotaciones SOLO son metadata; si no están presentes, suprime el warning:
+-dontwarn com.facebook.infer.annotation.**
+-keepattributes *Annotation*
+
+# AppLovin
+-keep class com.applovin.** { *; }
+-dontwarn com.applovin.**
+
