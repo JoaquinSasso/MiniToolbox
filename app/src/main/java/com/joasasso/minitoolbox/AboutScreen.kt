@@ -6,18 +6,24 @@ import android.content.ContextWrapper
 import android.content.pm.PackageManager
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -30,11 +36,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.google.android.ump.ConsentInformation
@@ -43,13 +51,15 @@ import com.joasasso.minitoolbox.metrics.isMetricsEnabled
 import com.joasasso.minitoolbox.metrics.setMetricsEnabled
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import com.joasasso.minitoolbox.utils.openPrivacyUrl
+import com.joasasso.minitoolbox.utils.pro.LocalProState
 
 
 @Composable
 fun AboutScreen(
     onBack: () -> Unit,
     onOpenLicenses: () -> Unit,
-    onOpenDevTools: () -> Unit
+    onOpenDevTools: () -> Unit,
+    onNavigateToPro: () -> Unit
 ) {
     val context = LocalContext.current
     val url = stringResource(R.string.privacy_policy_url)
@@ -68,6 +78,8 @@ fun AboutScreen(
     }
 
     val flaticonAuthors = stringArrayResource(R.array.about_flaticon_authors)
+
+    val proState = LocalProState.current
 
     Scaffold(
         topBar = {
@@ -125,9 +137,11 @@ fun AboutScreen(
                     SectionTitle(text = stringResource(R.string.about_section_credits_title))
                     HorizontalDivider(thickness = 3.dp, color = MaterialTheme.colorScheme.outlineVariant)
                     // Uicons
-                    Text(stringResource(R.string.about_icons_uicons_line))
+                    Text(stringResource(R.string.about_icons_uicons_line),
+                        style = MaterialTheme.typography.bodyMedium)
                     // Material Icons
-                    Text(stringResource(R.string.about_material_icons_line))
+                    Text(stringResource(R.string.about_material_icons_line),
+                        style = MaterialTheme.typography.bodyMedium)
 
                     // Autores Flaticon
                     Text(
@@ -135,17 +149,42 @@ fun AboutScreen(
                         style = MaterialTheme.typography.titleSmall
                     )
                     flaticonAuthors.forEach { author ->
-                        Text(stringResource(R.string.about_flaticon_line_per_author, author))
+                        Text(stringResource(R.string.about_flaticon_line_per_author, author),
+                            style = MaterialTheme.typography.bodyMedium)
                     }
 
                     // Línea “comodín” por si faltó alguno
-                    Text(stringResource(R.string.about_flaticon_and_others))
+                    Text(stringResource(R.string.about_flaticon_and_others),
+                        style = MaterialTheme.typography.bodyMedium)
                 }
             }
             HorizontalDivider(thickness = 3.dp, color = MaterialTheme.colorScheme.outlineVariant)
             // ===== 4) BOTONES =====
 
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                // Solo se muestra si el usuario NO es PRO
+                if (!proState.isPro) {
+                    Button(
+                        onClick = onNavigateToPro,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFFFD700), // Dorado
+                            contentColor = Color.Black
+                        ),
+                        contentPadding = PaddingValues(16.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.WorkspacePremium,
+                            contentDescription = null,
+                            tint = Color(0xFFC9A800) // Dorado más oscuro
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(R.string.about_go_pro_button),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
                 OutlinedButton(
                     onClick = { context.openPrivacyUrl(url) },
                     modifier = Modifier.fillMaxWidth()

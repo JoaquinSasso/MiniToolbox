@@ -18,5 +18,6 @@ data class Tool(
     val subCategory: Int,
     @StringRes val summary: Int? = null,
     val icon: ImageVector? = null,
-    @DrawableRes val svgResId: Int? = null
+    @DrawableRes val svgResId: Int? = null,
+    val isPro: Boolean = false
 )

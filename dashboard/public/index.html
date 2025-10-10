@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="es" data-bs-theme="auto">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Metrics Dashboard</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg border-bottom px-3">
+      <div class="container-fluid">
+        <span class="navbar-brand fw-semibold">📊 Metrics Dashboard</span>
+        <div class="d-flex gap-2 ms-auto align-items-center">
+    <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" role="switch" id="themeSwitch">
+        <label class="form-check-label" for="themeSwitch">🌙/☀️</label>
+    </div>
+    <button class="btn btn-outline-secondary" id="btnSettings">
+        ⚙️ Settings
+    </button>
+    <button class="btn btn-primary" id="btnReload">🔄 Reload</button>
+</div>
+      </div>
+    </nav>
+
+    <main class="container py-3">
+      <section class="row g-3 align-items-end">
+        <div class="col-12 col-md-3">
+          <label class="form-label">Rango</label>
+          <select class="form-select" id="rangePreset">
+            <option value="7">Últimos 7 días</option>
+            <option value="30" selected>Últimos 30 días</option>
+            <option value="90">Últimos 90 días</option>
+            <option value="custom">Personalizado</option>
+          </select>
+        </div>
+        <div class="col-6 col-md-3 d-none" id="fromWrap">
+          <label class="form-label">Desde</label>
+          <input type="date" class="form-control" id="fromDate" />
+        </div>
+        <div class="col-6 col-md-3 d-none" id="toWrap">
+          <label class="form-label">Hasta</label>
+          <input type="date" class="form-control" id="toDate" />
+        </div>
+        <div class="col-12 col-md-3">
+          <label class="form-label invisible d-none d-md-block">.</label>
+          <button class="btn btn-success w-100" id="btnApply">Aplicar</button>
+        </div>
+      </section>
+
+      <section class="row g-3 my-3" id="summaryCards">
+        <div class="col-6 col-md-3">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <div class="text-muted small">App Opens</div>
+              <div class="fs-4 fw-bold" id="cardOpens">–</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <div class="text-muted small">Nuevos (first-seen)</div>
+              <div class="fs-4 fw-bold" id="cardNew">–</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <div class="text-muted small">Top Versión</div>
+              <div class="fs-5 fw-bold" id="cardTopVer">–</div>
+              <div class="small text-muted" id="cardTopVerVal"></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <div class="text-muted small">Top Idioma (primario)</div>
+              <div class="fs-5 fw-bold" id="cardTopLang">–</div>
+              <div class="small text-muted" id="cardTopLangVal"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="my-3">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h6 class="card-title">App opens por día</h6>
+            <canvas id="chartOpens" height="120"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <section class="my-3">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+              <div class="card-body">
+                <h6 class="card-title">Tools por día (Top 5 + Otros)</h6>
+                <canvas id="chartTools" height="220"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+              <div class="card-body">
+                <h6 class="card-title">Ads por día (Top 5 + Otros)</h6>
+                <canvas id="chartAds" height="220"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="my-3">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+              <div class="card-body">
+                <h6 class="card-title">Versions por día (Top 5 + Otros)</h6>
+                <canvas id="chartVersions" height="220"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+              <div class="card-body">
+                <h6 class="card-title">Idiomas primarios por día (Top 5 + Otros)</h6>
+                <canvas id="chartLang" height="220"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="my-3">
+          <div class="row g-3">
+              <div class="col-md-12">
+                  <div class="card shadow-sm h-100">
+                      <div class="card-body">
+                          <h6 class="card-title">Distribución de Tools</h6>
+                          <div style="position: relative; height:800px">
+                              <canvas id="barTools"></canvas>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </section>
+
+      <section class="my-3">
+          <div class="row g-3">
+              <div class="col-md-6">
+                  <div class="card shadow-sm h-100">
+                      <div class="card-body">
+                          <h6 class="card-title">Distribución Ads</h6>
+                          <canvas id="pieAds" height="220"></canvas>
+                      </div>
+                  </div>
+              </div>
+              <div class="col-md-6">
+                  <div class="card shadow-sm h-100">
+                      <div class="card-body">
+                          <h6 class="card-title">Distribución Versions (uso)</h6>
+                          <canvas id="pieVersions" height="220"></canvas>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </section>
+
+      <section class="my-3">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+              <div class="card-body">
+                <h6 class="card-title">Nuevos por versión (first-seen)</h6>
+                <canvas id="pieVersionsFS" height="220"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+              <div class="card-body">
+                <h6 class="card-title">Widgets (uso)</h6>
+                <canvas id="pieWidgets" height="220"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="my-3">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+              <h6 class="card-title m-0">Tabla de días</h6>
+              <button class="btn btn-outline-primary btn-sm" id="btnExport">⬇️ Export CSV</button>
+            </div>
+            <div class="table-responsive mt-2">
+              <table class="table table-sm align-middle" id="tblDaily">
+                <thead>
+                  <tr>
+                    <th>Día</th>
+                    <th>App Open</th>
+                    <th>Tools</th>
+                    <th>Ads</th>
+                    <th>Versions</th>
+                    <th>First-seen</th>
+                    <th>Lang (prim)</th>
+                    <th>Lang (sec)</th>
+                    <th>Widgets</th>
+                    <th>Updated</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Settings Modal -->
+    <div class="modal" tabindex="-1" id="settingsModal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h6 class="modal-title">Settings</h6>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <label class="form-label">API Base URL</label>
+            <input class="form-control mb-3" id="inpBaseUrl" placeholder="https://us-central1-<project>.cloudfunctions.net" />
+            <label class="form-label">API Key (lectura)</label>
+            <input class="form-control" id="inpApiKey" />
+            <div class="form-text">Se guarda en tu dispositivo (localStorage).</div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            <button class="btn btn-primary" id="btnSaveSettings">Guardar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>

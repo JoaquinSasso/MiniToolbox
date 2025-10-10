@@ -20,9 +20,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
@@ -43,7 +42,6 @@ fun ToolCard(
     onToggleFavorito: () -> Unit,
     overrideElevation: Dp? = null
 ) {
-    val haptic = LocalHapticFeedback.current
 
     val swatch = swatchForSubcategory(tool.subCategory) ?: swatchForCategory(tool.category)
 
@@ -51,10 +49,7 @@ fun ToolCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = topPadding, bottom = bottomPadding)
-            .clickable {
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                onToolClick(tool)
-            },
+            .clickable { onToolClick(tool) },
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             contentColor = MaterialTheme.colorScheme.onSurface
@@ -81,7 +76,8 @@ fun ToolCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = stringResource(id = tool.name),
-                    style = MaterialTheme.typography.bodyLarge
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = if (tool.isPro) Color(0xFFFFD700) else MaterialTheme.colorScheme.onSurface
                 )
                 tool.summary?.let { sumRes ->
                     Text(
@@ -114,9 +110,19 @@ data class GroupDecor(
 )
 
 fun groupDecorBySubcategory(index: Int, list: List<Tool>): GroupDecor {
-    val cur = list[index]
-    val prevSame = index > 0 && list[index - 1].subCategory == cur.subCategory
-    val nextSame = index < list.lastIndex && list[index + 1].subCategory == cur.subCategory
+    if (list.isEmpty()) {
+        return GroupDecor(
+            RoundedCornerShape(16.dp), 8.dp, 8.dp
+        )
+    }
+
+    val safeIndex = index.coerceIn(0, list.lastIndex)
+    val cur = list.getOrNull(safeIndex)
+        ?: return GroupDecor(
+            RoundedCornerShape(16.dp), 8.dp, 8.dp
+        )
+    val prevSame = safeIndex > 0 && list[safeIndex - 1].subCategory == cur.subCategory
+    val nextSame = safeIndex < list.lastIndex && list[safeIndex + 1].subCategory == cur.subCategory
 
     return when {
         !prevSame && !nextSame -> GroupDecor(
