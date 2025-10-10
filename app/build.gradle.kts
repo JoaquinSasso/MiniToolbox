@@ -158,6 +158,12 @@ dependencies {
         // Evita que Ads traiga el stub 1.0
         exclude(group = "com.google.guava", module = "listenablefuture")
     }
+
+    implementation(libs.admob.unity)
+    implementation(libs.admob.meta)
+    implementation(libs.admob.applovin)
+
+
     implementation(libs.google.ump)
 
     implementation("androidx.media:media:1.7.1")
