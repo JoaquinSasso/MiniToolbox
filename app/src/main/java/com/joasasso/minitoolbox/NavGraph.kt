@@ -91,7 +91,7 @@ fun MiniToolboxNavGraph(
     LaunchedEffect(Unit) {
         // Inicializar managers una sola vez
         InterstitialManager.init(context.applicationContext, interstitialAdUnitId)
-        RewardedManager.init(context.applicationContext, rewardedAdUnitId, false)
+        RewardedManager.init(context.applicationContext, rewardedAdUnitId)
     }
 
     // Mapeo route -> toolId (ajustalo si tenés otro id)

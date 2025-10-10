@@ -54,11 +54,12 @@ android {
             // si tu release tiene minifyEnabled=true y te molesta:
             // isMinifyEnabled = false
         }
-//        release {
-//            isMinifyEnabled = true // puedes activarlo después con ProGuard
-//            isShrinkResources = true
-//            signingConfig = signingConfigs.getByName("release")
-//        }
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            signingConfig = signingConfigs.getByName("release")
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
     }
 
     compileOptions {
