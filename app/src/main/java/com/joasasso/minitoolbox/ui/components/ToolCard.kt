@@ -20,8 +20,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -53,17 +53,7 @@ fun ToolCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = topPadding, bottom = bottomPadding)
-            .clickable {
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                if (tool.isPro && !proState.isPro) {
-                    // El usuario no es PRO e intenta acceder a una tool PRO
-                    // Aquí lanzamos el diálogo/paywall en lugar de navegar
-                    //showPaywallDialog.value = true
-                } else {
-                    // El usuario es PRO o la tool es gratuita
-                    onToolClick(tool)
-                }
-            },
+            .clickable { onToolClick(tool) },
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             contentColor = MaterialTheme.colorScheme.onSurface
@@ -90,7 +80,8 @@ fun ToolCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = stringResource(id = tool.name),
-                    style = MaterialTheme.typography.bodyLarge
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = if (tool.isPro) Color(0xFFFFD700) else MaterialTheme.colorScheme.onSurface
                 )
                 tool.summary?.let { sumRes ->
                     Text(
