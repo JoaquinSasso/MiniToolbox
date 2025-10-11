@@ -6,11 +6,6 @@
     <string name="pomodoro_work_label">Trabajo (min)</string>
     <string name="pomodoro_short_label">Descanso corto (min)</string>
     <string name="pomodoro_long_label">Descanso largo (min)</string>
-    <string name="pomodoro_help_title">Acerca de Pomodoro Timer</string>
-    <string name="pomodoro_help_line1">• Para qué sirve: Temporizador que alterna ciclos de trabajo y descanso para mejorar tu productividad.</string>
-    <string name="pomodoro_help_line2">• Guía rápida:</string>
-    <string name="pomodoro_help_line3">   – Ingresa la duración (min) de trabajo, descanso corto y descanso largo.\n   – Pulsa “Iniciar” para arrancar el ciclo.\n   – Usa “Silenciar” o “Detener” desde la notificación cuando lo necesites.\n   – El progreso y el tiempo restante se muestran aquí con barra y contador.</string>
-    <string name="pomodoro_help_line4">• Todos los datos se guardan localmente y nunca se comparten.</string>
 
     <!-- Strings de notificación -->
     <string name="pomodoro_channel_countdown_name">Pomodoro (Conteo)</string>
@@ -35,5 +30,19 @@
     <string name="pomodoro_running_until">Hasta %1$s</string>
     <string name="pomodoro_tap_to_stop">Toca para detener</string>
 
+
+    <!-- pomodoro list -->
+    <string name="pomodoro_add_timer">Agregar timer</string>
+    <string name="pomodoro_no_timers">No hay timers aún. Toca “Agregar timer”.</string>
+    <string name="pomodoro_edit_timer">Editar timer</string>
+    <string name="pomodoro_timer">Timer</string>
+    <string name="pomodoro_min_work">min trabajo</string>
+    <string name="pomodoro_min_breaks">min descansos</string>
+    <string name="pomodoro_cycles_before_long">cada %1$d ciclos</string>
+    <string name="pomodoro_open_detail">Abrir detalle</string>
+    <string name="pomodoro_cycles">Ciclos antes del largo</string>
+    <string name="pomodoro_help_title">Lista de timers Pomodoro</string>
+    <string name="pomodoro_help_line1">Crea perfiles con duraciones y colores distintos.</string>
+    <string name="pomodoro_help_line2">Toca ▶ para iniciar con ese perfil o “Abrir detalle”.</string>
 
 </resources>

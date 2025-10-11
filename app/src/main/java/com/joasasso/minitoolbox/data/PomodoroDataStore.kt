@@ -6,8 +6,11 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.joasasso.minitoolbox.tools.organizacion.pomodoro.PomodoroTimerConfig
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import org.json.JSONArray
+import org.json.JSONObject
 
 private val Context.pomodoroStateStore by preferencesDataStore("pomodoro_state")
 
@@ -62,4 +65,49 @@ class PomodoroSettingsRepository(context: Context) {
 
     suspend fun updateShortBreak(v: Int) = ds.edit { it[PomodoroSettingsKeys.SHORT_BREAK] = v }
     suspend fun updateLongBreak(v: Int) = ds.edit { it[PomodoroSettingsKeys.LONG_BREAK] = v }
+}
+
+object PomodoroTimersPrefs {
+    private const val PREFS = "pomodoro_timers_prefs"
+    private const val KEY = "timers"
+
+    fun loadAll(context: Context): List<PomodoroTimerConfig> {
+        val sp = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val raw = sp.getString(KEY, "[]") ?: "[]"
+        val arr = try { JSONArray(raw) } catch (_: Exception) {
+            JSONArray("[]")
+        }
+        val list = mutableListOf<PomodoroTimerConfig>()
+        for (i in 0 until arr.length()) {
+            val o = arr.optJSONObject(i) ?: continue
+            list += PomodoroTimerConfig(
+                id = o.optString("id"),
+                name = o.optString("name"),
+                colorArgb = o.optLong("colorArgb"),
+                workMin = o.optInt("workMin", 25),
+                shortBreakMin = o.optInt("shortBreakMin", 5),
+                longBreakMin = o.optInt("longBreakMin", 15),
+                cyclesBeforeLong = o.optInt("cyclesBeforeLong", 4),
+            )
+        }
+        return list
+    }
+
+    fun saveAll(context: Context, items: List<PomodoroTimerConfig>) {
+        val sp = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val arr = JSONArray()
+        items.forEach { t ->
+            val o = JSONObject().apply {
+                put("id", t.id)
+                put("name", t.name)
+                put("colorArgb", t.colorArgb)
+                put("workMin", t.workMin)
+                put("shortBreakMin", t.shortBreakMin)
+                put("longBreakMin", t.longBreakMin)
+                put("cyclesBeforeLong", t.cyclesBeforeLong)
+            }
+            arr.put(o)
+        }
+        sp.edit().putString(KEY, arr.toString()).apply()
+    }
 }

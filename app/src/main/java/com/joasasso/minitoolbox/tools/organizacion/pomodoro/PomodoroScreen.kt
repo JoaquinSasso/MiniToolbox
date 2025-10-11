@@ -11,9 +11,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -55,6 +52,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -67,9 +65,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.joasasso.minitoolbox.R
-import com.joasasso.minitoolbox.data.PomodoroSettingsRepository
 import com.joasasso.minitoolbox.data.PomodoroStateRepository
+import com.joasasso.minitoolbox.data.PomodoroTimersPrefs
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
+import kotlinx.coroutines.android.awaitFrame
 import kotlinx.coroutines.delay
 import kotlin.math.max
 import kotlin.math.min
@@ -82,12 +81,23 @@ const val ACTION_POMODORO_ALARM_STOP  = "POMODORO_ALARM_STOP"
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PomodoroScreen(
+    timerId: String,
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
     val haptics = LocalHapticFeedback.current
     var showInfo by remember { mutableStateOf(false) }
 
+    val timerConfig by remember(timerId) {
+        mutableStateOf(
+            PomodoroTimersPrefs.loadAll(context).firstOrNull { it.id == timerId }
+                ?: PomodoroTimerConfig(
+                    name = "Default",
+                    colorArgb = Color(0xFF4DBC52).toArgbLong(),
+                    workMin = 25, shortBreakMin = 5, longBreakMin = 15, cyclesBeforeLong = 4
+                )
+        )
+    }
 
     // Asegurar canales de notificación creados
     LaunchedEffect(Unit) { ensurePomodoroChannels(context) }
@@ -103,13 +113,13 @@ fun PomodoroScreen(
     }
 
     // Repos actuales
-    val settingsRepo = remember { PomodoroSettingsRepository(context) }
     val stateRepo    = remember { PomodoroStateRepository(context) }
 
     // Flows de configuración (usamos para botón Start)
-    val workMin   by settingsRepo.workMinFlow.collectAsState(initial = 25)
-    val shortMin  by settingsRepo.shortBreakFlow.collectAsState(initial = 5)
-    val longMin   by settingsRepo.longBreakFlow.collectAsState(initial = 15)
+    val workMin = timerConfig.workMin
+    val shortMin = timerConfig.shortBreakMin
+    val longMin = timerConfig.longBreakMin
+    val cyclesBeforeLong = timerConfig.cyclesBeforeLong
 
     // Estado de la fase
     val phaseName by stateRepo.phaseNameFlow.collectAsState(initial = "")
@@ -172,7 +182,7 @@ fun PomodoroScreen(
 
     Scaffold(
         topBar = {
-            TopBarReusable(stringResource(R.string.tool_pomodoro_timer), onBack, onShowInfo = {showInfo = true})
+            TopBarReusable(timerConfig.name, onBack, onShowInfo = {showInfo = true})
         },
         floatingActionButton = {
             LargeFloatingActionButton(
@@ -184,7 +194,10 @@ fun PomodoroScreen(
                     } else {
                         remaining = workMin * 60L
                         isRunning = true
-                        PomodoroAlarmReceiver.startPomodoro(context, workMin, shortMin, longMin)
+                        PomodoroAlarmReceiver.startPomodoro(
+                            context = context,
+                            config = timerConfig
+                        )
                     }
                 },
                 modifier = Modifier.size(96.dp)
@@ -214,11 +227,14 @@ fun PomodoroScreen(
             )
 
             // 2) CÍRCULO + CONTENIDO CENTRADO ADENTRO
-            val progress = rememberSmoothPomodoroProgress(
+            val progress = rememberClockSyncedProgress(
                 isRunning = isRunning,
                 phaseEndMs = phaseEnd,
                 phaseTotalSec = phaseTot
             )
+            val nowForText = System.currentTimeMillis()
+            val remainingSec = if (phaseEnd > nowForText) (phaseEnd - nowForText) / 1000L else 0L
+
             val stroke = with(LocalDensity.current) {
                 Stroke(width = 18.dp.toPx(), cap = StrokeCap.Round) // ← bordes redondeados
             }
@@ -272,7 +288,7 @@ fun PomodoroScreen(
                         )
                     } else {
                         Text(
-                            text = formatHMS(remaining),
+                            text = formatHMS(remainingSec),
                             style = MaterialTheme.typography.displayLarge.copy(fontWeight = FontWeight.Bold),
                             textAlign = TextAlign.Center
                         )
@@ -315,46 +331,34 @@ private fun formatHMS(sec: Long): String {
 }
 
 
+// --- Helpers: reloj y progreso continuo en base a phaseEnd/phaseTotal ---
 @Composable
-fun rememberSmoothPomodoroProgress(
+private fun rememberFrameNow(isRunning: Boolean, phaseEndMs: Long): Long {
+    var now by remember { mutableStateOf(System.currentTimeMillis()) }
+    LaunchedEffect(isRunning, phaseEndMs) {
+        // Snap inmediato al entrar / volver a la app
+        now = System.currentTimeMillis()
+        // Ticker por frame solo mientras corre y no pasó el fin de fase
+        while (isRunning && now < phaseEndMs) {
+            awaitFrame()
+            now = System.currentTimeMillis()
+        }
+        // Una última actualización al salir del bucle
+        now = System.currentTimeMillis()
+    }
+    return now
+}
+
+@Composable
+private fun rememberClockSyncedProgress(
     isRunning: Boolean,
     phaseEndMs: Long,
     phaseTotalSec: Long
 ): Float {
-    val nowMs = System.currentTimeMillis()
-    val totalMs = (phaseTotalSec * 1000L).coerceAtLeast(1L)
-    val clampedNow = min(nowMs, phaseEndMs)
-    val raw = if (phaseEndMs > 0L)
-        1f - ((phaseEndMs - clampedNow).toFloat() / totalMs.toFloat())
-    else 0f
-
-    val anim = remember { Animatable(raw.coerceIn(0f, 1f)) }
-
-    // Si cambia el tiempo total o el fin de fase, reiniciamos la animación al punto actual
-    LaunchedEffect(phaseEndMs, phaseTotalSec) {
-        anim.snapTo(raw.coerceIn(0f, 1f))
-        if (isRunning) {
-            val remainingMs = max(0L, phaseEndMs - System.currentTimeMillis())
-            if (remainingMs > 0L) {
-                anim.animateTo(
-                    targetValue = 1f,
-                    animationSpec = tween(durationMillis = remainingMs.coerceAtMost(Int.MAX_VALUE.toLong()).toInt(), easing = LinearEasing)
-                )
-            }
-        }
-    }
-
-    // Si pausás/detenés, frenamos la animación y fijamos al valor actual
-    LaunchedEffect(isRunning) {
-        if (!isRunning) {
-            anim.stop()
-            val now = System.currentTimeMillis()
-            val r = if (phaseEndMs > 0L)
-                1f - ((phaseEndMs - min(now, phaseEndMs)).toFloat() / totalMs.toFloat())
-            else 0f
-            anim.snapTo(r.coerceIn(0f, 1f))
-        }
-    }
-
-    return anim.value
+    val now = rememberFrameNow(isRunning, phaseEndMs)
+    val totalMs = max(1L, phaseTotalSec * 1000L)
+    val clampedNow = min(now, phaseEndMs)
+    val raw = if (phaseEndMs > 0L) 1f - ((phaseEndMs - clampedNow).toFloat() / totalMs) else 0f
+    return raw.coerceIn(0f, 1f)
 }
+

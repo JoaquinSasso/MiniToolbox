@@ -16,5 +16,9 @@
     <string name="stepper_decrease">Decrease</string>
     <string name="stepper_increase">Increase</string>
     <string name="favorites_reorder_info">Reorder your favorite tools by dragging them. The order will affect the shortcuts widget.</string>
+    <string name="name">Name</string>
+    <string name="color">Color</string>
+    <string name="edit">Edit</string>
+
 
 </resources>

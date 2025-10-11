@@ -16,4 +16,7 @@
     <string name="stepper_decrease">Disminuir</string>
     <string name="stepper_increase">Aumentar</string>
     <string name="favorites_reorder_info">Ordena tus tools favoritas arrastrándolas. El orden afectará el widget de accesos directos.</string>
+    <string name="name">Nombre</string>
+    <string name="color">Color</string>
+    <string name="edit">Editar</string>
 </resources>
