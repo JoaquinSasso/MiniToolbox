@@ -20,7 +20,7 @@ sealed class Screen(val route: String) {
     object TrucoScoreboard     : Screen("truco_scoreboard")
     object AgeCalculator       : Screen("age_calculator")
     object ZodiacSign          : Screen("zodiac_sign")
-    object Pomodoro            : Screen("pomodoro")
+    object PomodoroList        : Screen("pomodoro_list")
     object BubbleLevel         : Screen("bubble_level")
     object Percentage          : Screen("percentage")
     object TimeConverter       : Screen("time_converter")

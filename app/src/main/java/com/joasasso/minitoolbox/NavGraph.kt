@@ -20,6 +20,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.navArgument
 import com.joasasso.minitoolbox.dev.MetricsDevScreen
 import com.joasasso.minitoolbox.nav.Screen
 import com.joasasso.minitoolbox.tools.ToolRegistry
@@ -64,6 +65,7 @@ import com.joasasso.minitoolbox.tools.organizacion.divisorGastos.DetallesReunion
 import com.joasasso.minitoolbox.tools.organizacion.divisorGastos.EditarGastoScreen
 import com.joasasso.minitoolbox.tools.organizacion.divisorGastos.ReunionesScreen
 import com.joasasso.minitoolbox.tools.organizacion.pomodoro.PomodoroScreen
+import com.joasasso.minitoolbox.tools.organizacion.pomodoro.PomodoroTimersListScreen
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.EventosImportantesScreen
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.HabitTrackerScreen
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.ToDoListScreen
@@ -186,8 +188,23 @@ fun MiniToolboxNavGraph(
         composable(Screen.ZodiacSign.route) {
             ZodiacSignScreen(onBack = onBackSmart)
         }
-        composable(Screen.Pomodoro.route) {
-            PomodoroScreen(onBack = onBackSmart)
+        composable(Screen.PomodoroList.route) {
+            PomodoroTimersListScreen(
+                onBack = { navController.popBackStack() },
+                onOpenTimer = { timer ->
+                    navController.navigate("pomodoro/detail/${timer.id}")
+                }
+            )
+        }
+        composable(
+            route = "pomodoro/detail/{timerId}",
+            arguments = listOf(navArgument("timerId") { defaultValue = "" })
+        ) { backStackEntry ->
+            val timerId = backStackEntry.arguments?.getString("timerId") ?: ""
+            PomodoroScreen(
+                timerId = timerId,
+                onBack = { navController.popBackStack() }
+            )
         }
         composable(Screen.BubbleLevel.route) {
             BubbleLevelScreen(onBack = onBackSmart)

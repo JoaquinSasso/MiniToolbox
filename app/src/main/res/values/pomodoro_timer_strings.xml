@@ -6,12 +6,6 @@
     <string name="pomodoro_work_label">Work (min)</string>
     <string name="pomodoro_short_label">Short break (min)</string>
     <string name="pomodoro_long_label">Long break (min)</string>
-    <string name="pomodoro_help_title">About Pomodoro Timer</string>
-    <string name="pomodoro_help_line1">• Purpose: Timer that alternates work and rest cycles to boost your productivity.</string>
-    <string name="pomodoro_help_line2">• Quick guide:</string>
-    <string name="pomodoro_help_line3">   – Enter the duration (min) for work, short break, and long break.\n   – Tap “Start” to begin the cycle.\n   – Use “Silence” or “Stop” from the notification as needed.\n   – Progress and remaining time are shown here with a bar and timer.</string>
-    <string name="pomodoro_help_line4">• All data is stored locally and never shared.</string>
-
 
     <!-- Strings de notificación -->
     <string name="pomodoro_channel_countdown_name">Pomodoro (Countdown)</string>
@@ -34,4 +28,23 @@
     <string name="pomodoro_channel_running_desc">Notification while Pomodoro is running.</string>
     <string name="pomodoro_channel_alarm">Pomodoro alarm</string>
     <string name="pomodoro_running_until">Until %1$s</string>
+
+    <!-- Pomodoro timers list (EN) -->
+    <string name="pomodoro_add_timer">Add timer</string>
+    <string name="pomodoro_no_timers">No timers yet. Tap “Add timer”.</string>
+    <string name="pomodoro_edit_timer">Edit timer</string>
+    <string name="pomodoro_timer">Timer</string>
+    <string name="pomodoro_min_work">min work</string>
+    <string name="pomodoro_min_breaks">min breaks</string>
+    <string name="pomodoro_cycles_before_long">every %1$d cycles</string>
+    <string name="pomodoro_open_detail">Open detail</string>
+
+    <!-- Edit dialog fields -->
+    <string name="pomodoro_cycles">Cycles before long break</string>
+
+    <!-- Help dialog -->
+    <string name="pomodoro_help_title">Pomodoro timers list</string>
+    <string name="pomodoro_help_line1">Create profiles with different durations and colors.</string>
+    <string name="pomodoro_help_line2">Tap ▶ to start with that profile or “Open detail”.</string>
+
 </resources>

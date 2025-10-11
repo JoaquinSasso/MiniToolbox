@@ -139,7 +139,7 @@ object ToolRegistry {
         ),
         Tool(
             name = R.string.tool_pomodoro_timer,
-            screen = Screen.Pomodoro,
+            screen = Screen.PomodoroList,
             category = ToolCategory.Organizacion,
             subCategory = R.string.subcategory_others,
             summary = R.string.sum_tool_pomodoro_timer,
