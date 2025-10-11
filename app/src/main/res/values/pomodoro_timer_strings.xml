@@ -30,5 +30,8 @@
     <string name="pomodoro_long_break">Long break</string>
     <string name="pomodoro_finished">✅ %1$s finished</string>
     <string name="pomodoro_tap_to_stop">Tap to silence or stop</string>
-
+    <string name="pomodoro_channel_running">Pomodoro in progress</string>
+    <string name="pomodoro_channel_running_desc">Notification while Pomodoro is running.</string>
+    <string name="pomodoro_channel_alarm">Pomodoro alarm</string>
+    <string name="pomodoro_running_until">Until %1$s</string>
 </resources>

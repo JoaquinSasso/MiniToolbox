@@ -73,6 +73,7 @@ fun PomodoroScreen(onBack: () -> Unit) {
         ) {
             notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
+        ensurePomodoroChannels(context)
     }
 
     // --- CONFIGURACIÓN PERSISTIDA ---
@@ -140,48 +141,64 @@ fun PomodoroScreen(onBack: () -> Unit) {
                     .padding(horizontal = 16.dp, vertical = 60.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
+// START
                 Button(onClick = {
                     haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+
+                    // 1) Persistir ajustes (suspend -> en corrutina)
                     scope.launch {
                         settingsRepo.updateWorkMin(workInput.toIntOrNull() ?: workMin)
                         settingsRepo.updateShortBreak(shortInput.toIntOrNull() ?: shortMin)
                         settingsRepo.updateLongBreak(longInput.toIntOrNull() ?: longMin)
                     }
-                    remaining = (workInput.toIntOrNull() ?: workMin) * 60L
-                    isRunning = true
-                    Intent(context, PomodoroService::class.java).apply {
-                        putExtra("WORK_MINUTES", workInput.toIntOrNull() ?: workMin)
-                        putExtra("SHORT_BREAK", shortInput.toIntOrNull() ?: shortMin)
-                        putExtra("LONG_BREAK", longInput.toIntOrNull() ?: longMin)
-                        putExtra("RUNNING", true)
-                    }.also {
-                        ContextCompat.startForegroundService(context, it)
+
+                    // 2) Valores efectivos
+                    val w = workInput.toIntOrNull() ?: workMin
+                    val s = shortInput.toIntOrNull() ?: shortMin
+                    val l = longInput.toIntOrNull() ?: longMin
+
+                    // 3) Comprobar acceso a EXact Alarms (Android 12+)
+                    val am = context.getSystemService(android.app.AlarmManager::class.java)
+                    val canExact = am?.canScheduleExactAlarms() == true
+                    if (!canExact) {
+                        // Abrir pantalla de "Alarmas y recordatorios"
+                        try {
+                            context.startActivity(
+                                Intent(
+                                    android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM
+                                ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            )
+                        } catch (_: Exception) {
+                            // sin crash si no existe la activity (raro)
+                        }
+                        // No iniciar todavía: el usuario debe conceder y reintentar
+                        return@Button
                     }
+
+                    // 4) Iniciar ciclo (UI local + programación del alarm)
+                    remaining = w * 60L
+                    isRunning = true
+                    PomodoroAlarmReceiver.startPomodoro(context, w, s, l)
                 }) {
                     Text(stringResource(R.string.pomodoro_start))
                 }
 
+
+                // STOP
                 Button(onClick = {
                     haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                     if (isRunning) {
                         isRunning = false
-                        Intent(context, PomodoroService::class.java).apply {
-                            action = ACTION_STOP
-                        }.also {
-                            ContextCompat.startForegroundService(context, it)
-                        }
+                        PomodoroAlarmReceiver.stopPomodoro(context)
                     }
                 }) {
                     Text(stringResource(R.string.pomodoro_stop))
                 }
 
+                // SILENCE
                 Button(onClick = {
                     haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                    Intent(context, PomodoroService::class.java).apply {
-                        action = ACTION_SILENCE
-                    }.also {
-                        ContextCompat.startForegroundService(context, it)
-                    }
+                    PomodoroAlarmReceiver.silenceAlarm(context)
                 }) {
                     Text(stringResource(R.string.pomodoro_silence))
                 }

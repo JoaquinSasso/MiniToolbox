@@ -17,7 +17,6 @@
     <string name="pomodoro_channel_countdown_desc">Actualizaciones de tiempo restante del Pomodoro</string>
 
     <string name="pomodoro_channel_alarm_name">Pomodoro (Alarma)</string>
-    <string name="pomodoro_channel_alarm_desc">Alertas de fin de ciclo Pomodoro</string>
 
     <string name="pomodoro_action_silence">Silenciar</string>
     <string name="pomodoro_action_stop">Detener</string>
@@ -28,6 +27,13 @@
     <string name="pomodoro_short_break">Descanso corto</string>
     <string name="pomodoro_long_break">Descanso largo</string>
     <string name="pomodoro_finished">✅ %1$s terminado</string>
-    <string name="pomodoro_tap_to_stop">Pulsa para silenciar o detener</string>
+
+    <string name="pomodoro_channel_running">Pomodoro en curso</string>
+    <string name="pomodoro_channel_running_desc">Notificación mientras el temporizador está corriendo.</string>
+    <string name="pomodoro_channel_alarm">Alarma de Pomodoro</string>
+    <string name="pomodoro_channel_alarm_desc">Aviso con sonido al finalizar cada fase.</string>
+    <string name="pomodoro_running_until">Hasta %1$s</string>
+    <string name="pomodoro_tap_to_stop">Toca para detener</string>
+
 
 </resources>
