@@ -56,7 +56,7 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
 
         val timerId    = intent.getStringExtra(EX_TIMER_ID) ?: ""
         val timerName  = intent.getStringExtra(EX_TIMER_NAME) ?: appContext.getString(R.string.tool_pomodoro_timer)
-        val timerColor = intent.getLongExtra(EX_TIMER_COLOR, 0xFF4DBC52)
+        val timerColorInt = intent.getIntExtra(EX_TIMER_COLOR, 0xFF4DBC52.toInt())
 
         // Trabajo asíncrono seguro en Receiver
         val pending = goAsync()
@@ -117,12 +117,11 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
                 val cfg = PomodoroTimerConfig(
                     id = timerId,
                     name = timerName,
-                    colorArgb = timerColor,
-                    workMin = workMin,
-                    shortBreakMin = shortMin,
-                    longBreakMin = longMin,
-                    cyclesBeforeLong = cbl
+                    colorInt = timerColorInt,               // ← Int
+                    workMin = workMin, shortBreakMin = shortMin,
+                    longBreakMin = longMin, cyclesBeforeLong = cbl
                 )
+
                 scheduleExactWithConfig(
                     context = appContext,
                     triggerAtMs = endMs,
@@ -231,7 +230,7 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
                 putExtra(EX_CYCLES_BEFORE_LONG, config.cyclesBeforeLong)
                 putExtra(EX_TIMER_ID, config.id)
                 putExtra(EX_TIMER_NAME, config.name)
-                putExtra(EX_TIMER_COLOR, config.colorArgb)
+                putExtra(EX_TIMER_COLOR, config.colorInt)
             }
 
             // Un único PendingIntent para el Pomodoro activo

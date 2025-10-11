@@ -47,26 +47,6 @@ object PomodoroSettingsKeys {
     val LONG_BREAK   = intPreferencesKey("long_break_minutes")
 }
 
-class PomodoroSettingsRepository(context: Context) {
-    private val ds = context.pomodoroSettingsStore
-
-    val workMinFlow: Flow<Int> = ds.data.map { prefs ->
-        prefs[PomodoroSettingsKeys.WORK_MINUTES] ?: 1
-    }
-    val shortBreakFlow: Flow<Int> = ds.data.map { prefs ->
-        prefs[PomodoroSettingsKeys.SHORT_BREAK] ?: 1
-    }
-    val longBreakFlow: Flow<Int> = ds.data.map { prefs ->
-        prefs[PomodoroSettingsKeys.LONG_BREAK] ?: 1
-    }
-
-    suspend fun updateWorkMin(value: Int) =
-        ds.edit { it[PomodoroSettingsKeys.WORK_MINUTES] = value }
-
-    suspend fun updateShortBreak(v: Int) = ds.edit { it[PomodoroSettingsKeys.SHORT_BREAK] = v }
-    suspend fun updateLongBreak(v: Int) = ds.edit { it[PomodoroSettingsKeys.LONG_BREAK] = v }
-}
-
 object PomodoroTimersPrefs {
     private const val PREFS = "pomodoro_timers_prefs"
     private const val KEY = "timers"
@@ -74,24 +54,60 @@ object PomodoroTimersPrefs {
     fun loadAll(context: Context): List<PomodoroTimerConfig> {
         val sp = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
         val raw = sp.getString(KEY, "[]") ?: "[]"
-        val arr = try { JSONArray(raw) } catch (_: Exception) {
-            JSONArray("[]")
+        val arr = try { JSONArray(raw) } catch (_: Exception) { JSONArray("[]") }
+
+        fun ensureOpaque(intColor: Int): Int {
+            // Si no hay alpha (0x00------), forzamos 0xFF------
+            return if ((intColor ushr 24) == 0) intColor or 0xFF000000.toInt() else intColor
         }
+
         val list = mutableListOf<PomodoroTimerConfig>()
+        var needsMigration = false
+
         for (i in 0 until arr.length()) {
             val o = arr.optJSONObject(i) ?: continue
+
+            // 1) Intentar leer en este orden: "color" (Int) → "colorInt" (Int) → "colorArgb" (Long)
+            val colorFromInt = if (o.has("color")) o.optInt("color")
+            else if (o.has("colorInt")) o.optInt("colorInt")
+            else 0
+
+            val colorFromLong = if (o.has("colorArgb")) {
+                // ¡Ojo! era Long antes: convertir y conservar bits
+                (o.optLong("colorArgb").toInt())
+            } else 0
+
+            var colorInt = when {
+                colorFromInt != 0 -> colorFromInt
+                colorFromLong != 0 -> colorFromLong
+                else -> 0xFF4DBC52.toInt() // fallback visible
+            }
+
+            val before = colorInt
+            colorInt = ensureOpaque(colorInt)
+            if (before != colorInt || (colorFromInt == 0 && colorFromLong.toLong() != 0L)) {
+                needsMigration = true
+            }
+
             list += PomodoroTimerConfig(
                 id = o.optString("id"),
                 name = o.optString("name"),
-                colorArgb = o.optLong("colorArgb"),
+                colorInt = colorInt,
                 workMin = o.optInt("workMin", 25),
                 shortBreakMin = o.optInt("shortBreakMin", 5),
                 longBreakMin = o.optInt("longBreakMin", 15),
                 cyclesBeforeLong = o.optInt("cyclesBeforeLong", 4),
             )
         }
+
+        // 2) Si migramos algún color, guardamos de vuelta con el key nuevo y alpha forzada
+        if (needsMigration) {
+            saveAll(context, list)
+        }
+
         return list
     }
+
 
     fun saveAll(context: Context, items: List<PomodoroTimerConfig>) {
         val sp = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -100,7 +116,7 @@ object PomodoroTimersPrefs {
             val o = JSONObject().apply {
                 put("id", t.id)
                 put("name", t.name)
-                put("colorArgb", t.colorArgb)
+                put("color", t.colorInt)                     // ← guardar Int ARGB
                 put("workMin", t.workMin)
                 put("shortBreakMin", t.shortBreakMin)
                 put("longBreakMin", t.longBreakMin)

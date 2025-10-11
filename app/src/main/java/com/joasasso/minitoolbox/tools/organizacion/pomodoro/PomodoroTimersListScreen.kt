@@ -31,14 +31,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,7 +46,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -58,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.data.PomodoroTimersPrefs
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
+import com.joasasso.minitoolbox.ui.utils.getContrastingTextColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -131,49 +129,55 @@ fun PomodoroTimersListScreen(
                 }
             }
             itemsIndexed(timers, key = { _, t -> t.id }) { index, timer ->
-                val bg = timer.color()
-                val textColor = getContrastingTextColor(bg)
+                val cardBg = timer.color()
+                val textColor = getContrastingTextColor(cardBg)
+
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = bg)
+                    colors = CardDefaults.cardColors(
+                        containerColor = cardBg
+                    )
                 ) {
-                    CompositionLocalProvider(LocalContentColor provides textColor) {
-                        Column(Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(24.dp)) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Text(
                                     timer.name,
-                                    style = MaterialTheme.typography.titleMedium
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = textColor
                                 )
                                 Spacer(Modifier.weight(1f))
                                 IconButton(onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    // Navegar al detalle con este timer
                                     onOpenTimer(timer)
-                                }) {
-                                    Icon(Icons.Default.PlayArrow, contentDescription = stringResource(R.string.pomodoro_start))
-                                }
-                                IconButton(onClick = {
-                                    showEditFor = timer
-                                }) {
-                                    Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.edit))
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                }) { Icon(Icons.Default.PlayArrow, contentDescription = null,
+                                    tint = textColor) }
+                                IconButton(onClick = { showEditFor = timer }) {
+                                    Icon(Icons.Default.Edit, contentDescription = null,
+                                        tint = textColor)
                                 }
                                 IconButton(onClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     timers = timers.toMutableList().also { it.removeAt(index) }
-                                }) {
-                                    Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete))
-                                }
+                                }) { Icon(Icons.Default.Delete, contentDescription = null,
+                                    tint = textColor) }
                             }
 
                             Spacer(Modifier.height(8.dp))
 
                             Text(
-                                text = "${timer.workMin} ${stringResource(R.string.pomodoro_min_work)} • " +
-                                        "${timer.shortBreakMin}/${timer.longBreakMin} ${stringResource(R.string.pomodoro_min_breaks)} • " +
+                                text = "${timer.workMin} / " +
+                                        "${timer.shortBreakMin} / ${timer.longBreakMin} - " +
                                         stringResource(R.string.pomodoro_cycles_before_long, timer.cyclesBeforeLong),
-                                style = MaterialTheme.typography.bodyMedium
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = textColor
                             )
                         }
                     }
@@ -256,11 +260,8 @@ fun PomodoroTimersListScreen(
                     timers = timers.map {
                         if (it.id == current.id) it.copy(
                             name = name.ifBlank { current.name },
-                            colorArgb = color.toArgbLong(),
-                            workMin = w,
-                            shortBreakMin = s,
-                            longBreakMin = l,
-                            cyclesBeforeLong = cy
+                            colorInt = color.toArgbInt(),                    // ← guardar Int
+                            workMin = w, shortBreakMin = s, longBreakMin = l, cyclesBeforeLong = cy
                         ) else it
                     }
                     showEditFor = null
@@ -309,15 +310,12 @@ private fun NumberField(
     )
 }
 
-fun getContrastingTextColor(bg: Color): Color {
-    return if (bg.luminance() > 0.5f) Color.Black else Color.White
-}
-
 private fun defaultNewTimer(context: Context, colors: List<Color>): PomodoroTimerConfig {
     val idx = (0..9999).random()
+    val c = colors.random()
     return PomodoroTimerConfig(
-        name = "${context.getString(R.string.pomodoro_timer)} ${idx}",
-        colorArgb = colors.random().toArgbLong(),
+        name = "${context.getString(R.string.pomodoro_timer)} $idx",
+        colorInt = c.toArgbInt(),                         // ← Int
         workMin = 25,
         shortBreakMin = 5,
         longBreakMin = 15,

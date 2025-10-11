@@ -36,7 +36,7 @@
     <string name="pomodoro_timer">Timer</string>
     <string name="pomodoro_min_work">min work</string>
     <string name="pomodoro_min_breaks">min breaks</string>
-    <string name="pomodoro_cycles_before_long">every %1$d cycles</string>
+    <string name="pomodoro_cycles_before_long">%1$d cycles</string>
     <string name="pomodoro_open_detail">Open detail</string>
 
     <!-- Edit dialog fields -->

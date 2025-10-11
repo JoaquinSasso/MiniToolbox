@@ -49,7 +49,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -57,6 +56,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
+import com.joasasso.minitoolbox.ui.utils.getContrastingTextColor
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -327,9 +327,5 @@ fun MarcadorEquiposScreen(onBack: () -> Unit) {
             }
         )
     }
-}
-
-fun getContrastingTextColor(bg: Color): Color {
-    return if (bg.luminance() > 0.5f) Color.Black else Color.White
 }
 
