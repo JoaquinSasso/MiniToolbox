@@ -23,7 +23,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -133,7 +132,11 @@ fun PomodoroTimersListScreen(
                 val textColor = getContrastingTextColor(cardBg)
 
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth()
+                        .clickable(onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onOpenTimer(timer)
+                        }),
                     colors = CardDefaults.cardColors(
                         containerColor = cardBg
                     )
@@ -153,12 +156,6 @@ fun PomodoroTimersListScreen(
                                     color = textColor
                                 )
                                 Spacer(Modifier.weight(1f))
-                                IconButton(onClick = {
-                                    // Navegar al detalle con este timer
-                                    onOpenTimer(timer)
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                }) { Icon(Icons.Default.PlayArrow, contentDescription = null,
-                                    tint = textColor) }
                                 IconButton(onClick = { showEditFor = timer }) {
                                     Icon(Icons.Default.Edit, contentDescription = null,
                                         tint = textColor)

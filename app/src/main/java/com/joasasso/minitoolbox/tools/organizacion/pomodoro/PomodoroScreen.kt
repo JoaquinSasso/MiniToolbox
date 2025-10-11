@@ -187,7 +187,7 @@ fun PomodoroScreen(
                 .padding(inner)
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceEvenly
+            verticalArrangement = Arrangement.Center
         ) {
             // 1) FASE ACTUAL → ARRIBA
             Text(
@@ -195,6 +195,8 @@ fun PomodoroScreen(
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+
+            Spacer(Modifier.height(8.dp))
 
             // 2) CÍRCULO + CONTENIDO CENTRADO ADENTRO
             val progress = rememberClockSyncedProgress(
@@ -267,7 +269,7 @@ fun PomodoroScreen(
             }
 
             // (dejamos un Spacer pequeño si querés aire)
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(24.dp))
         }
     }
 
