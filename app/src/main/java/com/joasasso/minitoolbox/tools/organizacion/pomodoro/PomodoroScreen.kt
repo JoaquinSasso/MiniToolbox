@@ -46,7 +46,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -69,7 +68,6 @@ import com.joasasso.minitoolbox.data.PomodoroStateRepository
 import com.joasasso.minitoolbox.data.PomodoroTimersPrefs
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlinx.coroutines.android.awaitFrame
-import kotlinx.coroutines.delay
 import kotlin.math.max
 import kotlin.math.min
 
@@ -93,7 +91,7 @@ fun PomodoroScreen(
             PomodoroTimersPrefs.loadAll(context).firstOrNull { it.id == timerId }
                 ?: PomodoroTimerConfig(
                     name = "Default",
-                    colorArgb = Color(0xFF4DBC52).toArgbLong(),
+                    colorInt = Color(0xFF4DBC52).toArgbInt(),
                     workMin = 25, shortBreakMin = 5, longBreakMin = 15, cyclesBeforeLong = 4
                 )
         )
@@ -115,12 +113,6 @@ fun PomodoroScreen(
     // Repos actuales
     val stateRepo    = remember { PomodoroStateRepository(context) }
 
-    // Flows de configuración (usamos para botón Start)
-    val workMin = timerConfig.workMin
-    val shortMin = timerConfig.shortBreakMin
-    val longMin = timerConfig.longBreakMin
-    val cyclesBeforeLong = timerConfig.cyclesBeforeLong
-
     // Estado de la fase
     val phaseName by stateRepo.phaseNameFlow.collectAsState(initial = "")
     val phaseEnd  by stateRepo.phaseEndFlow.collectAsState(initial = 0L)
@@ -128,11 +120,6 @@ fun PomodoroScreen(
 
     // Temporizador UI
     var isRunning by remember { mutableStateOf(phaseEnd > System.currentTimeMillis()) }
-    var remaining by remember {
-        mutableLongStateOf(
-            if (phaseEnd > System.currentTimeMillis()) (phaseEnd - System.currentTimeMillis()) / 1000L else 0L
-        )
-    }
 
     // “Alarma sonando” (opcional: lo actualizamos con Broadcasts que emite el AlarmReceiver)
     var alarmRinging by remember { mutableStateOf(false) }
@@ -159,24 +146,8 @@ fun PomodoroScreen(
         val now = System.currentTimeMillis()
         if (phaseEnd > now) {
             isRunning = true
-            remaining = (phaseEnd - now) / 1000L
         } else {
             isRunning = false
-            remaining = 0L
-        }
-    }
-
-    // Tick UI (solo visual)
-    LaunchedEffect(isRunning) {
-        while (isRunning) {
-            delay(1000L)
-            val now = System.currentTimeMillis()
-            if (phaseEnd > now) {
-                remaining = (phaseEnd - now) / 1000L
-            } else {
-                // acá NO apagamos la UI; el receiver ya puso la próxima fase
-                break
-            }
         }
     }
 
@@ -192,7 +163,6 @@ fun PomodoroScreen(
                         isRunning = false
                         PomodoroAlarmReceiver.stopPomodoro(context)
                     } else {
-                        remaining = workMin * 60L
                         isRunning = true
                         PomodoroAlarmReceiver.startPomodoro(
                             context = context,

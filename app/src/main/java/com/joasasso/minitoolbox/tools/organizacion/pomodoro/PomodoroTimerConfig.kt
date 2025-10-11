@@ -1,18 +1,19 @@
-// PomodoroTimerConfig.kt
 package com.joasasso.minitoolbox.tools.organizacion.pomodoro
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import java.util.UUID
 
 data class PomodoroTimerConfig(
     val id: String = UUID.randomUUID().toString(),
     val name: String,
-    val colorArgb: Long,
+    val colorInt: Int,            // ← ARGB Int
     val workMin: Int,
     val shortBreakMin: Int,
     val longBreakMin: Int,
     val cyclesBeforeLong: Int
 )
 
-fun PomodoroTimerConfig.color(): Color = Color(colorArgb)
-fun Color.toArgbLong(): Long = (this.value.toLong())
+// Helpers
+fun PomodoroTimerConfig.color(): Color = Color(colorInt)
+fun Color.toArgbInt(): Int = this.toArgb()

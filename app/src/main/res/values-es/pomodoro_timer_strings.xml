@@ -38,7 +38,7 @@
     <string name="pomodoro_timer">Timer</string>
     <string name="pomodoro_min_work">min trabajo</string>
     <string name="pomodoro_min_breaks">min descansos</string>
-    <string name="pomodoro_cycles_before_long">cada %1$d ciclos</string>
+    <string name="pomodoro_cycles_before_long">%1$d ciclos</string>
     <string name="pomodoro_open_detail">Abrir detalle</string>
     <string name="pomodoro_cycles">Ciclos antes del largo</string>
     <string name="pomodoro_help_title">Lista de timers Pomodoro</string>
