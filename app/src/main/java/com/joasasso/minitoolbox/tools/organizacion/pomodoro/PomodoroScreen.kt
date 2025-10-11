@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
@@ -125,10 +124,8 @@ fun PomodoroScreen(
         )
     }
 
-    // “Alarma sonando”
+    // “Alarma sonando” (opcional: lo actualizamos con Broadcasts que emite el AlarmReceiver)
     var alarmRinging by remember { mutableStateOf(false) }
-
-    // Receiver para refrescar UI
     DisposableEffect(Unit) {
         val filter = IntentFilter().apply {
             addAction(ACTION_POMODORO_ALARM_START)
@@ -136,15 +133,16 @@ fun PomodoroScreen(
         }
         val rcv = object : BroadcastReceiver() {
             override fun onReceive(c: Context, i: Intent) {
-                Log.d("PomodoroScreen", "UI broadcast: ${i.action}")
                 alarmRinging = i.action == ACTION_POMODORO_ALARM_START
             }
         }
-        // Usa EXPORTED para evitar que el sistema lo descarte por políticas de implicit broadcasts
-        context.registerReceiver(rcv, filter, Context.RECEIVER_EXPORTED)
+        context.registerReceiver(rcv, filter, Context.RECEIVER_NOT_EXPORTED)
 
-        onDispose { context.unregisterReceiver(rcv) }
+        onDispose {
+            context.unregisterReceiver(rcv)
+        }
     }
+
 
     // Reconstrucción al cambiar el fin de fase
     LaunchedEffect(phaseEnd) {
@@ -177,7 +175,6 @@ fun PomodoroScreen(
             TopBarReusable(stringResource(R.string.tool_pomodoro_timer), onBack, onShowInfo = {showInfo = true})
         },
         floatingActionButton = {
-            // FAB MUCHO MÁS GRANDE
             LargeFloatingActionButton(
                 onClick = {
                     haptics.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -190,12 +187,12 @@ fun PomodoroScreen(
                         PomodoroAlarmReceiver.startPomodoro(context, workMin, shortMin, longMin)
                     }
                 },
-                modifier = Modifier.size(96.dp) // ajustá 96..112dp si querés aún más grande
+                modifier = Modifier.size(96.dp)
             ) {
                 Icon(
                     imageVector = if (isRunning) Icons.Filled.Stop else Icons.Filled.PlayArrow,
                     contentDescription = null,
-                    modifier = Modifier.size(48.dp) // ícono grande
+                    modifier = Modifier.size(48.dp)
                 )
             }
         },
@@ -254,7 +251,7 @@ fun PomodoroScreen(
 
 
 
-                // TIEMPO EN GRANDE o ÍCONO DE SILENCIO (sin texto/outlined)
+                // TIEMPO EN GRANDE o ÍCONO DE SILENCIO
                 AnimatedContent(
                     targetState = alarmRinging,
                     transitionSpec = { fadeIn() togetherWith fadeOut() },

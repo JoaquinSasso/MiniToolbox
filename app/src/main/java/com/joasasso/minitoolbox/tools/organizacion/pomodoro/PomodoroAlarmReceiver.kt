@@ -17,7 +17,6 @@ import com.joasasso.minitoolbox.data.PomodoroStateRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 const val ACTION_FIRE_ALARM = "POMODORO_FIRE_ALARM"
@@ -47,7 +46,7 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
 
         CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
             try {
-                // 1) Notificación de fin de fase
+                // 1) Notificación de fin de fase (canal sin sonido) + avisar a la UI (START)
                 val finishedTitle = appContext.getString(
                     R.string.pomodoro_finished,
                     phaseNameLocalized(appContext, phase)
@@ -57,45 +56,51 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
                     finishedTitle,
                     appContext.getString(R.string.pomodoro_tap_to_stop)
                 )
-
                 appContext.sendBroadcast(
                     Intent(ACTION_POMODORO_ALARM_START)
                         .setPackage(appContext.packageName)
                         .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY or Intent.FLAG_RECEIVER_FOREGROUND)
                 )
 
+                // 1.1) Reproducir sonido de alarma controlado (auto-stop) y, al cortar, notificar STOP
+                AlarmSoundPlayer.play(appContext, durationMs = 10_000L) {
+                    // callback de auto-silencio: detiene audio (por si aún suena),
+                    // cancela la notificación y emite ACTION_POMODORO_ALARM_STOP
+                    silenceAlarm(appContext)
+                }
 
-                // 2) Próxima fase
+                // 2) Calcular próxima fase
                 val (nextPhase, nextMin, nextCycle) = when (phase) {
                     PHASE_WORK -> {
                         val longNext = ((cycle + 1) % 4 == 0)
-                        Triple(if (longNext) PHASE_LONG else PHASE_SHORT,
+                        Triple(
+                            if (longNext) PHASE_LONG else PHASE_SHORT,
                             if (longNext) longMin else shortMin,
-                            cycle + 1)
+                            cycle + 1
+                        )
                     }
                     else -> Triple(PHASE_WORK, workMin, cycle)
                 }
 
-                // 3) Persistir estado (llamadas suspend)
+                // 3) Persistir estado de la próxima fase
                 val endMs = System.currentTimeMillis() + nextMin * 60_000L
                 PomodoroStateRepository(appContext).updatePhase(
                     phaseNameLocalized(appContext, nextPhase),
                     endMs,
                     nextMin * 60L
                 )
+
+                // 4) Notificación "en curso" de la nueva fase (sin sonido)
                 showRunningNotification(
                     appContext,
                     phaseNameLocalized(appContext, nextPhase),
                     endMs
                 )
 
-                // 4) Agendar próxima alarma
+                // 5) Agendar la próxima alarma exacta
                 scheduleExact(appContext, endMs, workMin, shortMin, longMin, nextPhase, nextCycle)
 
-                // 5) Auto-silenciar tras X ms y avisar a la UI
-                delay(ALARM_AUTO_SILENCE_MS)
-                // si ya la canceló el usuario, no pasa nada; cancelar es idempotente
-                silenceAlarm(appContext) // ← dentro hace cancel() del NOTIFICATION_ID
+                // (Sin delay ni auto-silencio aquí: lo maneja AlarmSoundPlayer + callback)
             } finally {
                 pending.finish()
             }
@@ -145,16 +150,23 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
             }
         }
 
+        @Volatile private var alarmActive: Boolean = false // si lo usás, marcá true tras showAlarmNotification
+
         fun silenceAlarm(context: Context) {
             val nm = ContextCompat.getSystemService(context, NotificationManager::class.java)
-            nm?.cancel(NOTIFICATION_ID)
-            // Notificar a la UI que la alarma dejó de sonar (consistencia con autosilencio)
+            nm?.cancel(NOTIF_ID_ALARM_SILENT)
+
+            // detener audio por si estaba sonando
+            AlarmSoundPlayer.stop()
+
+            // avisar a la UI
             context.sendBroadcast(
                 Intent(ACTION_POMODORO_ALARM_STOP)
                     .setPackage(context.packageName)
                     .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY or Intent.FLAG_RECEIVER_FOREGROUND)
             )
         }
+
 
         private fun scheduleExact(
             context: Context,

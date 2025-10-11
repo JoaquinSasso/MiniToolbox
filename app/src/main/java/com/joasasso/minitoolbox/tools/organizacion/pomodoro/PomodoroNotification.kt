@@ -13,10 +13,13 @@ import androidx.core.content.ContextCompat
 import com.joasasso.minitoolbox.MainActivity
 import com.joasasso.minitoolbox.R
 
-const val CHANNEL_RUNNING = "pomodoro_running"        // IMPORTANCE_LOW (sin sonido)
-const val CHANNEL_ALARM   = "pomodoro_alarm_v2"       // **nuevo ID** con sonido
+const val CHANNEL_RUNNING = "pomodoro_running"
+const val CHANNEL_ALARM   = "pomodoro_alarm_v2"
+const val CHANNEL_ALARM_SILENT = "pomodoro_alarm_silent_v3"
 const val NOTIF_ID_RUNNING = 2001
 const val NOTIFICATION_ID  = 2002 // alarma
+const val NOTIF_ID_ALARM_SILENT = 2003
+
 
 fun ensurePomodoroChannels(context: Context) {
     val nm = context.getSystemService(NotificationManager::class.java) ?: return
@@ -53,6 +56,22 @@ fun ensurePomodoroChannels(context: Context) {
             ).apply {
                 description = context.getString(R.string.pomodoro_channel_alarm_desc)
                 setSound(alarmUri, attrs)
+                enableVibration(true)
+                enableLights(true)
+            }
+        )
+    }
+
+    // Canal ALARM sin sonido (para usar MediaPlayer manual)
+    if (nm.getNotificationChannel(CHANNEL_ALARM_SILENT) == null) {
+        nm.createNotificationChannel(
+            NotificationChannel(
+                CHANNEL_ALARM_SILENT,
+                context.getString(R.string.pomodoro_channel_alarm),
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = context.getString(R.string.pomodoro_channel_alarm_desc)
+                setSound(null, null)       // <- SIN sonido
                 enableVibration(true)
                 enableLights(true)
             }
@@ -99,18 +118,17 @@ fun cancelRunningNotification(context: Context) {
 /** Notif de alarma al finalizar fase (con sonido del canal). */
 fun showAlarmNotification(context: Context, title: String, text: String): Int {
     ensurePomodoroChannels(context)
-
-    val notif = NotificationCompat.Builder(context, CHANNEL_ALARM)
+    val notif = NotificationCompat.Builder(context, CHANNEL_ALARM_SILENT) // <- canal sin sonido
         .setSmallIcon(R.drawable.ic_pomodoro)
-        .setContentTitle(title)           // p.ej. "Terminó: Trabajo"
-        .setContentText(text)             // "Toca para detener"
+        .setContentTitle(title)
+        .setContentText(text)
         .setPriority(NotificationCompat.PRIORITY_HIGH)
-        .setAutoCancel(true)
+        .setAutoCancel(false) // la cancelamos nosotros al silenciar
         .setCategory(Notification.CATEGORY_ALARM)
         .setContentIntent(mainPendingIntent(context))
         .build()
-
     val nm = ContextCompat.getSystemService(context, NotificationManager::class.java)
-    nm?.notify(NOTIFICATION_ID, notif)
-    return NOTIFICATION_ID
+    nm?.notify(NOTIF_ID_ALARM_SILENT, notif)
+    return NOTIF_ID_ALARM_SILENT
 }
+
