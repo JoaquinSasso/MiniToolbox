@@ -48,13 +48,13 @@ class PomodoroSettingsRepository(context: Context) {
     private val ds = context.pomodoroSettingsStore
 
     val workMinFlow: Flow<Int> = ds.data.map { prefs ->
-        prefs[PomodoroSettingsKeys.WORK_MINUTES] ?: 25
+        prefs[PomodoroSettingsKeys.WORK_MINUTES] ?: 1
     }
     val shortBreakFlow: Flow<Int> = ds.data.map { prefs ->
-        prefs[PomodoroSettingsKeys.SHORT_BREAK] ?: 5
+        prefs[PomodoroSettingsKeys.SHORT_BREAK] ?: 1
     }
     val longBreakFlow: Flow<Int> = ds.data.map { prefs ->
-        prefs[PomodoroSettingsKeys.LONG_BREAK] ?: 15
+        prefs[PomodoroSettingsKeys.LONG_BREAK] ?: 1
     }
 
     suspend fun updateWorkMin(value: Int) =
