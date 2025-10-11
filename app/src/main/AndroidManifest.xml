@@ -17,6 +17,8 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
 
     <application
         android:name=".utils.MiniToolboxApp"
@@ -40,12 +42,6 @@
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="@string/admob_app_id" />
-
-        <!-- Servicio Pomodoro -->
-        <service
-            android:name="com.joasasso.minitoolbox.tools.organizacion.pomodoro.PomodoroService"
-            android:exported="false"
-            android:foregroundServiceType="dataSync" />
 
         <!-- Receiver para recordatorio de agua -->
         <receiver
@@ -112,7 +108,14 @@
         <meta-data
             android:name="android.appwidget.provider"
             android:resource="@xml/flashlight_widget_info" />
-    </receiver>
+        </receiver>
+
+        <receiver
+            android:name=".tools.organizacion.pomodoro.PomodoroAlarmReceiver"
+            android:exported="false" />
+        <receiver
+            android:name=".tools.organizacion.pomodoro.PomodoroActionReceiver"
+            android:exported="false" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

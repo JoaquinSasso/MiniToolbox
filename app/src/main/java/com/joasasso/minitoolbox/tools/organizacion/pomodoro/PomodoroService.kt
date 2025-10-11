@@ -35,7 +35,7 @@ class PomodoroService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        createPomodoroChannels(this)
+        ensurePomodoroChannels(this)
         stateRepo = PomodoroStateRepository(this)
     }
 
@@ -65,13 +65,10 @@ class PomodoroService : Service() {
         val longMin  = intent?.getIntExtra("LONG_BREAK", 15)  ?: 15
 
         // Mostrar notificación de conteo inicial (MM:00)
-        startForeground(
-            NOTIFICATION_ID,
-            buildCountdownNotification(
-                this,
-                getString(R.string.pomodoro_started),
-                "%02d:00".format(workMin)
-            )
+        showRunningNotification(
+            this,
+            getString(R.string.pomodoro_work),
+            System.currentTimeMillis() + workMin * 60_000L
         )
 
 
@@ -108,30 +105,24 @@ class PomodoroService : Service() {
         getSystemService(Vibrator::class.java)
             ?.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE))
 
-        while (true) {
-            val now = System.currentTimeMillis()
-            val remainingMs = endMs - now
-            val remainingSec = (remainingMs / 1000L).coerceAtLeast(0L)
-            val mm = remainingSec / 60
-            val ss = remainingSec % 60
-            NotificationManagerCompat.from(this)
-                .notify(
-                    NOTIFICATION_ID,
-                    buildCountdownNotification(this, "⏳ $name", "%02d:%02d".format(mm, ss))
-                )
-            if (remainingMs <= 0) break
-            delay((remainingMs % 1000L).let { if (it > 0) it else 1000L })
-        }
+        // Mostrar la notificación "en curso" una sola vez (sin FGS, sin actualizar cada segundo)
+        showRunningNotification(
+            this,
+            "⏳ $name",           // o usa getString(R.string.pomodoro_work) / short_break / long_break
+            endMs                 // hora de fin de la fase (en millis)
+        )
 
-        NotificationManagerCompat.from(this)
-            .notify(
-                NOTIFICATION_ID,
-                buildAlarmNotification(
-                    this,
-                    getString(R.string.pomodoro_finished, name),
-                    getString(R.string.pomodoro_tap_to_stop)
-                )
-            )
+        // ... NO hay loop de actualización por segundo aquí.
+        // El conteo en vivo queda a cargo de la UI (Compose).
+
+        // Cuando termine la fase (en tu flujo actual, justo antes de agendar la siguiente):
+        cancelRunningNotification(this) // opcional, para ocultar la "en curso" antes de la alarma
+        showAlarmNotification(
+            this,
+            getString(R.string.pomodoro_finished, name),
+            getString(R.string.pomodoro_tap_to_stop)
+        )
+
 
         getSystemService(Vibrator::class.java)
             ?.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE))
