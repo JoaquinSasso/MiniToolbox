@@ -17,6 +17,7 @@ import com.joasasso.minitoolbox.data.PomodoroStateRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 const val ACTION_FIRE_ALARM = "POMODORO_FIRE_ALARM"
@@ -25,6 +26,8 @@ private const val REQ_ALARM = 1001
 private const val PHASE_WORK  = "WORK"
 private const val PHASE_SHORT = "SHORT"
 private const val PHASE_LONG  = "LONG"
+
+private const val ALARM_AUTO_SILENCE_MS = 8000L // 8 segundos, es el tiempo necesario para que la alarma se silencie automaticamente
 
 class PomodoroAlarmReceiver : BroadcastReceiver() {
 
@@ -55,6 +58,12 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
                     appContext.getString(R.string.pomodoro_tap_to_stop)
                 )
 
+                appContext.sendBroadcast(
+                    Intent(ACTION_POMODORO_ALARM_START)
+                        .setPackage(appContext.packageName)
+                        .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY or Intent.FLAG_RECEIVER_FOREGROUND)
+                )
+
 
                 // 2) Próxima fase
                 val (nextPhase, nextMin, nextCycle) = when (phase) {
@@ -82,6 +91,11 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
 
                 // 4) Agendar próxima alarma
                 scheduleExact(appContext, endMs, workMin, shortMin, longMin, nextPhase, nextCycle)
+
+                // 5) Auto-silenciar tras X ms y avisar a la UI
+                delay(ALARM_AUTO_SILENCE_MS)
+                // si ya la canceló el usuario, no pasa nada; cancelar es idempotente
+                silenceAlarm(appContext) // ← dentro hace cancel() del NOTIFICATION_ID
             } finally {
                 pending.finish()
             }
@@ -134,6 +148,12 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
         fun silenceAlarm(context: Context) {
             val nm = ContextCompat.getSystemService(context, NotificationManager::class.java)
             nm?.cancel(NOTIFICATION_ID)
+            // Notificar a la UI que la alarma dejó de sonar (consistencia con autosilencio)
+            context.sendBroadcast(
+                Intent(ACTION_POMODORO_ALARM_STOP)
+                    .setPackage(context.packageName)
+                    .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY or Intent.FLAG_RECEIVER_FOREGROUND)
+            )
         }
 
         private fun scheduleExact(
