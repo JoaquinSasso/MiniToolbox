@@ -46,7 +46,6 @@ import com.joasasso.minitoolbox.tools.herramientas.generadores.GeneradorQrContac
 import com.joasasso.minitoolbox.tools.herramientas.generadores.GeneradorQrScreen
 import com.joasasso.minitoolbox.tools.herramientas.generadores.GroupSelectorScreen
 import com.joasasso.minitoolbox.tools.herramientas.generadores.RandomColorGeneratorScreen
-import com.joasasso.minitoolbox.tools.herramientas.generadores.noiseGenerator.WhiteNoiseScreen
 import com.joasasso.minitoolbox.tools.herramientas.instrumentos.ArRulerSceneViewScreen
 import com.joasasso.minitoolbox.tools.herramientas.instrumentos.BrujulaScreen
 import com.joasasso.minitoolbox.tools.herramientas.instrumentos.BubbleLevelScreen
@@ -342,9 +341,6 @@ fun MiniToolboxNavGraph(
         }
         composable(Screen.ArRuler.route) {
             ArRulerSceneViewScreen(onBack = onBackSmart)
-        }
-        composable(Screen.Noise.route) {
-            WhiteNoiseScreen(onBack = onBackSmart)
         }
         composable(Screen.About.route) {
             AboutScreen(

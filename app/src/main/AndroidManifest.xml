@@ -47,12 +47,6 @@
             android:exported="false"
             android:foregroundServiceType="dataSync" />
 
-        <!-- Servicio del generador de ruido blanco-->
-        <service
-            android:name="com.joasasso.minitoolbox.tools.herramientas.generadores.noiseGenerator.NoiseService"
-            android:exported="false"
-            android:foregroundServiceType="mediaPlayback" />
-
         <!-- Receiver para recordatorio de agua -->
         <receiver
             android:name="com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.WaterReminderReceiver"

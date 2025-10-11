@@ -1,12 +1,16 @@
 package com.joasasso.minitoolbox.utils
-import android.app.Activity
 import android.content.Context
-import android.content.ContextWrapper
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
 import com.google.android.gms.ads.MobileAds
-import com.google.android.ump.*
+import com.google.android.ump.ConsentDebugSettings
+import com.google.android.ump.ConsentRequestParameters
+import com.google.android.ump.UserMessagingPlatform
 
 object AdsManager {
     private val _ready = mutableStateOf(false)
@@ -62,10 +66,4 @@ fun ConsentGate(debugEEA: Boolean = true, testDeviceHash: String? = null) {
             }
         )
     }
-}
-
-private fun Context.findActivity(): Activity? = when (this) {
-    is Activity -> this
-    is ContextWrapper -> baseContext.findActivity()
-    else -> null
 }

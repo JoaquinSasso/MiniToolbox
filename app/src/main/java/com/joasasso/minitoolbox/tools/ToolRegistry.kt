@@ -364,14 +364,6 @@ object ToolRegistry {
             isPro = true
         ),
         Tool(
-            name = R.string.tool_noise_generator,
-            screen = Screen.Noise,
-            category = ToolCategory.Herramientas,
-            subCategory = R.string.subcategory_generator,
-            summary = R.string.sum_tool_noise_generator,
-            svgResId = R.drawable.noise_generator
-        ),
-        Tool(
             name = R.string.about_title,
             screen = Screen.About,
             category = ToolCategory.Favoritos,
