@@ -1,14 +1,21 @@
-// InterstitialManager.kt (fragmento clave de gating)
+// InterstitialManager.kt
 package com.joasasso.minitoolbox.utils.ads
 
 import android.app.Activity
 import android.content.Context
+import android.util.Log
 import androidx.core.content.edit
+import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.FullScreenContentCallback
+import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
+import java.lang.ref.WeakReference
 
 object InterstitialManager {
+    private const val TAG = "InterstitialManager"
+
     private const val PREFS = "interstitial_prefs"
     private const val KEY_LAST_AD_TS = "last_interstitial_ts"
 
@@ -22,29 +29,63 @@ object InterstitialManager {
 
     private var lastRewardedShownTs = 0L
 
+    // --- NUEVO: recordar una Activity para cargar con adapters que lo requieren (Unity) ---
+    private var lastActivityRef: WeakReference<Activity>? = null
+    private var pendingLoadUntilActivity: Boolean = false
+
     fun notifyRewardedShown() {
         lastRewardedShownTs = System.currentTimeMillis()
     }
 
     fun init(context: Context, adUnitId: String) {
         this.adUnitId = adUnitId
-        if (interstitial == null) load(context)
+
+        // Si el context es Activity, guardamos referencia y cargamos ya.
+        if (context is Activity) {
+            lastActivityRef = WeakReference(context)
+            load(context) // Activity → safe para Unity y resto
+        } else {
+            // Application context: deferimos la carga hasta tener una Activity
+            pendingLoadUntilActivity = true
+            Log.d(TAG, "init() con app Context; difiero carga hasta recibir una Activity.")
+        }
     }
 
+    // Mantengo la firma original. Internamente, si no hay Activity, difiere.
     private fun load(context: Context) {
         val id = adUnitId ?: return
         if (isLoading) return
+
+        // Priorizar Activity para evitar errores de Unity.
+        val activityForLoad: Activity? = when (context) {
+            is Activity -> context.also { lastActivityRef = WeakReference(it) }
+            else -> lastActivityRef?.get()
+        }
+
+        if (activityForLoad == null) {
+            // No tenemos Activity todavía → marcamos pendiente y salimos.
+            pendingLoadUntilActivity = true
+            Log.d(TAG, "load() diferido: no hay Activity disponible para cargar el interstitial.")
+            return
+        }
+
         isLoading = true
+        pendingLoadUntilActivity = false
+
         InterstitialAd.load(
-            context, id, AdRequest.Builder().build(),
-            object : InterstitialAdLoadCallback() {
+            /* context = */ activityForLoad,
+            /* adUnitId = */ id,
+            /* adRequest = */ AdRequest.Builder().build(),
+            /* callback = */ object : InterstitialAdLoadCallback() {
                 override fun onAdLoaded(ad: InterstitialAd) {
                     interstitial = ad
                     isLoading = false
+                    Log.i(TAG, "Interstitial loaded by adapter: ${ad.responseInfo?.mediationAdapterClassName}")
                 }
-                override fun onAdFailedToLoad(error: com.google.android.gms.ads.LoadAdError) {
+                override fun onAdFailedToLoad(error: LoadAdError) {
                     interstitial = null
                     isLoading = false
+                    Log.e(TAG, "Interstitial failed to load: code=${error.code} message=${error.message}")
                 }
             }
         )
@@ -57,6 +98,14 @@ object InterstitialManager {
     fun onToolOpened(activity: Activity, shouldShowAds: Boolean) {
         if (!shouldShowAds) return
 
+        // Actualizamos la Activity viva para futuras cargas.
+        lastActivityRef = WeakReference(activity)
+
+        // Si había una carga pendiente por falta de Activity, intentamos ahora.
+        if (pendingLoadUntilActivity && interstitial == null && !isLoading) {
+            load(activity)
+        }
+
         val ctx = activity.applicationContext
         val opens = ToolUsageTracker.getGlobalOpenCount(ctx)
         val now = System.currentTimeMillis()
@@ -66,33 +115,33 @@ object InterstitialManager {
         val openGate = (opens % MIN_OPENS_BETWEEN_ADS) == 0
         val timeGate = (now - lastTs) > GLOBAL_AD_COOLDOWN_MS
 
-        val skipBecauseRewarded = (now - lastRewardedShownTs) < 30_000L // 30 s de margen
+        val skipBecauseRewarded = (now - lastRewardedShownTs) < 60_000L // 60 s de margen
 
         if (skipBecauseRewarded) {
-            load(ctx)
+            load(activity) // precarga con Activity para mantener buffer listo
             return
         }
 
         if (openGate && timeGate && interstitial != null) {
-            interstitial?.fullScreenContentCallback = object : com.google.android.gms.ads.FullScreenContentCallback() {
+            interstitial?.fullScreenContentCallback = object : FullScreenContentCallback() {
                 override fun onAdDismissedFullScreenContent() {
                     interstitial = null
                     sp.edit { putLong(KEY_LAST_AD_TS, System.currentTimeMillis()) }
-                    load(ctx)
+                    load(activity) // precarga próxima con Activity
                 }
-                override fun onAdFailedToShowFullScreenContent(err: com.google.android.gms.ads.AdError) {
+                override fun onAdFailedToShowFullScreenContent(err: AdError) {
                     interstitial = null
-                    load(ctx)
+                    load(activity)
                 }
                 override fun onAdShowedFullScreenContent() {
-                    // opcional: métricas/impressions
+                    // opcional: métricas/impressions (no tocado)
                 }
             }
             interstitial?.show(activity)
             interstitial = null
         } else {
             // Si no pasa el gate o no hay anuncio cargado, asegurá precarga
-            load(ctx)
+            load(activity)
         }
     }
 }

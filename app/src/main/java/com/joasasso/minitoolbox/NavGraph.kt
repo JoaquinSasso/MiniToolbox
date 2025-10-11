@@ -75,6 +75,7 @@ import com.joasasso.minitoolbox.ui.screens.ProScreen
 import com.joasasso.minitoolbox.utils.ads.InterstitialManager
 import com.joasasso.minitoolbox.utils.ads.RewardedManager
 import com.joasasso.minitoolbox.utils.ads.ToolUsageTracker
+import com.joasasso.minitoolbox.utils.findActivity
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
@@ -86,12 +87,14 @@ fun MiniToolboxNavGraph(
 ) {
     val animationDuration = 150
     val context = LocalContext.current
-    val activity = (context as? Activity)
+    val activity = context.findActivity()
 
     LaunchedEffect(Unit) {
         // Inicializar managers una sola vez
-        InterstitialManager.init(context.applicationContext, interstitialAdUnitId)
-        RewardedManager.init(context.applicationContext, rewardedAdUnitId)
+        if (activity != null) {
+            RewardedManager.init(activity, rewardedAdUnitId)
+            InterstitialManager.init(context.applicationContext, interstitialAdUnitId)
+        }
     }
 
     // Mapeo route -> toolId (ajustalo si tenés otro id)

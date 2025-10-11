@@ -555,7 +555,7 @@ fun CategoriesScreen(
                         activity = activity,
                         onReward = {
                             // Activa el pase de 10 minutos
-                            //CreditAccessManager.startTimedPassForAd(activity)
+                            CreditAccessManager.startTimedPassForAd(activity)
 
                             Toast
                                 .makeText(activity, R.string.pro_unlocked_toast, android.widget.Toast.LENGTH_SHORT)
