@@ -21,6 +21,10 @@ sealed class Screen(val route: String) {
     object AgeCalculator       : Screen("age_calculator")
     object ZodiacSign          : Screen("zodiac_sign")
     object PomodoroList        : Screen("pomodoro_list")
+    object PomodoroDetail : Screen("pomodoro/detail/{timerId}") {
+        const val ARG = "timerId"
+        fun createRoute(timerId: String) = "pomodoro/detail/$timerId"
+    }
     object BubbleLevel         : Screen("bubble_level")
     object Percentage          : Screen("percentage")
     object TimeConverter       : Screen("time_converter")
@@ -63,12 +67,46 @@ sealed class Screen(val route: String) {
     object Pro : Screen("pro")
 
     companion object {
-        // Valida contra las routes NUEVAS
-        fun isValidRoute(route: String?): Boolean {
-            return route != null && Screen::class.sealedSubclasses
-                .mapNotNull { it.objectInstance }
-                .any { it.route == route }
+        // Convierte patrones con {param} en Regex que matchea valores reales
+        // Acepta: letras, números y símbolos comunes de IDs dentro de un segmento (sin / ? #)
+        private const val SEGMENT_REGEX = "[A-Za-z0-9._~+%-]+"
+
+        // "pomodoro/detail/{timerId}"  ->  ^pomodoro/detail/[A-Za-z0-9._~+%-]+(?:\\?.*)?$
+        private fun routePatternToRegex(pattern: String): Regex {
+            val sb = StringBuilder()
+            var i = 0
+            while (i < pattern.length) {
+                val ch = pattern[i]
+                if (ch == '{') {
+                    val end = pattern.indexOf('}', startIndex = i + 1)
+                    if (end == -1) {
+                        // Llave sin cerrar: trata tod0 como literal escapado
+                        sb.append(Regex.escape(pattern.substring(i)))
+                        break
+                    } else {
+                        // reemplaza {param} por un segmento de ruta válido
+                        sb.append(SEGMENT_REGEX)
+                        i = end + 1
+                        continue
+                    }
+                } else {
+                    sb.append(Regex.escape(ch.toString()))
+                    i++
+                }
+            }
+            return Regex("^$sb(?:\\?.*)?$")
         }
+
+        fun isValidRoute(route: String?): Boolean {
+            if (route.isNullOrBlank()) return false
+            val patterns = Screen::class.sealedSubclasses
+                .mapNotNull { it.objectInstance?.route } // e.g. "pomodoro/detail/{timerId}"
+            // Coincidencia exacta o por patrón con {param}
+            return patterns.any { p ->
+                p == route || routePatternToRegex(p).matches(route)
+            }
+        }
+
     }
 }
 

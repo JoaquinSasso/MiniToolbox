@@ -79,30 +79,38 @@ fun ensurePomodoroChannels(context: Context) {
     }
 }
 
-private fun mainPendingIntent(context: Context): PendingIntent {
+private fun mainPendingIntent(context: Context, startRoute: String?): PendingIntent {
     val intent = Intent(context, MainActivity::class.java).apply {
-        // Abrí la app en la screen del Pomodoro (usa tu deep link si tenés)
-        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        // Muy importante: que llegue a onNewIntent si ya está abierta
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        if (!startRoute.isNullOrBlank()) putExtra("startRoute", startRoute)
     }
+    // Evitar reciclado de extras: un requestCode por ruta
+    val reqCode = (startRoute ?: "default_route").hashCode()
     return PendingIntent.getActivity(
-        context, 991, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        context,
+        reqCode,
+        intent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
 }
 
 /** Notif Ongoing mientras corre la fase (sin conteo por segundo). */
-fun showRunningNotification(context: Context, title: String, endMs: Long) {
+fun showRunningNotification(context: Context, title: String, endMs: Long, startRoute: String? = null) {
     ensurePomodoroChannels(context)
 
-    val text = context.getString(R.string.pomodoro_running_until,
-        android.text.format.DateFormat.getTimeFormat(context).format(endMs))
+    val text = context.getString(
+        R.string.pomodoro_running_until,
+        android.text.format.DateFormat.getTimeFormat(context).format(endMs)
+    )
 
     val notif = NotificationCompat.Builder(context, CHANNEL_RUNNING)
         .setSmallIcon(R.drawable.ic_pomodoro)
-        .setContentTitle(title)           // p.ej. "Trabajo" / "Descanso corto"
-        .setContentText(text)             // "Hasta 14:35"
+        .setContentTitle(title)
+        .setContentText(text)
         .setOngoing(true)
         .setOnlyAlertOnce(true)
-        .setContentIntent(mainPendingIntent(context))
+        .setContentIntent(mainPendingIntent(context, startRoute))
         .setCategory(Notification.CATEGORY_STATUS)
         .build()
 
@@ -116,19 +124,20 @@ fun cancelRunningNotification(context: Context) {
 }
 
 /** Notif de alarma al finalizar fase (con sonido del canal). */
-fun showAlarmNotification(context: Context, title: String, text: String): Int {
+fun showAlarmNotification(context: Context, title: String, text: String, startRoute: String? = null): Int {
     ensurePomodoroChannels(context)
-    val notif = NotificationCompat.Builder(context, CHANNEL_ALARM_SILENT) // <- canal sin sonido
+    val notif = NotificationCompat.Builder(context, CHANNEL_ALARM_SILENT)
         .setSmallIcon(R.drawable.ic_pomodoro)
         .setContentTitle(title)
         .setContentText(text)
         .setPriority(NotificationCompat.PRIORITY_HIGH)
-        .setAutoCancel(false) // la cancelamos nosotros al silenciar
+        .setAutoCancel(false)
         .setCategory(Notification.CATEGORY_ALARM)
-        .setContentIntent(mainPendingIntent(context))
+        .setContentIntent(mainPendingIntent(context, startRoute))
         .build()
     val nm = ContextCompat.getSystemService(context, NotificationManager::class.java)
     nm?.notify(NOTIF_ID_ALARM_SILENT, notif)
     return NOTIF_ID_ALARM_SILENT
 }
+
 

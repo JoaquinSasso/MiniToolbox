@@ -42,9 +42,18 @@
     <!-- Edit dialog fields -->
     <string name="pomodoro_cycles">Cycles before long break</string>
 
-    <!-- Help dialog -->
-    <string name="pomodoro_help_title">Pomodoro timers list</string>
-    <string name="pomodoro_help_line1">Create profiles with different durations and colors.</string>
-    <string name="pomodoro_help_line2">Tap ▶ to start with that profile or “Open detail”.</string>
+    <!-- Help: Timers list -->
+    <string name="pomolist_help_title">Pomodoro timers list</string>
+    <string name="pomolist_help_p1">Create profiles with different work times, breaks, and cycles before the long break.</string>
+    <string name="pomolist_help_p3">Use ✏️ to edit the name, color, and durations. Use 🗑️ to delete a profile.</string>
+    <string name="pomolist_help_p2">Tap a profile to open its timer and use it.</string>
+    <string name="pomolist_help_p4">Changes are saved automatically on your device.</string>
+
+    <!-- Help: Timer detail -->
+    <string name="pomodetail_help_title">How to use the Pomodoro Timer</string>
+    <string name="pomodetail_help_p1">The floating button starts or stops the timer. When a phase ends, the next one starts automatically based on your profile.</string>
+    <string name="pomodetail_help_p2">When the alarm rings, an icon appears replacing the timer: tap it to silence. If you don’t, it auto-silences after a few seconds.</string>
+    <string name="pomodetail_help_p3">A notification keeps you informed even outside the app.</string>
+    <string name="pomodetail_help_p4">If exact alarms are restricted on your device, you may need to enable “Alarms and reminders”.</string>
 
 </resources>

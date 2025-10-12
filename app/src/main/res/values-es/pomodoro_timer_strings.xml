@@ -41,8 +41,19 @@
     <string name="pomodoro_cycles_before_long">%1$d ciclos</string>
     <string name="pomodoro_open_detail">Abrir detalle</string>
     <string name="pomodoro_cycles">Ciclos antes del largo</string>
-    <string name="pomodoro_help_title">Lista de timers Pomodoro</string>
-    <string name="pomodoro_help_line1">Crea perfiles con duraciones y colores distintos.</string>
-    <string name="pomodoro_help_line2">Toca ▶ para iniciar con ese perfil o “Abrir detalle”.</string>
 
+
+    <!-- Ayuda: Lista de timers -->
+    <string name="pomolist_help_title">Lista de timers Pomodoro</string>
+    <string name="pomolist_help_p1">Crea perfiles con distintos tiempos de trabajo, descansos y ciclos antes del descanso largo.</string>
+    <string name="pomolist_help_p3">Usa ✏️ para editar nombre, color y duraciones. Usa 🗑️ para eliminar el perfil.</string>
+    <string name="pomolist_help_p2">Toca el perfil para abrir su temporizador y usarlo.</string>
+    <string name="pomolist_help_p4">Los cambios se guardan automáticamente en el dispositivo.</string>
+
+    <!-- Ayuda: Detalle de timer -->
+    <string name="pomodetail_help_title">Cómo usar el Timer Pomodoro</string>
+    <string name="pomodetail_help_p1">Usa el bóton para iniciar o detener el timer. Al finalizar una fase, comienza automáticamente la siguiente según tu configuración.</string>
+    <string name="pomodetail_help_p2">Cuando suena la alarma, aparece un ícono en el lugar del timer: tócalo para silenciar. Si no la tocas, se silencia sola tras unos segundos.</string>
+    <string name="pomodetail_help_p3">La notificación te permite ver el estado aunque salgas de la app.</string>
+    <string name="pomodetail_help_p4">Si las alarmas exactas están restringidas tu dispositivo, puede que necesites habilitarlas en “Alarmas y recordatorios”.</string>
 </resources>

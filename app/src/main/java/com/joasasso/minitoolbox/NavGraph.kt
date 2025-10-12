@@ -17,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -197,14 +198,11 @@ fun MiniToolboxNavGraph(
             )
         }
         composable(
-            route = "pomodoro/detail/{timerId}",
-            arguments = listOf(navArgument("timerId") { defaultValue = "" })
+            route = Screen.PomodoroDetail.route,
+            arguments = listOf(navArgument(Screen.PomodoroDetail.ARG) { type = NavType.StringType })
         ) { backStackEntry ->
-            val timerId = backStackEntry.arguments?.getString("timerId") ?: ""
-            PomodoroScreen(
-                timerId = timerId,
-                onBack = { navController.popBackStack() }
-            )
+            val timerId = backStackEntry.arguments?.getString(Screen.PomodoroDetail.ARG).orEmpty()
+            PomodoroScreen(timerId = timerId, onBack = { navController.popBackStack() })
         }
         composable(Screen.BubbleLevel.route) {
             BubbleLevelScreen(onBack = onBackSmart)
