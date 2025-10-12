@@ -4,6 +4,7 @@ import android.content.Context
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.os.Build
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.glance.ColorFilter
@@ -21,10 +22,12 @@ import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.action.actionRunCallback
+import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.background
+import androidx.glance.color.ColorProvider
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
@@ -40,6 +43,10 @@ import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.data.setEstadoLinterna
 import com.joasasso.minitoolbox.data.setNivelLinterna
 import com.joasasso.minitoolbox.metrics.widgetUse
+import com.joasasso.minitoolbox.utils.pro.LocalProState
+import com.joasasso.minitoolbox.utils.pro.ProRepository
+import com.joasasso.minitoolbox.utils.pro.paywallIntent
+import kotlinx.coroutines.flow.first
 
 object QuickFlashKeys {
     val LEVEL = intPreferencesKey("quick_flash_level")
@@ -139,6 +146,29 @@ class FlashQuickWidget : GlanceAppWidget() {
                     }
                 }
             }
+            // Overlay PRO si no es Pro
+            val proState = LocalProState.current
+            val isPro = proState.isPro
+            if (!isPro) {
+                // Badge PRO en la esquina superior derecha
+                Box(
+                    modifier = GlanceModifier
+                        .fillMaxSize()
+                        .padding(6.dp)
+                        .background(Color(0xB0000000))
+                        .clickable(actionStartActivity(paywallIntent(context))),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        provider = ImageProvider(
+                            resId = R.drawable.pro_badge
+                        ),
+                        contentDescription = "PRO Tool",
+                        modifier = GlanceModifier.size(40.dp),
+                        colorFilter = ColorFilter.tint(ColorProvider(Color(0xFFFFD700), Color(0xFFFFD700))) // Tinte dorado
+                    )
+                }
+            }
         }
     }
 
@@ -159,6 +189,13 @@ class QuickFlashSetLevel : ActionCallback {
     }
 
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
+        val isPro = ProRepository.isProFlow(context).first()
+        //Si no es pro mostrar el paywall
+        if (!isPro) {
+            // Abrir paywall directamente: esto sí ejecuta la navegación
+            context.startActivity(paywallIntent(context))
+            return
+        }
         val level = parameters[KEY_LEVEL] ?: 0
         val cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
 

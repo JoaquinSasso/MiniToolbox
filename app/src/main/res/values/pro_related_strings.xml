@@ -7,8 +7,12 @@
     <string name="pro_benefit_ads_desc">Browse all tools ad-free.</string>
     <string name="pro_benefit_tools_title">Exclusive Tools</string>
     <string name="pro_benefit_tools_desc">Unlimited access to the most powerful features.</string>
+    <string name="pro_benefit_widgets_title_short">One-Tap Widgets</string>
+    <string name="pro_benefit_widgets_desc_short">Do it from your home screen — up to 2× faster.</string>
     <string name="pro_benefit_lifetime_title">One-Time Payment</string>
     <string name="pro_benefit_lifetime_desc">A single payment to unlock everything forever.</string>
+    <string name="pro_benefit_support_title">Back a Tiny Indie</string>
+    <string name="pro_benefit_support_desc">Go PRO to keep this indie app alive and polished—faster fixes, smarter tools, and steady new features.</string>
     <string name="pro_buy_button">Buy for %1$s</string>
     <string name="pro_restore_button">Restore Purchases</string>
     <string name="pro_feature_icon">Pro feature icon</string>
