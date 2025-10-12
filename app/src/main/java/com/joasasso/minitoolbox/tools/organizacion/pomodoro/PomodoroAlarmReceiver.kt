@@ -217,7 +217,7 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
         }
 
         /**
-         * Programa la próxima alarma exacta propagando SIEMPRE la configuración completa.
+         * Programa la próxima alarma propagando SIEMPRE la configuración completa.
          */
         private fun scheduleExactWithConfig(
             context: Context,
@@ -243,17 +243,21 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
 
             // Un único PendingIntent para el Pomodoro activo
             val pi = PendingIntent.getBroadcast(
-                context, REQ_ALARM, intent,
+                context,
+                REQ_ALARM,
+                intent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
+            // Política-safe: intentar exacta, caer a inexacta si no se permite
             try {
-                am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMs, pi)
-            } catch (_: SecurityException) {
                 am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMs, pi)
-                // La UI puede guiar al usuario a Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM
+            } catch (_: Exception) {
+                // Último recurso: fallback básico
+                am.set(AlarmManager.RTC_WAKEUP, triggerAtMs, pi)
             }
         }
+
 
         private fun cancelAlarm(context: Context) {
             val am = context.getSystemService(AlarmManager::class.java)
