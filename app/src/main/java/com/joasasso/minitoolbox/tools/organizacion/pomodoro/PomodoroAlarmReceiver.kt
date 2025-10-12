@@ -17,6 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import androidx.core.content.edit
 
 // Alarm action
 const val ACTION_FIRE_ALARM = "POMODORO_FIRE_ALARM"
@@ -67,6 +68,10 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
 
         CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
             try {
+                val repo = PomodoroStateRepository(context)
+                val now = System.currentTimeMillis()
+                val currentEnd = repo.phaseEndFlow.firstOrNull() ?: 0L
+                if (currentEnd > now) return@launch
                 // 1) Mostrar notificación de fin de fase (canal sin sonido) + avisar a la UI (START)
                 val finishedTitle = appContext.getString(
                     R.string.pomodoro_finished,
@@ -78,6 +83,8 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
                     appContext.getString(R.string.pomodoro_tap_to_stop),
                     startRoute = startRoute
                 )
+
+                AlarmState.setActive(context, true)
                 appContext.sendBroadcast(
                     Intent(ACTION_POMODORO_ALARM_START)
                         .setPackage(appContext.packageName)
@@ -210,6 +217,7 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
             AlarmSoundPlayer.stop()
 
             // avisar a la UI
+            AlarmState.setActive(context, false)
             context.sendBroadcast(
                 Intent(ACTION_POMODORO_ALARM_STOP)
                     .setPackage(context.packageName)
@@ -303,8 +311,9 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
 
         /**
          * Avanza la fase inmediatamente desde la UI, sin depender del broadcast del AlarmManager.
-         * - Idempotente: si ya se avanzó/persistió una nueva fase con endMs > now, no duplica.
-         * - Usa solo alarmas inexactas para el próximo ciclo (policy-safe).
+         * - Dispara notificación + sonido de fin de fase de inmediato (como hacía el Receiver).
+         * - Idempotente: si ya hay una fase activa (endMs > now), no duplica nada.
+         * - Reprograma respaldo con alarmas inexactas (policy-safe).
          */
         suspend fun forceAdvanceFromUi(
             context: Context,
@@ -315,11 +324,33 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
             val repo = PomodoroStateRepository(app)
             val now = System.currentTimeMillis()
 
-            // ✅ Obtener el valor actual de phaseEnd (primer elemento del Flow)
+            // Si ya hay una fase activa con end en el futuro, no hacer nada
             val currentEnd = repo.phaseEndFlow.firstOrNull() ?: 0L
-            if (currentEnd > now) return // Ya hay una fase activa, no duplicar
+            if (currentEnd > now) return
 
-            // Resolver fase actual → WORK/SHORT/LONG según tus strings
+            // === 1) DISPARAR ALARMA (notificación + sonido) ===
+            val finishedTitle = app.getString(R.string.pomodoro_finished, currentPhaseName)
+            // Notificación de fin (tap abre la detail del timer activo)
+            val startRoute = "pomodoro/detail/${config.id}"
+            showAlarmNotification(
+                app,
+                title = finishedTitle,
+                text  = app.getString(R.string.pomodoro_tap_to_stop),
+                startRoute = startRoute
+            )
+            // Avisar a la UI que la alarma está sonando (icono de parlante tachado)
+            AlarmState.setActive(context, true)
+            app.sendBroadcast(
+                Intent(ACTION_POMODORO_ALARM_START)
+                    .setPackage(app.packageName)
+                    .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY or Intent.FLAG_RECEIVER_FOREGROUND)
+            )
+            // Reproducir sonido por ~10s y, al terminar, silenciar + avisar a UI
+            AlarmSoundPlayer.play(app, durationMs = 10_000L) {
+                PomodoroAlarmReceiver.silenceAlarm(app)
+            }
+
+            // === 2) CALCULAR PRÓXIMA FASE ===
             val phase = when (currentPhaseName) {
                 app.getString(R.string.pomodoro_work)        -> PHASE_WORK
                 app.getString(R.string.pomodoro_short_break) -> PHASE_SHORT
@@ -327,12 +358,11 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
                 else                                         -> PHASE_WORK
             }
 
-            // Ciclo: persistimos por timerId en SharedPreferences
-            val sp = app.getSharedPreferences("pomodoro_cycle", Context.MODE_PRIVATE)
+            // Ciclo por timerId
+            val sp  = app.getSharedPreferences("pomodoro_cycle", Context.MODE_PRIVATE)
             val key = "cycle_${config.id}"
             var cycle = sp.getInt(key, 0)
 
-            // Calcular próxima fase
             val (nextPhase, nextMin, nextCycle) = when (phase) {
                 PHASE_WORK -> {
                     val longNext = ((cycle + 1) % config.cyclesBeforeLong == 0)
@@ -344,39 +374,23 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
                 }
                 else -> Triple(PHASE_WORK, config.workMin, cycle)
             }
+            if (phase == PHASE_WORK) sp.edit { putInt(key, nextCycle) }
 
-            // Persistir nuevo ciclo si venimos de WORK
-            if (phase == PHASE_WORK) {
-                sp.edit().putInt(key, nextCycle).apply()
-            }
-
-            // Persistir próxima fase
+            // === 3) PERSISTIR PRÓXIMA FASE + NOTIF. EN CURSO ===
             val endMs = now + nextMin * 60_000L
-            repo.updatePhase(
-                when (nextPhase) {
-                    PHASE_WORK  -> app.getString(R.string.pomodoro_work)
-                    PHASE_SHORT -> app.getString(R.string.pomodoro_short_break)
-                    PHASE_LONG  -> app.getString(R.string.pomodoro_long_break)
-                    else        -> currentPhaseName
-                },
-                endMs,
-                nextMin * 60L
-            )
+            val nextTitle = when (nextPhase) {
+                PHASE_WORK  -> app.getString(R.string.pomodoro_work)
+                PHASE_SHORT -> app.getString(R.string.pomodoro_short_break)
+                PHASE_LONG  -> app.getString(R.string.pomodoro_long_break)
+                else        -> currentPhaseName
+            }
+            repo.updatePhase(nextTitle, endMs, nextMin * 60L)
 
-            // Feedback inmediato: notificación "en curso" y programar respaldo inexacto
-            showRunningNotification(
-                app,
-                when (nextPhase) {
-                    PHASE_WORK  -> app.getString(R.string.pomodoro_work)
-                    PHASE_SHORT -> app.getString(R.string.pomodoro_short_break)
-                    PHASE_LONG  -> app.getString(R.string.pomodoro_long_break)
-                    else        -> currentPhaseName
-                },
-                endMs
-            )
+            // Notificación de fase en curso (sin sonido) + deep link a detail
+            showRunningNotification(app, nextTitle, endMs, startRoute = startRoute)
 
-            // Reprogramar alarma inexacta como respaldo
-            scheduleFromUiFallback(
+            // === 4) REPROGRAMAR RESPALDO (INEXACTO) ===
+            PomodoroAlarmReceiver.scheduleFromUiFallback(
                 context = app,
                 triggerAtMs = endMs,
                 phase = nextPhase,

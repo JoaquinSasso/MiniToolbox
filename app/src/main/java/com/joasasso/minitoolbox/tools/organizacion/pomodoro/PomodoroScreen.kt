@@ -63,6 +63,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.data.PomodoroStateRepository
 import com.joasasso.minitoolbox.data.PomodoroTimersPrefs
@@ -86,6 +89,8 @@ fun PomodoroScreen(
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
     var showInfo by remember { mutableStateOf(false) }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     val timerConfig by remember(timerId) {
         mutableStateOf(
@@ -138,6 +143,8 @@ fun PomodoroScreen(
         }
         context.registerReceiver(rcv, filter, Context.RECEIVER_NOT_EXPORTED)
 
+        alarmRinging = AlarmState.isActive(context)
+
         onDispose {
             context.unregisterReceiver(rcv)
         }
@@ -170,6 +177,18 @@ fun PomodoroScreen(
             }
         }
     }
+
+    // Refresca la interfaz al volver al foreground para revisar si la alarma esta sonando
+    DisposableEffect(lifecycleOwner) {
+        val obs = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_START) {
+                alarmRinging = AlarmState.isActive(context)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(obs)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(obs) }
+    }
+
 
     Scaffold(
         topBar = {
@@ -224,8 +243,6 @@ fun PomodoroScreen(
                 phaseEndMs = phaseEnd,
                 phaseTotalSec = phaseTot
             )
-            val nowForText = System.currentTimeMillis()
-            val remainingSec = if (phaseEnd > nowForText) (phaseEnd - nowForText) / 1000L else 0L
 
             val stroke = with(LocalDensity.current) {
                 Stroke(width = 18.dp.toPx(), cap = StrokeCap.Round) // ← bordes redondeados
@@ -310,7 +327,6 @@ fun PomodoroScreen(
                     Text(stringResource(R.string.pomodetail_help_p1))
                     Text(stringResource(R.string.pomodetail_help_p2))
                     Text(stringResource(R.string.pomodetail_help_p3))
-                    Text(stringResource(R.string.pomodetail_help_p4))
                 }
             },
             confirmButton = {

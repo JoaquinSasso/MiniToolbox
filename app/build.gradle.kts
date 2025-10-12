@@ -24,8 +24,8 @@ android {
         applicationId = "com.joasasso.minitoolbox"
         minSdk = 28
         targetSdk = 36
-        versionCode = 7
-        versionName = "1.1.2"
+        versionCode = 8
+        versionName = "1.1.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -179,5 +179,5 @@ dependencies {
     implementation(libs.billing.ktx)
     implementation(libs.androidx.browser)
 
-    implementation("androidx.work:work-runtime-ktx:2.9.0")
+    implementation("androidx.work:work-runtime-ktx:2.10.5")
 }
