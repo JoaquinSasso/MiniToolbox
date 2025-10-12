@@ -83,7 +83,7 @@ fun PomodoroScreen(
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
-    val haptics = LocalHapticFeedback.current
+    val haptic = LocalHapticFeedback.current
     var showInfo by remember { mutableStateOf(false) }
 
     val timerConfig by remember(timerId) {
@@ -158,7 +158,7 @@ fun PomodoroScreen(
         floatingActionButton = {
             LargeFloatingActionButton(
                 onClick = {
-                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     if (isRunning) {
                         isRunning = false
                         PomodoroAlarmReceiver.stopPomodoro(context)
@@ -236,9 +236,6 @@ fun PomodoroScreen(
                     waveSpeed = WavyProgressIndicatorDefaults.CircularWavelength
                 )
 
-
-
-
                 // TIEMPO EN GRANDE o ÍCONO DE SILENCIO
                 AnimatedContent(
                     targetState = alarmRinging,
@@ -252,7 +249,7 @@ fun PomodoroScreen(
                             contentDescription = stringResource(R.string.pomodoro_silence),
                             modifier = Modifier.size(72.dp) // ajustá según tu displayLarge
                                 .clickable(onClick = {
-                                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     PomodoroAlarmReceiver.silenceAlarm(context)
                                     alarmRinging = false // feedback inmediato en UI
                                 })
@@ -276,19 +273,20 @@ fun PomodoroScreen(
     if (showInfo) {
         AlertDialog(
             onDismissRequest = { showInfo = false },
-            title = { Text(stringResource(R.string.pomodoro_help_title)) },
+            title = { Text(stringResource(R.string.pomodetail_help_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Placeholder") //TODO agregar nuevo menu de ayuda al pomodoro timer
+                    Text(stringResource(R.string.pomodetail_help_p1))
+                    Text(stringResource(R.string.pomodetail_help_p2))
+                    Text(stringResource(R.string.pomodetail_help_p3))
+                    Text(stringResource(R.string.pomodetail_help_p4))
                 }
             },
             confirmButton = {
-                TextButton(onClick = {
+                TextButton(onClick =  {
                     showInfo = false
-                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                }) {
-                    Text(stringResource(R.string.close))
-                }
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                }) { Text(stringResource(R.string.close)) }
             }
         )
     }

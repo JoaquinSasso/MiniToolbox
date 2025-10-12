@@ -273,16 +273,18 @@ fun PomodoroTimersListScreen(
 
     if (showInfo) {
         AlertDialog(
-            onDismissRequest = { showInfo = false },
-            title = { Text(stringResource(R.string.pomodoro_help_title)) },
+            onDismissRequest =  { showInfo = false },
+            title = { Text(stringResource(R.string.pomolist_help_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(stringResource(R.string.pomodoro_help_line1))
-                    Text(stringResource(R.string.pomodoro_help_line2))
+                    Text(stringResource(R.string.pomolist_help_p1))
+                    Text(stringResource(R.string.pomolist_help_p2))
+                    Text(stringResource(R.string.pomolist_help_p3))
+                    Text(stringResource(R.string.pomolist_help_p4))
                 }
             },
             confirmButton = {
-                TextButton(onClick = {
+                TextButton(onClick =  {
                     showInfo = false
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 }) { Text(stringResource(R.string.close)) }

@@ -100,11 +100,10 @@ class MainActivity : AppCompatActivity() {
                         LaunchedEffect(startRoute) {
                             val route = startRoute
                             if (Screen.isValidRoute(route) && route != Screen.Categories.route) {
-                                toolUse(applicationContext,route!!)
-                                widgetUse(applicationContext,"widget_shortcuts")
+                                toolUse(applicationContext, route!!)
+                                widgetUse(applicationContext, "widget_shortcuts")
 
-
-                                // Limpiar stack hasta Categorías si está presente
+                                // opcional: solo si esa entry existe
                                 navController.popBackStack(Screen.Categories.route, inclusive = false)
 
                                 navController.navigate(route) {
@@ -112,7 +111,7 @@ class MainActivity : AppCompatActivity() {
                                     restoreState = false
                                 }
                             }
-                            // Reset para no re-navegar en recomposiciones
+                            // siempre limpiar al final (evita re-navegaciones)
                             startRoute = null
                         }
                     }

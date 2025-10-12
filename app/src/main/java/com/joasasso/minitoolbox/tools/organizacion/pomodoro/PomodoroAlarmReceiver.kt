@@ -11,6 +11,7 @@ import androidx.annotation.RequiresPermission
 import androidx.core.content.ContextCompat
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.data.PomodoroStateRepository
+import com.joasasso.minitoolbox.nav.Screen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -58,6 +59,8 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
         val timerName  = intent.getStringExtra(EX_TIMER_NAME) ?: appContext.getString(R.string.tool_pomodoro_timer)
         val timerColorInt = intent.getIntExtra(EX_TIMER_COLOR, 0xFF4DBC52.toInt())
 
+        val startRoute = Screen.PomodoroDetail.createRoute(timerId)
+
         // Trabajo asíncrono seguro en Receiver
         val pending = goAsync()
 
@@ -71,7 +74,8 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
                 showAlarmNotification(
                     appContext,
                     finishedTitle,
-                    appContext.getString(R.string.pomodoro_tap_to_stop)
+                    appContext.getString(R.string.pomodoro_tap_to_stop),
+                    startRoute = startRoute
                 )
                 appContext.sendBroadcast(
                     Intent(ACTION_POMODORO_ALARM_START)
@@ -110,7 +114,8 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
                 showRunningNotification(
                     appContext,
                     phaseNameLocalized(appContext, nextPhase),
-                    endMs
+                    endMs,
+                    startRoute = startRoute
                 )
 
                 // 5) Agendar la próxima alarma exacta con la MISMA configuración
@@ -161,7 +166,10 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
             }
 
             // Notificación "en curso"
-            showRunningNotification(app, app.getString(R.string.pomodoro_work), endMs)
+            showRunningNotification(
+                app, app.getString(R.string.pomodoro_work), endMs,
+                startRoute = Screen.PomodoroDetail.createRoute(config.id)
+            )
 
             // Programar primera alarma con la config completa
             scheduleExactWithConfig(
