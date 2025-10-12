@@ -132,7 +132,7 @@ class BillingRepository(
         } ?: run {
             // No hay compras: emitimos estado no PRO solo si fue un restore explícito
             if (fromRestore) {
-                emitPro(false, ProSource.None)
+                emitPro(false)
             }
             return
         }
@@ -145,16 +145,10 @@ class BillingRepository(
             billingClient.acknowledgePurchase(params) { /* no-op */ }
         }
 
-        // Determinar source
-        val src = when {
-            active.products.contains(inappId) -> ProSource.Lifetime
-            active.products.contains(subId)   -> ProSource.Subscription
-            else                              -> ProSource.None
-        }
-        emitPro(true, src)
+        emitPro(true)
     }
 
-    private fun emitPro(isPro: Boolean, src: ProSource) {
+    private fun emitPro(isPro: Boolean) {
         _entitlementEvents.tryEmit(
             ProState(isPro = isPro)
         )

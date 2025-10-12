@@ -11,11 +11,20 @@ import com.joasasso.minitoolbox.data.flujoPorVaso
 import com.joasasso.minitoolbox.data.guardarAguaHoy
 import com.joasasso.minitoolbox.metrics.storage.AggregatesRepository
 import com.joasasso.minitoolbox.metrics.widgetUse
+import com.joasasso.minitoolbox.utils.pro.ProRepository
+import com.joasasso.minitoolbox.utils.pro.paywallIntent
 import com.joasasso.minitoolbox.widgets.WidgetWaterKindResolver
 import kotlinx.coroutines.flow.first
 
 class AgregarAguaCallback : ActionCallback {
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
+        val isPro = ProRepository.isProFlow(context).first()
+        //Si no es pro mostrar el paywall
+        if (!isPro) {
+            // Abrir paywall directamente: esto sí ejecuta la navegación
+            context.startActivity(paywallIntent(context))
+            return
+        }
         //Obtener el valor actual de agua desde el dataStore
         val porVaso = context.flujoPorVaso().first()
         val actual = context.flujoAguaHoy().first()
@@ -38,6 +47,13 @@ class AgregarAguaCallback : ActionCallback {
 
 class QuitarAguaCallback : ActionCallback {
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
+        val isPro = ProRepository.isProFlow(context).first()
+        //Si no es pro mostrar el paywall
+        if (!isPro) {
+            // Abrir paywall directamente: esto sí ejecuta la navegación
+            context.startActivity(paywallIntent(context))
+            return
+        }
         //Obtener el valor actual de agua desde el dataStore
         val porVaso = context.flujoPorVaso().first()
         val actual = context.flujoAguaHoy().first()
