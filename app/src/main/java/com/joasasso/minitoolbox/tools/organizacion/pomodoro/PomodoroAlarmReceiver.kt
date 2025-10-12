@@ -15,6 +15,7 @@ import com.joasasso.minitoolbox.nav.Screen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 // Alarm action
@@ -218,6 +219,7 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
 
         /**
          * Programa la próxima alarma propagando SIEMPRE la configuración completa.
+         * Usa solo alarmas inexactas (permitidas por políticas de Google Play).
          */
         private fun scheduleExactWithConfig(
             context: Context,
@@ -249,11 +251,42 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            // Política-safe: intentar exacta, caer a inexacta si no se permite
+            // Solo alarmas inexactas: cumplen políticas y son suficientes para Pomodoro
             try {
                 am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMs, pi)
             } catch (_: Exception) {
-                // Último recurso: fallback básico
+                // Fallback básico si algún fabricante falla
+                am.set(AlarmManager.RTC_WAKEUP, triggerAtMs, pi)
+            }
+        }
+
+        fun scheduleFromUiFallback(
+            context: Context,
+            triggerAtMs: Long,
+            phase: String,
+            cycle: Int,
+            config: PomodoroTimerConfig
+        ) {
+            val am = context.getSystemService(AlarmManager::class.java) ?: return
+            val intent = Intent(context, PomodoroAlarmReceiver::class.java).apply {
+                action = ACTION_FIRE_ALARM
+                putExtra(EX_PHASE, phase)
+                putExtra(EX_CYCLE, cycle)
+                putExtra(EX_WORK, config.workMin)
+                putExtra(EX_SHORT, config.shortBreakMin)
+                putExtra(EX_LONG, config.longBreakMin)
+                putExtra(EX_CYCLES_BEFORE_LONG, config.cyclesBeforeLong)
+                putExtra(EX_TIMER_ID, config.id)
+                putExtra(EX_TIMER_NAME, config.name)
+                putExtra(EX_TIMER_COLOR, config.colorInt)
+            }
+            val pi = PendingIntent.getBroadcast(
+                context, REQ_ALARM, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            try {
+                am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMs, pi)
+            } catch (_: Exception) {
                 am.set(AlarmManager.RTC_WAKEUP, triggerAtMs, pi)
             }
         }
@@ -266,6 +299,90 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
                 context, REQ_ALARM, i, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE
             )
             if (pi != null) am?.cancel(pi)
+        }
+
+        /**
+         * Avanza la fase inmediatamente desde la UI, sin depender del broadcast del AlarmManager.
+         * - Idempotente: si ya se avanzó/persistió una nueva fase con endMs > now, no duplica.
+         * - Usa solo alarmas inexactas para el próximo ciclo (policy-safe).
+         */
+        suspend fun forceAdvanceFromUi(
+            context: Context,
+            currentPhaseName: String,
+            config: PomodoroTimerConfig
+        ) {
+            val app = context.applicationContext
+            val repo = PomodoroStateRepository(app)
+            val now = System.currentTimeMillis()
+
+            // ✅ Obtener el valor actual de phaseEnd (primer elemento del Flow)
+            val currentEnd = repo.phaseEndFlow.firstOrNull() ?: 0L
+            if (currentEnd > now) return // Ya hay una fase activa, no duplicar
+
+            // Resolver fase actual → WORK/SHORT/LONG según tus strings
+            val phase = when (currentPhaseName) {
+                app.getString(R.string.pomodoro_work)        -> PHASE_WORK
+                app.getString(R.string.pomodoro_short_break) -> PHASE_SHORT
+                app.getString(R.string.pomodoro_long_break)  -> PHASE_LONG
+                else                                         -> PHASE_WORK
+            }
+
+            // Ciclo: persistimos por timerId en SharedPreferences
+            val sp = app.getSharedPreferences("pomodoro_cycle", Context.MODE_PRIVATE)
+            val key = "cycle_${config.id}"
+            var cycle = sp.getInt(key, 0)
+
+            // Calcular próxima fase
+            val (nextPhase, nextMin, nextCycle) = when (phase) {
+                PHASE_WORK -> {
+                    val longNext = ((cycle + 1) % config.cyclesBeforeLong == 0)
+                    Triple(
+                        if (longNext) PHASE_LONG else PHASE_SHORT,
+                        if (longNext) config.longBreakMin else config.shortBreakMin,
+                        cycle + 1
+                    )
+                }
+                else -> Triple(PHASE_WORK, config.workMin, cycle)
+            }
+
+            // Persistir nuevo ciclo si venimos de WORK
+            if (phase == PHASE_WORK) {
+                sp.edit().putInt(key, nextCycle).apply()
+            }
+
+            // Persistir próxima fase
+            val endMs = now + nextMin * 60_000L
+            repo.updatePhase(
+                when (nextPhase) {
+                    PHASE_WORK  -> app.getString(R.string.pomodoro_work)
+                    PHASE_SHORT -> app.getString(R.string.pomodoro_short_break)
+                    PHASE_LONG  -> app.getString(R.string.pomodoro_long_break)
+                    else        -> currentPhaseName
+                },
+                endMs,
+                nextMin * 60L
+            )
+
+            // Feedback inmediato: notificación "en curso" y programar respaldo inexacto
+            showRunningNotification(
+                app,
+                when (nextPhase) {
+                    PHASE_WORK  -> app.getString(R.string.pomodoro_work)
+                    PHASE_SHORT -> app.getString(R.string.pomodoro_short_break)
+                    PHASE_LONG  -> app.getString(R.string.pomodoro_long_break)
+                    else        -> currentPhaseName
+                },
+                endMs
+            )
+
+            // Reprogramar alarma inexacta como respaldo
+            scheduleFromUiFallback(
+                context = app,
+                triggerAtMs = endMs,
+                phase = nextPhase,
+                cycle = nextCycle,
+                config = config
+            )
         }
     }
 }

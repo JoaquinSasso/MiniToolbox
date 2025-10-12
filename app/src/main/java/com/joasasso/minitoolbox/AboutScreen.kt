@@ -168,7 +168,7 @@ fun AboutScreen(
                         onClick = onNavigateToPro,
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFFFD700), // Dorado
+                            containerColor = Color(0xFFC79300), // Dorado
                             contentColor = Color.Black
                         ),
                         contentPadding = PaddingValues(16.dp)
@@ -176,7 +176,7 @@ fun AboutScreen(
                         Icon(
                             imageVector = Icons.Default.WorkspacePremium,
                             contentDescription = null,
-                            tint = Color(0xFFC9A800) // Dorado más oscuro
+                            tint = Color(0xFFC79300) // Dorado más oscuro
                         )
                         Spacer(Modifier.width(8.dp))
                         Text(

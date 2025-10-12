@@ -38,6 +38,7 @@
     <string name="pomodoro_min_breaks">min breaks</string>
     <string name="pomodoro_cycles_before_long">%1$d cycles</string>
     <string name="pomodoro_open_detail">Open detail</string>
+    <string name="pomodoro_finishing">Finishing cycle…</string>
 
     <!-- Edit dialog fields -->
     <string name="pomodoro_cycles">Cycles before long break</string>

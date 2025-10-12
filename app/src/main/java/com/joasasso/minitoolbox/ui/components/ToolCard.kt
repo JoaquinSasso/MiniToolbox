@@ -77,7 +77,7 @@ fun ToolCard(
                 Text(
                     text = stringResource(id = tool.name),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = if (tool.isPro) Color(0xFFFFD700) else MaterialTheme.colorScheme.onSurface
+                    color = if (tool.isPro) Color(0xFFC79300) else MaterialTheme.colorScheme.onSurface
                 )
                 tool.summary?.let { sumRes ->
                     Text(

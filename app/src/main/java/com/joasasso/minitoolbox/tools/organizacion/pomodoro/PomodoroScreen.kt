@@ -68,6 +68,7 @@ import com.joasasso.minitoolbox.data.PomodoroStateRepository
 import com.joasasso.minitoolbox.data.PomodoroTimersPrefs
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlinx.coroutines.android.awaitFrame
+import kotlinx.coroutines.delay
 import kotlin.math.max
 import kotlin.math.min
 
@@ -96,23 +97,25 @@ fun PomodoroScreen(
                 )
         )
     }
-
-    // Asegurar canales de notificación creados
-    LaunchedEffect(Unit) { ensurePomodoroChannels(context) }
+    // Flag para evitar dobles disparos si hay recomposición
+    var advanceInFlight by remember { mutableStateOf(false) }
 
     // Permiso notificaciones Android 13+
     val notifLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { /* no-op */ }
+
     LaunchedEffect(Unit) {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
             != PackageManager.PERMISSION_GRANTED
         ) notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        // Asegurar canales de notificación creados
+        ensurePomodoroChannels(context)
     }
+
 
     // Repos actuales
     val stateRepo    = remember { PomodoroStateRepository(context) }
-
     // Estado de la fase
     val phaseName by stateRepo.phaseNameFlow.collectAsState(initial = "")
     val phaseEnd  by stateRepo.phaseEndFlow.collectAsState(initial = 0L)
@@ -144,10 +147,27 @@ fun PomodoroScreen(
     // Reconstrucción al cambiar el fin de fase
     LaunchedEffect(phaseEnd) {
         val now = System.currentTimeMillis()
-        if (phaseEnd > now) {
-            isRunning = true
-        } else {
-            isRunning = false
+        isRunning = phaseEnd > now
+    }
+
+    LaunchedEffect(isRunning, phaseEnd, phaseName) {
+        if (!isRunning || phaseEnd <= 0L) return@LaunchedEffect
+        // Poll liviano cada ~250ms hasta cruzar el fin
+        while (isRunning && System.currentTimeMillis() < phaseEnd) {
+            delay(250)
+        }
+        if (isRunning && !advanceInFlight) {
+            advanceInFlight = true
+            try {
+                // Avanza inmediatamente sin esperar al AlarmReceiver (que puede llegar tarde)
+                PomodoroAlarmReceiver.forceAdvanceFromUi(
+                    context = context,
+                    currentPhaseName = phaseName.ifBlank { context.getString(R.string.pomodoro_work) },
+                    config = timerConfig
+                )
+            } finally {
+                advanceInFlight = false
+            }
         }
     }
 
@@ -238,29 +258,40 @@ fun PomodoroScreen(
 
                 // TIEMPO EN GRANDE o ÍCONO DE SILENCIO
                 AnimatedContent(
-                    targetState = alarmRinging,
+                    targetState = if (alarmRinging) "ring" else if (advanceInFlight) "finishing" else "time",
                     transitionSpec = { fadeIn() togetherWith fadeOut() },
                     label = "alarmOrTime"
-                ) { ringing ->
-                    if (ringing) {
-                        // Solo icono, tamaño similar al texto grande
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.VolumeOff,
-                            contentDescription = stringResource(R.string.pomodoro_silence),
-                            modifier = Modifier.size(72.dp) // ajustá según tu displayLarge
-                                .clickable(onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    PomodoroAlarmReceiver.silenceAlarm(context)
-                                    alarmRinging = false // feedback inmediato en UI
-                                })
-
-                        )
-                    } else {
-                        Text(
-                            text = formatHMS(remainingSec),
-                            style = MaterialTheme.typography.displayLarge.copy(fontWeight = FontWeight.Bold),
-                            textAlign = TextAlign.Center
-                        )
+                ) { state ->
+                    when (state) {
+                        "ring" -> {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.VolumeOff,
+                                contentDescription = stringResource(R.string.pomodoro_silence),
+                                modifier = Modifier
+                                    .size(72.dp)
+                                    .clickable {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        PomodoroAlarmReceiver.silenceAlarm(context)
+                                        alarmRinging = false
+                                    }
+                            )
+                        }
+                        "finishing" -> {
+                            Text(
+                                text = stringResource(R.string.pomodoro_finishing), // e.g. “Cambiando de fase…”
+                                style = MaterialTheme.typography.titleLarge,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                        else -> {
+                            val nowForText = System.currentTimeMillis()
+                            val remainingSec = if (phaseEnd > nowForText) (phaseEnd - nowForText) / 1000L else 0L
+                            Text(
+                                text = formatHMS(remainingSec),
+                                style = MaterialTheme.typography.displayLarge.copy(fontWeight = FontWeight.Bold),
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
                 }
             }

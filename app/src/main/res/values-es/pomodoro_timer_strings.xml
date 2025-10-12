@@ -41,7 +41,7 @@
     <string name="pomodoro_cycles_before_long">%1$d ciclos</string>
     <string name="pomodoro_open_detail">Abrir detalle</string>
     <string name="pomodoro_cycles">Ciclos antes del largo</string>
-
+    <string name="pomodoro_finishing">Finalizando ciclo…</string>
 
     <!-- Ayuda: Lista de timers -->
     <string name="pomolist_help_title">Lista de timers Pomodoro</string>
