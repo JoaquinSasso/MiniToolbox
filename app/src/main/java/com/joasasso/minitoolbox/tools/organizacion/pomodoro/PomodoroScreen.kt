@@ -118,7 +118,6 @@ fun PomodoroScreen(
         ensurePomodoroChannels(context)
     }
 
-
     // Repos actuales
     val stateRepo    = remember { PomodoroStateRepository(context) }
     // Estado de la fase
@@ -129,7 +128,7 @@ fun PomodoroScreen(
     // Temporizador UI
     var isRunning by remember { mutableStateOf(phaseEnd > System.currentTimeMillis()) }
 
-    // “Alarma sonando” (opcional: lo actualizamos con Broadcasts que emite el AlarmReceiver)
+    // “Alarma sonando” (persistente + broadcasts)
     var alarmRinging by remember { mutableStateOf(false) }
     DisposableEffect(Unit) {
         val filter = IntentFilter().apply {
@@ -143,6 +142,7 @@ fun PomodoroScreen(
         }
         context.registerReceiver(rcv, filter, Context.RECEIVER_NOT_EXPORTED)
 
+        // lectura inicial al entrar
         alarmRinging = AlarmState.isActive(context)
 
         onDispose {
@@ -150,23 +150,21 @@ fun PomodoroScreen(
         }
     }
 
-
     // Reconstrucción al cambiar el fin de fase
     LaunchedEffect(phaseEnd) {
         val now = System.currentTimeMillis()
         isRunning = phaseEnd > now
     }
 
+    // Avanzar localmente cuando cruzamos el 0, sin esperar al Receiver
     LaunchedEffect(isRunning, phaseEnd, phaseName) {
         if (!isRunning || phaseEnd <= 0L) return@LaunchedEffect
-        // Poll liviano cada ~250ms hasta cruzar el fin
         while (isRunning && System.currentTimeMillis() < phaseEnd) {
             delay(250)
         }
         if (isRunning && !advanceInFlight) {
             advanceInFlight = true
             try {
-                // Avanza inmediatamente sin esperar al AlarmReceiver (que puede llegar tarde)
                 PomodoroAlarmReceiver.forceAdvanceFromUi(
                     context = context,
                     currentPhaseName = phaseName.ifBlank { context.getString(R.string.pomodoro_work) },
@@ -178,7 +176,7 @@ fun PomodoroScreen(
         }
     }
 
-    // Refresca la interfaz al volver al foreground para revisar si la alarma esta sonando
+    // Refresca el estado al volver al foreground (si la alarma sonaba en segundo plano)
     DisposableEffect(lifecycleOwner) {
         val obs = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_START) {
@@ -188,7 +186,6 @@ fun PomodoroScreen(
         lifecycleOwner.lifecycle.addObserver(obs)
         onDispose { lifecycleOwner.lifecycle.removeObserver(obs) }
     }
-
 
     Scaffold(
         topBar = {
@@ -237,15 +234,14 @@ fun PomodoroScreen(
 
             Spacer(Modifier.height(8.dp))
 
-            // 2) CÍRCULO + CONTENIDO CENTRADO ADENTRO
+            // 2) CÍRCULO + CONTENIDO
             val progress = rememberClockSyncedProgress(
                 isRunning = isRunning,
                 phaseEndMs = phaseEnd,
                 phaseTotalSec = phaseTot
             )
-
             val stroke = with(LocalDensity.current) {
-                Stroke(width = 18.dp.toPx(), cap = StrokeCap.Round) // ← bordes redondeados
+                Stroke(width = 18.dp.toPx(), cap = StrokeCap.Round)
             }
 
             Box(
@@ -255,25 +251,20 @@ fun PomodoroScreen(
                 contentAlignment = Alignment.Center
             ) {
                 CircularWavyProgressIndicator(
-                    progress = { progress },                                // 0f..1f
+                    progress = { progress },
                     modifier = Modifier
                         .fillMaxWidth(0.9f)
                         .aspectRatio(1f),
-                    color = MaterialTheme.colorScheme.primary,       // “progreso” (ondulado)
-                    trackColor = MaterialTheme.colorScheme.primary
-                        .copy(alpha = 0.70f),                        // “restante” (liso)
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.70f),
                     stroke = stroke,
                     trackStroke = stroke,
                     gapSize = 10.dp,
-                    // por defecto la onda aparece entre 10% y 95%.
-                    // si la querés SIEMPRE visible:
                     amplitude = { 1f },
-                    // opcional: si prefieres el comportamiento por defecto, quita la línea de arriba
-                    wavelength =    80.dp,
+                    wavelength = 80.dp,
                     waveSpeed = WavyProgressIndicatorDefaults.CircularWavelength
                 )
 
-                // TIEMPO EN GRANDE o ÍCONO DE SILENCIO
                 AnimatedContent(
                     targetState = if (alarmRinging) "ring" else if (advanceInFlight) "finishing" else "time",
                     transitionSpec = { fadeIn() togetherWith fadeOut() },
@@ -295,7 +286,7 @@ fun PomodoroScreen(
                         }
                         "finishing" -> {
                             Text(
-                                text = stringResource(R.string.pomodoro_finishing), // e.g. “Cambiando de fase…”
+                                text = stringResource(R.string.pomodoro_finishing),
                                 style = MaterialTheme.typography.titleLarge,
                                 textAlign = TextAlign.Center
                             )
@@ -313,7 +304,6 @@ fun PomodoroScreen(
                 }
             }
 
-            // (dejamos un Spacer pequeño si querés aire)
             Spacer(Modifier.height(24.dp))
         }
     }
@@ -347,20 +337,16 @@ private fun formatHMS(sec: Long): String {
     return "%02d:%02d".format(mm, ss)
 }
 
-
 // --- Helpers: reloj y progreso continuo en base a phaseEnd/phaseTotal ---
 @Composable
 private fun rememberFrameNow(isRunning: Boolean, phaseEndMs: Long): Long {
     var now by remember { mutableStateOf(System.currentTimeMillis()) }
     LaunchedEffect(isRunning, phaseEndMs) {
-        // Snap inmediato al entrar / volver a la app
         now = System.currentTimeMillis()
-        // Ticker por frame solo mientras corre y no pasó el fin de fase
         while (isRunning && now < phaseEndMs) {
             awaitFrame()
             now = System.currentTimeMillis()
         }
-        // Una última actualización al salir del bucle
         now = System.currentTimeMillis()
     }
     return now
@@ -378,4 +364,3 @@ private fun rememberClockSyncedProgress(
     val raw = if (phaseEndMs > 0L) 1f - ((phaseEndMs - clampedNow).toFloat() / totalMs) else 0f
     return raw.coerceIn(0f, 1f)
 }
-

@@ -19,6 +19,7 @@ const val CHANNEL_ALARM_SILENT = "pomodoro_alarm_silent_v3"
 const val NOTIF_ID_RUNNING = 2001
 const val NOTIFICATION_ID  = 2002 // alarma
 const val NOTIF_ID_ALARM_SILENT = 2003
+const val ACTION_POMODORO_ALARM_SILENCE = "POMODORO_ALARM_SILENCE"
 
 
 fun ensurePomodoroChannels(context: Context) {
@@ -71,9 +72,11 @@ fun ensurePomodoroChannels(context: Context) {
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = context.getString(R.string.pomodoro_channel_alarm_desc)
-                setSound(null, null)       // <- SIN sonido
+                setSound(null, null)
                 enableVibration(true)
                 enableLights(true)
+                setShowBadge(false)
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
             }
         )
     }
@@ -124,20 +127,52 @@ fun cancelRunningNotification(context: Context) {
 }
 
 /** Notif de alarma al finalizar fase (con sonido del canal). */
-fun showAlarmNotification(context: Context, title: String, text: String, startRoute: String? = null): Int {
+fun showAlarmNotification(
+    context: Context,
+    title: String,
+    text: String,
+    startRoute: String? = null
+): Int {
     ensurePomodoroChannels(context)
-    val notif = NotificationCompat.Builder(context, CHANNEL_ALARM_SILENT)
+
+    val nm = ContextCompat.getSystemService(context, NotificationManager::class.java)
+
+    val builder = NotificationCompat.Builder(context, CHANNEL_ALARM_SILENT) // canal sin sonido
         .setSmallIcon(R.drawable.ic_pomodoro)
         .setContentTitle(title)
         .setContentText(text)
-        .setPriority(NotificationCompat.PRIORITY_HIGH)
+        .setStyle(NotificationCompat.BigTextStyle().bigText(text)) // expandible
+        .setOngoing(true)
         .setAutoCancel(false)
-        .setCategory(Notification.CATEGORY_ALARM)
+        .setCategory(NotificationCompat.CATEGORY_ALARM)
+        .setPriority(NotificationCompat.PRIORITY_HIGH) // pre-26
+        .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+        .setSilent(true)   // sin sonido del canal
+        .setDefaults(0)    // sin efectos por defecto
         .setContentIntent(mainPendingIntent(context, startRoute))
-        .build()
-    val nm = ContextCompat.getSystemService(context, NotificationManager::class.java)
-    nm?.notify(NOTIF_ID_ALARM_SILENT, notif)
+        .addAction(
+            R.drawable.volume_off,
+            context.getString(R.string.pomodoro_silence),
+            silencePendingIntent(context)
+        )
+    builder.setFullScreenIntent(mainPendingIntent(context, startRoute), true)
+
+    nm?.notify(NOTIF_ID_ALARM_SILENT, builder.build())
     return NOTIF_ID_ALARM_SILENT
 }
 
+
+private fun silencePendingIntent(context: Context): PendingIntent {
+    val i = Intent(context, PomodoroAlarmReceiver::class.java).apply {
+        action = ACTION_POMODORO_ALARM_SILENCE
+    }
+    // requestCode único para esta acción
+    val reqCode = 9917
+    return PendingIntent.getBroadcast(
+        context,
+        reqCode,
+        i,
+        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+    )
+}
 

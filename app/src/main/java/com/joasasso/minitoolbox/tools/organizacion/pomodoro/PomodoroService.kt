@@ -3,9 +3,7 @@ package com.joasasso.minitoolbox.tools.organizacion.pomodoro
 import android.Manifest
 import android.app.Service
 import android.content.Intent
-import android.media.AudioAttributes
 import android.media.MediaPlayer
-import android.media.RingtoneManager
 import android.os.IBinder
 import android.os.VibrationEffect
 import android.os.Vibrator
@@ -112,9 +110,6 @@ class PomodoroService : Service() {
             endMs                 // hora de fin de la fase (en millis)
         )
 
-        // ... NO hay loop de actualización por segundo aquí.
-        // El conteo en vivo queda a cargo de la UI (Compose).
-
         // Cuando termine la fase (en tu flujo actual, justo antes de agendar la siguiente):
         cancelRunningNotification(this) // opcional, para ocultar la "en curso" antes de la alarma
         showAlarmNotification(
@@ -123,43 +118,12 @@ class PomodoroService : Service() {
             getString(R.string.pomodoro_tap_to_stop)
         )
 
-
         getSystemService(Vibrator::class.java)
             ?.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE))
-        playSound()
         delay(5_000L)
     }
 
 
-    private fun playSound() {
-        try {
-            val uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-                ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-            mediaPlayer?.release()
-            mediaPlayer = MediaPlayer().apply {
-                setAudioAttributes(
-                    AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_ALARM)
-                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                        .build()
-                )
-                setDataSource(applicationContext, uri)
-                isLooping = false
-                prepare()
-                start()
-            }
-            // Detener la alarma automáticamente después de 10 segundos
-            scope.launch {
-                delay(10_000L)
-                mediaPlayer?.takeIf { it.isPlaying }?.apply {
-                    stop()
-                    reset()
-                }
-            }
-        } catch (e: Exception) {
-            Log.e("PomodoroService", "Error sonido: ${e.message}")
-        }
-    }
 
     override fun onDestroy() {
         super.onDestroy()
