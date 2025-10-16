@@ -107,6 +107,11 @@ object CreditAccessManager {
         sp.edit { putLong(KEY_PASS_UNTIL, now + duration) }
     }
 
+    fun endTimedPass(context: Context) {
+        val sp = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        sp.edit { putLong(KEY_PASS_UNTIL, 0L) }
+    }
+
     // --------- Estado CREDITS ---------
 
     fun credits(context: Context): Int {

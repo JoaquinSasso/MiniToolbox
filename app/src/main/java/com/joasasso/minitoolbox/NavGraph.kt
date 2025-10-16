@@ -300,7 +300,8 @@ fun MiniToolboxNavGraph(
                 },
                 onAgregarGasto = { idReunion ->
                     navController.navigate(Screen.ExpenseAdd.route + "/$idReunion")
-                }
+                },
+                onNavigateToPro = { navController.navigate(Screen.Pro.route) },
             )
         }
         composable(Screen.ExpenseEdit.route + "/{reunionId}/{gastoId}") {

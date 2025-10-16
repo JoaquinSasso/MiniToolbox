@@ -66,6 +66,7 @@
     <string name="add_member_button">+ Agregar integrante</string>
     <string name="add_expense_button">+ Agregar gasto</string>
     <string name="debts_section">Deudas</string>
+    <string name="unlock_debts_section_button">Ver deudas</string>
     <string name="dialog_edit_member_title">Editar integrante</string>
     <string name="dialog_new_member_title">Nuevo integrante</string>
     <string name="expenses_group_name_label">Nombre</string>

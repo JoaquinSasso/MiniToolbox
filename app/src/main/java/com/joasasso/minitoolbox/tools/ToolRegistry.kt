@@ -258,8 +258,7 @@ object ToolRegistry {
             category = ToolCategory.Organizacion,
             subCategory = R.string.subcategory_others,
             summary = R.string.sum_tool_expense_splitter,
-            svgResId = R.drawable.expense_splitter,
-            isPro = true
+            svgResId = R.drawable.expense_splitter
         ),
         Tool(
             name = R.string.tool_dice,
