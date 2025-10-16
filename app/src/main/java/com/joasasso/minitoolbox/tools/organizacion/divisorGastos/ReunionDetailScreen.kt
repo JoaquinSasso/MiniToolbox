@@ -1,23 +1,28 @@
 package com.joasasso.minitoolbox.tools.organizacion.divisorGastos
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -40,17 +45,23 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.data.Grupo
 import com.joasasso.minitoolbox.data.Reunion
 import com.joasasso.minitoolbox.data.ReunionesRepository
+import com.joasasso.minitoolbox.ui.components.ProToolPaywallDialog
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
+import com.joasasso.minitoolbox.utils.ads.RewardedManager
+import com.joasasso.minitoolbox.utils.pro.CreditAccessManager
+import com.joasasso.minitoolbox.utils.pro.LocalProState
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.text.DateFormat.getDateInstance
@@ -65,9 +76,11 @@ fun DetallesReunionScreen(
     reunionId: String,
     onBack: () -> Unit,
     onEditarGasto: (String, String) -> Unit,
-    onAgregarGasto: (String) -> Unit
+    onAgregarGasto: (String) -> Unit,
+    onNavigateToPro: () -> Unit
 ) {
     val context = LocalContext.current
+    val activity = context as? Activity
     val scope = rememberCoroutineScope()
     var showInfo by remember { mutableStateOf(false) }
     val haptic = LocalHapticFeedback.current
@@ -87,6 +100,11 @@ fun DetallesReunionScreen(
         maximumFractionDigits = 2
         minimumFractionDigits = 0
     }
+
+    val isPro = LocalProState.current.isPro
+    var showPaywallDialog by remember { mutableStateOf(false) }
+    var hasActivePass by remember { mutableStateOf(CreditAccessManager.hasActivePass(context)) }
+
 
     LaunchedEffect(Unit) {
         val reuniones = ReunionesRepository.flujoReuniones(context).firstOrNull().orEmpty()
@@ -298,39 +316,72 @@ fun DetallesReunionScreen(
                 Spacer(Modifier.height(8.dp))
                 Text(stringResource(R.string.debts_section), style = MaterialTheme.typography.titleSmall)
             }
-
-            items(deudas) { deuda ->
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surfaceVariant)
-                ) {
-                    Text(deuda, modifier = Modifier.padding(16.dp))
+            if ( !isPro && !hasActivePass) {
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Button(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                showPaywallDialog = true
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFFFFD700), // Dorado
+                                contentColor = Color.Black
+                            ),
+                            contentPadding = PaddingValues(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.WorkspacePremium,
+                                contentDescription = null,
+                                tint = Color(0xFFC9A800) // Dorado más oscuro
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                text = stringResource(R.string.unlock_debts_section_button),
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
                 }
             }
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Button(
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            scope.launch {
-                                val sendIntent = Intent().apply {
-                                    action = Intent.ACTION_SEND
-                                    putExtra(Intent.EXTRA_TEXT, textoCompartir)
-                                    type = "text/plain"
-                                }
-                                val shareIntent = Intent.createChooser(
-                                    sendIntent,
-                                    context.resources.getString(R.string.expenses_share_summary_button)
-                                )
-                                context.startActivity(shareIntent)
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondaryContainer)
+            else {
+                items(deudas) { deuda ->
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surfaceVariant)
                     ) {
-                        Text(stringResource(R.string.expenses_share_summary_button))
+                        Text(deuda, modifier = Modifier.padding(16.dp))
+                    }
+                }
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Button(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                scope.launch {
+                                    val sendIntent = Intent().apply {
+                                        action = Intent.ACTION_SEND
+                                        putExtra(Intent.EXTRA_TEXT, textoCompartir)
+                                        type = "text/plain"
+                                    }
+                                    val shareIntent = Intent.createChooser(
+                                        sendIntent,
+                                        context.resources.getString(R.string.expenses_share_summary_button)
+                                    )
+                                    context.startActivity(shareIntent)
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondaryContainer)
+                        ) {
+                            Text(stringResource(R.string.expenses_share_summary_button))
+                        }
                     }
                 }
             }
@@ -374,30 +425,25 @@ fun DetallesReunionScreen(
 
                     val nuevoNombre = nombreEditado.trim()
                     val nuevaCantidad = cantidadEditada.toIntOrNull()?.coerceAtLeast(1) ?: 1
+                    val grupoAnterior = grupoAEditar!!
 
-                    if (nuevoNombre.isNotBlank()) {
-                        val grupoAnterior = grupoAEditar!!
-                        val grupoNuevo = Grupo(nuevoNombre, nuevaCantidad)
+                    if (nuevoNombre.isBlank()) {
+                        grupoAEditar = null
+                        return@TextButton
+                    }
 
-                        val integrantesActualizados = if (grupoAnterior.nombre.isBlank()) {
-                            reunion!!.integrantes + grupoNuevo
-                        } else {
-                            reunion!!.integrantes.map {
-                                if (it.nombre == grupoAnterior.nombre) grupoNuevo else it
-                            }
-                        }
+                    val grupoNuevo = Grupo(nuevoNombre, nuevaCantidad)
+
+                    if (grupoAnterior.nombre.isNotBlank()) {
+                        actualizarGrupo(grupoAnterior, grupoNuevo)
+                        return@TextButton
+                    } else {
+                        val integrantesActualizados = reunion!!.integrantes + grupoNuevo
 
                         val gastosActualizados = reunion!!.gastos.map { gasto ->
                             val consumidoPor = gasto.consumidoPor.toMutableMap()
-
-                            if (grupoAnterior.nombre.isBlank()) {
-                                // nuevo grupo: por defecto participa con su cantidad
-                                consumidoPor[nuevoNombre] = nuevaCantidad
-                            } else if (grupoAnterior.nombre in consumidoPor) {
-                                val cantidadAnterior = consumidoPor.remove(grupoAnterior.nombre) ?: 0
-                                consumidoPor[nuevoNombre] = cantidadAnterior.coerceAtMost(nuevaCantidad)
-                            }
-
+                            // nuevo grupo: por defecto participa con su cantidad
+                            consumidoPor[nuevoNombre] = nuevaCantidad
                             gasto.copy(consumidoPor = consumidoPor)
                         }
 
@@ -412,8 +458,6 @@ fun DetallesReunionScreen(
 
                         grupoAEditar = null
                         deudas = calcularDeudas(reunion!!, context)
-                    } else {
-                        grupoAEditar = null
                     }
                 }) {
                     Text(stringResource(R.string.save))
@@ -430,7 +474,6 @@ fun DetallesReunionScreen(
         )
     }
 
-    // NUEVO: confirmación de borrado de integrante
     if (grupoAEliminar != null) {
         val g = grupoAEliminar!!
         AlertDialog(
@@ -473,6 +516,43 @@ fun DetallesReunionScreen(
                 }
             }
         )
+    }
+
+    if(showPaywallDialog)
+    {
+        ProToolPaywallDialog(
+            onDismiss = { showPaywallDialog = false },
+            onGoToPro = { onNavigateToPro },
+            onWatchAd = { showPaywallDialog = false
+                if (activity != null) {
+                    RewardedManager.show(
+                        activity = activity,
+                        onReward = {
+                            // Activa el pase de 10 minutos
+                            CreditAccessManager.startTimedPassForAd(activity)
+                            hasActivePass = true
+
+                            Toast
+                                .makeText(activity, R.string.pro_unlocked_toast, android.widget.Toast.LENGTH_SHORT)
+                                .show()
+                        },
+                        onUnavailable = {
+                            // No-fill: deja pasar, muestra Toast y no suma tiempo
+                            val used = CreditAccessManager.consumeGrace(activity)
+                            if (used) {
+                                hasActivePass = true
+                                Toast
+                                    .makeText(activity, R.string.free_pass_used_toast, android.widget.Toast.LENGTH_SHORT)
+                                    .show()
+                            } else {
+                                Toast
+                                    .makeText(activity, R.string.paywall_no_ad_try_later, android.widget.Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+                        }
+                    )
+                }
+            })
     }
 
     if (showInfo) {
@@ -540,13 +620,17 @@ fun generarTextoCompartible(reunion: Reunion, context: Context): String {
 fun calcularDeudas(reunion: Reunion, context: Context): List<String> {
     // Inicializar deudas por grupo
     val deudaPorGrupo = reunion.integrantes.associate { it.nombre to 0.0 }.toMutableMap()
+    val nombresIntegrantes = reunion.integrantes.map { it.nombre }.toSet()
 
     // Calcular cuánto debe cada grupo según los gastos que consumió
     for (gasto in reunion.gastos) {
-        val totalPersonas = gasto.consumidoPor.values.sum()
+        val consumidoPor = gasto.consumidoPor.filterKeys { it in nombresIntegrantes }
+        val aportes = gasto.aportesIndividuales.filterKeys { it in nombresIntegrantes }
+        val totalPersonas = consumidoPor.values.sum()
         if (totalPersonas == 0) continue
 
-        val montoTotal = gasto.aportesIndividuales.values.sum()
+        val montoTotal = aportes.values.sum()
+
         gasto.consumidoPor.forEach { (grupo, cantidad) ->
             val monto = montoTotal * cantidad / totalPersonas
             deudaPorGrupo[grupo] = deudaPorGrupo.getOrDefault(grupo, 0.0) + monto

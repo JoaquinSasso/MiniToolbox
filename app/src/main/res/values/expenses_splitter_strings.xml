@@ -64,6 +64,7 @@
     <string name="add_member_button">+ Add member</string>
     <string name="add_expense_button">+ Add expense</string>
     <string name="debts_section">Debts</string>
+    <string name="unlock_debts_section_button">See debts</string>
     <string name="dialog_edit_member_title">Edit member</string>
     <string name="dialog_new_member_title">New member</string>
     <string name="expenses_group_name_label">Name</string>

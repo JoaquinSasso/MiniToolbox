@@ -5,10 +5,8 @@ import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -33,6 +31,7 @@ import com.google.android.gms.ads.MobileAds
 import com.joasasso.minitoolbox.metrics.storage.AggregatesRepository
 import com.joasasso.minitoolbox.metrics.storage.MetricsKeys
 import com.joasasso.minitoolbox.metrics.storage.metricsDataStore
+import com.joasasso.minitoolbox.utils.pro.CreditAccessManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -42,6 +41,7 @@ import org.json.JSONObject
 @Composable
 fun MetricsDevScreen() {
     val ctx = LocalContext.current
+    val activity = ctx as Activity
     val scope = rememberCoroutineScope()
     val scroll = rememberScrollState()
 
@@ -81,7 +81,8 @@ fun MetricsDevScreen() {
             color = MaterialTheme.colorScheme.onBackground
         )
 
-        Button(onClick = { openAdInspector(ctx as Activity) }) { Text("Abrir Ad Inspector") }
+        Button(onClick = { openAdInspector(activity) }) { Text("Abrir Ad Inspector") }
+        Button(onClick = { CreditAccessManager.endTimedPass(activity) }) { Text("Terminar modo PRO") }
 
         Button(onClick = { refresh() }) { Text("Refrescar") }
 
