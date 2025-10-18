@@ -17,6 +17,9 @@
     <string name="pro_restore_button">Restore Purchases</string>
     <string name="pro_feature_icon">Pro feature icon</string>
 
+    <string name="pro_toast_warning_unable_to_buy">Unable to start purchase</string>
+    <string name="pro_toast_thanks">Thanks for your purchase!</string>
+
     <!-- Paywall -->
     <string name="paywall_title">PRO Feature</string>
     <string name="paywall_go_pro">Go PRO</string>
@@ -34,4 +37,7 @@
     <!-- Badge -->
     <string name="pro_badge_active_time">PRO %1$s</string>
     <string name="about_go_pro_button">Unlock PRO Mode</string>
+
+    <!--Product ID-->
+    <string name="billing_pro_id" translatable="false">pro_unlock</string>
 </resources>
