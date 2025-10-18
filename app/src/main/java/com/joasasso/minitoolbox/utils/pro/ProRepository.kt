@@ -12,7 +12,7 @@ object ProRepository {
 
     fun isProFlow(context: Context): Flow<Boolean> =
         context.dataStore.data.map { preferences ->
-            preferences[IS_PRO] ?: false
+            preferences[IS_PRO] ?: true //TODO Cambiar el true a false cuando se publique la app
         }
 
     suspend fun setProStatus(context: Context, isPro: Boolean) {

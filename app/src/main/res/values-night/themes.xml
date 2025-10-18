@@ -2,5 +2,6 @@
     <!-- Base application theme -->
     <style name="Theme.MiniToolbox" parent="Theme.Material3.DayNight">
         <!-- No necesitas especificar los colores aquí, ya que el sistema se encargará de ello -->
+        <item name="android:statusBarColor">#00000000</item>
     </style>
 </resources>

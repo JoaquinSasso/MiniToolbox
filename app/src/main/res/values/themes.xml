@@ -9,5 +9,7 @@
 
         <!-- Si querés mantener el ícono centrado -->
         <item name="android:windowSplashScreenIconBackgroundColor">@null</item>
+
+        <item name="android:statusBarColor">#00000000</item>
     </style>
 </resources>
