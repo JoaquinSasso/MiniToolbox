@@ -79,7 +79,7 @@ object InterstitialManager {
             /* context = */ activityForLoad,
             /* adUnitId = */ id,
             /* adRequest = */ AdRequest.Builder().build(),
-            /* callback = */ object : InterstitialAdLoadCallback() {
+            /* loadCallback = */ object : InterstitialAdLoadCallback() {
                 override fun onAdLoaded(ad: InterstitialAd) {
                     interstitial = ad
                     isLoading = false

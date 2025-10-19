@@ -4,7 +4,7 @@
     <string name="mines_title">Buscaminas</string>
     <string name="mines_options_cd">Opciones</string>
     <string name="mines_new_game">Nueva partida</string>
-    <string name="mines_difficulty">Dificultad…</string>
+    <string name="mines_difficulty">Dificultad</string>
     <string name="mines_difficulty_title">Dificultad</string>
     <string name="mines_help">Ayuda</string>
 
@@ -18,7 +18,7 @@
     <string name="mines_level_hard">Difícil</string>
     <string name="mines_level_custom">Personalizado</string>
     <string name="mines_selected_summary">Seleccionado: Filas: %1$d · Columnas: %2$d · Minas: %3$d</string>
-
+    <string name="mines_suggested_20">Sugerido: %1$d</string>
 
     <string name="mines_rows">Filas</string>
     <string name="mines_cols">Columnas</string>

@@ -67,9 +67,9 @@ object MinesEngine {
     }
 
     // Presets
-    val EASY = Config(10, 7, 10)
-    val MEDIUM = Config(14, 9, 25)
-    val HARD = Config(18, 10, 40)
+    val EASY = Config(12, 9, 14)
+    val MEDIUM = Config(16, 11, 28)
+    val HARD = Config(20, 13, 45)
 
     fun newBoard(config: Config, seed: Long = Random.nextLong()): Board =
         Board(config.rows, config.cols, config.mines, seed)
@@ -87,13 +87,21 @@ object MinesEngine {
     }
 
     fun toggleFlag(board: Board, index: Int): Board {
+        // No permitir antes del primer toque
+        if (board.firstTapIndex == -1) return board
         if (board.status == Status.Lost || board.status == Status.Won) return board
         if (board.revealed[index]) return board
-        val flags = (board.flags.clone() as BitSet).apply {
-            if (get(index)) clear(index) else set(index)
-        }
+
+        val flags = board.flags.clone() as BitSet
+        val placing = !flags[index]
+
+        // Tope: no permitir más banderas que minas
+        if (placing && flags.cardinality() >= board.mines) return board
+
+        flags.flip(index)
         return board.copy(flags = flags)
     }
+
 
     fun chord(board: Board, index: Int): Board {
         if (!board.revealed[index]) return board

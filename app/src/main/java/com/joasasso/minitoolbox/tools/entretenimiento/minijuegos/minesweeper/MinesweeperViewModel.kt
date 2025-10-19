@@ -126,7 +126,6 @@ class MinesViewModel(app: Application) : AndroidViewModel(app) {
         elapsed = 0L
         startEpoch = System.currentTimeMillis()
         publish(board, InputMode.Reveal)
-        startTickerIfNeeded(board.status)
         if (fromUser) {
             viewModelScope.launch { MinesStore.clear(getApplication()) }
         }

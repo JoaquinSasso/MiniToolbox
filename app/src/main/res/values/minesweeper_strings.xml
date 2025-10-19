@@ -4,7 +4,7 @@
     <string name="mines_title">Minesweeper</string>
     <string name="mines_options_cd">Options</string>
     <string name="mines_new_game">New game</string>
-    <string name="mines_difficulty">Difficulty…</string>
+    <string name="mines_difficulty">Difficulty</string>
     <string name="mines_difficulty_title">Difficulty</string>
     <string name="mines_help">Help</string>
 
@@ -18,6 +18,7 @@
     <string name="mines_level_hard">Hard</string>
     <string name="mines_level_custom">Custom</string>
     <string name="mines_selected_summary">Selected: Rows: %1$d · Columns: %2$d · Mines: %3$d</string>
+    <string name="mines_suggested_20">Suggested: %1$d</string>
 
     <string name="mines_rows">Rows</string>
     <string name="mines_cols">Columns</string>
