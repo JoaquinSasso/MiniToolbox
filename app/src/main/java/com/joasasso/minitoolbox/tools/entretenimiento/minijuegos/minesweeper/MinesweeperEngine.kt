@@ -9,18 +9,33 @@ object MinesEngine {
 
     data class Config(val rows: Int, val cols: Int, val mines: Int)
 
+    /**
+     * Game Status: Ready, InProgress, Won, Lost
+     */
     enum class Status { Ready, InProgress, Won, Lost }
+/**
+ *SingleSafe: Reveals only the selected cell
+
+ *CrossSafe: Reveals a cross with the selected cell in the center
+
+ * Square3x3: Reveals a 3x3 square with the selected cell in the center
+ **/
+    enum class FirstTapPolicy { SingleSafe, CrossSafe, Square3x3 }
+
+    /** Profundidad máxima de expansión de ceros desde la celda tocada (0 = sólo esa, 1 ≈ cruz, 2 ≈ 5×5) **/
+    private const val MAX_ZERO_DEPTH = 2
 
     data class Board(
         val rows: Int,
         val cols: Int,
         val mines: Int,
         val seed: Long,
-        val firstTapIndex: Int = -1,            // -1 si aún no hubo primer toque
+        val firstTapIndex: Int = -1,
+        val firstTapPolicy: FirstTapPolicy = FirstTapPolicy.CrossSafe, // <- default recomendado
         val mineBits: BitSet = BitSet(rows * cols),
         val revealed: BitSet = BitSet(rows * cols),
         val flags: BitSet = BitSet(rows * cols),
-        val numbers: IntArray = IntArray(rows * cols) { 0 },
+        val numbers: IntArray = IntArray(rows * cols),
         val status: Status = Status.Ready,
         val explodedIndex: Int = -1
     ) {
@@ -71,12 +86,12 @@ object MinesEngine {
     val MEDIUM = Config(16, 11, 28)
     val HARD = Config(20, 13, 45)
 
-    fun newBoard(config: Config, seed: Long = Random.nextLong()): Board =
-        Board(config.rows, config.cols, config.mines, seed)
+    fun newBoard(config: Config, seed: Long = Random.nextLong(),
+                 policy: FirstTapPolicy = FirstTapPolicy.CrossSafe): Board =
+        Board(config.rows, config.cols, config.mines, seed, firstTapPolicy = policy)
 
     fun firstTap(board: Board, index: Int): Board {
-        // Genera minas evitando zona segura (celda y sus vecinos)
-        val mines = generateMines(board.rows, board.cols, board.mines, board.seed, index)
+        val mines = generateMines(board.rows, board.cols, board.mines, board.seed, index, board.firstTapPolicy)
         val numbers = computeNumbers(board.rows, board.cols, mines)
         return board.copy(
             firstTapIndex = index,
@@ -141,22 +156,39 @@ object MinesEngine {
             )
         }
 
-        // Flood fill de ceros
+        // Flood fill limitado por profundidad de ceros
         val revealed = board.revealed.clone() as BitSet
-        val queue = ArrayDeque<Int>()
-        queue.add(index)
+
+        // Cola con (índice, depth). El depth cuenta capas de ceros desde el toque inicial.
+        data class Node(val idx: Int, val depth: Int)
+        val queue = ArrayDeque<Node>()
+        queue.add(Node(index, 0))
 
         while (queue.isNotEmpty()) {
-            val i = queue.removeFirst()
+            val (i, d) = queue.removeFirst()
             if (revealed[i]) continue
+            if (board.flags[i]) continue   // no revelar banderas
             revealed.set(i)
 
-            if (board.numbers[i] == 0) {
+            val num = board.numbers[i]
+            // Si esta celda es un cero y todavía podemos expandir ceros, encolamos vecinos
+            if (num == 0 && d < MAX_ZERO_DEPTH) {
                 neighbors(board, i).forEach { n ->
-                    if (!revealed[n] && !board.flags[n]) queue.add(n)
+                    if (!revealed[n]) queue.add(Node(n, d + 1))
+                }
+            } else if (num == 0) {
+                // En el borde: no expandimos más, pero revelamos los vecinos NUMÉRICOS directos
+                neighbors(board, i).forEach { n ->
+                    if (!revealed[n] && !board.flags[n]) {
+                        // Revelar números adyacentes al borde, sin seguir expandiendo
+                        if (board.numbers[n] > 0 || !board.mineBits[n]) {
+                            revealed.set(n)
+                        }
+                    }
                 }
             }
         }
+
 
         // ¿Victoria?
         val totalNoMines = board.totalCells - board.mines
@@ -198,34 +230,40 @@ object MinesEngine {
         return numbers
     }
 
-    private fun generateMines(rows: Int, cols: Int, count: Int, seed: Long, firstTap: Int): BitSet {
+    private fun generateMines(
+        rows: Int, cols: Int, count: Int, seed: Long, firstTap: Int, policy: FirstTapPolicy
+    ): BitSet {
         val total = rows * cols
-        val safe = safeZone(rows, cols, firstTap)
+        val safe = safeZone(rows, cols, firstTap, policy)
         val pool = IntArray(total - safe.size)
         var p = 0
-        for (i in 0 until total) {
-            if (!safe.contains(i)) { pool[p++] = i }
-        }
-        // Shuffle determinista
+        for (i in 0 until total) if (!safe.contains(i)) pool[p++] = i
+
         val rnd = Random(seed xor firstTap.toLong())
         for (i in pool.lastIndex downTo 1) {
             val j = rnd.nextInt(i + 1)
             val tmp = pool[i]; pool[i] = pool[j]; pool[j] = tmp
         }
-        val bits = BitSet(total)
-        for (i in 0 until count) bits.set(pool[i])
-        return bits
+        return BitSet(total).apply { for (i in 0 until count) set(pool[i]) }
     }
 
-    private fun safeZone(rows: Int, cols: Int, index: Int): IntArray {
+    private fun safeZone(rows: Int, cols: Int, index: Int, policy: FirstTapPolicy): IntArray {
         val r = index / cols
         val c = index % cols
-        val out = ArrayList<Int>(9)
-        for (rr in max(0, r - 1)..min(rows - 1, r + 1)) {
-            for (cc in max(0, c - 1)..min(cols - 1, c + 1)) {
-                out.add(rr * cols + cc)
+        val list = ArrayList<Int>(9)
+        fun add(rr: Int, cc: Int) {
+            if (rr in 0 until rows && cc in 0 until cols) list.add(rr * cols + cc)
+        }
+        when (policy) {
+            FirstTapPolicy.SingleSafe -> add(r, c)
+            FirstTapPolicy.CrossSafe -> {
+                add(r, c)
+                add(r - 1, c); add(r + 1, c); add(r, c - 1); add(r, c + 1)
+            }
+            FirstTapPolicy.Square3x3 -> {
+                for (rr in r - 1..r + 1) for (cc in c - 1..c + 1) add(rr, cc)
             }
         }
-        return out.toIntArray()
+        return list.toIntArray()
     }
 }

@@ -122,7 +122,7 @@ class MinesViewModel(app: Application) : AndroidViewModel(app) {
             Level.HARD -> MinesEngine.HARD
             Level.CUSTOM -> custom
         }
-        val board = MinesEngine.newBoard(cfg, seed = Random.nextLong())
+        val board = MinesEngine.newBoard(cfg, seed = Random.nextLong(), policy = MinesEngine.FirstTapPolicy.Square3x3)
         elapsed = 0L
         startEpoch = System.currentTimeMillis()
         publish(board, InputMode.Reveal)
