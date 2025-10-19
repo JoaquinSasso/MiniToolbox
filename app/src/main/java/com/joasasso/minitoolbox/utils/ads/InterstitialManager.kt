@@ -11,6 +11,9 @@ import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
+import com.joasasso.minitoolbox.utils.pro.ProRepository
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import java.lang.ref.WeakReference
 
 object InterstitialManager {
@@ -96,7 +99,10 @@ object InterstitialManager {
      * Solo intentará mostrar ad si cumple reglas (aperturas mínimas y cooldown global).
      */
     fun onToolOpened(activity: Activity, shouldShowAds: Boolean) {
-        if (!shouldShowAds) return
+        val isPro = runBlocking {
+            ProRepository.isProFlow(activity).first()
+        }
+        if (!shouldShowAds || isPro) return
 
         // Actualizamos la Activity viva para futuras cargas.
         lastActivityRef = WeakReference(activity)

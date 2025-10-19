@@ -97,6 +97,7 @@ fun MinesweeperScreen(
     var showInfo by remember { mutableStateOf(false) }
     val board = ui.board
     val lost = board.status == MinesEngine.Status.Lost
+    var showLostDialog by remember { mutableStateOf(true) }
     val won = ui.board.status == MinesEngine.Status.Won
 
 
@@ -110,7 +111,9 @@ fun MinesweeperScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { dialOpen = !dialOpen }) {
+                    IconButton(onClick = {
+                        dialOpen = !dialOpen
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)}) {
                         Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.mines_options_cd))
                     }
                     IconButton(onClick = {
@@ -124,7 +127,10 @@ fun MinesweeperScreen(
         },
         bottomBar = {
             BottomAppBar {
-                FilledTonalButton(onClick = { vm.onToggleMode(); /* haptic */ }) {
+                FilledTonalButton(onClick = {
+                    vm.onToggleMode()
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)})
+                {
                     val mode = ui.inputMode
                     Icon(if (mode == InputMode.Reveal) Icons.Default.TouchApp else Icons.Default.Flag, null)
                     Spacer(Modifier.width(8.dp))
@@ -132,7 +138,9 @@ fun MinesweeperScreen(
                 }
                 Spacer(Modifier.weight(1f))
                 AssistChip(
-                    onClick = { vm.onNewGame(); /* haptic */ },
+                    onClick = { vm.onNewGame()
+                                showLostDialog = true
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)},
                     label = { Text(stringResource(R.string.mines_new_game)) },
                     leadingIcon = { Icon(Icons.Default.Refresh, null) }
                 )
@@ -166,7 +174,9 @@ fun MinesweeperScreen(
                 open = dialOpen,
                 onDismiss = { dialOpen = false },
                 actions = listOf(
-                    DialAction(Icons.Default.Refresh, stringResource(R.string.mines_new_game)) { vm.onNewGame() },
+                    DialAction(Icons.Default.Refresh, stringResource(R.string.mines_new_game)) {
+                        vm.onNewGame()
+                        showLostDialog = true},
                     DialAction(Icons.Default.Tune, stringResource(R.string.mines_difficulty)) { showDifficulty = true }
                 )
             )
@@ -176,25 +186,32 @@ fun MinesweeperScreen(
             if (showDifficulty) {
                 DifficultySheet(
                     currentLevel = vm.getCurrentLevel(),
-                    onDismiss = { showDifficulty = false },
+                    onDismiss = {   showDifficulty = false
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)},
                     onPick = { lvl, cfg ->
                         vm.onPickLevel(lvl, cfg)
                         showDifficulty = false
                     }
                 )
             }
-            if (lost) {
+            if (lost && showLostDialog) {
                 AlertDialog(
                     onDismissRequest = {},
                     title = { Text(stringResource(R.string.mines_lost_title)) },
                     text = { Text(stringResource(R.string.mines_lost_message)) },
                     confirmButton = {
-                        TextButton(onClick = { vm.onNewGame() }) {
+                        TextButton(onClick = {
+                            vm.onNewGame()
+                            showLostDialog = true
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)}) {
                             Text(stringResource(R.string.mines_try_again))
                         }
                     },
                     dismissButton = {
-                        TextButton(onClick = { /* no-op */ }) {
+                        TextButton(onClick = {
+                            showLostDialog = false
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)})
+                        {
                             Text(stringResource(R.string.common_cancel))
                         }
                     }
@@ -206,7 +223,10 @@ fun MinesweeperScreen(
                     title = { Text(stringResource(R.string.mines_win_title)) },
                     text  = { Text(stringResource(R.string.mines_win_message)) },
                     confirmButton = {
-                        TextButton(onClick = { vm.onNewGame() }) {
+                        TextButton(onClick = {
+                            vm.onNewGame()
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            showLostDialog = true}) {
                             Text(stringResource(R.string.mines_new_game))
                         }
                     }
@@ -304,7 +324,7 @@ private fun Cell(
     val shape = MaterialTheme.shapes.large
     val isDark = isSystemInDarkTheme()
     val bg = when {
-        isExploded -> Color(0xFFC53737)
+        isExploded -> Color(0xFF961B1B)
         revealed && !isMine -> if (isDark) Color(0xFF3C3C3C) else Color(0xFFF1F1F1)
         else -> MaterialTheme.colorScheme.surface
     }
