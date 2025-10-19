@@ -14,10 +14,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -60,6 +59,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -68,9 +68,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -127,23 +129,27 @@ fun MinesweeperScreen(
         },
         bottomBar = {
             BottomAppBar {
-                FilledTonalButton(onClick = {
-                    vm.onToggleMode()
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)})
+                Row(horizontalArrangement = Arrangement.SpaceAround,
+                modifier = Modifier.padding(horizontal = 12.dp))
                 {
-                    val mode = ui.inputMode
-                    Icon(if (mode == InputMode.Reveal) Icons.Default.TouchApp else Icons.Default.Flag, null)
-                    Spacer(Modifier.width(8.dp))
-                    Text(if (mode == InputMode.Reveal) stringResource(R.string.mines_mode_reveal) else stringResource(R.string.mines_mode_flags))
+                    FilledTonalButton(onClick = {
+                        vm.onToggleMode()
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)})
+                    {
+                        val mode = ui.inputMode
+                        Icon(if (mode == InputMode.Reveal) Icons.Default.TouchApp else Icons.Default.Flag, null)
+                        Spacer(Modifier.width(8.dp))
+                        Text(if (mode == InputMode.Reveal) stringResource(R.string.mines_mode_reveal) else stringResource(R.string.mines_mode_flags))
+                    }
+                    Spacer(Modifier.weight(1f))
+                    AssistChip(
+                        onClick = { vm.onNewGame()
+                                    showLostDialog = true
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)},
+                        label = { Text(stringResource(R.string.mines_new_game)) },
+                        leadingIcon = { Icon(Icons.Default.Refresh, null) }
+                    )
                 }
-                Spacer(Modifier.weight(1f))
-                AssistChip(
-                    onClick = { vm.onNewGame()
-                                showLostDialog = true
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)},
-                    label = { Text(stringResource(R.string.mines_new_game)) },
-                    leadingIcon = { Icon(Icons.Default.Refresh, null) }
-                )
             }
         }
     ) { padding ->
@@ -160,13 +166,19 @@ fun MinesweeperScreen(
                 Spacer(Modifier.height(8.dp))
 
                 // Tablero
-                BoardGrid(ui, onTap = {
-                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    vm.onCellTap(it) },
+                BoardGrid(
+                    ui = ui,
+                    onTap = {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        vm.onCellTap(it)
+                    },
                     onLongPress = {
                         vm.onCellLongPress(it)
-                        HapticFeedbackType.LongPress},
-                    onChord = { vm.onChord(it) })
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    },
+                    onChord = { vm.onChord(it) },
+                    modifier = Modifier.weight(1f)
+                )
             }
 
             // Speed-dial anclado al engranaje
@@ -260,25 +272,29 @@ private fun BoardGrid(
     ui: MinesUiState,
     onTap: (Int) -> Unit,
     onLongPress: (Int) -> Unit,
-    onChord: (Int) -> Unit
+    onChord: (Int) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val b = ui.board
     val cols = b.cols
     val rows = b.rows
     val hSpacing = 4.dp
     val vSpacing = 4.dp
+    val density = LocalDensity.current
 
     BoxWithConstraints(
-        Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .fillMaxHeight()
             .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
-        // Tamaño de celda para que entren filas y columnas sin scroll
+        // Tamaño de celda con redondeo a píxel para evitar overflow por fracciones
         val cellSize = remember(maxWidth, maxHeight, cols, rows) {
-            val w = (maxWidth - hSpacing * (cols - 1)) / cols
-            val h = (maxHeight - vSpacing * (rows - 1)) / rows
-            minOf(w, h)
+            with(density) {
+                val wPx = ((maxWidth - hSpacing * (cols - 1)).toPx()) / cols
+                val hPx = ((maxHeight - vSpacing * (rows - 1)).toPx()) / rows
+                val sidePx = kotlin.math.floor(minOf(wPx, hPx))
+                sidePx.toDp()
+            }
         }
 
         LazyVerticalGrid(
@@ -286,7 +302,8 @@ private fun BoardGrid(
             modifier = Modifier.align(Alignment.Center),
             horizontalArrangement = Arrangement.spacedBy(hSpacing),
             verticalArrangement = Arrangement.spacedBy(vSpacing),
-            userScrollEnabled = false     // <- sin scroll
+            userScrollEnabled = false,
+            contentPadding = PaddingValues(bottom = vSpacing) // leve margen para no cortar la última fila
         ) {
             items(b.totalCells) { index ->
                 Cell(
@@ -300,12 +317,13 @@ private fun BoardGrid(
                     onLongPress = onLongPress,
                     onChord = onChord,
                     board = b,
-                    modifier = Modifier.size(cellSize) // <- fuerza tamaño
+                    modifier = Modifier.size(cellSize)
                 )
             }
         }
     }
 }
+
 
 @Composable
 private fun Cell(
@@ -323,9 +341,10 @@ private fun Cell(
 ) {
     val shape = MaterialTheme.shapes.large
     val isDark = isSystemInDarkTheme()
+
     val bg = when {
         isExploded -> Color(0xFF961B1B)
-        revealed && !isMine -> if (isDark) Color(0xFF3C3C3C) else Color(0xFFF1F1F1)
+        revealed && !isMine -> if (isDark) Color(0xFF444444) else Color(0xFFF8F8F8)
         else -> MaterialTheme.colorScheme.surface
     }
 
@@ -337,14 +356,11 @@ private fun Cell(
     }
 
     Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(1f)
+        modifier = modifier   // <- usar el que viene (size(cellSize))
             .clip(shape)
             .combinedClickable(
                 onClick = {
-                    if (revealed && number > 0) onChord(index)
-                    else onTap(index)
+                    if (revealed && number > 0) onChord(index) else onTap(index)
                 },
                 onLongClick = { onLongPress(index) },
                 role = Role.Button,
@@ -360,17 +376,20 @@ private fun Cell(
                 val color = when {
                     isExploded -> MaterialTheme.colorScheme.onErrorContainer
                     revealed && isMine -> MaterialTheme.colorScheme.onSurface
-                    revealed && number == 1 -> MaterialTheme.colorScheme.primary
-                    revealed && number == 2 -> MaterialTheme.colorScheme.secondary
-                    revealed && number == 3 -> MaterialTheme.colorScheme.error
-                    revealed && number == 4 -> MaterialTheme.colorScheme.tertiary
+                    revealed && number in 1..8 -> numberColor(number, isDark)
                     else -> MaterialTheme.colorScheme.onSurfaceVariant
                 }
-                Text(content, color = color, fontWeight = FontWeight.Bold)
+                Text(
+                    text = content,
+                    color = color,
+                    fontWeight = FontWeight.ExtraBold,
+                    style = MaterialTheme.typography.titleMedium
+                )
             }
         }
     }
 }
+
 
 data class DialAction(
     val icon: ImageVector,
@@ -423,16 +442,47 @@ private fun DifficultySheet(
     onPick: (Level, MinesEngine.Config?) -> Unit
 ) {
     var level by remember { mutableStateOf(currentLevel) }
+
+    // Estado "oficial" (se actualiza al Aplicar si es CUSTOM)
     var rows by remember { mutableIntStateOf(12) }
     var cols by remember { mutableIntStateOf(12) }
     var mines by remember { mutableIntStateOf(20) }
+
     val easy = MinesEngine.EASY
     val med  = MinesEngine.MEDIUM
     val hard = MinesEngine.HARD
 
+    // --- Límites jugables propuestos ---
+    val ROW_MIN = 8;  val ROW_MAX = 20
+    val COL_MIN = 6;  val COL_MAX = 15
+
+    // --- Estado crudo para CUSTOM (permite vacío) ---
+    var rowsStr by remember { mutableStateOf(rows.toString()) }
+    var colsStr by remember { mutableStateOf(cols.toString()) }
+    var minesStr by remember { mutableStateOf("") } // arranca vacío para autosugerir
+    var autoMinesEnabled by remember { mutableStateOf(true) }
+
+    fun clamp(v: Int, min: Int, max: Int) = v.coerceIn(min, max)
+    fun safeInt(s: String, def: Int) = s.toIntOrNull() ?: def
+
+    // Números "de vista previa" (para validar y sugerir mientras se edita)
+    val rowsPreview = clamp(safeInt(rowsStr.ifEmpty { "${ROW_MIN}" }, ROW_MIN), ROW_MIN, ROW_MAX)
+    val colsPreview = clamp(safeInt(colsStr.ifEmpty { "${COL_MIN}" }, COL_MIN), COL_MIN, COL_MAX)
+    val maxMines = (rowsPreview * colsPreview - 9).coerceAtLeast(1)
+    val suggestedMines = clamp(kotlin.math.round(rowsPreview * colsPreview * 0.20f).toInt(), 1, maxMines)
+
+    // Si cambia filas/cols y el user NO tocó minas, auto-rellenar 20%
+    LaunchedEffect(rowsPreview, colsPreview, autoMinesEnabled, level) {
+        if (level == Level.CUSTOM && autoMinesEnabled) {
+            minesStr = suggestedMines.toString()
+        }
+    }
+
     ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(Modifier.fillMaxWidth().padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(
+            Modifier.fillMaxWidth().padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
             Text(stringResource(R.string.mines_difficulty_title), style = MaterialTheme.typography.titleLarge)
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -461,51 +511,75 @@ private fun DifficultySheet(
                     leadingIcon = if (level == Level.CUSTOM) { { Icon(Icons.Default.Build, null) } } else null
                 )
             }
+
+            // Resumen de la selección actual
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 val cur = when (level) {
                     Level.EASY -> easy
                     Level.MEDIUM -> med
                     Level.HARD -> hard
-                    Level.CUSTOM -> MinesEngine.Config(rows, cols, mines)
+                    Level.CUSTOM -> MinesEngine.Config(rowsPreview, colsPreview,
+                        (minesStr.toIntOrNull() ?: suggestedMines).coerceIn(1, maxMines)
+                    )
                 }
                 Text(
-                    stringResource(
-                        R.string.mines_selected_summary,
-                        cur.rows, cur.cols, cur.mines
-                    ),
+                    stringResource(R.string.mines_selected_summary, cur.rows, cur.cols, cur.mines),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
             }
 
             if (level == Level.CUSTOM) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     OutlinedTextField(
-                        value = rows.toString(),
-                        onValueChange = { rows = it.filter(Char::isDigit).toIntOrNull()?.coerceIn(5, 40) ?: rows },
+                        value = rowsStr,
+                        onValueChange = { rowsStr = it.filter(Char::isDigit).take(3) }, // permite vacío
                         label = { Text(stringResource(R.string.mines_rows)) },
                         singleLine = true,
-                        modifier = Modifier.weight(1f),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next)
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
+                        modifier = Modifier
+                            .weight(1f)
+                            .onFocusChanged { f ->
+                                if (!f.isFocused && rowsStr.isNotEmpty()) {
+                                    rowsStr = clamp(safeInt(rowsStr, ROW_MIN), ROW_MIN, ROW_MAX).toString()
+                                }
+                            }
                     )
                     OutlinedTextField(
-                        value = cols.toString(),
-                        onValueChange = { cols = it.filter(Char::isDigit).toIntOrNull()?.coerceIn(5, 60) ?: cols },
+                        value = colsStr,
+                        onValueChange = { colsStr = it.filter(Char::isDigit).take(3) },
                         label = { Text(stringResource(R.string.mines_cols)) },
                         singleLine = true,
-                        modifier = Modifier.weight(1f),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next)
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
+                        modifier = Modifier
+                            .weight(1f)
+                            .onFocusChanged { f ->
+                                if (!f.isFocused && colsStr.isNotEmpty()) {
+                                    colsStr = clamp(safeInt(colsStr, COL_MIN), COL_MIN, COL_MAX).toString()
+                                }
+                            }
                     )
                     OutlinedTextField(
-                        value = mines.toString(),
+                        value = minesStr,
                         onValueChange = {
-                            val maxM = (rows * cols - 9).coerceAtLeast(1)
-                            mines = it.filter(Char::isDigit).toIntOrNull()?.coerceIn(1, maxM) ?: mines
+                            minesStr = it.filter(Char::isDigit).take(4)
+                            autoMinesEnabled = false // el usuario tomó control
                         },
                         label = { Text(stringResource(R.string.mines_mines)) },
+                        supportingText = { Text(stringResource(R.string.mines_suggested_20, suggestedMines)) },
                         singleLine = true,
-                        modifier = Modifier.weight(1f),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done)
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
+                        modifier = Modifier
+                            .weight(1f)
+                            .onFocusChanged { f ->
+                                if (!f.isFocused && minesStr.isNotEmpty()) {
+                                    val m = clamp(safeInt(minesStr, suggestedMines), 1, maxMines)
+                                    minesStr = m.toString()
+                                }
+                            }
                     )
                 }
                 Text(
@@ -519,12 +593,37 @@ private fun DifficultySheet(
                 TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
                 Spacer(Modifier.width(8.dp))
                 Button(onClick = {
-                    val cfg = if (level == Level.CUSTOM) MinesEngine.Config(rows, cols, mines) else null
+                    val cfg = if (level == Level.CUSTOM) {
+                        // Clamp final + fallback al sugerido si "minas" quedó vacío
+                        val r = rowsPreview
+                        val c = colsPreview
+                        val maxM = (r * c - 9).coerceAtLeast(1)
+                        val suggest = clamp(kotlin.math.round(r * c * 0.20f).toInt(), 1, maxM)
+                        val m = if (minesStr.isBlank()) suggest
+                        else clamp(safeInt(minesStr, suggest), 1, maxM)
+                        // actualiza "oficiales" y retorna config
+                        rows = r; cols = c; mines = m
+                        MinesEngine.Config(r, c, m)
+                    } else null
                     onPick(level, cfg)
                 }) { Text(stringResource(R.string.common_apply)) }
             }
             Spacer(Modifier.height(12.dp))
         }
     }
+}
+
+
+@Composable
+private fun numberColor(n: Int, isDark: Boolean): Color = when (n) {
+    1 -> if (isDark) Color(0xFF6FA8FF) else Color(0xFF0000FF) // azul
+    2 -> if (isDark) Color(0xFF8BE28B) else Color(0xFF007300) // verde
+    3 -> if (isDark) Color(0xFFFF8B8B) else Color(0xFFFF0000) // rojo
+    4 -> if (isDark) Color(0xFF9CA6FF) else Color(0xFF00007B) // azul oscuro
+    5 -> if (isDark) Color(0xFFFF9F9F) else Color(0xFF7B0000) // marrón/rojo oscuro
+    6 -> if (isDark) Color(0xFF88E0E0) else Color(0xFF007B7B) // cian/teal
+    7 -> if (isDark) Color(0xFFEDEDED) else Color(0xFF000000) // negro/blanco según tema
+    8 -> if (isDark) Color(0xFFBDBDBD) else Color(0xFF4D4D4D) // gris
+    else -> MaterialTheme.colorScheme.onSurfaceVariant
 }
 
