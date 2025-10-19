@@ -1,8 +1,6 @@
 package com.joasasso.minitoolbox.tools.entretenimiento.minijuegos
 
 import android.content.Context
-import android.os.VibrationEffect
-import android.os.Vibrator
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -47,6 +45,7 @@ import com.joasasso.minitoolbox.data.CountryOuterClass
 import com.joasasso.minitoolbox.data.FlagGameDataStore
 import com.joasasso.minitoolbox.data.MinimalCountry
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
+import com.joasasso.minitoolbox.utils.vibrate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -298,10 +297,5 @@ private fun nextRoundFlag(
     }
     val shuffled = options.shuffled()
     onSet(correct, options, shuffled)
-}
-
-fun vibrate(context: Context, duration: Long = 300, amplitude: Int = VibrationEffect.DEFAULT_AMPLITUDE) {
-    val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
-    vibrator?.vibrate(VibrationEffect.createOneShot(duration, amplitude))
 }
 

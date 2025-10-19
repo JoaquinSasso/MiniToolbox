@@ -43,5 +43,6 @@
     <string name="sum_tool_scoreboard">Score tracker</string>
     <string name="sum_tool_magnifier">Camera magnifier</string>
     <string name="sum_tool_ar_ruler">Ruler with camera</string>
+    <string name="sum_tool_minesweeper">Find the bombs</string>
     <string name="sum_tool_noise_generator">White/pink/brown noise</string>
 </resources>

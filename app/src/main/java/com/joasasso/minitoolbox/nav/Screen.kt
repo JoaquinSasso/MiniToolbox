@@ -66,6 +66,8 @@ sealed class Screen(val route: String) {
     object ArRuler             : Screen("ar_ruler")
     object Pro : Screen("pro")
 
+    object Minesweeper : Screen("minesweeper")
+
     companion object {
         // Convierte patrones con {param} en Regex que matchea valores reales
         // Acepta: letras, números y símbolos comunes de IDs dentro de un segmento (sin / ? #)

@@ -46,6 +46,7 @@ import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.data.CapitalOfCountry
 import com.joasasso.minitoolbox.data.CountryOuterClass
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
+import com.joasasso.minitoolbox.utils.vibrate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow

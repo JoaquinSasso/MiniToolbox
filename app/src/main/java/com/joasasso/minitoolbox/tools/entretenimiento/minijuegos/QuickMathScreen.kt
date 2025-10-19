@@ -2,8 +2,6 @@
 package com.joasasso.minitoolbox.tools.entretenimiento.minijuegos
 
 import android.content.Context
-import android.os.VibrationEffect
-import android.os.Vibrator
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -47,6 +45,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
+import com.joasasso.minitoolbox.utils.vibrate
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -87,11 +86,6 @@ fun CalculosRapidosScreen(onBack: () -> Unit) {
 
     var lost by remember { mutableStateOf(false) }
 
-    fun vibrate(ms: Long = 300, amplitude: Int = VibrationEffect.DEFAULT_AMPLITUDE) {
-        val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
-        vibrator?.vibrate(VibrationEffect.createOneShot(ms, amplitude))
-    }
-
     fun restartTimer() {
         timerJob?.cancel()
         progress = 1f
@@ -102,7 +96,7 @@ fun CalculosRapidosScreen(onBack: () -> Unit) {
                 val remaining = currentTimerDuration - elapsed
                 progress = 1f - (elapsed.toFloat() / currentTimerDuration)
                 if (remaining <= 0L) {
-                    vibrate()
+                    vibrate(context, 400, 255)
                     lost = true
                     break
                 }
@@ -151,7 +145,7 @@ fun CalculosRapidosScreen(onBack: () -> Unit) {
         if (lost) {
             bgFlashColor = Color(0xFFC53737)
             buttonsEnabled = false
-            vibrate(400, 255)
+            vibrate(context,400, 255)
             scope.launch {
                 guardarHighScoreSiEsMayor(context, score)
             }

@@ -127,6 +127,7 @@ dependencies {
     implementation(libs.androidx.runtime.saveable)
     implementation(libs.androidx.runtime)
     implementation(libs.runtime)
+    implementation(libs.androidx.compose.foundation.foundation)
 
 
     // 7) Testing
