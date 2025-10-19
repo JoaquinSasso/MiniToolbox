@@ -34,6 +34,7 @@ import com.joasasso.minitoolbox.tools.entretenimiento.minijuegos.AdivinaBanderaS
 import com.joasasso.minitoolbox.tools.entretenimiento.minijuegos.AdivinaCapitalScreen
 import com.joasasso.minitoolbox.tools.entretenimiento.minijuegos.CalculosRapidosScreen
 import com.joasasso.minitoolbox.tools.entretenimiento.minijuegos.InOtherWoldScreen
+import com.joasasso.minitoolbox.tools.entretenimiento.minijuegos.minesweeper.MinesweeperScreen
 import com.joasasso.minitoolbox.tools.herramientas.calculadoras.ConversorHorasScreen
 import com.joasasso.minitoolbox.tools.herramientas.calculadoras.ConversorRomanosScreen
 import com.joasasso.minitoolbox.tools.herramientas.calculadoras.ConversorUnidadesScreen
@@ -378,6 +379,9 @@ fun MiniToolboxNavGraph(
         }
         composable(Screen.Pro.route) {
             ProScreen(onBack = onBackSmart)
+        }
+        composable(Screen.Minesweeper.route) {
+            MinesweeperScreen(onBack = onBackSmart)
         }
     }
 }

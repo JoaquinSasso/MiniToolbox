@@ -43,5 +43,6 @@
     <string name="sum_tool_scoreboard">Marcador de puntajes</string>
     <string name="sum_tool_magnifier">Amplía con la cámara</string>
     <string name="sum_tool_ar_ruler">Regla con cámara</string>
+    <string name="sum_tool_minesweeper">Encuentra las bombas</string>
     <string name="sum_tool_noise_generator">Ruido blanco/rosa/marrón</string>
 </resources>

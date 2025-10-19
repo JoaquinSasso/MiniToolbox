@@ -41,6 +41,7 @@ billing = "8.0.0"
 androidx-browser = "1.8.0"
 runtime = "1.9.1"
 runtimeVersion = "1.9.3"
+foundationVersion = "1.9.3"
 
 [libraries]
 androidx-activity = { module = "androidx.activity:activity", version.ref = "activityCompose" }
@@ -97,6 +98,7 @@ billing-ktx = { module = "com.android.billingclient:billing-ktx", version.ref = 
 androidx-browser = { module = "androidx.browser:browser", version.ref = "androidx-browser" }
 androidx-runtime = { group = "androidx.compose.runtime", name = "runtime", version.ref = "runtime" }
 runtime = { group = "androidx.compose.runtime", name = "runtime", version.ref = "runtimeVersion" }
+androidx-compose-foundation-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundationVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

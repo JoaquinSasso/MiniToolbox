@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Buscaminas -->
+    <string name="mines_title">Buscaminas</string>
+    <string name="mines_options_cd">Opciones</string>
+    <string name="mines_new_game">Nueva partida</string>
+    <string name="mines_difficulty">Dificultad…</string>
+    <string name="mines_difficulty_title">Dificultad</string>
+    <string name="mines_help">Ayuda</string>
+
+    <string name="mines_mode_reveal">Descubrir</string>
+    <string name="mines_mode_flags">Banderas</string>
+
+    <string name="mines_flags_left">Banderas: %1$d</string>
+
+    <string name="mines_level_easy">Fácil</string>
+    <string name="mines_level_medium">Medio</string>
+    <string name="mines_level_hard">Difícil</string>
+    <string name="mines_level_custom">Personalizado</string>
+    <string name="mines_selected_summary">Seleccionado: Filas: %1$d · Columnas: %2$d · Minas: %3$d</string>
+
+
+    <string name="mines_rows">Filas</string>
+    <string name="mines_cols">Columnas</string>
+    <string name="mines_mines">Minas</string>
+    <string name="mines_custom_hint">Las minas deben ser menores a Filas×Columnas − 9 (zona segura).</string>
+
+    <string name="mines_lost_title">¡Perdiste!</string>
+    <string name="mines_lost_message">Has tocado una mina. ¿Querés comenzar una nueva partida?</string>
+    <string name="mines_try_again">Intentar de nuevo</string>
+    <string name="mines_win_title">¡Ganaste!</string>
+    <string name="mines_win_message">Completaste el tablero. ¿Querés empezar otra partida?</string>
+
+
+    <!-- Comunes -->
+    <string name="common_apply">Aplicar</string>
+    <string name="common_cancel">Cancelar</string>
+</resources>

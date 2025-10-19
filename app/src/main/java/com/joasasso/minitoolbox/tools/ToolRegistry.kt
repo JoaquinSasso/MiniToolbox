@@ -367,6 +367,15 @@ object ToolRegistry {
             screen = Screen.About,
             category = ToolCategory.Favoritos,
             subCategory = R.string.subcategory_generator
+        ),
+        Tool(
+            name = R.string.tool_minesweeper,
+            screen = Screen.Minesweeper,
+            category = ToolCategory.Entretenimiento,
+            subCategory = R.string.subcategory_minigames,
+            summary = R.string.sum_tool_minesweeper,
+            svgResId = R.drawable.bomb
         )
+
     )
 }
