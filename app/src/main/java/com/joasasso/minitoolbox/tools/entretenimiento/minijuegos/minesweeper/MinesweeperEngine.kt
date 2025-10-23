@@ -22,8 +22,8 @@ object MinesEngine {
  **/
     enum class FirstTapPolicy { SingleSafe, CrossSafe, Square3x3 }
 
-    /** Profundidad máxima de expansión de ceros desde la celda tocada (0 = sólo esa, 1 ≈ cruz, 2 ≈ 5×5) **/
-    private const val MAX_ZERO_DEPTH = 2
+    /** Max profundity that will be revealed at the first tap (0 = only the tapped cell, 1 ≈ a cross around the tapped cell, 2 ≈ 5×5) **/
+    private const val MAX_ZERO_DEPTH = 12
 
     data class Board(
         val rows: Int,
@@ -82,9 +82,9 @@ object MinesEngine {
     }
 
     // Presets
-    val EASY = Config(12, 9, 14)
-    val MEDIUM = Config(16, 11, 28)
-    val HARD = Config(20, 13, 45)
+    val EASY = Config(12, 9, 24)
+    val MEDIUM = Config(16, 11, 38)
+    val HARD = Config(20, 13, 60)
 
     fun newBoard(config: Config, seed: Long = Random.nextLong(),
                  policy: FirstTapPolicy = FirstTapPolicy.CrossSafe): Board =
