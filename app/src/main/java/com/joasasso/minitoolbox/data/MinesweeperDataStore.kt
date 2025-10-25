@@ -24,7 +24,9 @@ data class SavedGame(
     val flagsB64: String,
     val startEpochMs: Long,
     val elapsedMs: Long,
-    val explodedIndex: Int
+    val explodedIndex: Int,
+    val policy: String = "Square3x3",
+    val minesB64: String = ""
 )
 
 object MinesStore {
@@ -44,6 +46,9 @@ object MinesStore {
     private val K_CUSTOM_R = intPreferencesKey("custom_r")
     private val K_CUSTOM_C = intPreferencesKey("custom_c")
     private val K_CUSTOM_M = intPreferencesKey("custom_m")
+    private val K_POLICY = stringPreferencesKey("policy")
+    private val K_MINESBITS = stringPreferencesKey("mines_bits_b64")
+
 
     // ---- Public API ----
 
@@ -60,6 +65,8 @@ object MinesStore {
             it[K_START] = s.startEpochMs
             it[K_ELAPSED] = s.elapsedMs
             it[K_EXPLODED] = s.explodedIndex
+            it[K_POLICY] = s.policy
+            it[K_MINESBITS] = s.minesB64
         }
     }
 
@@ -77,7 +84,9 @@ object MinesStore {
             flagsB64 = prefs[K_FLAGS] ?: "",
             startEpochMs = prefs[K_START] ?: 0L,
             elapsedMs = prefs[K_ELAPSED] ?: 0L,
-            explodedIndex = prefs[K_EXPLODED] ?: -1
+            explodedIndex = prefs[K_EXPLODED] ?: -1,
+            policy = prefs[K_POLICY] ?: "Square3x3",
+            minesB64 = prefs[K_MINESBITS] ?: ""
         )
     }
 

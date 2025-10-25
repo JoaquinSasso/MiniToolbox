@@ -7,9 +7,12 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.PowerManager
 import androidx.annotation.RequiresPermission
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
+import androidx.core.content.getSystemService
+import com.joasasso.minitoolbox.MainActivity
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.data.PomodoroStateRepository
 import com.joasasso.minitoolbox.nav.Screen
@@ -18,6 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+
 
 // Alarm action
 const val ACTION_FIRE_ALARM = "POMODORO_FIRE_ALARM"
@@ -56,6 +60,11 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
             ACTION_FIRE_ALARM -> { /* sigue abajo */ }
             else -> return
         }
+
+        val pm = app.getSystemService<PowerManager>()
+        val wl = pm?.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MiniToolbox:PomodoroAlarm")
+        // 15s son más que suficientes para: notificación + sonido + persistir + reprogramar
+        wl?.acquire(15_000L)
 
         val pending = goAsync()
         CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
@@ -134,6 +143,7 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
                     )
                 )
             } finally {
+                try { wl?.release() } catch (_: Exception) {}
                 pending.finish()
             }
         }
@@ -201,7 +211,8 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
 
         /**
          * Programa la próxima alarma propagando SIEMPRE la configuración completa.
-         * Usa solo alarmas inexactas (permitidas por políticas de Google Play).
+         * Camino principal: AlarmClockInfo (exacta sin permisos).
+         * Respaldo: setAndAllowWhileIdle / set (inexactas) si algo falla.
          */
         private fun scheduleExactWithConfig(
             context: Context,
@@ -212,7 +223,8 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
         ) {
             val am = context.getSystemService(AlarmManager::class.java) ?: return
 
-            val intent = Intent(context, PomodoroAlarmReceiver::class.java).apply {
+            // 1) Intent que dispara el cambio de fase (BroadcastReceiver)
+            val alarmIntent = Intent(context, PomodoroAlarmReceiver::class.java).apply {
                 action = ACTION_FIRE_ALARM
                 putExtra(EX_PHASE, phase)
                 putExtra(EX_CYCLE, cycle)
@@ -224,18 +236,44 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
                 putExtra(EX_TIMER_NAME, config.name)
                 putExtra(EX_TIMER_COLOR, config.colorInt)
             }
-
-            val pi = PendingIntent.getBroadcast(
+            val piAlarm = PendingIntent.getBroadcast(
                 context,
                 REQ_ALARM,
-                intent,
+                alarmIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
+            // 2) Intent de “mostrar” (para AlarmClock): abre la pantalla de detalle del timer
+            val startRoute = "pomodoro/detail/${config.id}"
+            val showIntent = Intent(context, MainActivity::class.java).apply {
+                addFlags(
+                    Intent.FLAG_ACTIVITY_NEW_TASK or
+                            Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                            Intent.FLAG_ACTIVITY_SINGLE_TOP
+                )
+                putExtra("startRoute", startRoute)
+            }
+            val piShow = PendingIntent.getActivity(
+                context,
+                startRoute.hashCode(),
+                showIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            // 3) Programar como “alarma de usuario” (exacta, policy-safe)
             try {
-                am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMs, pi)
+                val info = AlarmManager.AlarmClockInfo(triggerAtMs, piShow)
+                am.setAlarmClock(info, piAlarm)
+                return
             } catch (_: Exception) {
-                am.set(AlarmManager.RTC_WAKEUP, triggerAtMs, pi)
+                // cae a respaldo si algún OEM raro falla
+            }
+
+            // 4) Respaldo inexacto (aceptado por políticas)
+            try {
+                am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMs, piAlarm)
+            } catch (_: Exception) {
+                am.set(AlarmManager.RTC_WAKEUP, triggerAtMs, piAlarm)
             }
         }
 

@@ -213,7 +213,7 @@ object MinesEngine {
         return out.toIntArray()
     }
 
-    private fun computeNumbers(rows: Int, cols: Int, mines: BitSet): IntArray {
+     fun computeNumbers(rows: Int, cols: Int, mines: BitSet): IntArray {
         val numbers = IntArray(rows * cols)
         fun idx(r: Int, c: Int) = r * cols + c
         fun inB(r: Int, c: Int) = r in 0 until rows && c in 0 until cols
