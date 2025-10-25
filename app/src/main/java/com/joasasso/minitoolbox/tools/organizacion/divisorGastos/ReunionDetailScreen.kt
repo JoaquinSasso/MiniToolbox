@@ -380,7 +380,7 @@ fun DetallesReunionScreen(
                             },
                             colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondaryContainer)
                         ) {
-                            Text(stringResource(R.string.expenses_share_summary_button))
+                            Text(stringResource(R.string.expenses_share_summary_button), color = MaterialTheme.colorScheme.onSecondaryContainer)
                         }
                     }
                 }

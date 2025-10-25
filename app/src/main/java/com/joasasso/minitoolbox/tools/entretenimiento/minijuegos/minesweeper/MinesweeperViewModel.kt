@@ -46,18 +46,40 @@ class MinesViewModel(app: Application) : AndroidViewModel(app) {
             val saved = MinesStore.load(app)
             if (saved != null) {
                 val cfg = MinesEngine.Config(saved.rows, saved.cols, saved.mines)
-                var board = MinesEngine.newBoard(cfg, saved.seed)
-                if (saved.firstTapIndex >= 0) {
-                    board = MinesEngine.firstTap(board, saved.firstTapIndex)
+
+                // Política guardada o fallback
+                val policy = runCatching { MinesEngine.FirstTapPolicy.valueOf(saved.policy) }
+                    .getOrElse { MinesEngine.FirstTapPolicy.Square3x3 }
+
+                // Siempre arrancamos con un board "vacío" pero con misma seed/policy
+                var board = MinesEngine.newBoard(cfg, saved.seed, policy = policy)
+
+                // Si ya hubo primer toque y tenemos minas guardadas, NO regeneres:
+                if (saved.firstTapIndex >= 0 && saved.minesB64.isNotEmpty()) {
+                    val mines = MinesStore.base64ToBitSet(saved.minesB64)
+                    val numbers = MinesEngine.computeNumbers(cfg.rows, cfg.cols, mines)
+                    board = board.copy(
+                        firstTapIndex = saved.firstTapIndex,
+                        mineBits = mines,
+                        numbers = numbers,
+                        revealed = MinesStore.base64ToBitSet(saved.revealedB64),
+                        flags = MinesStore.base64ToBitSet(saved.flagsB64),
+                        status = MinesEngine.Status.valueOf(saved.status),
+                        explodedIndex = saved.explodedIndex
+                    )
+                } else {
+                    // Fallback para saves antiguos sin minesB64: regenerar coherente con policy y seed
+                    if (saved.firstTapIndex >= 0) {
+                        board = MinesEngine.firstTap(board, saved.firstTapIndex)
+                    }
+                    board = board.copy(
+                        revealed = MinesStore.base64ToBitSet(saved.revealedB64),
+                        flags = MinesStore.base64ToBitSet(saved.flagsB64),
+                        status = MinesEngine.Status.valueOf(saved.status),
+                        explodedIndex = saved.explodedIndex
+                    )
                 }
-                val revealed = MinesStore.base64ToBitSet(saved.revealedB64)
-                val flags = MinesStore.base64ToBitSet(saved.flagsB64)
-                board = board.copy(
-                    revealed = revealed,
-                    flags = flags,
-                    status = MinesEngine.Status.valueOf(saved.status),
-                    explodedIndex = saved.explodedIndex
-                )
+
                 startEpoch = saved.startEpochMs
                 elapsed = saved.elapsedMs
                 publish(board, InputMode.Reveal)
@@ -188,10 +210,11 @@ class MinesViewModel(app: Application) : AndroidViewModel(app) {
                 MinesEngine.Status.Ready, MinesEngine.Status.InProgress -> System.currentTimeMillis() - startEpoch
                 else -> elapsed
             },
-            explodedIndex = board.explodedIndex
+            explodedIndex = board.explodedIndex,
+            policy = board.firstTapPolicy.name,
+            minesB64 = if (board.firstTapIndex >= 0) board.mineBits.toBase64() else ""
         )
         MinesStore.save(app, s)
-        // Si terminó la partida, congelamos el tiempo en 'elapsed'
         if (board.status == MinesEngine.Status.Won || board.status == MinesEngine.Status.Lost) {
             elapsed = s.elapsedMs
         }
