@@ -252,6 +252,7 @@ fun MinesweeperScreen(
 
 @Composable
 private fun StatusPanel(flagsLeft: Int, elapsedMs: Long) {
+    Spacer(Modifier.height(8.dp))
     Card(
         modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge
