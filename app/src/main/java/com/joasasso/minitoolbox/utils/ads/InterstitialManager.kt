@@ -32,7 +32,6 @@ object InterstitialManager {
 
     private var lastRewardedShownTs = 0L
 
-    // --- NUEVO: recordar una Activity para cargar con adapters que lo requieren (Unity) ---
     private var lastActivityRef: WeakReference<Activity>? = null
     private var pendingLoadUntilActivity: Boolean = false
 

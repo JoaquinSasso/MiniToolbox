@@ -24,12 +24,10 @@ import androidx.compose.material.icons.filled.WebAssetOff
 import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -132,30 +130,38 @@ fun ProScreen(onBack: () -> Unit) {
 
             Spacer(Modifier.weight(1f))
 
+//            Button(  //TODO Descomentar cuando se implemente el modo PRO completamente
+//                onClick = {
+//                    val activity = context.findActivity()
+//                    if (activity != null) {
+//                        billingWrapper.launchPurchaseFlow(activity)
+//                    } else {
+//                        Toast.makeText(context, context.getString(R.string.pro_toast_warning_unable_to_buy), Toast.LENGTH_SHORT).show()
+//                    }
+//                },
+//                modifier = Modifier.fillMaxWidth(),
+//                enabled = !isPurchasing && productDetails != null
+//            ) {
+//                if (isPurchasing) {
+//                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+//                } else {
+//                    Text(stringResource(R.string.pro_buy_button, productPrice.ifBlank { "—" }))
+//                }
+//            }
+
             Button(
-                onClick = {
-                    val activity = context.findActivity()
-                    if (activity != null) {
-                        billingWrapper.launchPurchaseFlow(activity)
-                    } else {
-                        Toast.makeText(context, context.getString(R.string.pro_toast_warning_unable_to_buy), Toast.LENGTH_SHORT).show()
-                    }
-                },
+                onClick = {},
                 modifier = Modifier.fillMaxWidth(),
-                enabled = !isPurchasing && productDetails != null
+                enabled = false
             ) {
-                if (isPurchasing) {
-                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
-                } else {
-                    Text(stringResource(R.string.pro_buy_button, productPrice.ifBlank { "—" }))
-                }
+                Text(stringResource(R.string.pro_buy_button_disabled))
             }
 
-            Spacer(Modifier.height(8.dp))
-
-            TextButton(onClick = { billingWrapper.checkAndRestorePurchases() }) {
-                Text(stringResource(R.string.pro_restore_button))
-            }
+//            Spacer(Modifier.height(8.dp)) //TODO Descomentar cuando se implemente el modo PRO completamente
+//
+//            TextButton(onClick = { billingWrapper.checkAndRestorePurchases() }) {
+//                Text(stringResource(R.string.pro_restore_button))
+//            }
         }
     }
 }

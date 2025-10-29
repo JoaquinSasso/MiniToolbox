@@ -14,6 +14,7 @@
     <string name="pro_benefit_support_title">Back a Tiny Indie</string>
     <string name="pro_benefit_support_desc">Go PRO to keep this indie app alive and polished—faster fixes, smarter tools, and steady new features.</string>
     <string name="pro_buy_button">Buy for %1$s</string>
+    <string name="pro_buy_button_disabled">PRO mode is still in development</string>
     <string name="pro_restore_button">Restore Purchases</string>
     <string name="pro_feature_icon">Pro feature icon</string>
 
