@@ -10,7 +10,7 @@ import androidx.compose.ui.platform.LocalContext
 @Composable
 fun ProStateProvider(content: @Composable () -> Unit) {
     val context = LocalContext.current
-    val isPro by ProRepository.isProFlow(context).collectAsState(initial = true) //TODO Cambiar el initial a false cuando se publique la app
+    val isPro by ProRepository.isProFlow(context).collectAsState(initial = false)
     CompositionLocalProvider(LocalProState provides ProState(isPro = isPro)) {
         content()
     }
