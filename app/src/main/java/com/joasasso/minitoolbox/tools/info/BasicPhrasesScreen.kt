@@ -1,4 +1,4 @@
-package com.joasasso.minitoolbox.ui.screens
+package com.joasasso.minitoolbox.tools.info
 
 import android.content.Context
 import android.speech.tts.TextToSpeech
@@ -29,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,6 +50,20 @@ import com.joasasso.minitoolbox.data.Frase
 import com.joasasso.minitoolbox.data.idiomasDisponibles
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import java.util.Locale
+
+
+@Composable
+fun rememberTts(): TextToSpeech {
+    val context = LocalContext.current
+    val ttsHolder = remember { arrayOfNulls<TextToSpeech>(1) }
+
+    DisposableEffect(Unit) {
+        val tts = TextToSpeech(context) { /* status -> */ }
+        ttsHolder[0] = tts
+        onDispose { tts.stop(); tts.shutdown() }
+    }
+    return ttsHolder[0]!!
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -189,9 +204,9 @@ fun BasicPhrasesScreen(onBack: () -> Unit) {
                                 )
                             }
                             IconButton(onClick = {
-                                frase.traducciones[selectedLanguage.codigo]?.let {
+                                frase.traducciones[selectedLanguage.codigo]?.let { text ->
                                     tts.language = selectedLanguage.locale
-                                    tts.speak(it, TextToSpeech.QUEUE_FLUSH, null, null)
+                                    tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 }
                             }) {
