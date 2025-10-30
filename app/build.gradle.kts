@@ -24,8 +24,8 @@ android {
         applicationId = "com.joasasso.minitoolbox"
         minSdk = 28
         targetSdk = 36
-        versionCode = 13
-        versionName = "1.2.1"
+        versionCode = 15
+        versionName = "1.2.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

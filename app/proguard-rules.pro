@@ -34,3 +34,13 @@
 -keep class com.applovin.** { *; }
 -dontwarn com.applovin.**
 
+# Mantener metadata de genéricos y anotaciones (Gson la usa)
+-keepattributes Signature, RuntimeVisibleAnnotations, RuntimeVisibleParameterAnnotations, EnclosingMethod, InnerClasses
+
+# Mantener tus modelos tal cual (nombres de clase y campos)
+-keep class com.joasasso.minitoolbox.data.** { *; }
+
+# (Opcional) Evitar warnings ruidosos de Gson/Unsafe
+-dontwarn sun.misc.**
+-dontwarn com.google.gson.**
+

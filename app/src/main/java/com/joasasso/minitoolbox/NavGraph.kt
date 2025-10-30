@@ -23,6 +23,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.joasasso.minitoolbox.dev.MetricsDevScreen
+import com.joasasso.minitoolbox.metrics.toolUse
 import com.joasasso.minitoolbox.nav.Screen
 import com.joasasso.minitoolbox.tools.ToolRegistry
 import com.joasasso.minitoolbox.tools.entretenimiento.MarcadorEquiposScreen
@@ -57,6 +58,7 @@ import com.joasasso.minitoolbox.tools.herramientas.instrumentos.LightSensorScree
 import com.joasasso.minitoolbox.tools.herramientas.instrumentos.MagnifierScreen
 import com.joasasso.minitoolbox.tools.herramientas.instrumentos.ReglaScreen
 import com.joasasso.minitoolbox.tools.info.AgeCalculatorScreen
+import com.joasasso.minitoolbox.tools.info.BasicPhrasesScreen
 import com.joasasso.minitoolbox.tools.info.CountriesInfoScreen
 import com.joasasso.minitoolbox.tools.info.RemainingTimeScreen
 import com.joasasso.minitoolbox.tools.info.TextBinaryConverterScreen
@@ -73,7 +75,6 @@ import com.joasasso.minitoolbox.tools.organizacion.recordatorios.HabitTrackerScr
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.ToDoListScreen
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AguaReminderScreen
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AguaStatisticsScreen
-import com.joasasso.minitoolbox.ui.screens.BasicPhrasesScreen
 import com.joasasso.minitoolbox.ui.screens.ProScreen
 import com.joasasso.minitoolbox.utils.ads.InterstitialManager
 import com.joasasso.minitoolbox.utils.ads.RewardedManager
@@ -113,7 +114,7 @@ fun MiniToolboxNavGraph(
         val route = backStackEntry?.destination?.route ?: return@LaunchedEffect
         if (route != lastRoute && toolRoutes.contains(route)) {
             val toolId = routeToToolId[route] ?: route
-
+            toolUse(context, route!!)
             // contar solo si pasó el cooldown por herramienta
             val isNewAccess = ToolUsageTracker.onToolOpened(context, toolId)
 
