@@ -12,8 +12,7 @@ object ToolRegistry {
             category = ToolCategory.Herramientas,
             subCategory = R.string.subcategory_instrument,
             summary = R.string.sum_tool_bubble_level,
-            svgResId = R.drawable.bubble_level,
-            isPro = true
+            svgResId = R.drawable.bubble_level
         ),
         Tool(
             name = R.string.tool_team_generator,
@@ -118,8 +117,7 @@ object ToolRegistry {
             category = ToolCategory.Herramientas,
             subCategory = R.string.subcategory_calculator,
             summary = R.string.sum_tool_unit_converter,
-            svgResId = R.drawable.unit_conversor,
-            isPro = true
+            svgResId = R.drawable.unit_conversor
         ),
         Tool(
             name = R.string.tool_password_generator,
@@ -191,8 +189,7 @@ object ToolRegistry {
             category = ToolCategory.Herramientas,
             subCategory = R.string.subcategory_instrument,
             summary = R.string.sum_tool_light_meter,
-            svgResId = R.drawable.light_meter,
-            isPro = true
+            svgResId = R.drawable.light_meter
         ),
         Tool(
             name = R.string.tool_flashlight,
@@ -232,8 +229,7 @@ object ToolRegistry {
             category = ToolCategory.Informacion,
             subCategory = R.string.subcategory_general,
             summary = R.string.sum_tool_country_info,
-            svgResId = R.drawable.countries_info,
-            isPro = true
+            svgResId = R.drawable.countries_info
         ),
         Tool(
             name = R.string.tool_option_selector,
@@ -249,8 +245,7 @@ object ToolRegistry {
             category = ToolCategory.Entretenimiento,
             subCategory = R.string.subcategory_minigames,
             summary = R.string.sum_tool_guess_flag,
-            svgResId = R.drawable.flag,
-            isPro = true
+            svgResId = R.drawable.flag
         ),
         Tool(
             name = R.string.tool_expense_splitter,
@@ -282,8 +277,7 @@ object ToolRegistry {
             category = ToolCategory.Informacion,
             subCategory = R.string.subcategory_general,
             summary = R.string.sum_tool_basic_phrases,
-            svgResId = R.drawable.phrases,
-            isPro = true
+            svgResId = R.drawable.phrases
         ),
         Tool(
             name = R.string.tool_multiverse_me,
@@ -299,8 +293,7 @@ object ToolRegistry {
             category = ToolCategory.Entretenimiento,
             subCategory = R.string.subcategory_minigames,
             summary = R.string.sum_tool_guess_capital,
-            svgResId = R.drawable.capitol,
-            isPro = true
+            svgResId = R.drawable.capitol
         ),
         Tool(
             name = R.string.tool_compass,
@@ -308,8 +301,7 @@ object ToolRegistry {
             category = ToolCategory.Herramientas,
             subCategory = R.string.subcategory_instrument,
             summary = R.string.sum_tool_compass,
-            svgResId = R.drawable.compass,
-            isPro = true
+            svgResId = R.drawable.compass
         ),
         Tool(
             name = R.string.tool_todo_list,
@@ -325,8 +317,7 @@ object ToolRegistry {
             category = ToolCategory.Organizacion,
             subCategory = R.string.subcategory_habits,
             summary = R.string.sum_tool_event_tracker,
-            svgResId = R.drawable.events,
-            isPro = true
+            svgResId = R.drawable.events
         ),
         Tool(
             name = R.string.tool_compound_interest,
@@ -334,8 +325,7 @@ object ToolRegistry {
             category = ToolCategory.Herramientas,
             subCategory = R.string.subcategory_calculator,
             summary = R.string.sum_tool_compound_interest,
-            svgResId = R.drawable.interes_compuesto,
-            isPro = true
+            svgResId = R.drawable.interes_compuesto
         ),
         Tool(
             name = R.string.tool_scoreboard,
@@ -359,8 +349,7 @@ object ToolRegistry {
             category = ToolCategory.Herramientas,
             subCategory = R.string.subcategory_instrument,
             summary = R.string.sum_tool_ar_ruler,
-            svgResId = R.drawable.ar_ruler,
-            isPro = true
+            svgResId = R.drawable.ar_ruler
         ),
         Tool(
             name = R.string.about_title,

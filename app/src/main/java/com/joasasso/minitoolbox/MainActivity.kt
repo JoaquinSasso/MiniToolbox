@@ -27,6 +27,7 @@ import com.joasasso.minitoolbox.ui.utils.LockScreenOrientationIfAllowed
 import com.joasasso.minitoolbox.utils.ads.ConsentGateProvider
 import com.joasasso.minitoolbox.utils.ads.LocalConsentState
 import com.joasasso.minitoolbox.utils.pro.LocalProState
+import com.joasasso.minitoolbox.utils.pro.ProSilentInitializer
 import com.joasasso.minitoolbox.utils.pro.ProStateProvider
 
 class MainActivity : AppCompatActivity() {
@@ -43,6 +44,12 @@ class MainActivity : AppCompatActivity() {
 
         Log.d("Metrics", "endpoint=" + UploadConfig.getEndpoint(this))
         Log.d("Metrics", "apiKey=" + UploadConfig.getApiKey(this).take(6) + "…")
+
+        // 🔹 Inicialización / restauración silenciosa del estado PRO
+        ProSilentInitializer.init(
+            context = applicationContext,
+            inappProductId = getString(R.string.billing_pro_id)
+        )
 
         setContent {
             LockScreenOrientationIfAllowed(
