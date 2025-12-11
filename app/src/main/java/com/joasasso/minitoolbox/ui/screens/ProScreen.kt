@@ -19,7 +19,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AllInclusive
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.WebAssetOff
 import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material.icons.filled.WorkspacePremium
@@ -117,9 +116,6 @@ fun ProScreen(onBack: () -> Unit) {
             BenefitItem(icon = Icons.Default.WebAssetOff,
                 title = stringResource(R.string.pro_benefit_ads_title),
                 description = stringResource(R.string.pro_benefit_ads_desc))
-            BenefitItem(icon = Icons.Default.LockOpen,
-                title = stringResource(R.string.pro_benefit_tools_title),
-                description = stringResource(R.string.pro_benefit_tools_desc))
             BenefitItem(icon = Icons.Default.Widgets,
                 title = stringResource(R.string.pro_benefit_widgets_title_short),
                 description = stringResource(R.string.pro_benefit_widgets_desc_short))

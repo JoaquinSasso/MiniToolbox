@@ -19,6 +19,6 @@
     <string name="name">Name</string>
     <string name="color">Color</string>
     <string name="edit">Edit</string>
-
+    <string name="information">Information</string>
 
 </resources>
