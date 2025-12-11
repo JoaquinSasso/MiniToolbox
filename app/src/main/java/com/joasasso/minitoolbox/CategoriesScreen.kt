@@ -212,12 +212,14 @@ fun CategoriesScreen(
                         modifier = Modifier.padding(end = 6.dp),
                         onClick = { onNavigateToPro() }
                     )
-                    IconButton(onClick = onNavigateToPro) {
-                        Icon(
-                            imageVector = Icons.Default.WorkspacePremium,
-                            contentDescription = stringResource(R.string.pro_screen_title),
-                            tint = Color(0xFFFFD700)
-                        )
+                    if (!proState.isPro) {
+                        IconButton(onClick = onNavigateToPro) {
+                            Icon(
+                                imageVector = Icons.Default.WorkspacePremium,
+                                contentDescription = stringResource(R.string.pro_screen_title),
+                                tint = Color(0xFFFFD700)
+                            )
+                        }
                     }
                     IconButton(onClick = {
                         onNavigateToAbout()

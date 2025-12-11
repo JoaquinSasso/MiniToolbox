@@ -11,6 +11,7 @@ import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
+import com.joasasso.minitoolbox.metrics.adImpression
 import com.joasasso.minitoolbox.utils.pro.ProRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -23,8 +24,8 @@ object InterstitialManager {
     private const val KEY_LAST_AD_TS = "last_interstitial_ts"
 
     // Ajustables:
-    private const val MIN_OPENS_BETWEEN_ADS = 4          // muestra 1 cada 4 accesos válidos
-    private const val GLOBAL_AD_COOLDOWN_MS = 120_000L   // 2 min entre interstitials
+    private const val MIN_OPENS_BETWEEN_ADS = 3         // muestra 1 cada 3 accesos válidos
+    private const val GLOBAL_AD_COOLDOWN_MS = 90_000L   // 90 seg entre interstitials
 
     private var interstitial: InterstitialAd? = null
     private var adUnitId: String? = null
@@ -139,7 +140,7 @@ object InterstitialManager {
                     load(activity)
                 }
                 override fun onAdShowedFullScreenContent() {
-                    // opcional: métricas/impressions (no tocado)
+                    adImpression(activity.applicationContext, "interstitial")
                 }
             }
             interstitial?.show(activity)
