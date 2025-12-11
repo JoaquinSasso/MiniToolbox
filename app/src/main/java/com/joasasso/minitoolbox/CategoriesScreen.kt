@@ -225,7 +225,7 @@ fun CategoriesScreen(
                         onNavigateToAbout()
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     }) {
-                        Icon(Icons.Filled.Info, contentDescription = "Información")
+                        Icon(Icons.Filled.Info, contentDescription = stringResource(R.string.information))
                     }
                 },
             )

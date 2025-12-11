@@ -62,4 +62,12 @@ object ProSilentInitializer {
         billingWrapper = null
         initialized = false
     }
+
+    /**
+     * Llamar cada vez que la app vuelve al foreground (onResume de MainActivity).
+     * Si hubo un reembolso y Google ya lo reflejó, acá se va a desactivar PRO.
+     */
+    fun recheckOnForeground() {
+        billingWrapper?.checkAndRestorePurchases()
+    }
 }
