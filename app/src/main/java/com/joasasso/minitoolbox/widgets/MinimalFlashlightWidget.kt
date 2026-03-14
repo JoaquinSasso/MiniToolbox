@@ -37,7 +37,6 @@ import androidx.glance.state.PreferencesGlanceStateDefinition
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.data.flujoNivelLinterna
 import com.joasasso.minitoolbox.metrics.widgetUse
-import com.joasasso.minitoolbox.utils.pro.LocalProState
 import com.joasasso.minitoolbox.utils.pro.ProRepository
 import com.joasasso.minitoolbox.utils.pro.paywallIntent
 import kotlinx.coroutines.flow.first
@@ -51,20 +50,24 @@ class FlashToggleWidget : GlanceAppWidget() {
     override val stateDefinition = PreferencesGlanceStateDefinition
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        // 1. Leemos el estado real desde el repositorio (DataStore)
+        // Usamos .first() para obtener el valor actual de forma síncrona (suspendida)
+        val isPro = ProRepository.isProFlow(context).first()
+
         provideContent {
             val prefs = currentState<Preferences>()
             val isOn = prefs[FlashWidgetKeys.KEY_IS_ON] ?: false
-            val proState = LocalProState.current
-            val isPro = proState.isPro
+
             Box(
                 modifier = GlanceModifier
                     .fillMaxSize()
                     .background(GlanceTheme.colors.background)
                     .clickable(
+                        // Ahora 'isPro' tiene el valor real de la base de datos
                         onClick = if (isPro)
                             actionRunCallback(ToggleFlashAction::class.java)
                         else
-                            actionStartActivity(paywallIntent(context))
+                            actionStartActivity(paywallIntent(context)) // Asumiendo que esta función existe en tus utils
                     ),
                 contentAlignment = Alignment.Center
             ) {
@@ -75,9 +78,9 @@ class FlashToggleWidget : GlanceAppWidget() {
                     contentDescription = if (isOn) context.getString(R.string.flash_button_off) else context.getString(R.string.flash_button_on),
                     modifier = GlanceModifier.size(40.dp)
                 )
-                // Overlay PRO si no es Pro
+
+                // Lógica visual del candado/badge
                 if (!isPro) {
-                    // Badge PRO en la esquina superior derecha
                     Box(
                         modifier = GlanceModifier
                             .fillMaxSize()
@@ -91,7 +94,7 @@ class FlashToggleWidget : GlanceAppWidget() {
                             ),
                             contentDescription = "PRO Tool",
                             modifier = GlanceModifier.size(40.dp),
-                            colorFilter = ColorFilter.tint(ColorProvider(Color(0xFFFFD700), Color(0xFFFFD700))) // Tinte dorado
+                            colorFilter = ColorFilter.tint(ColorProvider(Color(0xFFFFD700), Color(0xFFFFD700)))
                         )
                     }
                 }
