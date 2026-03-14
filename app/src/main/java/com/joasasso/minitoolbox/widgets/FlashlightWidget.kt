@@ -43,7 +43,6 @@ import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.data.setEstadoLinterna
 import com.joasasso.minitoolbox.data.setNivelLinterna
 import com.joasasso.minitoolbox.metrics.widgetUse
-import com.joasasso.minitoolbox.utils.pro.LocalProState
 import com.joasasso.minitoolbox.utils.pro.ProRepository
 import com.joasasso.minitoolbox.utils.pro.paywallIntent
 import kotlinx.coroutines.flow.first
@@ -57,6 +56,7 @@ class FlashQuickWidget : GlanceAppWidget() {
     override val sizeMode = SizeMode.Exact
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val isPro = ProRepository.isProFlow(context).first()
         provideContent {
             Column(
                 modifier = GlanceModifier
@@ -147,8 +147,6 @@ class FlashQuickWidget : GlanceAppWidget() {
                 }
             }
             // Overlay PRO si no es Pro
-            val proState = LocalProState.current
-            val isPro = proState.isPro
             if (!isPro) {
                 // Badge PRO en la esquina superior derecha
                 Box(

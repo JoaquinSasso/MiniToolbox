@@ -43,8 +43,9 @@ import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AgregarAguaCallback
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.QuitarAguaCallback
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.actualizarWidgetAgua
-import com.joasasso.minitoolbox.utils.pro.LocalProState
+import com.joasasso.minitoolbox.utils.pro.ProRepository
 import com.joasasso.minitoolbox.utils.pro.paywallIntent
+import kotlinx.coroutines.flow.first
 
 class AguaWidget : GlanceAppWidget() {
 
@@ -55,6 +56,7 @@ class AguaWidget : GlanceAppWidget() {
     }
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val isPro = ProRepository.isProFlow(context).first()
         provideContent {
             val prefs = currentState<Preferences>()
             val agua = prefs[KEY_AGUA] ?: 0
@@ -100,9 +102,7 @@ class AguaWidget : GlanceAppWidget() {
                     }
                 }
             }
-            // Overlay PRO si no es Pro
-            val proState = LocalProState.current
-            val isPro = proState.isPro
+
             if (!isPro) {
                 // Badge PRO en la esquina superior derecha
                 Box(

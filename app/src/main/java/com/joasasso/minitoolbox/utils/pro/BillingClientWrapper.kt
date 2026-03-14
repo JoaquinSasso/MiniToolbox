@@ -4,6 +4,7 @@ package com.joasasso.minitoolbox.utils.pro
 import android.app.Activity
 import android.content.Context
 import android.util.Log
+import androidx.glance.appwidget.updateAll
 import com.android.billingclient.api.AcknowledgePurchaseParams
 import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingClient.ProductType
@@ -20,7 +21,13 @@ import com.android.billingclient.api.QueryPurchasesParams
 import com.android.billingclient.api.acknowledgePurchase
 import com.android.billingclient.api.queryProductDetails
 import com.android.billingclient.api.queryPurchasesAsync
+import com.joasasso.minitoolbox.widgets.AguaMiniWidget
+import com.joasasso.minitoolbox.widgets.AguaWidget
+import com.joasasso.minitoolbox.widgets.FavoriteToolsWidget
+import com.joasasso.minitoolbox.widgets.FlashQuickWidget
+import com.joasasso.minitoolbox.widgets.FlashToggleWidget
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -121,6 +128,13 @@ class BillingClientWrapper(
         if (purchase.purchaseState == PurchaseState.PURCHASED) {
             // Persistimos PRO para offline
             ProRepository.setProStatus(context, true)
+            CoroutineScope(Dispatchers.IO).launch {
+                FlashToggleWidget().updateAll(context)
+                AguaMiniWidget().updateAll(context)
+                AguaWidget().updateAll(context)
+                FavoriteToolsWidget().updateAll(context)
+                FlashQuickWidget().updateAll(context)
+            }
 
             if (!purchase.isAcknowledged) {
                 val ackParams = AcknowledgePurchaseParams.newBuilder()
