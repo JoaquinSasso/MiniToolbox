@@ -65,7 +65,6 @@ sealed class Screen(val route: String) {
     object Magnifier           : Screen("magnifier")
     object ArRuler             : Screen("ar_ruler")
     object Pro : Screen("pro")
-
     object Minesweeper : Screen("minesweeper")
 
     companion object {
