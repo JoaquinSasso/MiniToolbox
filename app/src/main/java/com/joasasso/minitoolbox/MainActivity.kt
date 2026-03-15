@@ -106,20 +106,28 @@ class MainActivity : AppCompatActivity() {
 
                         LaunchedEffect(startRoute) {
                             val route = startRoute
-                            if (Screen.isValidRoute(route) && route != Screen.Categories.route) {
-                                toolUse(applicationContext, route!!)
-                                widgetUse(applicationContext, "widget_shortcuts")
 
-                                // opcional: solo si esa entry existe
-                                navController.popBackStack(Screen.Categories.route, inclusive = false)
+                            // Validamos que no sea null antes de intentar nada
+                            if (!route.isNullOrBlank() && route != Screen.Categories.route) {
+                                try {
+                                    // Quitamos el chequeo problemático de if (Screen.isValidRoute(route))
+                                    toolUse(applicationContext, route)
+                                    widgetUse(applicationContext, "widget_shortcuts")
 
-                                navController.navigate(route) {
-                                    launchSingleTop = true
-                                    restoreState = false
+                                    navController.popBackStack(Screen.Categories.route, inclusive = false)
+
+                                    navController.navigate(route) {
+                                        launchSingleTop = true
+                                        restoreState = false
+                                    }
+                                } catch (e: IllegalArgumentException) {
+                                    // Si la ruta enviada por el Intent no existe en el NavGraph, cae aquí sin crashear.
+                                    Log.e("Navigation", "Ruta inválida desde el Intent: $route")
+                                } finally {
+                                    // Siempre limpiamos el estado al final para evitar re-navegaciones infinitas
+                                    startRoute = null
                                 }
                             }
-                            // siempre limpiar al final (evita re-navegaciones)
-                            startRoute = null
                         }
                     }
                 }
