@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,6 +30,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -54,12 +56,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import com.joasasso.minitoolbox.ui.utils.getContrastingTextColor
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MarcadorEquiposScreen(onBack: () -> Unit) {
     val haptic = LocalHapticFeedback.current
@@ -90,7 +93,7 @@ fun MarcadorEquiposScreen(onBack: () -> Unit) {
         Color(0xFFB2EBF2), Color(0xFFC8E6C9), Color(0xFFD1C4E9),
         Color(0xFFFFECB3), Color(0xFFC71FE8), Color(0xFFDCEDC8),
         Color(0xFF723855), Color(0xFF5E08C2), Color(0xFF4DBC52),
-        Color(0xFFFF746C)
+        Color(0xFFAD170D), Color(0xFFFF746C)
     )
 
     var showEditDialogFor by remember { mutableStateOf<Int?>(null) }
@@ -132,7 +135,8 @@ fun MarcadorEquiposScreen(onBack: () -> Unit) {
                 .fillMaxSize()
                 .padding(padding)
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(bottom = 160.dp)
         ) {
             if (equipos.isEmpty()) {
                 item {
@@ -155,7 +159,13 @@ fun MarcadorEquiposScreen(onBack: () -> Unit) {
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
                         containerColor = equipo.color
-                    )
+                    ),
+                    onClick = {
+                        equipos = equipos.toMutableList().also {
+                            it[index] = it[index].copy(puntos = it[index].puntos + 1)
+                        }
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    }
                 ) {
                     CompositionLocalProvider(LocalContentColor provides textColor)
                     {
@@ -164,7 +174,7 @@ fun MarcadorEquiposScreen(onBack: () -> Unit) {
                                 modifier = Modifier.fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(equipo.nombre, style = MaterialTheme.typography.titleMedium)
+                                Text(equipo.nombre, fontSize = 26.sp, modifier = Modifier.weight(1f))
                                 Spacer(Modifier.weight(1f))
                                 IconButton(onClick = {
                                     showEditDialogFor = index
@@ -205,13 +215,14 @@ fun MarcadorEquiposScreen(onBack: () -> Unit) {
                                 }) {
                                     Icon(
                                         Icons.Default.Remove,
-                                        contentDescription = stringResource(R.string.marcador_restar_punto_content_desc)
+                                        contentDescription = stringResource(R.string.marcador_restar_punto_content_desc),
+                                        Modifier.size(36.dp)
                                     )
                                 }
 
                                 Text(
                                     equipo.puntos.toString(),
-                                    style = MaterialTheme.typography.displaySmall
+                                    style = MaterialTheme.typography.displayMediumEmphasized
                                 )
 
                                 IconButton(onClick = {
@@ -222,7 +233,8 @@ fun MarcadorEquiposScreen(onBack: () -> Unit) {
                                 }) {
                                     Icon(
                                         Icons.Default.Add,
-                                        contentDescription = stringResource(R.string.marcador_sumar_punto_content_desc)
+                                        contentDescription = stringResource(R.string.marcador_sumar_punto_content_desc),
+                                        Modifier.size(36.dp)
                                     )
                                 }
                             }
@@ -328,4 +340,3 @@ fun MarcadorEquiposScreen(onBack: () -> Unit) {
         )
     }
 }
-
