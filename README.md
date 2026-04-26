@@ -2,7 +2,7 @@
 > **La navaja suiza digital definitiva para Android.**
 > *Arquitectura moderna, alto rendimiento y telemetría avanzada.*
 
-[![Play Store](https://img.shields.io/badge/PlayStore-4.9%20⭐-green?style=for-the-badge&logo=google-play)](https://play.google.com/store/apps/details?id=com.joasasso.minitoolbox&hl=es_AR)
+[![Play Store](https://img.shields.io/badge/PlayStore-5%20⭐-green?style=for-the-badge&logo=google-play)](https://play.google.com/store/apps/details?id=com.joasasso.minitoolbox&hl=es_AR)
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.9-purple?style=for-the-badge&logo=kotlin)](https://kotlinlang.org/)
 [![Jetpack Compose](https://img.shields.io/badge/UI-Jetpack%20Compose-blue?style=for-the-badge&logo=android)](https://developer.android.com/jetpack/compose)
 [![Firebase](https://img.shields.io/badge/Backend-Firebase-orange?style=for-the-badge&logo=firebase)](https://firebase.google.com/)
@@ -77,7 +77,7 @@ El proyecto sigue el patrón **MVVM (Model-View-ViewModel)** bajo principios de 
 ---
 
 ## 📈 Impacto Real
-- **Rating:** 4.9/5 ⭐ en Google Play Store.
+- **Rating:** 5/5 ⭐ en Google Play Store, basado en 23 reseñas.
 - **Instalaciones:** +130 descargas orgánicas.
 - **Comunidad:** Feedback activo de usuarios con 19 reseñas positivas.
 
