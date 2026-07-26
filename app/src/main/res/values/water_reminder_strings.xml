@@ -6,6 +6,7 @@
     <string name="water_add">+%1$d ml</string>
     <string name="water_remove">-%1$d ml</string>
     <string name="water_change_glass">Change glass amount</string>
+    <string name="water_glasses_display">( %1$d / %2$d Glasses)</string>
 
     <string name="water_notif_title">Water reminder</string>
     <string name="water_notif_enabled">Notifications</string>

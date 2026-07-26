@@ -248,8 +248,11 @@ fun AguaReminderScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(Modifier.height(16.dp))
+            val glassesConsumed = (totalAgua / mlPorVaso.coerceAtLeast(1).toFloat()).toInt()
+            val glassesGoal = (objetivoML / mlPorVaso.coerceAtLeast(1).toFloat()).toInt()
+            val glassesText = stringResource(R.string.water_glasses_display, glassesConsumed, glassesGoal)
             Text(
-                "${(totalAgua / 1000f).let { "%.2f".format(it) }} L / ${(objetivoML / 1000f).let { "%.2f".format(it) }} L",
+                "${(totalAgua / 1000f).let { "%.2f".format(it) }} L / ${(objetivoML / 1000f).let { "%.2f".format(it) }} L $glassesText",
                 fontSize = 20.sp
             )
             // --- Visual de progreso ---
