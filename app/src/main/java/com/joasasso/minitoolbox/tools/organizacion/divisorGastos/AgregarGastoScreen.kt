@@ -22,6 +22,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -43,7 +44,6 @@ import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.data.Gasto
 import com.joasasso.minitoolbox.data.Reunion
 import com.joasasso.minitoolbox.data.ReunionesRepository
-import com.joasasso.minitoolbox.ui.components.Stepper
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
@@ -69,21 +69,15 @@ fun AgregarGastoScreen(
     var showInfo by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Mensajes (asegurate de tener estos strings; si no, te paso las claves)
     val msgNombreOblig = stringResource(R.string.expense_name_required)
     val msgSinAporte = stringResource(R.string.expense_amount_required)
     val msgSinConsumidores = stringResource(R.string.expense_consumers_required)
 
     var reunion by remember { mutableStateOf<Reunion?>(null) }
     var descripcion by remember { mutableStateOf("") }
-
-    // Aportes: guardamos el texto ingresado y lo parseamos al final (coma o punto)
     var aportes by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
-
-    // Consumidores: por defecto TODOS (cantidad del grupo)
     var consumidores by remember { mutableStateOf<Map<String, Int>>(emptyMap()) }
 
-    // --- helpers para decimales flexibles "," y "." ---
     fun parseFlexibleDouble(text: String): Double? {
         if (text.isBlank()) return null
         val cleaned = text.trim()
@@ -96,8 +90,7 @@ fun AgregarGastoScreen(
     LaunchedEffect(Unit) {
         val reuniones = ReunionesRepository.flujoReuniones(context).firstOrNull().orEmpty()
         reunion = reuniones.find { it.id == reunionId }
-        // default: todos consumen
-        consumidores = reunion?.integrantes?.associate { it.nombre to it.cantidad } ?: emptyMap()
+        consumidores = reunion?.integrantes?.associate { it to 1 } ?: emptyMap()
     }
 
     val montoTotal = aportes.values.sumOf { parseFlexibleDouble(it) ?: 0.0 }
@@ -119,8 +112,6 @@ fun AgregarGastoScreen(
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-
-            // Nombre del gasto (obligatorio)
             item {
                 OutlinedTextField(
                     value = descripcion,
@@ -138,7 +129,6 @@ fun AgregarGastoScreen(
                 )
             }
 
-            // Quién pagó y cuánto (coma/punto aceptados)
             item {
                 Text(
                     stringResource(R.string.expense_who_paid_label),
@@ -146,7 +136,7 @@ fun AgregarGastoScreen(
                 )
             }
 
-            items(reunion?.integrantes.orEmpty()) { grupo ->
+            items(reunion?.integrantes.orEmpty()) { nombre ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
@@ -158,21 +148,17 @@ fun AgregarGastoScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(grupo.nombre, modifier = Modifier.weight(1f))
+                        Text(nombre, modifier = Modifier.weight(1f))
                         OutlinedTextField(
-                            value = aportes[grupo.nombre] ?: "",
+                            value = aportes[nombre] ?: "",
                             onValueChange = { nuevo ->
-                                // Unificar coma a punto
                                 var filtrado = nuevo.replace(',', '.')
-                                // Permitir solo dígitos y punto
                                 filtrado = filtrado.replace(Regex("[^0-9.]"), "")
-                                // Si hay más de un punto, eliminar los extra
                                 if (filtrado.count { it == '.' } > 1) {
                                     val firstDot = filtrado.indexOf('.')
                                     filtrado = filtrado.substring(0, firstDot + 1) +
                                             filtrado.substring(firstDot + 1).replace(".", "")
                                 }
-                                // Limitar a 2 decimales si hay punto
                                 if (filtrado.contains('.')) {
                                     val parts = filtrado.split('.')
                                     val enteros = parts[0]
@@ -181,7 +167,7 @@ fun AgregarGastoScreen(
                                 }
 
                                 aportes = aportes.toMutableMap().apply {
-                                    if (filtrado.isNotBlank()) put(grupo.nombre, filtrado) else remove(grupo.nombre)
+                                    if (filtrado.isNotBlank()) put(nombre, filtrado) else remove(nombre)
                                 }
                             },
                             modifier = Modifier.width(120.dp),
@@ -195,7 +181,6 @@ fun AgregarGastoScreen(
 
             item { HorizontalDivider() }
 
-            // Quiénes consumieron (Stepper 0..grupo.cantidad)
             item {
                 Text(
                     stringResource(R.string.expense_who_consumed_label),
@@ -203,8 +188,8 @@ fun AgregarGastoScreen(
                 )
             }
 
-            items(reunion?.integrantes.orEmpty()) { grupo ->
-                val actual = (consumidores[grupo.nombre] ?: grupo.cantidad).coerceIn(0, grupo.cantidad)
+            items(reunion?.integrantes.orEmpty()) { nombre ->
+                val actual = (consumidores[nombre] ?: 1) > 0
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
@@ -216,16 +201,15 @@ fun AgregarGastoScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("${grupo.nombre} (${grupo.cantidad})", modifier = Modifier.weight(1f))
+                        Text(nombre, modifier = Modifier.weight(1f))
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Stepper(
-                                value = actual,
-                                onValueChange = { nuevo ->
+                            Switch(
+                                checked = actual,
+                                onCheckedChange = { isChecked ->
                                     consumidores = consumidores.toMutableMap().apply {
-                                        put(grupo.nombre, nuevo.coerceIn(0, grupo.cantidad))
+                                        put(nombre, if (isChecked) 1 else 0)
                                     }
-                                },
-                                range = 0..grupo.cantidad
+                                }
                             )
                             Spacer(Modifier.width(8.dp))
                         }
@@ -235,12 +219,10 @@ fun AgregarGastoScreen(
 
             item { Spacer(Modifier.height(16.dp)) }
 
-            // Guardar
             item {
                 Button(
                     onClick = {
                         scope.launch {
-                            // Validaciones
                             if (descripcion.isBlank()) {
                                 snackbarHostState.showSnackbar(msgNombreOblig)
                                 return@launch

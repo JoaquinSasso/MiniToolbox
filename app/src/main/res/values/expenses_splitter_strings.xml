@@ -4,7 +4,7 @@
     <string name="expense_no_meetings">No meetings saved yet.</string>
     <string name="expense_help_title">About Expense Splitter</string>
     <string name="expense_help_line1">• This screen shows all meetings you’ve created, sorted by date.</string>
-    <string name="expense_help_line2">• Tap a meeting to view its details, edit expenses or modify groups.</string>
+    <string name="expense_help_line2">• Tap a meeting to view its details, edit expenses or modify members.</string>
     <string name="expense_help_line3">• Delete a meeting using the trash icon.</string>
     <string name="expense_help_line4">• From a meeting’s details, you can share a summary with the share icon.</string>
     <string name="expense_help_line5">• Tap the \'+\' button to create a new meeting.</string>
@@ -13,29 +13,26 @@
     <string name="expense_date">Date:</string>
     <string name="expense_members">Members:</string>
     <string name="expense_delete_content_desc">Delete meeting</string>
-    <string name="expense_group_size">Size</string>
 
 
     <string name="create_meeting_button">Save Meeting</string>
     <string name="create_meeting_name_label">Meeting name</string>
-    <string name="create_meeting_group_name">Group name</string>
-    <string name="create_meeting_group_size_label">Amount of people</string>
+    <string name="create_meeting_group_name">Member name</string>
     <string name="create_meeting_add_member">Add member</string>
     <string name="create_meeting_remove_member">Remove member</string>
-    <string name="create_meeting_snackbar_error">Please enter a name and add at least one person/group</string>
+    <string name="create_meeting_snackbar_error">Please enter a name and add at least one person</string>
     <string name="create_meeting_help_title">How to create a meeting?</string>
-    <string name="create_meeting_help_line1">• Give your meeting a name and add the participating groups (families, friends, etc.).</string>
-    <string name="create_meeting_help_line2">• Each group can have a name and a number of people associated.</string>
-    <string name="create_meeting_help_line3">• The group size will be used later to divide expenses proportionally.</string>
-    <string name="create_meeting_help_line4">• If you want to add a particular person, leave the group size at 1</string>
-    <string name="create_meeting_help_line5">• You will be able to add and edit expenses once the meeting is created.</string>
+    <string name="create_meeting_help_line1">• Give your meeting a name and add the participating members.</string>
+    <string name="create_meeting_help_line2">• Each member is a single person.</string>
+    <string name="create_meeting_help_line3">• You will be able to add and edit expenses once the meeting is created.</string>
+    <string name="create_meeting_help_line4">• The app will calculate how much each person owes based on what they consumed.</string>
+    <string name="create_meeting_help_line5">• Tap the \'+\' button to save the meeting.</string>
 
 
     <string name="expense_description_label">Expense description</string>
     <string name="total_amount_label">Total: %1$s</string>
     <string name="expense_who_paid_label">Who paid and how much?</string>
-    <string name="expense_who_consumed_label">Who consumed? (people per group)</string>
-    <string name="error_group_size_exceeded">%1$s group has a maximum of %2$d people</string>
+    <string name="expense_who_consumed_label">Who consumed?</string>
     <string name="expense_name_required">Expense must have a name</string>
     <string name="expense_amount_required">Enter at least an amount greater than 0.</string>
     <string name="expense_consumers_required">Select at least one consumer.</string>
@@ -43,22 +40,22 @@
     <string name="expense_delete_member_message">Are you sure you want to delete "%1$s"? This may change the value of some expenses because their contributions and consumptions will be removed.</string>
     <string name="help_title_expense">How to record an expense?</string>
     <string name="help_expense_1">• Write a brief description of the expense (e.g. \'Pizza\', \'Ticket\', \'Coca-Cola\').</string>
-    <string name="help_expense_2">• Indicate how much each group contributed.</string>
-    <string name="help_expense_3">• Then, select how many people from each group consumed the expense.</string>
+    <string name="help_expense_2">• Indicate how much each person contributed.</string>
+    <string name="help_expense_3">• Then, select who consumed the expense.</string>
     <string name="help_expense_4">• The total is calculated automatically from the contributions.</string>
-    <string name="help_expense_5">• The expense will be split proportionally based on consumption.</string>
+    <string name="help_expense_5">• The expense will be split among consumers.</string>
 
 
     <string name="expense_consumers_only">Consumed by: %1$s</string>
-    <string name="expense_consumers_with_price">Consumed by: %1$s · %2$s per person</string>
+    <string name="expense_consumers_with_price">Consumed by: %1$s · %2$s each</string>
     <string name="expense_no_consumers">—</string>
     <string name="expenses_share_summary_button">Share summary</string>
     <string name="date_label">Date: %1$s</string>
     <string name="total_spent_label">Total spent: $%1$.2f</string>
     <string name="expenses_section">Expenses</string>
     <string name="members_section">Members</string>
-    <string name="edit_member_content_desc">Edit group</string>
-    <string name="delete_member_content_desc">Delete group</string>
+    <string name="edit_member_content_desc">Edit member</string>
+    <string name="delete_member_content_desc">Delete member</string>
     <string name="edit_expense_content_desc">Edit expense</string>
     <string name="delete_expense_content_desc">Delete expense</string>
     <string name="add_member_button">+ Add member</string>
@@ -71,9 +68,9 @@
     <string name="dialog_meeting_info_title">About the meeting</string>
     <string name="info_meeting_line1">• Here you can see a summary of the meeting with date, total spent, and expenses.</string>
     <string name="info_meeting_line2">• You can edit or delete expenses, or add new ones.</string>
-    <string name="info_meeting_line3">• You can also modify the groups: change name, number of people, or remove them.</string>
-    <string name="info_meeting_line4">• The debts section shows who owes whom, based on how much each group paid and consumed.</string>
-    <string name="info_meeting_line5">• The calculation is automatic and proportional to the number of people who consumed from each group.</string>
+    <string name="info_meeting_line3">• You can also modify the members: change name or remove them.</string>
+    <string name="info_meeting_line4">• The debts section shows who owes whom, based on how much each person paid and consumed.</string>
+    <string name="info_meeting_line5">• The calculation is automatic and split among those who consumed.</string>
     <string name="info_meeting_line6">• You can use the share button to send the summary via message, email, or any compatible app. Perfect to split expenses with friends.</string>
 
 
@@ -82,7 +79,6 @@
     <string name="share_total">Total:</string>
     <string name="share_expenses">Expenses:</string>
     <string name="share_members">Members:</string>
-    <string name="people_label">people</string>
     <string name="share_paid">paid</string>
     <string name="share_debts">Split:</string>
     <string name="debt_line">%1$s must pay %2$s to %3$s</string>

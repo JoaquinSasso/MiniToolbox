@@ -15,21 +15,15 @@ data class Reunion(
     val id: String,
     val nombre: String,
     val fecha: Long,
-    val integrantes: List<Grupo>,
+    val integrantes: List<String>, // Simplificado: lista de nombres
     val gastos: List<Gasto>
-)
-
-@Serializable
-data class Grupo(
-    val nombre: String,
-    val cantidad: Int // cantidad de personas reales en el grupo
 )
 
 @Serializable
 data class Gasto(
     val id: String,
     val descripcion: String,
-    val consumidoPor: Map<String, Int>, // nombre del grupo -> cantidad de personas que consumieron
+    val consumidoPor: Map<String, Int>, // Se mantiene Map por compatibilidad, pero el Int siempre será 1 o 0
     val aportesIndividuales: Map<String, Double> = emptyMap(),
     val imagenComprobante: String? = null
 )

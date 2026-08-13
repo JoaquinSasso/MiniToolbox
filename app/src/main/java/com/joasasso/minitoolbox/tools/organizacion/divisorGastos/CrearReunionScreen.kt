@@ -13,12 +13,12 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -46,15 +46,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.joasasso.minitoolbox.R
-import com.joasasso.minitoolbox.data.Grupo
 import com.joasasso.minitoolbox.data.Reunion
 import com.joasasso.minitoolbox.data.ReunionesRepository
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
@@ -66,17 +67,17 @@ import java.util.UUID
 @Composable
 fun CrearReunionScreen(
     onBack: () -> Unit,
-    onReunionCreada: () -> Unit
+    onReunionCreada: (String) -> Unit
 ) {
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
     val scope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
     var showInfo by remember { mutableStateOf(false) }
 
     var nombre by remember { mutableStateOf("") }
-    var nuevoGrupoNombre by remember { mutableStateOf("") }
-    var nuevaCantidad by remember { mutableStateOf("1") }
-    val grupos = remember { mutableStateListOf<Grupo>() }
+    var nuevoIntegranteNombre by remember { mutableStateOf("") }
+    val integrantes = remember { mutableStateListOf<String>() }
     val snackbarHostState = remember { SnackbarHostState() }
     val snackbarError = stringResource(R.string.create_meeting_snackbar_error)
 
@@ -90,24 +91,25 @@ fun CrearReunionScreen(
         bottomBar = {
             Button(
                 onClick = {
-                    if (nombre.isBlank() || grupos.isEmpty()) {
+                    if (nombre.isBlank() || integrantes.isEmpty()) {
                         scope.launch {
                             snackbarHostState.showSnackbar(snackbarError)
                         }
                         return@Button
                     }
 
+                    val meetingId = UUID.randomUUID().toString()
                     val nuevaReunion = Reunion(
-                        id = UUID.randomUUID().toString(),
+                        id = meetingId,
                         nombre = nombre,
                         fecha = System.currentTimeMillis(),
-                        integrantes = grupos.toList(),
+                        integrantes = integrantes.toList(),
                         gastos = emptyList()
                     )
 
                     scope.launch {
                         ReunionesRepository.agregarReunion(context, nuevaReunion)
-                        onReunionCreada()
+                        onReunionCreada(meetingId)
                     }
                 },
                 modifier = Modifier
@@ -132,43 +134,42 @@ fun CrearReunionScreen(
                     value = nombre,
                     onValueChange = { nombre = it },
                     label = { Text(stringResource(R.string.create_meeting_name_label)) },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                    keyboardActions = KeyboardActions(
+                        onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                    )
                 )
             }
 
             item {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Column(horizontalAlignment = Alignment.Start,
-                        modifier = Modifier.height(140.dp)
-                        ) {
-                        OutlinedTextField(
-                            value = nuevoGrupoNombre,
-                            onValueChange = { nuevoGrupoNombre = it },
-                            label = { Text(stringResource(R.string.create_meeting_group_name)) },
-                            modifier = Modifier.weight(1f)
-                        )
-                        OutlinedTextField(
-                            value = nuevaCantidad,
-                            onValueChange = { nuevaCantidad = it },
-                            label = { Text(stringResource(R.string.create_meeting_group_size_label)) },
-                            modifier = Modifier.weight(1f),
-                            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                        )
+                    fun agregarIntegrante() {
+                        val nombreIntegrante = nuevoIntegranteNombre.trim()
+                        if (nombreIntegrante.isNotBlank() && !integrantes.contains(nombreIntegrante)) {
+                            integrantes.add(nombreIntegrante)
+                            nuevoIntegranteNombre = ""
+                        }
                     }
+
+                    OutlinedTextField(
+                        value = nuevoIntegranteNombre,
+                        onValueChange = { nuevoIntegranteNombre = it },
+                        label = { Text(stringResource(R.string.create_meeting_group_name)) },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(
+                            onDone = { agregarIntegrante() }
+                        )
+                    )
                     IconButton(
-                        onClick = {
-                            val nombreGrupo = nuevoGrupoNombre.trim()
-                            val cantidad = nuevaCantidad.toIntOrNull()?.coerceAtLeast(1) ?: 1
-                            if (nombreGrupo.isNotBlank()) {
-                                grupos.add(Grupo(nombreGrupo, cantidad))
-                                nuevoGrupoNombre = ""
-                                nuevaCantidad = "1"
-                            }
-                        },
+                        onClick = { agregarIntegrante() },
                         modifier = Modifier
                             .size(56.dp)
                             .background(MaterialTheme.colorScheme.primary, CircleShape)
@@ -182,7 +183,7 @@ fun CrearReunionScreen(
                 }
             }
 
-            items(grupos, key = { it.nombre }) { grupo ->
+            items(integrantes, key = { it }) { integrante ->
                 var visible by remember { mutableStateOf(true) }
 
                 AnimatedVisibility(
@@ -207,7 +208,7 @@ fun CrearReunionScreen(
                                 .padding(horizontal = 20.dp, vertical = 8.dp)
                         ) {
                             Text(
-                                text = "${grupo.nombre} (${stringResource(R.string.expense_group_size)}: ${grupo.cantidad})",
+                                text = integrante,
                                 style = MaterialTheme.typography.bodyLarge,
                                 modifier = Modifier.weight(1f),
                                 maxLines = 1,
@@ -218,7 +219,7 @@ fun CrearReunionScreen(
                                 visible = false
                                 scope.launch {
                                     delay(300)
-                                    grupos.remove(grupo)
+                                    integrantes.remove(integrante)
                                 }
                             }) {
                                 Icon(
@@ -257,5 +258,3 @@ fun CrearReunionScreen(
         }
     }
 }
-
-
