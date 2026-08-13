@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="pro_screen_title">Modo PRO</string>
-    <string name="pro_title">Desbloquea todo el potencial</string>
-    <string name="pro_description">Apoya el desarrollo de la app y disfruta de una experiencia mejorada sin interrupciones.</string>
+    <string name="pro_title">Apoya a MiniToolbox</string>
+    <string name="pro_description">Ayúdanos a que la app siga creciendo. Al pasarte a PRO, eliminas todos los anuncios y apoyas directamente el desarrollo independiente.</string>
     <string name="pro_benefit_ads_title">Sin Anuncios</string>
-    <string name="pro_benefit_ads_desc">Navega por todas las herramientas sin publicidad.</string>
+    <string name="pro_benefit_ads_desc">Disfruta de toda la aplicación sin interrupciones.</string>
     <string name="pro_benefit_tools_title">Herramientas Exclusivas</string>
     <string name="pro_benefit_tools_desc">Acceso ilimitado a las funciones más potentes.</string>
-    <string name="pro_benefit_widgets_title_short">Widgets de un toque</string>
-    <string name="pro_benefit_widgets_desc_short">Hazlo desde la pantalla de inicio — hasta 2× más rápido.</string>
+
     <string name="pro_benefit_lifetime_title">Pago Único</string>
     <string name="pro_benefit_lifetime_desc">Un solo pago para desbloquear todo para siempre.</string>
-    <string name="pro_benefit_support_title">Apoya a un estudio indie</string>
-    <string name="pro_benefit_support_desc">Pásate a PRO para mantener viva y pulida esta app: correcciones más rápidas, herramientas más inteligentes y novedades constantes.</string>
+    <string name="pro_benefit_support_title">Apoya el Desarrollo Independiente</string>
+    <string name="pro_benefit_support_desc">Tu contribución me ayuda a mantener el proyecto vivo, añadir nuevas funciones y mejorar la app para todos.</string>
     <string name="pro_buy_button">Comprar por %1$s</string>
     <string name="pro_buy_button_disabled">El modo pro todavía está en desarrollo</string>
     <string name="pro_restore_button">Restaurar compras</string>

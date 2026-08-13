@@ -9,12 +9,9 @@ import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.glance.Button
-import androidx.glance.ColorFilter
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
-import androidx.glance.Image
-import androidx.glance.ImageProvider
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
@@ -33,19 +30,14 @@ import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
-import androidx.glance.layout.size
 import androidx.glance.layout.width
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.joasasso.minitoolbox.MainActivity
-import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AgregarAguaCallback
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.QuitarAguaCallback
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.actualizarWidgetAgua
-import com.joasasso.minitoolbox.utils.pro.ProRepository
-import com.joasasso.minitoolbox.utils.pro.paywallIntent
-import kotlinx.coroutines.flow.first
 
 class AguaWidget : GlanceAppWidget() {
 
@@ -56,7 +48,6 @@ class AguaWidget : GlanceAppWidget() {
     }
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val isPro = ProRepository.isProFlow(context).first()
         provideContent {
             val prefs = currentState<Preferences>()
             val agua = prefs[KEY_AGUA] ?: 0
@@ -100,27 +91,6 @@ class AguaWidget : GlanceAppWidget() {
                             onClick = actionRunCallback<AgregarAguaCallback>()
                         )
                     }
-                }
-            }
-
-            if (!isPro) {
-                // Badge PRO en la esquina superior derecha
-                Box(
-                    modifier = GlanceModifier
-                        .fillMaxSize()
-                        .padding(6.dp)
-                        .background(Color(0xB0000000))
-                        .clickable(actionStartActivity(paywallIntent(context))),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        provider = ImageProvider(
-                            resId = R.drawable.pro_badge
-                        ),
-                        contentDescription = "PRO Tool",
-                        modifier = GlanceModifier.size(40.dp),
-                        colorFilter = ColorFilter.tint(ColorProvider(Color(0xFFFFD700), Color(0xFFFFD700))) // Tinte dorado
-                    )
                 }
             }
         }
