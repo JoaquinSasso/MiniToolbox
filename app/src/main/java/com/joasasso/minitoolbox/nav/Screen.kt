@@ -12,11 +12,9 @@ sealed class Screen(val route: String) {
     object DevMetrics  : Screen("dev_metrics") // antes: "dev/metrics"
 
     // --- Tools (normalizadas)
-    object RandomColor         : Screen("random_color")
     object GroupSelector       : Screen("group_selector")
     object CoinFlip            : Screen("coin_flip")
     object DecimalBinary       : Screen("decimal_binary")
-    object TextBinary          : Screen("text_binary")
     object TrucoScoreboard     : Screen("truco_scoreboard")
     object AgeCalculator       : Screen("age_calculator")
     object ZodiacSign          : Screen("zodiac_sign")
@@ -27,20 +25,12 @@ sealed class Screen(val route: String) {
     }
     object BubbleLevel         : Screen("bubble_level")
     object Percentage          : Screen("percentage")
-    object TimeConverter       : Screen("time_converter")
-    object BmiCalculator       : Screen("bmi_calculator")
-    object RomanNumerals       : Screen("roman_numerals")
     object UnitConverter       : Screen("unit_converter")
     object PasswordGenerator   : Screen("password_generator")
-    object ActivitySuggester   : Screen("activity_suggester")
-    object NameGenerator       : Screen("name_generator")
     object QrGenerator         : Screen("qr_generator")
-    object VcardGenerator      : Screen("vcard_generator")
-    object LoremIpsum          : Screen("lorem_ipsum")
     object Ruler               : Screen("ruler")
     object LightMeter          : Screen("light_meter")
     object Flashlight          : Screen("flashlight")
-    object Streaks             : Screen("streaks")
     object Water               : Screen("water")
     object WaterStats          : Screen("water_stats")
     object Countdown           : Screen("countdown")
@@ -59,8 +49,6 @@ sealed class Screen(val route: String) {
     object GuessCapital        : Screen("guess_capital")
     object Compass             : Screen("compass")
     object Todo                : Screen("todo")
-    object Events              : Screen("events")
-    object CompoundInterest    : Screen("compound_interest")
     object Scoreboard          : Screen("scoreboard")
     object Magnifier           : Screen("magnifier")
     object ArRuler             : Screen("ar_ruler")
@@ -110,4 +98,3 @@ sealed class Screen(val route: String) {
 
     }
 }
-

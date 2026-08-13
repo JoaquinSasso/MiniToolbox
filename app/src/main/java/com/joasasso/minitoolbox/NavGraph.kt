@@ -36,20 +36,12 @@ import com.joasasso.minitoolbox.tools.entretenimiento.minijuegos.AdivinaCapitalS
 import com.joasasso.minitoolbox.tools.entretenimiento.minijuegos.CalculosRapidosScreen
 import com.joasasso.minitoolbox.tools.entretenimiento.minijuegos.InOtherWoldScreen
 import com.joasasso.minitoolbox.tools.entretenimiento.minijuegos.minesweeper.MinesweeperScreen
-import com.joasasso.minitoolbox.tools.herramientas.calculadoras.ConversorHorasScreen
-import com.joasasso.minitoolbox.tools.herramientas.calculadoras.ConversorRomanosScreen
 import com.joasasso.minitoolbox.tools.herramientas.calculadoras.ConversorUnidadesScreen
 import com.joasasso.minitoolbox.tools.herramientas.calculadoras.DecimalBinaryConverterScreen
-import com.joasasso.minitoolbox.tools.herramientas.calculadoras.IMCScreen
-import com.joasasso.minitoolbox.tools.herramientas.calculadoras.InteresCompuestoScreen
 import com.joasasso.minitoolbox.tools.herramientas.calculadoras.PorcentajeScreen
 import com.joasasso.minitoolbox.tools.herramientas.generadores.GeneradorContrasenaScreen
-import com.joasasso.minitoolbox.tools.herramientas.generadores.GeneradorLoremIpsumScreen
-import com.joasasso.minitoolbox.tools.herramientas.generadores.GeneradorNombresScreen
-import com.joasasso.minitoolbox.tools.herramientas.generadores.GeneradorQrContactoScreen
 import com.joasasso.minitoolbox.tools.herramientas.generadores.GeneradorQrScreen
 import com.joasasso.minitoolbox.tools.herramientas.generadores.GroupSelectorScreen
-import com.joasasso.minitoolbox.tools.herramientas.generadores.RandomColorGeneratorScreen
 import com.joasasso.minitoolbox.tools.herramientas.instrumentos.ArRulerSceneViewScreen
 import com.joasasso.minitoolbox.tools.herramientas.instrumentos.BrujulaScreen
 import com.joasasso.minitoolbox.tools.herramientas.instrumentos.BubbleLevelScreen
@@ -61,8 +53,6 @@ import com.joasasso.minitoolbox.tools.info.AgeCalculatorScreen
 import com.joasasso.minitoolbox.tools.info.BasicPhrasesScreen
 import com.joasasso.minitoolbox.tools.info.CountriesInfoScreen
 import com.joasasso.minitoolbox.tools.info.RemainingTimeScreen
-import com.joasasso.minitoolbox.tools.info.TextBinaryConverterScreen
-import com.joasasso.minitoolbox.tools.organizacion.SugeridorActividadScreen
 import com.joasasso.minitoolbox.tools.organizacion.divisorGastos.AgregarGastoScreen
 import com.joasasso.minitoolbox.tools.organizacion.divisorGastos.CrearReunionScreen
 import com.joasasso.minitoolbox.tools.organizacion.divisorGastos.DetallesReunionScreen
@@ -70,8 +60,6 @@ import com.joasasso.minitoolbox.tools.organizacion.divisorGastos.EditarGastoScre
 import com.joasasso.minitoolbox.tools.organizacion.divisorGastos.ReunionesScreen
 import com.joasasso.minitoolbox.tools.organizacion.pomodoro.PomodoroScreen
 import com.joasasso.minitoolbox.tools.organizacion.pomodoro.PomodoroTimersListScreen
-import com.joasasso.minitoolbox.tools.organizacion.recordatorios.EventosImportantesScreen
-import com.joasasso.minitoolbox.tools.organizacion.recordatorios.HabitTrackerScreen
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.ToDoListScreen
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AguaReminderScreen
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AguaStatisticsScreen
@@ -167,9 +155,6 @@ fun MiniToolboxNavGraph(
             )
         }
 
-        composable(Screen.RandomColor.route) {
-            RandomColorGeneratorScreen(onBack = onBackSmart)
-        }
         composable(Screen.GroupSelector.route) {
             GroupSelectorScreen(onBack = onBackSmart)
         }
@@ -178,9 +163,6 @@ fun MiniToolboxNavGraph(
         }
         composable(Screen.DecimalBinary.route) {
             DecimalBinaryConverterScreen(onBack = onBackSmart)
-        }
-        composable(Screen.TextBinary.route) {
-            TextBinaryConverterScreen(onBack = onBackSmart)
         }
         composable(Screen.TrucoScoreboard.route) {
             TrucoScoreBoardScreen(onBack = onBackSmart)
@@ -212,35 +194,14 @@ fun MiniToolboxNavGraph(
         composable(Screen.Percentage.route) {
             PorcentajeScreen(onBack = onBackSmart)
         }
-        composable(Screen.TimeConverter.route) {
-            ConversorHorasScreen(onBack = onBackSmart)
-        }
-        composable(Screen.BmiCalculator.route) {
-            IMCScreen(onBack = onBackSmart)
-        }
-        composable(Screen.RomanNumerals.route) {
-            ConversorRomanosScreen(onBack = onBackSmart)
-        }
         composable(Screen.UnitConverter.route) {
             ConversorUnidadesScreen(onBack = onBackSmart)
         }
         composable(Screen.PasswordGenerator.route) {
             GeneradorContrasenaScreen(onBack = onBackSmart)
         }
-        composable(Screen.ActivitySuggester.route) {
-            SugeridorActividadScreen(onBack = onBackSmart)
-        }
-        composable(Screen.NameGenerator.route) {
-            GeneradorNombresScreen(onBack = onBackSmart)
-        }
         composable(Screen.QrGenerator.route) {
             GeneradorQrScreen(onBack = onBackSmart)
-        }
-        composable(Screen.VcardGenerator.route) {
-            GeneradorQrContactoScreen(onBack = onBackSmart)
-        }
-        composable(Screen.LoremIpsum.route) {
-            GeneradorLoremIpsumScreen(onBack = onBackSmart)
         }
         composable(Screen.Ruler.route) {
             ReglaScreen(onBack = onBackSmart)
@@ -250,9 +211,6 @@ fun MiniToolboxNavGraph(
         }
         composable(Screen.Flashlight.route) {
             FlashScreen(onBack = onBackSmart)
-        }
-        composable(Screen.Streaks.route) {
-            HabitTrackerScreen(onBack = onBackSmart)
         }
         composable(Screen.Water.route) {
             AguaReminderScreen(
@@ -349,12 +307,6 @@ fun MiniToolboxNavGraph(
         composable(Screen.Todo.route) {
             ToDoListScreen(onBack = onBackSmart)
         }
-        composable(Screen.Events.route) {
-            EventosImportantesScreen(onBack = onBackSmart)
-        }
-        composable(Screen.CompoundInterest.route) {
-            InteresCompuestoScreen(onBack = onBackSmart)
-        }
         composable(Screen.Scoreboard.route) {
             MarcadorEquiposScreen(onBack = onBackSmart)
         }
@@ -390,4 +342,3 @@ fun MiniToolboxNavGraph(
         }
     }
 }
-
