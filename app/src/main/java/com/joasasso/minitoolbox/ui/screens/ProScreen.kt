@@ -20,7 +20,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AllInclusive
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.WebAssetOff
-import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -116,15 +115,12 @@ fun ProScreen(onBack: () -> Unit) {
             BenefitItem(icon = Icons.Default.WebAssetOff,
                 title = stringResource(R.string.pro_benefit_ads_title),
                 description = stringResource(R.string.pro_benefit_ads_desc))
-            BenefitItem(icon = Icons.Default.Widgets,
-                title = stringResource(R.string.pro_benefit_widgets_title_short),
-                description = stringResource(R.string.pro_benefit_widgets_desc_short))
-            BenefitItem(icon = Icons.Default.AllInclusive,
-                title = stringResource(R.string.pro_benefit_lifetime_title),
-                description = stringResource(R.string.pro_benefit_lifetime_desc))
             BenefitItem(icon = Icons.Default.Favorite,
                 title = stringResource(R.string.pro_benefit_support_title),
                 description = stringResource(R.string.pro_benefit_support_desc))
+            BenefitItem(icon = Icons.Default.AllInclusive,
+                title = stringResource(R.string.pro_benefit_lifetime_title),
+                description = stringResource(R.string.pro_benefit_lifetime_desc))
 
             Spacer(Modifier.weight(1f))
 

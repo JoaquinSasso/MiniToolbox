@@ -2,7 +2,6 @@ package com.joasasso.minitoolbox.widgets
 
 import android.content.Context
 import android.content.Intent
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.Preferences
 import androidx.glance.ColorFilter
@@ -24,7 +23,6 @@ import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.background
-import androidx.glance.color.ColorProvider
 import androidx.glance.currentState
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
@@ -42,8 +40,6 @@ import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.data.FAVORITOS_KEYS
 import com.joasasso.minitoolbox.data.flujoToolsFavoritas
 import com.joasasso.minitoolbox.tools.ToolRegistry
-import com.joasasso.minitoolbox.utils.pro.ProRepository
-import com.joasasso.minitoolbox.utils.pro.paywallIntent
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -53,7 +49,6 @@ class FavoriteToolsWidget : GlanceAppWidget() {
     override val sizeMode = SizeMode.Exact
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val isPro = ProRepository.isProFlow(context).first()
         provideContent {
             val prefs = currentState<Preferences>()
             val size = LocalSize.current
@@ -147,26 +142,6 @@ class FavoriteToolsWidget : GlanceAppWidget() {
                     }
                 }
             }
-            if (!isPro) {
-                // Badge PRO en la esquina superior derecha
-                Box(
-                    modifier = GlanceModifier
-                        .fillMaxSize()
-                        .padding(6.dp)
-                        .background(Color(0xB0000000))
-                        .clickable(actionStartActivity(paywallIntent(context))),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        provider = ImageProvider(
-                            resId = R.drawable.pro_badge
-                        ),
-                        contentDescription = "PRO Tool",
-                        modifier = GlanceModifier.size(40.dp),
-                        colorFilter = ColorFilter.tint(ColorProvider(Color(0xFFFFD700), Color(0xFFFFD700))) // Tinte dorado
-                    )
-                }
-            }
         }
     }
 }
@@ -200,13 +175,7 @@ class FavoriteToolsWidgetReceiver : GlanceAppWidgetReceiver() {
             glanceId: GlanceId,
             parameters: ActionParameters
         ) {
-            val isPro = ProRepository.isProFlow(context).first()
-            //Si no es pro mostrar el paywall
-            if (!isPro) {
-                // Abrir paywall directamente: esto sí ejecuta la navegación
-                context.startActivity(paywallIntent(context))
-                return
-            }
+            // No longer needed
         }
     }
 }
