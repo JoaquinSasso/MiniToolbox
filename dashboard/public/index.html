@@ -408,6 +408,24 @@ function palette(n){
 }
 function destroyCharts(){Object.values(charts).forEach(c=>c&&c.destroy());charts={};}
 
+/* ---------- nombres de idioma (ISO 639-1 -> español) ---------- */
+const LANG_DISPLAY=(()=>{try{return new Intl.DisplayNames(["es"],{type:"language",fallback:"code"});}catch(e){return null;}})();
+function langLabel(raw){
+  const code=String(raw||"").trim();
+  if(!code)return{name:"—",code:""};
+  if(code.toLowerCase()==="und")return{name:"Sin determinar",code};
+  let name=code;
+  if(LANG_DISPLAY){
+    try{const n=LANG_DISPLAY.of(code);if(n&&n!==code)name=n.charAt(0).toUpperCase()+n.slice(1);}catch(e){}
+  }
+  return{name,code};
+}
+function langCell(raw){
+  const{name,code}=langLabel(raw);
+  if(name===code)return `<span class="mono">${code}</span>`;
+  return `${name} <span class="mono" style="color:var(--faint); font-size:11px">${code}</span>`;
+}
+
 /* ---------- render: KPIs ---------- */
 function renderKpis(a,range){
   const topVer=ranked(a.agg.versions)[0], topLang=ranked(a.agg.lang_primary)[0];
@@ -419,7 +437,7 @@ function renderKpis(a,range){
     {l:"Días con datos",v:fmt(a.daysWithData),s:`de ${range.days} posibles`},
     {l:"Tools distintas",v:fmt(distinctTools),s:`${fmt(toolsTotal)} usos totales`},
     {l:"Versión top",v:topVer?topVer[0]:"—",s:topVer?pctS(topVer[1],totalOf(a.agg.versions))+" del uso":""},
-    {l:"Idioma top",v:topLang?topLang[0]:"—",s:topLang?pctS(topLang[1],totalOf(a.agg.lang_primary))+" de dispositivos":""},
+    {l:"Idioma top",v:topLang?langLabel(topLang[0]).name:"—",s:topLang?langLabel(topLang[0]).code+" · "+pctS(topLang[1],totalOf(a.agg.lang_primary))+" de dispositivos":""},
   ];
   $("#kpis").innerHTML=cards.map(c=>`
     <div class="kpi"><div class="k-label"><span>${c.l}</span></div>
@@ -463,12 +481,13 @@ function renderTools(map){
   updateZeroList(map);
 }
 /* ---------- tabla rankeada genérica ---------- */
-function renderRankTable(sel,entries,total,isTools){
+function renderRankTable(sel,entries,total,isTools,keyCell){
   const tb=$(sel+" tbody");
   if(!entries.length){tb.innerHTML=`<tr><td colspan="4" class="empty">Sin datos en el rango</td></tr>`;return;}
   const max=entries[0][1];
+  const cell=keyCell||(k=>`<span class="mono">${k}</span>`);
   tb.innerHTML=entries.map(([k,v])=>`
-    <tr><td class="mono">${k}</td>
+    <tr><td>${cell(k)}</td>
     <td class="num">${fmt(v)}</td>
     <td class="num">${pctS(v,total)}</td>
     <td class="share"><div class="fill" style="width:${(v/max*100).toFixed(1)}%"></div><span>${pctS(v,total)}</span></td></tr>`).join("");
@@ -499,8 +518,8 @@ function renderPie(sel,map,key){
 }
 /* ---------- idiomas ---------- */
 function renderLangs(a){
-  renderRankTable("#tblLangP",ranked(a.agg.lang_primary),totalOf(a.agg.lang_primary));
-  renderRankTable("#tblLangS",ranked(a.agg.lang_secondary),totalOf(a.agg.lang_secondary));
+  renderRankTable("#tblLangP",ranked(a.agg.lang_primary),totalOf(a.agg.lang_primary),false,langCell);
+  renderRankTable("#tblLangS",ranked(a.agg.lang_secondary),totalOf(a.agg.lang_secondary),false,langCell);
 }
 /* ---------- tabla diaria ---------- */
 function renderDaily(daily){
