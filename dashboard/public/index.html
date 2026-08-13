@@ -118,6 +118,8 @@ tbody tr:hover{background:var(--surface2)}
 .zero-list{display:flex; flex-wrap:wrap; gap:6px; margin-top:10px}
 .chip{font-family:var(--mono); font-size:12px; padding:3px 8px; border-radius:6px; background:var(--surface2);
   border:1px solid var(--border); color:var(--neg)}
+.chip.paywall{color:var(--warn); border-color:color-mix(in srgb,var(--warn) 50%, var(--border))}
+.chip.util{color:var(--faint); border-color:var(--border)}
 details.zero{margin-top:12px}
 details.zero summary{cursor:pointer; color:var(--muted); font-size:12px}
 details.zero textarea{width:100%; margin-top:8px; min-height:70px; background:var(--surface2); color:var(--text);
@@ -230,7 +232,8 @@ details.zero textarea{width:100%; margin-top:8px; min-height:70px; background:va
           <details class="zero" id="zeroBox">
             <summary>Detectar herramientas sin uso en el rango</summary>
             <p style="font-size:12px; color:var(--muted); margin:8px 0 0">
-              Pegá todos los IDs de tus tools (uno por línea o separados por coma). Se marcan las que no registran ni un uso.</p>
+              Precargado con las 46 tools de tu código (Screen.kt). Editá la lista si hace falta — "pro" y "about" quedan marcadas aparte, no como candidatas a borrar.
+              <button class="btn" id="btnResetZero" style="padding:2px 8px; font-size:11px; margin-left:6px">Restaurar lista completa</button></p>
             <textarea id="zeroInput" placeholder="ar_ruler&#10;ruler&#10;compass&#10;…"></textarea>
             <div class="zero-list" id="zeroList"></div>
           </details>
@@ -426,6 +429,39 @@ function langCell(raw){
   return `${name} <span class="mono" style="color:var(--faint); font-size:11px">${code}</span>`;
 }
 
+/* ---------- catálogo de tools (desde Screen.kt + tool_sum.xml) ---------- */
+const TOOL_CATALOG={
+  random_color:{name:"Colores (hex)"}, group_selector:{name:"Generador de grupos"},
+  coin_flip:{name:"Cara o cruz"}, decimal_binary:{name:"Decimal ↔ binario"},
+  text_binary:{name:"Texto ↔ binario"}, truco_scoreboard:{name:"Marcador de truco"},
+  age_calculator:{name:"Calculadora de edad"}, zodiac_sign:{name:"Signo zodiacal"},
+  pomodoro_list:{name:"Pomodoro"}, bubble_level:{name:"Nivel de burbuja"},
+  percentage:{name:"Porcentajes"}, time_converter:{name:"Horas 12/24"},
+  bmi_calculator:{name:"IMC"}, roman_numerals:{name:"Números romanos"},
+  unit_converter:{name:"Conversor de unidades"}, password_generator:{name:"Generador de contraseñas"},
+  activity_suggester:{name:"Sugeridor de actividades"}, name_generator:{name:"Nombres aleatorios"},
+  qr_generator:{name:"Generador de QR"}, vcard_generator:{name:"QR vCard"},
+  lorem_ipsum:{name:"Lorem ipsum"}, ruler:{name:"Regla en pantalla"},
+  light_meter:{name:"Medidor de luz"}, flashlight:{name:"Linterna"},
+  streaks:{name:"Rachas / hábitos"}, water:{name:"Recordatorio de agua"},
+  countdown:{name:"Cuenta regresiva"}, countries_info:{name:"Info de países"},
+  selector_wheel:{name:"Selector de opciones"}, guess_flag:{name:"Adivina la bandera"},
+  meetings:{name:"Divisor de gastos"}, dice:{name:"Dados"},
+  quick_calcs:{name:"Cálculo rápido"}, quotes:{name:"Frases",note:"sin descripción en tool_sum.xml"},
+  multiverse_me:{name:"Multiverso / En otro mundo"}, guess_capital:{name:"Adivina la capital"},
+  compass:{name:"Brújula"}, todo:{name:"To-Do list"}, events:{name:"Eventos importantes"},
+  compound_interest:{name:"Interés compuesto"}, scoreboard:{name:"Marcador de equipos"},
+  magnifier:{name:"Lupa"}, ar_ruler:{name:"Regla AR"}, minesweeper:{name:"Buscaminas"},
+  pro:{name:"Pro (paywall)",isPaywall:true,note:"no es una tool: desbloquea widgets y saca ads"},
+  about:{name:"Acerca de",isUtility:true,note:"marcada para ocultar de métricas en el código, pero igual registra uso"},
+};
+const TOOL_CATALOG_IDS=Object.keys(TOOL_CATALOG).sort();
+function toolCell(id){
+  const c=TOOL_CATALOG[id];
+  if(!c)return `<span class="mono">${id}</span>`;
+  return `${c.name} <span class="mono" style="color:var(--faint); font-size:11px">${id}</span>`;
+}
+
 /* ---------- render: KPIs ---------- */
 function renderKpis(a,range){
   const topVer=ranked(a.agg.versions)[0], topLang=ranked(a.agg.lang_primary)[0];
@@ -477,7 +513,7 @@ function renderTools(map){
               y:{grid:{display:false},ticks:{autoSkip:false,font:{family:cssVar("--mono"),size:12}}}},
       plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${fmt(c.raw)} (${pctS(c.raw,total)})`}}}}
   });
-  renderRankTable("#tblTools",entries,total,true);
+  renderRankTable("#tblTools",entries,total,true,toolCell);
   updateZeroList(map);
 }
 /* ---------- tabla rankeada genérica ---------- */
@@ -500,9 +536,15 @@ function updateZeroList(map){
   if(!ids.length){box.innerHTML="";return;}
   const used=new Set(Object.keys(map||{}));
   const zero=ids.filter(id=>!used.has(id));
-  box.innerHTML=zero.length
-    ? `<div style="width:100%;font-size:12px;color:var(--muted);margin-bottom:4px">${zero.length} sin uso en el rango:</div>`+zero.map(z=>`<span class="chip">${z}</span>`).join("")
-    : `<div style="font-size:12px;color:var(--pos)">Todas las tools listadas registran al menos un uso.</div>`;
+  if(!zero.length){box.innerHTML=`<div style="font-size:12px;color:var(--pos)">Todas las tools listadas registran al menos un uso.</div>`;return;}
+  const rows=zero.map(id=>{
+    const c=TOOL_CATALOG[id];
+    const label=c?c.name:id;
+    const cls=c?.isPaywall?"chip paywall":c?.isUtility?"chip util":"chip";
+    const suffix=c?.isPaywall?" · paywall":c?.isUtility?" · utilidad":"";
+    return `<span class="${cls}" title="${id}${c?.note?" — "+c.note:""}">${label}${suffix}</span>`;
+  }).join("");
+  box.innerHTML=`<div style="width:100%;font-size:12px;color:var(--muted);margin-bottom:4px">${zero.length} de ${ids.length} sin uso en el rango:</div>`+rows;
 }
 /* ---------- pies ---------- */
 function renderPie(sel,map,key){
@@ -664,7 +706,7 @@ function closeSettings(){$("#overlay").classList.remove("open");}
 
 document.addEventListener("DOMContentLoaded",()=>{
   applyTheme(localStorage.getItem(LS_THEME)||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"));
-  $("#zeroInput").value=localStorage.getItem(LS_ZERO)||"";
+  $("#zeroInput").value=localStorage.getItem(LS_ZERO)||TOOL_CATALOG_IDS.join("\n");
 
   $("#btnTheme").onclick=()=>{const t=document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark";
     localStorage.setItem(LS_THEME,t);applyTheme(t);if(lastData)loadRange();};
@@ -701,6 +743,8 @@ document.addEventListener("DOMContentLoaded",()=>{
   // zero-use detector
   const zi=$("#zeroInput");
   zi.oninput=()=>{localStorage.setItem(LS_ZERO,zi.value);if(lastData)updateZeroList(aggregate(lastData).agg.tools);};
+  $("#btnResetZero").onclick=()=>{zi.value=TOOL_CATALOG_IDS.join("\n");localStorage.setItem(LS_ZERO,zi.value);
+    if(lastData)updateZeroList(aggregate(lastData).agg.tools); showToast("Lista restaurada");};
 
   // sortable tables
   document.querySelectorAll("table").forEach(tbl=>{
