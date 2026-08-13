@@ -289,7 +289,11 @@ fun MiniToolboxNavGraph(
         composable(Screen.MeetingCreate.route) {
             CrearReunionScreen(
                 onBack = onBackSmart,
-                onReunionCreada = { navController.popBackStack() }
+                onReunionCreada = { reunionId ->
+                    navController.navigate(Screen.MeetingDetail.route + "/$reunionId") {
+                        popUpTo(Screen.Meetings.route)
+                    }
+                }
             )
         }
         composable(Screen.MeetingDetail.route + "/{reunionId}") {

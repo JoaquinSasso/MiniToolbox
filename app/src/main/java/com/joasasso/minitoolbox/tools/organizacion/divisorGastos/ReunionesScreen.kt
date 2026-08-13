@@ -174,7 +174,7 @@ fun ReunionesScreen(
 fun ReunionItem(reunion: Reunion, onClick: () -> Unit, onDelete: () -> Unit) {
     val formato = getDateInstance()
     val fechaTexto = formato.format(Date(reunion.fecha))
-    val integrantes = reunion.integrantes.map { it.nombre }
+    val integrantes = reunion.integrantes
 
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),

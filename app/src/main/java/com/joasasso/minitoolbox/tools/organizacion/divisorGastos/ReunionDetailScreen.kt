@@ -16,10 +16,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -46,10 +44,8 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.joasasso.minitoolbox.R
-import com.joasasso.minitoolbox.data.Grupo
 import com.joasasso.minitoolbox.data.Reunion
 import com.joasasso.minitoolbox.data.ReunionesRepository
 import com.joasasso.minitoolbox.ui.components.ProToolPaywallDialog
@@ -63,8 +59,6 @@ import java.text.DateFormat.getDateInstance
 import java.text.NumberFormat
 import java.util.Date
 import java.util.Locale
-
-// … imports idénticos a los tuyos …
 
 @Composable
 fun DetallesReunionScreen(
@@ -81,14 +75,12 @@ fun DetallesReunionScreen(
     val haptic = LocalHapticFeedback.current
 
     var reunion by remember { mutableStateOf<Reunion?>(null) }
-    var grupoAEditar by remember { mutableStateOf<Grupo?>(null) }
+    var integranteAEditar by remember { mutableStateOf<String?>(null) }
     var nombreEditado by remember { mutableStateOf("") }
-    var cantidadEditada by remember { mutableStateOf("") }
     var textoCompartir by remember { mutableStateOf("") }
     var deudas by remember { mutableStateOf(emptyList<String>()) }
 
-    // NEW: confirmación de borrado de integrante
-    var grupoAEliminar by remember { mutableStateOf<Grupo?>(null) }
+    var integranteAEliminar by remember { mutableStateOf<String?>(null) }
 
     val locale = Locale.getDefault()
     val formatter = NumberFormat.getCurrencyInstance(locale).apply {
@@ -110,26 +102,26 @@ fun DetallesReunionScreen(
         }
     }
 
-    fun actualizarGrupo(original: Grupo, nuevo: Grupo) {
+    fun actualizarIntegrante(original: String, nuevo: String) {
         reunion?.let { r ->
-            val nuevosGrupos = r.integrantes.map { if (it == original) nuevo else it }
+            val nuevosIntegrantes = r.integrantes.map { if (it == original) nuevo else it }
             val nuevosGastos = r.gastos.map { g ->
                 val nuevosAportes = g.aportesIndividuales.mapKeys {
-                    if (it.key == original.nombre) nuevo.nombre else it.key
+                    if (it.key == original) nuevo else it.key
                 }
                 val nuevosConsumidores = g.consumidoPor.mapKeys {
-                    if (it.key == original.nombre) nuevo.nombre else it.key
+                    if (it.key == original) nuevo else it.key
                 }
                 g.copy(
                     aportesIndividuales = nuevosAportes,
                     consumidoPor = nuevosConsumidores
                 )
             }
-            val actualizada = r.copy(integrantes = nuevosGrupos, gastos = nuevosGastos)
+            val actualizada = r.copy(integrantes = nuevosIntegrantes, gastos = nuevosGastos)
             scope.launch {
                 ReunionesRepository.actualizarReunion(context, actualizada)
                 reunion = actualizada
-                grupoAEditar = null
+                integranteAEditar = null
                 deudas = calcularDeudas(actualizada, context)
             }
         }
@@ -165,18 +157,19 @@ fun DetallesReunionScreen(
                 val totalPersonas = gasto.consumidoPor.values.sum()
                 val porPersona = if (totalPersonas > 0) totalGasto / totalPersonas else 0.0
                 val resumenConsumidores = if (gasto.consumidoPor.isNotEmpty()) {
-                    gasto.consumidoPor.entries.joinToString(", ") { (nombre, cant) -> "$nombre ($cant)" }
+                    gasto.consumidoPor.entries.filter { it.value > 0 }.joinToString(", ") { it.key }
                 } else {
                     stringResource(R.string.expense_no_consumers)
                 }
 
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onEditarGasto(reunionId, gasto.id) },
                     colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surfaceVariant)
                 ) {
                     Column(Modifier.padding(16.dp)) {
 
-                        // Fila superior: descripción, total, acciones
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -189,12 +182,6 @@ fun DetallesReunionScreen(
                             )
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(formatter.format(totalGasto))
-                                IconButton(onClick = { onEditarGasto(reunionId, gasto.id) }) {
-                                    Icon(
-                                        Icons.Default.Edit,
-                                        contentDescription = stringResource(R.string.edit_expense_content_desc)
-                                    )
-                                }
                                 IconButton(onClick = {
                                     reunion?.let {
                                         val nueva = it.copy(gastos = it.gastos.filterNot { g -> g.id == gasto.id })
@@ -215,7 +202,6 @@ fun DetallesReunionScreen(
 
                         Spacer(Modifier.height(8.dp))
 
-                        // Resumen por gasto
                         val textoResumen = if (totalPersonas > 0) {
                             stringResource(
                                 R.string.expense_consumers_with_price,
@@ -254,11 +240,16 @@ fun DetallesReunionScreen(
                 Text(stringResource(R.string.members_section), style = MaterialTheme.typography.titleSmall)
             }
 
-            items(reunion?.integrantes ?: emptyList()) { grupo ->
-                val totalPagado = reunion?.gastos?.sumOf { it.aportesIndividuales[grupo.nombre] ?: 0.0 } ?: 0.0
+            items(reunion?.integrantes ?: emptyList()) { integrante ->
+                val totalPagado = reunion?.gastos?.sumOf { it.aportesIndividuales[integrante] ?: 0.0 } ?: 0.0
 
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            integranteAEditar = integrante
+                            nombreEditado = integrante
+                        },
                     colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surfaceVariant)
                 ) {
                     Row(
@@ -268,19 +259,11 @@ fun DetallesReunionScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("${grupo.nombre} (${grupo.cantidad})")
+                        Text(integrante)
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(formatter.format(totalPagado))
                             IconButton(onClick = {
-                                grupoAEditar = grupo
-                                nombreEditado = grupo.nombre
-                                cantidadEditada = grupo.cantidad.toString()
-                            }) {
-                                Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.edit_member_content_desc))
-                            }
-                            IconButton(onClick = {
-                                // En lugar de borrar directo, pedimos confirmación
-                                grupoAEliminar = grupo
+                                integranteAEliminar = integrante
                             }) {
                                 Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete_member_content_desc))
                             }
@@ -294,9 +277,8 @@ fun DetallesReunionScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            grupoAEditar = Grupo("", 1)
+                            integranteAEditar = ""
                             nombreEditado = ""
-                            cantidadEditada = "1"
                         },
                     colors = CardDefaults.cardColors(MaterialTheme.colorScheme.secondaryContainer)
                 ) {
@@ -349,13 +331,12 @@ fun DetallesReunionScreen(
         }
     }
 
-    // Diálogo de edición de grupo (igual que antes, solo recalcula deudas al final)
-    if (grupoAEditar != null) {
+    if (integranteAEditar != null) {
         AlertDialog(
-            onDismissRequest = { grupoAEditar = null },
+            onDismissRequest = { integranteAEditar = null },
             title = {
                 Text(
-                    if (grupoAEditar!!.nombre.isBlank())
+                    if (integranteAEditar!!.isBlank())
                         stringResource(R.string.dialog_new_member_title)
                     else
                         stringResource(R.string.dialog_edit_member_title)
@@ -366,17 +347,9 @@ fun DetallesReunionScreen(
                     OutlinedTextField(
                         value = nombreEditado,
                         onValueChange = { nombreEditado = it },
-                        label = { Text(stringResource(R.string.create_meeting_group_name)) },
+                        label = { Text(stringResource(R.string.expenses_group_name_label)) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
-                    )
-                    OutlinedTextField(
-                        value = cantidadEditada,
-                        onValueChange = { cantidadEditada = it },
-                        label = { Text(stringResource(R.string.expense_group_size)) },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                     )
                 }
             },
@@ -385,26 +358,22 @@ fun DetallesReunionScreen(
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
 
                     val nuevoNombre = nombreEditado.trim()
-                    val nuevaCantidad = cantidadEditada.toIntOrNull()?.coerceAtLeast(1) ?: 1
-                    val grupoAnterior = grupoAEditar!!
+                    val integranteAnterior = integranteAEditar!!
 
-                    if (nuevoNombre.isBlank()) {
-                        grupoAEditar = null
+                    if (nuevoNombre.isBlank() || reunion?.integrantes?.contains(nuevoNombre) == true) {
+                        integranteAEditar = null
                         return@TextButton
                     }
 
-                    val grupoNuevo = Grupo(nuevoNombre, nuevaCantidad)
-
-                    if (grupoAnterior.nombre.isNotBlank()) {
-                        actualizarGrupo(grupoAnterior, grupoNuevo)
+                    if (integranteAnterior.isNotBlank()) {
+                        actualizarIntegrante(integranteAnterior, nuevoNombre)
                         return@TextButton
                     } else {
-                        val integrantesActualizados = reunion!!.integrantes + grupoNuevo
+                        val integrantesActualizados = reunion!!.integrantes + nuevoNombre
 
                         val gastosActualizados = reunion!!.gastos.map { gasto ->
                             val consumidoPor = gasto.consumidoPor.toMutableMap()
-                            // nuevo grupo: por defecto participa con su cantidad
-                            consumidoPor[nuevoNombre] = nuevaCantidad
+                            consumidoPor[nuevoNombre] = 1
                             gasto.copy(consumidoPor = consumidoPor)
                         }
 
@@ -417,7 +386,7 @@ fun DetallesReunionScreen(
                             ReunionesRepository.actualizarReunion(context, reunion!!)
                         }
 
-                        grupoAEditar = null
+                        integranteAEditar = null
                         deudas = calcularDeudas(reunion!!, context)
                     }
                 }) {
@@ -426,7 +395,7 @@ fun DetallesReunionScreen(
             },
             dismissButton = {
                 TextButton(onClick = {
-                    grupoAEditar = null
+                    integranteAEditar = null
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 }) {
                     Text(stringResource(R.string.cancel))
@@ -435,15 +404,14 @@ fun DetallesReunionScreen(
         )
     }
 
-    if (grupoAEliminar != null) {
-        val g = grupoAEliminar!!
+    if (integranteAEliminar != null) {
+        val i = integranteAEliminar!!
         AlertDialog(
-            onDismissRequest = { grupoAEliminar = null },
+            onDismissRequest = { integranteAEliminar = null },
             title = { Text(stringResource(R.string.expense_delete_member_title)) },
             text = {
                 Text(
-                    // Aviso explícito del impacto:
-                    stringResource(R.string.expense_delete_member_message, g.nombre)
+                    stringResource(R.string.expense_delete_member_message, i)
                 )
             },
             confirmButton = {
@@ -451,12 +419,11 @@ fun DetallesReunionScreen(
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     reunion?.let {
                         val actualizada = it.copy(
-                            integrantes = it.integrantes - g,
+                            integrantes = it.integrantes - i,
                             gastos = it.gastos.map { gasto ->
                                 gasto.copy(
-                                    // Al borrar un integrante, se quitan sus aportes y consumos (manteniendo coherencia)
-                                    aportesIndividuales = gasto.aportesIndividuales - g.nombre,
-                                    consumidoPor = gasto.consumidoPor - g.nombre
+                                    aportesIndividuales = gasto.aportesIndividuales - i,
+                                    consumidoPor = gasto.consumidoPor - i
                                 )
                             }
                         )
@@ -464,7 +431,7 @@ fun DetallesReunionScreen(
                             ReunionesRepository.actualizarReunion(context, actualizada)
                             reunion = actualizada
                             deudas = calcularDeudas(reunion!!, context)
-                            grupoAEliminar = null
+                            integranteAEliminar = null
                         }
                     }
                 }) {
@@ -472,7 +439,7 @@ fun DetallesReunionScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { grupoAEliminar = null }) {
+                TextButton(onClick = { integranteAEliminar = null }) {
                     Text(stringResource(R.string.cancel))
                 }
             }
@@ -489,7 +456,6 @@ fun DetallesReunionScreen(
                     RewardedManager.show(
                         activity = activity,
                         onReward = {
-                            // Activa el pase de 10 minutos
                             CreditAccessManager.startTimedPassForAd(activity)
                             hasActivePass = true
 
@@ -498,7 +464,6 @@ fun DetallesReunionScreen(
                                 .show()
                         },
                         onUnavailable = {
-                            // No-fill: deja pasar, muestra Toast y no suma tiempo
                             val used = CreditAccessManager.consumeGrace(activity)
                             if (used) {
                                 hasActivePass = true
@@ -566,9 +531,9 @@ fun generarTextoCompartible(reunion: Reunion, context: Context): String {
 
     sb.appendLine()
     sb.appendLine("👥 ${context.resources.getString(R.string.share_members)}")
-    reunion.integrantes.forEach { grupo ->
-        val pagado = reunion.gastos.sumOf { it.aportesIndividuales[grupo.nombre] ?: 0.0 }
-        sb.appendLine("- ${grupo.nombre} (${grupo.cantidad} ${context.resources.getString(R.string.people_label)}) ${context.resources.getString(R.string.share_paid)} ${formatoMoneda.format(pagado)}")
+    reunion.integrantes.forEach { integrante ->
+        val pagado = reunion.gastos.sumOf { it.aportesIndividuales[integrante] ?: 0.0 }
+        sb.appendLine("- $integrante: ${context.resources.getString(R.string.share_paid)} ${formatoMoneda.format(pagado)}")
     }
 
     sb.appendLine()
@@ -579,44 +544,38 @@ fun generarTextoCompartible(reunion: Reunion, context: Context): String {
 }
 
 fun calcularDeudas(reunion: Reunion, context: Context): List<String> {
-    // Inicializar deudas por grupo
-    val deudaPorGrupo = reunion.integrantes.associate { it.nombre to 0.0 }.toMutableMap()
-    val nombresIntegrantes = reunion.integrantes.map { it.nombre }.toSet()
+    val deudaPorIntegrante = reunion.integrantes.associate { it to 0.0 }.toMutableMap()
+    val nombresIntegrantes = reunion.integrantes.toSet()
 
-    // Calcular cuánto debe cada grupo según los gastos que consumió
     for (gasto in reunion.gastos) {
-        val consumidoPor = gasto.consumidoPor.filterKeys { it in nombresIntegrantes }
+        val consumidoPor = gasto.consumidoPor.filter { it.key in nombresIntegrantes && it.value > 0 }
         val aportes = gasto.aportesIndividuales.filterKeys { it in nombresIntegrantes }
-        val totalPersonas = consumidoPor.values.sum()
+        val totalPersonas = consumidoPor.size
         if (totalPersonas == 0) continue
 
         val montoTotal = aportes.values.sum()
+        val montoPorPersona = montoTotal / totalPersonas
 
-        gasto.consumidoPor.forEach { (grupo, cantidad) ->
-            val monto = montoTotal * cantidad / totalPersonas
-            deudaPorGrupo[grupo] = deudaPorGrupo.getOrDefault(grupo, 0.0) + monto
+        consumidoPor.forEach { (nombre, _) ->
+            deudaPorIntegrante[nombre] = deudaPorIntegrante.getOrDefault(nombre, 0.0) + montoPorPersona
         }
     }
 
-    // Calcular cuánto pagó cada grupo
-    val pagadoPorGrupo = reunion.integrantes.associate { grupo ->
-        grupo.nombre to reunion.gastos.sumOf { it.aportesIndividuales[grupo.nombre] ?: 0.0 }
+    val pagadoPorIntegrante = reunion.integrantes.associate { nombre ->
+        nombre to reunion.gastos.sumOf { it.aportesIndividuales[nombre] ?: 0.0 }
     }
 
-    // Calcular balances
-    val balance = reunion.integrantes.associate { grupo ->
-        val pagado = pagadoPorGrupo[grupo.nombre] ?: 0.0
-        val debe = deudaPorGrupo[grupo.nombre] ?: 0.0
-        grupo.nombre to (pagado - debe)
+    val balance = reunion.integrantes.associate { nombre ->
+        val pagado = pagadoPorIntegrante[nombre] ?: 0.0
+        val debe = deudaPorIntegrante[nombre] ?: 0.0
+        nombre to (pagado - debe)
     }
 
-    // Separar acreedores y deudores
     val deudores = balance.filterValues { it < -0.01 }.toMutableMap()
     val acreedores = balance.filterValues { it > 0.01 }.toMutableMap()
 
     val resultados = mutableListOf<String>()
 
-    // Formateador de moneda con puntos de miles y coma decimal
     val locale = Locale.getDefault()
     val formatoMoneda = NumberFormat.getCurrencyInstance(locale).apply {
         maximumFractionDigits = 2
