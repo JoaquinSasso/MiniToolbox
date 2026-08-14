@@ -3,6 +3,9 @@ package com.joasasso.minitoolbox.tools.organizacion.pomodoro
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.util.Log
+
+private const val TAG = "PomodoroBootReceiver"
 
 /**
  * Reprograma la alarma pendiente cuando el sistema la borra por debajo.
@@ -27,6 +30,7 @@ class PomodoroBootReceiver : BroadcastReceiver() {
             "android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" -> Unit
             else -> return
         }
+        Log.d(TAG, "onReceive: action=${intent.action}, reprogramando si hay pomodoro pendiente")
         PomodoroAlarmReceiver.rescheduleFromPersisted(context.applicationContext)
     }
 }
