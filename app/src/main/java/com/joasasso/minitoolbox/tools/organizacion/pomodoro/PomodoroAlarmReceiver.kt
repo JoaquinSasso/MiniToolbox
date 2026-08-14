@@ -1,6 +1,5 @@
 package com.joasasso.minitoolbox.tools.organizacion.pomodoro
 
-import android.Manifest
 import android.app.AlarmManager
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -8,387 +7,339 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.PowerManager
-import androidx.annotation.RequiresPermission
+import android.util.Log
 import androidx.core.content.ContextCompat
-import androidx.core.content.edit
-import androidx.core.content.getSystemService
-import com.joasasso.minitoolbox.MainActivity
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.data.PomodoroStateRepository
 import com.joasasso.minitoolbox.nav.Screen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
-
-// Alarm action
+// Acción de la alarma
 const val ACTION_FIRE_ALARM = "POMODORO_FIRE_ALARM"
 
-// Request code único para el PendingIntent del Pomodoro activo
+// Estas dos vivían en PomodoroService.kt (que se elimina). Las usa PomodoroActionReceiver.
+const val ACTION_STOP    = "STOP_POMODORO"
+const val ACTION_SILENCE = "SILENCE_ALARM"
+
 private const val REQ_ALARM = 1001
+private const val TAG = "PomodoroAlarm"
 
-// Fases
-private const val PHASE_WORK  = "WORK"
-private const val PHASE_SHORT = "SHORT"
-private const val PHASE_LONG  = "LONG"
+internal const val PHASE_WORK  = "WORK"
+internal const val PHASE_SHORT = "SHORT"
+internal const val PHASE_LONG  = "LONG"
 
-// Extras para propagar la configuración completa entre fases
-private const val EX_WORK = "ex_work"
-private const val EX_SHORT = "ex_short"
-private const val EX_LONG = "ex_long"
-private const val EX_CYCLES_BEFORE_LONG = "ex_cbl"
-private const val EX_CYCLE = "ex_cycle"
-private const val EX_PHASE = "ex_phase"
-private const val EX_TIMER_ID = "ex_timer_id"
-private const val EX_TIMER_NAME = "ex_timer_name"
-private const val EX_TIMER_COLOR = "ex_timer_color"
+/**
+ * Único extra que viaja en el PendingIntent: el instante para el que se programó.
+ * Sirve para descartar disparos duplicados o de alarmas ya canceladas.
+ * El resto del estado vive en PomodoroSchedulePrefs.
+ */
+private const val EX_TRIGGER = "ex_trigger"
 
 class PomodoroAlarmReceiver : BroadcastReceiver() {
 
-    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     override fun onReceive(context: Context, intent: Intent) {
         val app = context.applicationContext
 
         when (intent.action) {
-            ACTION_POMODORO_ALARM_SILENCE -> {
-                // Cortar audio + cancelar notificación + avisar UI + limpiar flag persistente
-                silenceAlarm(app)
-                return
-            }
-            ACTION_FIRE_ALARM -> { /* sigue abajo */ }
+            ACTION_POMODORO_ALARM_SILENCE -> { silenceAlarm(app); return }
+            ACTION_FIRE_ALARM -> Unit
             else -> return
         }
 
-        val pm = app.getSystemService<PowerManager>()
-        val wl = pm?.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MiniToolbox:PomodoroAlarm")
-        // 15s son más que suficientes para: notificación + sonido + persistir + reprogramar
-        wl?.acquire(15_000L)
+        val trigger = intent.getLongExtra(EX_TRIGGER, 0L)
+        val pending = PomodoroSchedulePrefs.load(app)
 
-        val pending = goAsync()
+        // Idempotencia: si el pomodoro se paró, o esta alarma ya se consumió,
+        // el trigger guardado no coincide y no hacemos nada.
+        if (pending == null || pending.triggerAtMs != trigger) {
+            Log.d(TAG, "Disparo descartado (trigger=$trigger, guardado=${pending?.triggerAtMs})")
+            return
+        }
+
+        val wl = app.getSystemService(PowerManager::class.java)
+            ?.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MiniToolbox:PomodoroAlarm")
+        try { wl?.acquire(20_000L) } catch (_: Exception) { }
+
+        // 1) Sonar YA, sincrónicamente. Venimos de una alarma exacta, así que
+        //    estamos dentro de la exención que permite arrancar un FGS desde background.
+        startRinging(app, pending)
+
+        // 2) Encadenar la fase siguiente (IO por el DataStore del repo)
+        val result = goAsync()
         CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
             try {
-                // --- 0) Leer config del Intent ---
-                val workMin  = intent.getIntExtra(EX_WORK, 25)
-                val shortMin = intent.getIntExtra(EX_SHORT, 5)
-                val longMin  = intent.getIntExtra(EX_LONG, 15)
-                val cbl      = intent.getIntExtra(EX_CYCLES_BEFORE_LONG, 4)
-                val phase    = intent.getStringExtra(EX_PHASE) ?: PHASE_WORK
-                val cycle    = intent.getIntExtra(EX_CYCLE, 0)
-                val timerId  = intent.getStringExtra(EX_TIMER_ID) ?: ""
-                val timerNm  = intent.getStringExtra(EX_TIMER_NAME) ?: app.getString(R.string.tool_pomodoro_timer)
-                val colorInt = intent.getIntExtra(EX_TIMER_COLOR, 0xFF4DBC52.toInt())
-                val startRoute = Screen.PomodoroDetail.createRoute(timerId)
-
-                val repo = PomodoroStateRepository(app)
-                val now  = System.currentTimeMillis()
-
-                // --- 1) Idempotencia: si ya hay una fase activa, NO dupliques alarma ---
-                val currentEnd = repo.phaseEndFlow.firstOrNull() ?: 0L
-                if (currentEnd > now) return@launch
-
-                // --- 2) Notificación fin de fase (HUN silenciosa) + flag + broadcast UI ---
-                val finishedTitle = app.getString(R.string.pomodoro_finished, phaseNameLocalized(app, phase))
-                showAlarmNotification(
-                    context = app,
-                    title   = finishedTitle,
-                    text    = app.getString(R.string.pomodoro_tap_to_stop),
-                    startRoute = startRoute
-                )
-                AlarmState.setActive(app, true)
-                app.sendBroadcast(
-                    Intent(ACTION_POMODORO_ALARM_START)
-                        .setPackage(app.packageName)
-                        .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY or Intent.FLAG_RECEIVER_FOREGROUND)
-                )
-
-                // --- 3) Sonido controlado (10s) sin duplicados ---
-                AlarmSoundPlayer.play(app, durationMs = 10_000L) {
-                    silenceAlarm(app) // al autostop, silencia “oficialmente”
-                }
-
-                // --- 4) Calcular próxima fase ---
-                val (nextPhase, nextMin, nextCycle) = when (phase) {
-                    PHASE_WORK -> {
-                        val longNext = ((cycle + 1) % cbl == 0)
-                        Triple(if (longNext) PHASE_LONG else PHASE_SHORT,
-                            if (longNext) longMin else shortMin,
-                            cycle + 1)
-                    }
-                    else -> Triple(PHASE_WORK, workMin, cycle)
-                }
-
-                // --- 5) Persistir próximo estado + notificación “en curso” ---
-                val endMs = now + nextMin * 60_000L
-                val nextTitle = when (nextPhase) {
-                    PHASE_WORK  -> app.getString(R.string.pomodoro_work)
-                    PHASE_SHORT -> app.getString(R.string.pomodoro_short_break)
-                    PHASE_LONG  -> app.getString(R.string.pomodoro_long_break)
-                    else        -> timerNm
-                }
-                repo.updatePhase(nextTitle, endMs, nextMin * 60L)
-                showRunningNotification(app, nextTitle, endMs, startRoute = startRoute)
-
-                // --- 6) Reprogramar respaldo (INEXACTO) con la MISMA config ---
-                scheduleExactWithConfig(
-                    context = app,
-                    triggerAtMs = endMs,
-                    phase = nextPhase,
-                    cycle = nextCycle,
-                    config = PomodoroTimerConfig(
-                        id = timerId, name = timerNm, colorInt = colorInt,
-                        workMin = workMin, shortBreakMin = shortMin,
-                        longBreakMin = longMin, cyclesBeforeLong = cbl
-                    )
-                )
+                advanceToNextPhase(app, pending)
+            } catch (t: Throwable) {
+                Log.e(TAG, "Error al encadenar la fase siguiente", t)
             } finally {
-                try { wl?.release() } catch (_: Exception) {}
-                pending.finish()
+                try { if (wl?.isHeld == true) wl.release() } catch (_: Exception) { }
+                result.finish()
             }
         }
-    }
-
-
-    private fun phaseNameLocalized(context: Context, phase: String) = when (phase) {
-        PHASE_WORK  -> context.getString(R.string.pomodoro_work)
-        PHASE_SHORT -> context.getString(R.string.pomodoro_short_break)
-        PHASE_LONG  -> context.getString(R.string.pomodoro_long_break)
-        else        -> phase
     }
 
     companion object {
 
+        // ---------------------------------------------------------------------
+        // API pública (la que usa la UI)
+        // ---------------------------------------------------------------------
+
         fun startPomodoro(context: Context, config: PomodoroTimerConfig) {
             val app = context.applicationContext
             val endMs = System.currentTimeMillis() + config.workMin * 60_000L
+            val route = Screen.PomodoroDetail.createRoute(config.id)
 
             CoroutineScope(Dispatchers.IO).launch {
                 PomodoroStateRepository(app).updatePhase(
-                    app.getString(R.string.pomodoro_work),
-                    endMs,
-                    config.workMin * 60L
+                    app.getString(R.string.pomodoro_work), endMs, config.workMin * 60L
                 )
             }
 
-            showRunningNotification(
-                app, app.getString(R.string.pomodoro_work), endMs,
-                startRoute = Screen.PomodoroDetail.createRoute(config.id)
-            )
-
-            scheduleExactWithConfig(
-                context = app,
-                triggerAtMs = endMs,
-                phase = PHASE_WORK,
-                cycle = 0,
-                config = config
-            )
+            showRunningNotification(app, app.getString(R.string.pomodoro_work), endMs, route)
+            schedule(app, PomodoroSchedulePrefs.Pending(endMs, PHASE_WORK, 0, config))
         }
 
         fun stopPomodoro(context: Context) {
             val app = context.applicationContext
             cancelAlarm(app)
+            PomodoroSchedulePrefs.clear(app)
             cancelRunningNotification(app)
-            val nm = ContextCompat.getSystemService(app, NotificationManager::class.java)
-            nm?.cancel(NOTIF_ID_ALARM_SILENT)
-            AlarmSoundPlayer.stop()
+            PomodoroAlarmService.stop(app)
+            ContextCompat.getSystemService(app, NotificationManager::class.java)
+                ?.cancel(NOTIF_ID_ALARM_SILENT)
+            AlarmState.setActive(app, false)
             CoroutineScope(Dispatchers.IO).launch {
                 PomodoroStateRepository(app).clearPhase()
             }
         }
 
         fun silenceAlarm(context: Context) {
-            val nm = ContextCompat.getSystemService(context, NotificationManager::class.java)
-            nm?.cancel(NOTIF_ID_ALARM_SILENT)
-            AlarmSoundPlayer.stop()
-            AlarmState.setActive(context, false)
-            context.sendBroadcast(
+            val app = context.applicationContext
+            PomodoroAlarmService.stop(app)
+            // Por si sonó por el plan B (notificación con sonido de canal, sin servicio)
+            ContextCompat.getSystemService(app, NotificationManager::class.java)
+                ?.cancel(NOTIF_ID_ALARM_SILENT)
+            AlarmState.setActive(app, false)
+            app.sendBroadcast(
                 Intent(ACTION_POMODORO_ALARM_STOP)
-                    .setPackage(context.packageName)
+                    .setPackage(app.packageName)
                     .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY or Intent.FLAG_RECEIVER_FOREGROUND)
             )
         }
 
         /**
-         * Programa la próxima alarma propagando SIEMPRE la configuración completa.
-         * Camino principal: AlarmClockInfo (exacta sin permisos).
-         * Respaldo: setAndAllowWhileIdle / set (inexactas) si algo falla.
+         * Recuperación: reprograma la alarma guardada.
+         * La llama PomodoroBootReceiver tras un reboot, un cambio de hora, o
+         * cuando el usuario concede el permiso de alarmas exactas.
          */
-        private fun scheduleExactWithConfig(
-            context: Context,
-            triggerAtMs: Long,
-            phase: String,
-            cycle: Int,
-            config: PomodoroTimerConfig
-        ) {
-            val am = context.getSystemService(AlarmManager::class.java) ?: return
+        fun rescheduleFromPersisted(context: Context) {
+            val app = context.applicationContext
+            val pending = PomodoroSchedulePrefs.load(app) ?: return
+            val now = System.currentTimeMillis()
 
-            // 1) Intent que dispara el cambio de fase (BroadcastReceiver)
-            val alarmIntent = Intent(context, PomodoroAlarmReceiver::class.java).apply {
-                action = ACTION_FIRE_ALARM
-                putExtra(EX_PHASE, phase)
-                putExtra(EX_CYCLE, cycle)
-                putExtra(EX_WORK, config.workMin)
-                putExtra(EX_SHORT, config.shortBreakMin)
-                putExtra(EX_LONG, config.longBreakMin)
-                putExtra(EX_CYCLES_BEFORE_LONG, config.cyclesBeforeLong)
-                putExtra(EX_TIMER_ID, config.id)
-                putExtra(EX_TIMER_NAME, config.name)
-                putExtra(EX_TIMER_COLOR, config.colorInt)
-            }
-            val piAlarm = PendingIntent.getBroadcast(
-                context,
-                REQ_ALARM,
-                alarmIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-
-            // 2) Intent de “mostrar” (para AlarmClock): abre la pantalla de detalle del timer
-            val startRoute = "pomodoro/detail/${config.id}"
-            val showIntent = Intent(context, MainActivity::class.java).apply {
-                addFlags(
-                    Intent.FLAG_ACTIVITY_NEW_TASK or
-                            Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                            Intent.FLAG_ACTIVITY_SINGLE_TOP
+            if (pending.triggerAtMs > now) {
+                schedule(app, pending)
+                showRunningNotification(
+                    app,
+                    phaseTitle(app, pending.phase),
+                    pending.triggerAtMs,
+                    Screen.PomodoroDetail.createRoute(pending.config.id)
                 )
-                putExtra("startRoute", startRoute)
-            }
-            val piShow = PendingIntent.getActivity(
-                context,
-                startRoute.hashCode(),
-                showIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-
-            // 3) Programar como “alarma de usuario” (exacta, policy-safe)
-            try {
-                val info = AlarmManager.AlarmClockInfo(triggerAtMs, piShow)
-                am.setAlarmClock(info, piAlarm)
-                return
-            } catch (_: Exception) {
-                // cae a respaldo si algún OEM raro falla
-            }
-
-            // 4) Respaldo inexacto (aceptado por políticas)
-            try {
-                am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMs, piAlarm)
-            } catch (_: Exception) {
-                am.set(AlarmManager.RTC_WAKEUP, triggerAtMs, piAlarm)
+            } else {
+                // La fase venció mientras el teléfono estaba apagado. No se puede
+                // arrancar un FGS de tipo mediaPlayback desde BOOT_COMPLETED, así
+                // que sólo dejamos el aviso y cortamos la cadena.
+                cancelRunningNotification(app)
+                showAlarmNotification(
+                    app,
+                    app.getString(R.string.pomodoro_finished, phaseTitle(app, pending.phase)),
+                    app.getString(R.string.pomodoro_tap_to_stop),
+                    Screen.PomodoroDetail.createRoute(pending.config.id)
+                )
+                PomodoroSchedulePrefs.clear(app)
+                CoroutineScope(Dispatchers.IO).launch {
+                    PomodoroStateRepository(app).clearPhase()
+                }
             }
         }
 
-        fun scheduleFromUiFallback(
-            context: Context,
-            triggerAtMs: Long,
-            phase: String,
-            cycle: Int,
-            config: PomodoroTimerConfig
-        ) {
-            val am = context.getSystemService(AlarmManager::class.java) ?: return
-            val intent = Intent(context, PomodoroAlarmReceiver::class.java).apply {
-                action = ACTION_FIRE_ALARM
-                putExtra(EX_PHASE, phase)
-                putExtra(EX_CYCLE, cycle)
-                putExtra(EX_WORK, config.workMin)
-                putExtra(EX_SHORT, config.shortBreakMin)
-                putExtra(EX_LONG, config.longBreakMin)
-                putExtra(EX_CYCLES_BEFORE_LONG, config.cyclesBeforeLong)
-                putExtra(EX_TIMER_ID, config.id)
-                putExtra(EX_TIMER_NAME, config.name)
-                putExtra(EX_TIMER_COLOR, config.colorInt)
-            }
-            val pi = PendingIntent.getBroadcast(
-                context, REQ_ALARM, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-            try {
-                am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMs, pi)
-            } catch (_: Exception) {
-                am.set(AlarmManager.RTC_WAKEUP, triggerAtMs, pi)
-            }
-        }
-
-        private fun cancelAlarm(context: Context) {
-            val am = context.getSystemService(AlarmManager::class.java)
-            val i = Intent(context, PomodoroAlarmReceiver::class.java).apply { action = ACTION_FIRE_ALARM }
-            val pi = PendingIntent.getBroadcast(
-                context, REQ_ALARM, i, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE
-            )
-            if (pi != null) am?.cancel(pi)
-        }
-
+        /**
+         * Red de seguridad desde la UI: si el usuario abre la app y la fase ya
+         * venció pero la alarma nunca llegó (permiso denegado, OEM agresivo),
+         * avanzamos igual. Con alarmas exactas esto casi nunca debería dispararse.
+         */
         suspend fun forceAdvanceFromUi(
             context: Context,
             currentPhaseName: String,
             config: PomodoroTimerConfig
         ) {
             val app = context.applicationContext
-            val repo = PomodoroStateRepository(app)
-            val now = System.currentTimeMillis()
+            val pending = PomodoroSchedulePrefs.load(app)
+                ?: PomodoroSchedulePrefs.Pending(
+                    triggerAtMs = System.currentTimeMillis(),
+                    phase = phaseKeyOf(app, currentPhaseName),
+                    cycle = 0,
+                    config = config
+                )
+            if (pending.triggerAtMs > System.currentTimeMillis()) return
 
-            val currentEnd = repo.phaseEndFlow.firstOrNull() ?: 0L
-            if (currentEnd > now) return
+            cancelAlarm(app)
+            startRinging(app, pending)          // la app está en foreground: FGS permitido
+            advanceToNextPhase(app, pending)
+        }
 
-            val finishedTitle = app.getString(R.string.pomodoro_finished, currentPhaseName)
-            val startRoute = "pomodoro/detail/${config.id}"
-            showAlarmNotification(
-                app,
-                title = finishedTitle,
-                text  = app.getString(R.string.pomodoro_tap_to_stop),
-                startRoute = startRoute
+        // ---------------------------------------------------------------------
+        // Interno
+        // ---------------------------------------------------------------------
+
+        /**
+         * Programa la alarma y persiste el estado.
+         *
+         * Camino principal: setAlarmClock(). Es el único que el sistema saca de
+         * Doze de forma garantizada (sale de Doze poco antes del disparo) y el
+         * único que NO tiene el límite de "un disparo cada 9 minutos por app" que
+         * afecta a setAndAllowWhileIdle / setExactAndAllowWhileIdle. Con descansos
+         * cortos de 5 minutos ese límite importa.
+         *
+         * Requiere permiso de alarmas exactas. Si no lo tenemos, degradamos a
+         * inexacta y lo dejamos anotado en el log: llegará tarde, pero al menos
+         * no se pierde silenciosamente como antes.
+         */
+        internal fun schedule(context: Context, pending: PomodoroSchedulePrefs.Pending) {
+            val app = context.applicationContext
+            PomodoroSchedulePrefs.save(app, pending)   // persistir primero
+
+            val am = app.getSystemService(AlarmManager::class.java) ?: return
+            val pi = firePendingIntent(app, pending.triggerAtMs)
+
+            if (ExactAlarmPermission.canSchedule(app)) {
+                try {
+                    val show = mainPendingIntent(app, Screen.PomodoroDetail.createRoute(pending.config.id))
+                    am.setAlarmClock(AlarmManager.AlarmClockInfo(pending.triggerAtMs, show), pi)
+                    return
+                } catch (e: SecurityException) {
+                    // Carrera: el usuario revocó el permiso entre el chequeo y el uso
+                    Log.w(TAG, "setAlarmClock rechazado, degradando a inexacta", e)
+                }
+            } else {
+                Log.w(TAG, "Sin permiso de alarmas exactas: la alarma puede llegar tarde")
+            }
+
+            am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, pending.triggerAtMs, pi)
+        }
+
+        private fun firePendingIntent(context: Context, triggerAtMs: Long): PendingIntent {
+            val i = Intent(context, PomodoroAlarmReceiver::class.java).apply {
+                action = ACTION_FIRE_ALARM
+                putExtra(EX_TRIGGER, triggerAtMs)
+            }
+            return PendingIntent.getBroadcast(
+                context, REQ_ALARM, i,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
-            AlarmState.setActive(context, true)
+        }
+
+        private fun cancelAlarm(context: Context) {
+            val am = context.getSystemService(AlarmManager::class.java)
+            val i = Intent(context, PomodoroAlarmReceiver::class.java).apply {
+                action = ACTION_FIRE_ALARM
+            }
+            val pi = PendingIntent.getBroadcast(
+                context, REQ_ALARM, i,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE
+            )
+            if (pi != null) {
+                am?.cancel(pi)
+                pi.cancel()
+            }
+        }
+
+        /** Arranca el servicio que suena. Nunca lanza: si falla, plan B con sonido de canal. */
+        internal fun startRinging(context: Context, pending: PomodoroSchedulePrefs.Pending) {
+            val app = context.applicationContext
+            val title = app.getString(R.string.pomodoro_finished, phaseTitle(app, pending.phase))
+            val text  = app.getString(R.string.pomodoro_tap_to_stop)
+            val route = Screen.PomodoroDetail.createRoute(pending.config.id)
+
+            // Android 17 / targetSdk 37: un FGS arrancado desde background NO tiene
+            // capacidades while-in-use, así que nuestro MediaPlayer sólo puede sonar
+            // gracias a la exención "permiso de alarma exacta + stream USAGE_ALARM".
+            // Sin ese permiso el audio falla EN SILENCIO: las APIs no lanzan excepción,
+            // simplemente no suena. Por eso ni lo intentamos y vamos directo a la
+            // notificación con sonido de canal, que la reproduce el sistema y no está
+            // sujeta a esta restricción.
+            if (!ExactAlarmPermission.canSchedule(app)) {
+                Log.w(TAG, "Sin permiso de alarmas exactas: sonando por canal de notificación")
+                ringWithChannelSound(app, title, text, route)
+                return
+            }
+
+            try {
+                PomodoroAlarmService.ring(app, title, text, route)
+            } catch (e: Exception) {
+                Log.w(TAG, "No se pudo arrancar el FGS de alarma, usando notificación con sonido", e)
+                ringWithChannelSound(app, title, text, route)
+            }
+        }
+
+        private fun ringWithChannelSound(
+            app: Context,
+            title: String,
+            text: String,
+            route: String
+        ) {
+            AlarmState.setActive(app, true)
             app.sendBroadcast(
                 Intent(ACTION_POMODORO_ALARM_START)
                     .setPackage(app.packageName)
                     .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY or Intent.FLAG_RECEIVER_FOREGROUND)
             )
-            AlarmSoundPlayer.play(app, durationMs = 10_000L) {
-                silenceAlarm(app)
-            }
+            showAlarmNotification(app, title, text, route, withChannelSound = true)
+        }
 
-            val phase = when (currentPhaseName) {
-                app.getString(R.string.pomodoro_work)        -> PHASE_WORK
-                app.getString(R.string.pomodoro_short_break) -> PHASE_SHORT
-                app.getString(R.string.pomodoro_long_break)  -> PHASE_LONG
-                else                                         -> PHASE_WORK
-            }
+        private suspend fun advanceToNextPhase(
+            context: Context,
+            pending: PomodoroSchedulePrefs.Pending
+        ) {
+            val app = context.applicationContext
+            val cfg = pending.config
 
-            val sp  = app.getSharedPreferences("pomodoro_cycle", Context.MODE_PRIVATE)
-            val key = "cycle_${config.id}"
-            var cycle = sp.getInt(key, 0)
-
-            val (nextPhase, nextMin, nextCycle) = when (phase) {
+            val (nextPhase, nextMin, nextCycle) = when (pending.phase) {
                 PHASE_WORK -> {
-                    val longNext = ((cycle + 1) % config.cyclesBeforeLong == 0)
+                    val cycle = pending.cycle + 1
+                    val isLong = cfg.cyclesBeforeLong > 0 && cycle % cfg.cyclesBeforeLong == 0
                     Triple(
-                        if (longNext) PHASE_LONG else PHASE_SHORT,
-                        if (longNext) config.longBreakMin else config.shortBreakMin,
-                        cycle + 1
+                        if (isLong) PHASE_LONG else PHASE_SHORT,
+                        if (isLong) cfg.longBreakMin else cfg.shortBreakMin,
+                        cycle
                     )
                 }
-                else -> Triple(PHASE_WORK, config.workMin, cycle)
+                else -> Triple(PHASE_WORK, cfg.workMin, pending.cycle)
             }
-            if (phase == PHASE_WORK) sp.edit { putInt(key, nextCycle) }
 
-            val endMs = now + nextMin * 60_000L
-            val nextTitle = when (nextPhase) {
-                PHASE_WORK  -> app.getString(R.string.pomodoro_work)
-                PHASE_SHORT -> app.getString(R.string.pomodoro_short_break)
-                PHASE_LONG  -> app.getString(R.string.pomodoro_long_break)
-                else        -> currentPhaseName
-            }
-            repo.updatePhase(nextTitle, endMs, nextMin * 60L)
+            val endMs = System.currentTimeMillis() + nextMin * 60_000L
+            val title = phaseTitle(app, nextPhase)
+            val route = Screen.PomodoroDetail.createRoute(cfg.id)
 
-            showRunningNotification(app, nextTitle, endMs, startRoute = startRoute)
+            PomodoroStateRepository(app).updatePhase(title, endMs, nextMin * 60L)
+            showRunningNotification(app, title, endMs, route)
+            schedule(app, PomodoroSchedulePrefs.Pending(endMs, nextPhase, nextCycle, cfg))
+        }
 
-            scheduleFromUiFallback(
-                context = app,
-                triggerAtMs = endMs,
-                phase = nextPhase,
-                cycle = nextCycle,
-                config = config
-            )
+        private fun phaseTitle(context: Context, phase: String): String = when (phase) {
+            PHASE_WORK  -> context.getString(R.string.pomodoro_work)
+            PHASE_SHORT -> context.getString(R.string.pomodoro_short_break)
+            PHASE_LONG  -> context.getString(R.string.pomodoro_long_break)
+            else        -> phase
+        }
+
+        private fun phaseKeyOf(context: Context, localizedName: String): String = when (localizedName) {
+            context.getString(R.string.pomodoro_short_break) -> PHASE_SHORT
+            context.getString(R.string.pomodoro_long_break)  -> PHASE_LONG
+            else -> PHASE_WORK
         }
     }
 }

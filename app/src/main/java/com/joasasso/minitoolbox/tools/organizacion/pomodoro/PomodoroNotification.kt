@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.media.AudioAttributes
 import android.media.RingtoneManager
+import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.joasasso.minitoolbox.MainActivity
@@ -17,7 +18,7 @@ const val CHANNEL_RUNNING = "pomodoro_running"
 const val CHANNEL_ALARM   = "pomodoro_alarm_v2"
 const val CHANNEL_ALARM_SILENT = "pomodoro_alarm_silent_v3"
 const val NOTIF_ID_RUNNING = 2001
-const val NOTIFICATION_ID  = 2002 // alarma
+const val NOTIFICATION_ID  = 2002 // alarma (legacy)
 const val NOTIF_ID_ALARM_SILENT = 2003
 const val ACTION_POMODORO_ALARM_SILENCE = "POMODORO_ALARM_SILENCE"
 
@@ -39,7 +40,9 @@ fun ensurePomodoroChannels(context: Context) {
         )
     }
 
-    // Canal "alarm" (con sonido). Usamos un **nuevo ID** para garantizar sonido correcto.
+    // Canal "alarm" CON sonido del sistema.
+    // Se usa sólo como plan B: cuando no pudimos arrancar el servicio en primer
+    // plano y necesitamos que al menos suene algo.
     if (nm.getNotificationChannel(CHANNEL_ALARM) == null) {
         val alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
             ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
@@ -63,7 +66,7 @@ fun ensurePomodoroChannels(context: Context) {
         )
     }
 
-    // Canal ALARM sin sonido (para usar MediaPlayer manual)
+    // Canal ALARM sin sonido: el audio lo maneja PomodoroAlarmService con MediaPlayer.
     if (nm.getNotificationChannel(CHANNEL_ALARM_SILENT) == null) {
         nm.createNotificationChannel(
             NotificationChannel(
@@ -73,7 +76,7 @@ fun ensurePomodoroChannels(context: Context) {
             ).apply {
                 description = context.getString(R.string.pomodoro_channel_alarm_desc)
                 setSound(null, null)
-                enableVibration(true)
+                enableVibration(false)          // vibra el servicio, no el canal
                 enableLights(true)
                 setShowBadge(false)
                 lockscreenVisibility = Notification.VISIBILITY_PUBLIC
@@ -82,13 +85,15 @@ fun ensurePomodoroChannels(context: Context) {
     }
 }
 
-private fun mainPendingIntent(context: Context, startRoute: String?): PendingIntent {
+internal fun mainPendingIntent(context: Context, startRoute: String?): PendingIntent {
     val intent = Intent(context, MainActivity::class.java).apply {
-        // Muy importante: que llegue a onNewIntent si ya está abierta
-        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        addFlags(
+            Intent.FLAG_ACTIVITY_NEW_TASK or
+                    Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                    Intent.FLAG_ACTIVITY_SINGLE_TOP
+        )
         if (!startRoute.isNullOrBlank()) putExtra("startRoute", startRoute)
     }
-    // Evitar reciclado de extras: un requestCode por ruta
     val reqCode = (startRoute ?: "default_route").hashCode()
     return PendingIntent.getActivity(
         context,
@@ -98,7 +103,7 @@ private fun mainPendingIntent(context: Context, startRoute: String?): PendingInt
     )
 }
 
-/** Notif Ongoing mientras corre la fase (sin conteo por segundo). */
+/** Notificación "en curso" mientras corre la fase (sin conteo por segundo). */
 fun showRunningNotification(context: Context, title: String, endMs: Long, startRoute: String? = null) {
     ensurePomodoroChannels(context)
 
@@ -126,47 +131,88 @@ fun cancelRunningNotification(context: Context) {
     nm?.cancel(NOTIF_ID_RUNNING)
 }
 
-/** Notif de alarma al finalizar fase (con sonido del canal). */
-fun showAlarmNotification(
+/**
+ * Construye la notificación de alarma.
+ *
+ * Es la MISMA notificación que usa PomodoroAlarmService como notificación de
+ * primer plano, por eso se separó del `notify()`: un FGS necesita el objeto
+ * Notification, no que ya esté publicada.
+ *
+ * @param withChannelSound si true usa el canal CON sonido del sistema (plan B,
+ *        cuando no pudimos arrancar el servicio).
+ */
+fun buildAlarmNotification(
     context: Context,
     title: String,
     text: String,
-    startRoute: String? = null
-): Int {
+    startRoute: String? = null,
+    withChannelSound: Boolean = false
+): Notification {
     ensurePomodoroChannels(context)
 
-    val nm = ContextCompat.getSystemService(context, NotificationManager::class.java)
+    val channel = if (withChannelSound) CHANNEL_ALARM else CHANNEL_ALARM_SILENT
 
-    val builder = NotificationCompat.Builder(context, CHANNEL_ALARM_SILENT) // canal sin sonido
+    val builder = NotificationCompat.Builder(context, channel)
         .setSmallIcon(R.drawable.ic_pomodoro)
         .setContentTitle(title)
         .setContentText(text)
-        .setStyle(NotificationCompat.BigTextStyle().bigText(text)) // expandible
+        .setStyle(NotificationCompat.BigTextStyle().bigText(text))
         .setOngoing(true)
         .setAutoCancel(false)
         .setCategory(NotificationCompat.CATEGORY_ALARM)
-        .setPriority(NotificationCompat.PRIORITY_HIGH) // pre-26
+        .setPriority(NotificationCompat.PRIORITY_HIGH)
         .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-        .setSilent(true)   // sin sonido del canal
-        .setDefaults(0)    // sin efectos por defecto
         .setContentIntent(mainPendingIntent(context, startRoute))
         .addAction(
             R.drawable.volume_off,
             context.getString(R.string.pomodoro_silence),
             silencePendingIntent(context)
         )
-    builder.setFullScreenIntent(mainPendingIntent(context, startRoute), true)
 
-    nm?.notify(NOTIF_ID_ALARM_SILENT, builder.build())
-    return NOTIF_ID_ALARM_SILENT
+    if (!withChannelSound) {
+        builder.setSilent(true).setDefaults(0)
+    }
+
+    // Full screen intent: en Android 14+ el permiso USE_FULL_SCREEN_INTENT sólo
+    // se autoconcede a apps de alarma/llamadas. Si no lo tenemos, el sistema
+    // degrada la notificación a heads-up; pedirlo igual no rompe nada, pero
+    // chequeamos para no depender de él.
+    val nm = context.getSystemService(NotificationManager::class.java)
+    val canFullScreen = if (Build.VERSION.SDK_INT >= 34) {
+        nm?.canUseFullScreenIntent() == true
+    } else true
+
+    if (canFullScreen) {
+        builder.setFullScreenIntent(mainPendingIntent(context, startRoute), true)
+    }
+
+    return builder.build()
 }
 
+/**
+ * Publica la notificación de alarma directamente, sin servicio.
+ * Sólo para casos donde no se puede arrancar un FGS (por ejemplo desde
+ * BOOT_COMPLETED, o si el arranque en background fue rechazado).
+ */
+fun showAlarmNotification(
+    context: Context,
+    title: String,
+    text: String,
+    startRoute: String? = null,
+    withChannelSound: Boolean = false
+): Int {
+    val nm = ContextCompat.getSystemService(context, NotificationManager::class.java)
+    nm?.notify(
+        NOTIF_ID_ALARM_SILENT,
+        buildAlarmNotification(context, title, text, startRoute, withChannelSound)
+    )
+    return NOTIF_ID_ALARM_SILENT
+}
 
 private fun silencePendingIntent(context: Context): PendingIntent {
     val i = Intent(context, PomodoroAlarmReceiver::class.java).apply {
         action = ACTION_POMODORO_ALARM_SILENCE
     }
-    // requestCode único para esta acción
     val reqCode = 9917
     return PendingIntent.getBroadcast(
         context,
@@ -175,4 +221,3 @@ private fun silencePendingIntent(context: Context): PendingIntent {
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
     )
 }
-

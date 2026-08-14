@@ -89,6 +89,7 @@ fun PomodoroScreen(
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
     var showInfo by remember { mutableStateOf(false) }
+    var showExactAlarmDialog by remember { mutableStateOf(false) }
 
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -130,6 +131,16 @@ fun PomodoroScreen(
 
     // “Alarma sonando” (persistente + broadcasts)
     var alarmRinging by remember { mutableStateOf(false) }
+
+    var needsExactAlarm by remember { mutableStateOf(!ExactAlarmPermission.canSchedule(context)) }
+
+    val exactAlarmLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        // Al volver de Ajustes re-chequeamos: el resultCode no sirve acá
+        needsExactAlarm = !ExactAlarmPermission.canSchedule(context)
+    }
+
     DisposableEffect(Unit) {
         val filter = IntentFilter().apply {
             addAction(ACTION_POMODORO_ALARM_START)
@@ -181,6 +192,7 @@ fun PomodoroScreen(
         val obs = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_START) {
                 alarmRinging = AlarmState.isActive(context)
+                needsExactAlarm = !ExactAlarmPermission.canSchedule(context)
             }
         }
         lifecycleOwner.lifecycle.addObserver(obs)
@@ -198,13 +210,14 @@ fun PomodoroScreen(
                     if (isRunning) {
                         isRunning = false
                         PomodoroAlarmReceiver.stopPomodoro(context)
-                    } else {
+                    }  else {
+                        if (needsExactAlarm) {
+                        showExactAlarmDialog = true
+                        } else {
                         isRunning = true
-                        PomodoroAlarmReceiver.startPomodoro(
-                            context = context,
-                            config = timerConfig
-                        )
-                    }
+                        PomodoroAlarmReceiver.startPomodoro(context, timerConfig)
+                }
+            }
                 },
                 modifier = Modifier.size(96.dp)
             ) {
@@ -324,6 +337,24 @@ fun PomodoroScreen(
                     showInfo = false
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 }) { Text(stringResource(R.string.close)) }
+            }
+        )
+    }
+    if (showExactAlarmDialog) {
+        AlertDialog(
+            onDismissRequest = { showExactAlarmDialog = false },
+            title = { Text(stringResource(R.string.pomodoro_exact_alarm_title)) },
+            text  = { Text(stringResource(R.string.pomodoro_exact_alarm_body)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showExactAlarmDialog = false
+                    ExactAlarmPermission.settingsIntent(context)?.let { exactAlarmLauncher.launch(it) }
+                }) { Text(stringResource(R.string.pomodoro_exact_alarm_open_settings)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showExactAlarmDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
             }
         )
     }

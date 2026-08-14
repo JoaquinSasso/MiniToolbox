@@ -17,6 +17,10 @@
     <string name="pomodoro_action_silence">Silence</string>
     <string name="pomodoro_action_stop">Stop</string>
 
+    <string name="pomodoro_exact_alarm_title">Alarm permission</string>
+    <string name="pomodoro_exact_alarm_body">To ensure the timer sounds while the screen is off, Android requires the "Alarms and reminders" permission. Without it, the alarm may be delayed by several minutes or not trigger until you open the app.</string>
+    <string name="pomodoro_exact_alarm_open_settings">Open settings</string>
+
     <!-- Strings del service -->
     <string name="pomodoro_started">Pomodoro started</string>
     <string name="pomodoro_work">Work</string>
