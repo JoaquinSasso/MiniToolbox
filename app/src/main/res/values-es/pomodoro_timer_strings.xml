@@ -16,6 +16,10 @@
     <string name="pomodoro_action_silence">Silenciar</string>
     <string name="pomodoro_action_stop">Detener</string>
 
+    <string name="pomodoro_exact_alarm_title">Permiso de alarmas</string>
+    <string name="pomodoro_exact_alarm_body">Para que el temporizador suene con la pantalla apagada, Android necesita que le des permiso de "Alarmas y recordatorios". Sin ese permiso la alarma puede llegar con varios minutos de retraso o no llegar hasta que abras la app.</string>
+    <string name="pomodoro_exact_alarm_open_settings">Abrir ajustes</string>
+
     <!-- Strings del service -->
     <string name="pomodoro_started">Pomodoro iniciado</string>
     <string name="pomodoro_work">Trabajo</string>
