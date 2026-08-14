@@ -157,6 +157,10 @@ dependencies {
     implementation(libs.arsceneview)
     implementation(libs.arcore)
 
+    //Pomodoro Media
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.session)
+
     //Proveedor único de ListenableFuture
     implementation(libs.guava.android)
 

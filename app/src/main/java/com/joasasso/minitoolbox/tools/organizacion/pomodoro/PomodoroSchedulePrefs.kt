@@ -1,6 +1,7 @@
 package com.joasasso.minitoolbox.tools.organizacion.pomodoro
 
 import android.content.Context
+import android.util.Log
 import androidx.core.content.edit
 
 /**
@@ -18,6 +19,7 @@ import androidx.core.content.edit
  */
 object PomodoroSchedulePrefs {
 
+    private const val TAG = "PomodoroSchedulePrefs"
     private const val PREFS = "pomodoro_schedule"
 
     private const val K_ACTIVE  = "active"
@@ -31,6 +33,7 @@ object PomodoroSchedulePrefs {
     private const val K_SHORT   = "cfg_short"
     private const val K_LONG    = "cfg_long"
     private const val K_CBL     = "cfg_cbl"
+    private const val K_CLAIMED = "claimed_trigger"
 
     data class Pending(
         val triggerAtMs: Long,
@@ -81,5 +84,38 @@ object PomodoroSchedulePrefs {
 
     fun clear(context: Context) {
         prefs(context).edit(commit = true) { clear() }
+    }
+
+    /**
+     * Reclama el procesamiento del vencimiento de fase en [triggerAtMs].
+     *
+     * Hay dos caminos que pueden llegar a "esta fase venció, hay que sonar y
+     * avanzar": el BroadcastReceiver real (disparado por AlarmManager) y el
+     * watchdog de la UI (forceAdvanceFromUi, que corre mientras el proceso siga
+     * vivo, sin importar si la pantalla está apagada). Ambos vigilan el mismo
+     * reloj, así que pueden despertar casi al mismo instante para el mismo
+     * [triggerAtMs]. Sin este chequeo, los dos procesan la fase: suenan dos
+     * alarmas superpuestas y se programan dos veces la fase siguiente.
+     *
+     * @return true si quien llama es el primero en reclamar este trigger (debe
+     *         proceder); false si ya fue reclamado por el otro camino (debe
+     *         abortar sin hacer nada más).
+     *
+     * synchronized: los dos caminos corren en el mismo proceso (uno en el hilo
+     * principal, el otro en una corrutina de IO), así que un lock de Kotlin
+     * alcanza para que el chequeo-y-marcado sea atómico entre ellos.
+     */
+    private val claimLock = Any()
+
+    fun claimTrigger(context: Context, triggerAtMs: Long): Boolean = synchronized(claimLock) {
+        val sp = prefs(context)
+        val already = sp.getLong(K_CLAIMED, -1L)
+        if (already == triggerAtMs) {
+            Log.d(TAG, "claimTrigger($triggerAtMs): ya estaba reclamado, se descarta")
+            return@synchronized false
+        }
+        sp.edit(commit = true) { putLong(K_CLAIMED, triggerAtMs) }
+        Log.d(TAG, "claimTrigger($triggerAtMs): reclamado con éxito")
+        true
     }
 }

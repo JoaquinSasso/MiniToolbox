@@ -15,6 +15,7 @@ import com.joasasso.minitoolbox.nav.Screen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 // Acción de la alarma
@@ -26,6 +27,17 @@ const val ACTION_SILENCE = "SILENCE_ALARM"
 
 private const val REQ_ALARM = 1001
 private const val TAG = "PomodoroAlarm"
+
+/**
+ * Cuánto espera el watchdog de la UI después de que la fase venció, antes de
+ * asumir que la alarma real se perdió y actuar por su cuenta.
+ *
+ * La alarma real llega, en la práctica, en menos de 300ms (lo confirman los
+ * campos "retraso=" que loguea onReceive). 5 segundos es un margen amplio:
+ * nunca se nota como demora real si la alarma llega a tiempo, pero es corto
+ * si genuinamente hay que activar la red de seguridad.
+ */
+private const val UI_WATCHDOG_GRACE_MS = 5_000L
 
 internal const val PHASE_WORK  = "WORK"
 internal const val PHASE_SHORT = "SHORT"
@@ -42,6 +54,7 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val app = context.applicationContext
+        Log.d(TAG, "onReceive: action=${intent.action}")
 
         when (intent.action) {
             ACTION_POMODORO_ALARM_SILENCE -> { silenceAlarm(app); return }
@@ -59,9 +72,21 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
             return
         }
 
+        Log.d(TAG, "Alarma disparada: phase=${pending.phase} cycle=${pending.cycle} trigger=$trigger (retraso=${System.currentTimeMillis() - trigger}ms)")
+
+        if (!PomodoroSchedulePrefs.claimTrigger(app, trigger)) {
+            Log.d(TAG, "Disparo descartado: el watchdog de la UI ya reclamó este trigger")
+            return
+        }
+
         val wl = app.getSystemService(PowerManager::class.java)
             ?.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MiniToolbox:PomodoroAlarm")
-        try { wl?.acquire(20_000L) } catch (_: Exception) { }
+        try {
+            wl?.acquire(20_000L)
+            Log.d(TAG, "WakeLock adquirido")
+        } catch (e: Exception) {
+            Log.e(TAG, "No se pudo adquirir el WakeLock", e)
+        }
 
         // 1) Sonar YA, sincrónicamente. Venimos de una alarma exacta, así que
         //    estamos dentro de la exención que permite arrancar un FGS desde background.
@@ -72,6 +97,7 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
         CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
             try {
                 advanceToNextPhase(app, pending)
+                Log.d(TAG, "Fase siguiente encadenada correctamente")
             } catch (t: Throwable) {
                 Log.e(TAG, "Error al encadenar la fase siguiente", t)
             } finally {
@@ -91,6 +117,7 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
             val app = context.applicationContext
             val endMs = System.currentTimeMillis() + config.workMin * 60_000L
             val route = Screen.PomodoroDetail.createRoute(config.id)
+            Log.d(TAG, "startPomodoro: config=${config.name} workMin=${config.workMin} endMs=$endMs")
 
             CoroutineScope(Dispatchers.IO).launch {
                 PomodoroStateRepository(app).updatePhase(
@@ -104,6 +131,7 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
 
         fun stopPomodoro(context: Context) {
             val app = context.applicationContext
+            Log.d(TAG, "stopPomodoro")
             cancelAlarm(app)
             PomodoroSchedulePrefs.clear(app)
             cancelRunningNotification(app)
@@ -118,6 +146,7 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
 
         fun silenceAlarm(context: Context) {
             val app = context.applicationContext
+            Log.d(TAG, "silenceAlarm")
             PomodoroAlarmService.stop(app)
             // Por si sonó por el plan B (notificación con sonido de canal, sin servicio)
             ContextCompat.getSystemService(app, NotificationManager::class.java)
@@ -137,8 +166,13 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
          */
         fun rescheduleFromPersisted(context: Context) {
             val app = context.applicationContext
-            val pending = PomodoroSchedulePrefs.load(app) ?: return
+            val pending = PomodoroSchedulePrefs.load(app)
+            if (pending == null) {
+                Log.d(TAG, "rescheduleFromPersisted: no hay pomodoro guardado, nada que hacer")
+                return
+            }
             val now = System.currentTimeMillis()
+            Log.d(TAG, "rescheduleFromPersisted: phase=${pending.phase} trigger=${pending.triggerAtMs} now=$now")
 
             if (pending.triggerAtMs > now) {
                 schedule(app, pending)
@@ -149,6 +183,7 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
                     Screen.PomodoroDetail.createRoute(pending.config.id)
                 )
             } else {
+                Log.d(TAG, "rescheduleFromPersisted: la fase ya venció, cortando la cadena")
                 // La fase venció mientras el teléfono estaba apagado. No se puede
                 // arrancar un FGS de tipo mediaPlayback desde BOOT_COMPLETED, así
                 // que sólo dejamos el aviso y cortamos la cadena.
@@ -186,8 +221,33 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
                 )
             if (pending.triggerAtMs > System.currentTimeMillis()) return
 
+            // Margen de gracia: le damos tiempo a la alarma real antes de actuar
+            // nosotros. Sin esto, este watchdog corre contra la alarma real cada
+            // vez que la fase vence con el proceso vivo (con o sin pantalla
+            // encendida) y las dos rutas terminan sonando y avanzando la fase
+            // por duplicado.
+            val elapsed = System.currentTimeMillis() - pending.triggerAtMs
+            if (elapsed < UI_WATCHDOG_GRACE_MS) {
+                delay(UI_WATCHDOG_GRACE_MS - elapsed)
+            }
+
+            if (!PomodoroSchedulePrefs.claimTrigger(app, pending.triggerAtMs)) {
+                Log.d(TAG, "forceAdvanceFromUi: la alarma real ya procesó este trigger, no hacemos nada")
+                return
+            }
+
+            Log.d(TAG, "forceAdvanceFromUi: la alarma real no llegó en ${UI_WATCHDOG_GRACE_MS}ms, actuando como respaldo (phase=${pending.phase})")
             cancelAlarm(app)
-            startRinging(app, pending)          // la app está en foreground: FGS permitido
+            // OJO: esto puede correr con la app en background (proceso vivo,
+            // pantalla apagada), no en foreground real. A diferencia del camino
+            // de onReceive (que siempre tiene la exención de alarma exacta),
+            // acá el arranque del FGS depende de si el proceso todavía cae
+            // dentro de alguna ventana de gracia post-background del sistema.
+            // Si no la tiene, ContextCompat.startForegroundService() puede
+            // lanzar ForegroundServiceStartNotAllowedException — que ya cae
+            // dentro del catch de startRinging() y se resuelve con el plan B
+            // de notificación con sonido de canal, así que sigue sonando.
+            startRinging(app, pending)
             advanceToNextPhase(app, pending)
         }
 
@@ -212,13 +272,18 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
             val app = context.applicationContext
             PomodoroSchedulePrefs.save(app, pending)   // persistir primero
 
-            val am = app.getSystemService(AlarmManager::class.java) ?: return
+            val am = app.getSystemService(AlarmManager::class.java)
+            if (am == null) {
+                Log.e(TAG, "schedule: no se pudo obtener AlarmManager")
+                return
+            }
             val pi = firePendingIntent(app, pending.triggerAtMs)
 
             if (ExactAlarmPermission.canSchedule(app)) {
                 try {
                     val show = mainPendingIntent(app, Screen.PomodoroDetail.createRoute(pending.config.id))
                     am.setAlarmClock(AlarmManager.AlarmClockInfo(pending.triggerAtMs, show), pi)
+                    Log.d(TAG, "schedule: alarma EXACTA programada para ${pending.triggerAtMs} (phase=${pending.phase}, cycle=${pending.cycle})")
                     return
                 } catch (e: SecurityException) {
                     // Carrera: el usuario revocó el permiso entre el chequeo y el uso
@@ -229,6 +294,7 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
             }
 
             am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, pending.triggerAtMs, pi)
+            Log.d(TAG, "schedule: alarma INEXACTA programada para ${pending.triggerAtMs} (phase=${pending.phase}, cycle=${pending.cycle})")
         }
 
         private fun firePendingIntent(context: Context, triggerAtMs: Long): PendingIntent {
@@ -279,6 +345,7 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
 
             try {
                 PomodoroAlarmService.ring(app, title, text, route)
+                Log.d(TAG, "startRinging: FGS de alarma arrancado")
             } catch (e: Exception) {
                 Log.w(TAG, "No se pudo arrancar el FGS de alarma, usando notificación con sonido", e)
                 ringWithChannelSound(app, title, text, route)
@@ -324,6 +391,7 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
             val title = phaseTitle(app, nextPhase)
             val route = Screen.PomodoroDetail.createRoute(cfg.id)
 
+            Log.d(TAG, "advanceToNextPhase: ${pending.phase} -> $nextPhase (${nextMin}min, cycle=$nextCycle)")
             PomodoroStateRepository(app).updatePhase(title, endMs, nextMin * 60L)
             showRunningNotification(app, title, endMs, route)
             schedule(app, PomodoroSchedulePrefs.Pending(endMs, nextPhase, nextCycle, cfg))
