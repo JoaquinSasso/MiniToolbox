@@ -36,6 +36,14 @@ Diseñé un motor de telemetría personalizado para monitorear el ciclo de vida 
 - **Foreground Services:** Gestión de hilos persistentes para el temporizador Pomodoro, garantizando estabilidad total.
 - **Widgets (Glance):** Micro-interfaces reactivas para la pantalla de inicio desarrolladas con el nuevo framework de Google.
 
+### 4. Documentación de Debugging: Diagnóstico del Pomodoro en Android 17
+El temporizador Pomodoro presentaba fallos en background que requerían debugging profundo a través de 6 problemas independientes apilados. En lugar de simplemente parchear, documenté el proceso completo:
+
+- **Archivo:** `/docs/pomodoro-background-alarm-fix.md` (415 líneas de análisis técnico)
+- **Contenido:** Diagnóstico de cada problema, causa raíz, solución implementada y metodología de prueba reutilizable
+- **Herramientas usadas:** adb, dumpsys alarm, Logcat filtering, forced Doze simulation, Android 17 audio hardening flags
+- **Impacto:** Documentación que sirve como referencia para otros desarrolladores enfrentando problemas similares con alarmas exactas, foreground services y audio en background
+
 ---
 
 ## ✨ Herramientas Destacadas
@@ -62,7 +70,7 @@ El proyecto sigue el patrón **MVVM (Model-View-ViewModel)** bajo principios de 
 - `/app`: Código fuente Android (Kotlin).
 - `/backend`: Firebase Functions (TypeScript) para la API de métricas.
 - `/dashboard`: Panel de control web (JS/CSS) para visualización de datos.
-- `/docs`: Análisis detallados de performance y documentación de arquitectura.
+- `/docs`: Análisis detallados de performance, documentación de arquitectura, implementación e investigación.
 
 ---
 
@@ -77,7 +85,7 @@ El proyecto sigue el patrón **MVVM (Model-View-ViewModel)** bajo principios de 
 ---
 
 ## 📈 Impacto Real
-- **Rating:** 5/5 ⭐ en Google Play Store, basado en 23 reseñas.
+- **Rating:** 5/5 ⭐ en Google Play Store, basado en 24 reseñas.
 - **Instalaciones:** +130 descargas orgánicas.
 - **Comunidad:** Feedback activo de usuarios con 19 reseñas positivas.
 

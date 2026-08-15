@@ -20,6 +20,12 @@
     <string name="pomodoro_exact_alarm_body">Para que el temporizador suene con la pantalla apagada, Android necesita que le des permiso de "Alarmas y recordatorios". Sin ese permiso la alarma puede llegar con varios minutos de retraso o no llegar hasta que abras la app.</string>
     <string name="pomodoro_exact_alarm_open_settings">Abrir ajustes</string>
 
+    <string name="pomodoro_finish_full">Finalizar pomodoro</string>
+    <string name="pomodoro_open_app">Abrir la app</string>
+    <string name="pomodoro_fsi_title">Abrir la alarma en pantalla completa</string>
+    <string name="pomodoro_fsi_body">Notamos que tuviste que entrar a la app para apagar la alarma. Si le das este permiso, la próxima vez la pantalla de apagado va a aparecer sola, incluso con el teléfono bloqueado.</string>
+    <string name="pomodoro_fsi_later">Ahora no</string>
+
     <!-- Strings del service -->
     <string name="pomodoro_started">Pomodoro iniciado</string>
     <string name="pomodoro_work">Trabajo</string>

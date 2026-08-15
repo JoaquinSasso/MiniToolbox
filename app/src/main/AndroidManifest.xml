@@ -40,6 +40,14 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".tools.organizacion.pomodoro.PomodoroAlarmActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true" />
+
         <!-- Metadata para Admob-->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
