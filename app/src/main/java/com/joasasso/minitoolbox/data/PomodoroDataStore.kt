@@ -91,7 +91,6 @@ object PomodoroTimersPrefs {
 
             list += PomodoroTimerConfig(
                 id = o.optString("id"),
-                name = o.optString("name"),
                 colorInt = colorInt,
                 workMin = o.optInt("workMin", 25),
                 shortBreakMin = o.optInt("shortBreakMin", 5),
@@ -115,7 +114,6 @@ object PomodoroTimersPrefs {
         items.forEach { t ->
             val o = JSONObject().apply {
                 put("id", t.id)
-                put("name", t.name)
                 put("color", t.colorInt)                     // ← guardar Int ARGB
                 put("workMin", t.workMin)
                 put("shortBreakMin", t.shortBreakMin)

@@ -27,7 +27,6 @@ object PomodoroSchedulePrefs {
     private const val K_PHASE   = "phase"
     private const val K_CYCLE   = "cycle"
     private const val K_ID      = "cfg_id"
-    private const val K_NAME    = "cfg_name"
     private const val K_COLOR   = "cfg_color"
     private const val K_WORK    = "cfg_work"
     private const val K_SHORT   = "cfg_short"
@@ -53,7 +52,6 @@ object PomodoroSchedulePrefs {
             putString(K_PHASE, pending.phase)
             putInt(K_CYCLE, pending.cycle)
             putString(K_ID, pending.config.id)
-            putString(K_NAME, pending.config.name)
             putInt(K_COLOR, pending.config.colorInt)
             putInt(K_WORK, pending.config.workMin)
             putInt(K_SHORT, pending.config.shortBreakMin)
@@ -72,7 +70,6 @@ object PomodoroSchedulePrefs {
             cycle = sp.getInt(K_CYCLE, 0),
             config = PomodoroTimerConfig(
                 id = sp.getString(K_ID, "").orEmpty(),
-                name = sp.getString(K_NAME, "").orEmpty(),
                 colorInt = sp.getInt(K_COLOR, 0xFF4DBC52.toInt()),
                 workMin = sp.getInt(K_WORK, 25),
                 shortBreakMin = sp.getInt(K_SHORT, 5),
