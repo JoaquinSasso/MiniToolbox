@@ -82,6 +82,31 @@ class PomodoroAlarmService : MediaSessionService() {
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? =
         mediaSession
 
+    /**
+     * Intencionalmente vacío: NO llamar a super.
+     *
+     * media3 trae adentro su propio gestor de notificaciones. En cuanto el
+     * player arranca, construye una notificación de estilo media ("Now playing",
+     * canal `default_channel_id` con IMPORTANCE_LOW) y llama a startForeground()
+     * con SU id (1001 por defecto, el de DefaultMediaNotificationProvider).
+     *
+     * El problema es que un servicio tiene una sola notificación de primer
+     * plano: cuando se llama a startForeground() con un id distinto del que ya
+     * tenía, el framework CANCELA la anterior antes de poner la nueva
+     * (ActiveServices.setServiceForegroundInnerLocked). Es decir, media3 se
+     * llevaba puesta la notificación de alarma unos milisegundos después de
+     * publicarla — el heads-up desaparecía y en el shade quedaba sólo una
+     * tarjeta de reproducción en un canal LOW.
+     *
+     * Neutralizando este callback, la notificación del servicio queda bajo
+     * nuestro control exclusivo (la publicamos en onStartCommand). No rompe
+     * nada del contrato del FGS: ya llamamos a startForeground() por nuestra
+     * cuenta con el tipo mediaPlayback.
+     */
+    override fun onUpdateNotification(session: MediaSession, startInForegroundRequired: Boolean) {
+        // no-op a propósito
+    }
+
     private fun buildPlayer(): ExoPlayer {
         val attrs = Media3AudioAttributes.Builder()
             .setUsage(C.USAGE_ALARM)
@@ -123,8 +148,15 @@ class PomodoroAlarmService : MediaSessionService() {
             ?: getString(R.string.pomodoro_tap_to_stop)
         val route = intent?.getStringExtra(EX_RING_ROUTE)
 
-        // 1) Primero de todo: pasar a primer plano. Hay ~10 s de margen antes de
-        //    que el sistema mate el proceso por no llamar a startForeground().
+        // 1) Marcar la alarma como activa ANTES de publicar la notificación.
+        //    PomodoroAlarmActivity.onStart() hace `if (!AlarmState.isActive) finish()`,
+        //    y el full-screen intent puede lanzarla en cuanto la notificación se
+        //    publica. Si el flag se escribiera después, la pantalla de alarma
+        //    podría abrirse y cerrarse sola.
+        AlarmState.setActive(this, true)
+
+        // 2) Pasar a primer plano. Hay ~10 s de margen antes de que el sistema
+        //    mate el proceso por no llamar a startForeground().
         ensurePomodoroChannels(this)
         val notif = buildAlarmNotification(this, title, text, route)
         try {
@@ -141,15 +173,14 @@ class PomodoroAlarmService : MediaSessionService() {
             Log.e(TAG, "startForeground FALLÓ, el servicio va a ser matado por el sistema", e)
         }
 
-        // 2) Estado visible para la UI
-        AlarmState.setActive(this, true)
+        // 3) Avisarle a la UI que la alarma está sonando
         sendBroadcast(
             Intent(ACTION_POMODORO_ALARM_START)
                 .setPackage(packageName)
                 .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY or Intent.FLAG_RECEIVER_FOREGROUND)
         )
 
-        // 3) Sonido + vibración
+        // 4) Sonido + vibración
         acquireWakeLock()
         startAudio()
         startVibration()

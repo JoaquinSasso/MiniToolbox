@@ -21,6 +21,11 @@
     <string name="pomodoro_exact_alarm_body">To ensure the timer sounds while the screen is off, Android requires the "Alarms and reminders" permission. Without it, the alarm may be delayed by several minutes or not trigger until you open the app.</string>
     <string name="pomodoro_exact_alarm_open_settings">Open settings</string>
 
+    <string name="pomodoro_finish_full">Finish Pomodoro</string>
+    <string name="pomodoro_open_app">Open app</string>
+    <string name="pomodoro_fsi_title">Open alarm in full screen</string>
+    <string name="pomodoro_fsi_body">We noticed you had to enter the app to turn off the alarm. If you grant this permission, the next time the stop screen will appear automatically, even with the phone locked.</string>
+    <string name="pomodoro_fsi_later">Not now</string>
     <!-- Strings del service -->
     <string name="pomodoro_started">Pomodoro started</string>
     <string name="pomodoro_work">Work</string>

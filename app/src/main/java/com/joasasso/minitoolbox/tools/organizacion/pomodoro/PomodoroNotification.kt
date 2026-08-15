@@ -9,6 +9,7 @@ import android.content.Intent
 import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.joasasso.minitoolbox.MainActivity
@@ -66,7 +67,12 @@ fun ensurePomodoroChannels(context: Context) {
         )
     }
 
-    // Canal ALARM sin sonido: el audio lo maneja PomodoroAlarmService con MediaPlayer.
+    // Canal ALARM sin sonido: el audio lo maneja PomodoroAlarmService con ExoPlayer.
+    //
+    // Este canal es la ÚNICA fuente del silencio de la notificación de alarma.
+    // Desde Android 8 el canal manda sobre el builder en todo lo que sea sonido
+    // y vibración, así que no hace falta (ni conviene) volver a silenciar del
+    // lado del builder — ver el comentario en buildAlarmNotification().
     if (nm.getNotificationChannel(CHANNEL_ALARM_SILENT) == null) {
         nm.createNotificationChannel(
             NotificationChannel(
@@ -95,6 +101,33 @@ internal fun mainPendingIntent(context: Context, startRoute: String?): PendingIn
         if (!startRoute.isNullOrBlank()) putExtra("startRoute", startRoute)
     }
     val reqCode = (startRoute ?: "default_route").hashCode()
+    return PendingIntent.getActivity(
+        context,
+        reqCode,
+        intent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
+}
+
+/**
+ * PendingIntent hacia la pantalla completa de alarma (PomodoroAlarmActivity),
+ * no hacia MainActivity. Se usa tanto para el toque manual de la notificación
+ * como para el full-screen intent automático — las dos vías tienen que llevar
+ * al mismo lugar: un botón grande de "apagar", no al detalle del timer.
+ */
+internal fun alarmActivityPendingIntent(
+    context: Context,
+    title: String,
+    text: String,
+    startRoute: String?
+): PendingIntent {
+    val intent = Intent(context, PomodoroAlarmActivity::class.java).apply {
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        putExtra(EX_ALARM_TITLE, title)
+        putExtra(EX_ALARM_TEXT, text)
+        if (!startRoute.isNullOrBlank()) putExtra(EX_ALARM_ROUTE, startRoute)
+    }
+    val reqCode = 9918
     return PendingIntent.getActivity(
         context,
         reqCode,
@@ -152,6 +185,11 @@ fun buildAlarmNotification(
 
     val channel = if (withChannelSound) CHANNEL_ALARM else CHANNEL_ALARM_SILENT
 
+    // Un solo PendingIntent para las dos vías (toque manual y full-screen
+    // automático): las dos tienen que abrir la pantalla de "apagar alarma",
+    // no MainActivity ni el detalle del timer.
+    val ringingIntent = alarmActivityPendingIntent(context, title, text, startRoute)
+
     val builder = NotificationCompat.Builder(context, channel)
         .setSmallIcon(R.drawable.ic_pomodoro)
         .setContentTitle(title)
@@ -162,7 +200,7 @@ fun buildAlarmNotification(
         .setCategory(NotificationCompat.CATEGORY_ALARM)
         .setPriority(NotificationCompat.PRIORITY_HIGH)
         .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-        .setContentIntent(mainPendingIntent(context, startRoute))
+        .setContentIntent(ringingIntent)
         .addAction(
             R.drawable.volume_off,
             context.getString(R.string.pomodoro_silence),
@@ -170,7 +208,24 @@ fun buildAlarmNotification(
         )
 
     if (!withChannelSound) {
-        builder.setSilent(true).setDefaults(0)
+        // NO volver a poner setSilent(true) acá. Fue la causa de que la alarma
+        // nunca hiciera heads-up ni saltara a pantalla completa, durante toda
+        // una tanda de tests en los que el permiso, el canal y el DND daban
+        // bien.
+        //
+        // setSilent(true) no se limita a sacar el sonido: además setea el
+        // group alert behavior en GROUP_ALERT_SUMMARY y, al no haber grupo
+        // asignado, mete la notificación en el grupo "silent". Queda entonces
+        // como hija de un grupo cuya política dice "sólo alerta el resumen" —
+        // y ese resumen nunca se publica. Notification.suppressAlertingDueToGrouping()
+        // pasa a devolver true, y con eso el sistema bloquea las dos cosas:
+        // NotificationManagerService la silencia y SystemUI le niega el
+        // heads-up y el full-screen intent (lo registra como
+        // NO_FSI_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR).
+        //
+        // El silencio que queríamos ya lo garantiza CHANNEL_ALARM_SILENT, que
+        // se crea con setSound(null, null) y enableVibration(false).
+        builder.setDefaults(0)
     }
 
     // Full screen intent: en Android 14+ el permiso USE_FULL_SCREEN_INTENT sólo
@@ -182,8 +237,24 @@ fun buildAlarmNotification(
         nm?.canUseFullScreenIntent() == true
     } else true
 
+    // Diagnóstico: sin esto, un permiso denegado o un canal con la
+    // importancia rebajada por el sistema fallan en silencio — igual que nos
+    // pasó con el audio.
+    //
+    // OJO con la lección de este bug: estas dos métricas miden el PERMISO y el
+    // CANAL, no el objeto Notification. La supresión por grupo no aparece acá.
+    // Si alguna vez vuelve a no saltar con estas dos líneas en verde, mirar la
+    // notificación en sí con `adb shell dumpsys notification --noredact`.
+    val liveImportance = nm?.getNotificationChannel(channel)?.importance
+    Log.d(
+        "PomodoroNotification",
+        "buildAlarmNotification: canFullScreen=$canFullScreen " +
+                "channelImportance=$liveImportance (HIGH=${NotificationManager.IMPORTANCE_HIGH}) " +
+                "channel=$channel"
+    )
+
     if (canFullScreen) {
-        builder.setFullScreenIntent(mainPendingIntent(context, startRoute), true)
+        builder.setFullScreenIntent(ringingIntent, true)
     }
 
     return builder.build()

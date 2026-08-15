@@ -133,6 +133,7 @@ fun PomodoroScreen(
     var alarmRinging by remember { mutableStateOf(false) }
 
     var needsExactAlarm by remember { mutableStateOf(!ExactAlarmPermission.canSchedule(context)) }
+    var showFullScreenIntentDialog by remember { mutableStateOf(false) }
 
     val exactAlarmLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -193,6 +194,9 @@ fun PomodoroScreen(
             if (event == Lifecycle.Event.ON_START) {
                 alarmRinging = AlarmState.isActive(context)
                 needsExactAlarm = !ExactAlarmPermission.canSchedule(context)
+                if (alarmRinging && !FullScreenIntentPermission.canUse(context)) {
+                    showFullScreenIntentDialog = true
+                }
             }
         }
         lifecycleOwner.lifecycle.addObserver(obs)
@@ -354,6 +358,24 @@ fun PomodoroScreen(
             dismissButton = {
                 TextButton(onClick = { showExactAlarmDialog = false }) {
                     Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+    if (showFullScreenIntentDialog) {
+        AlertDialog(
+            onDismissRequest = { showFullScreenIntentDialog = false },
+            title = { Text(stringResource(R.string.pomodoro_fsi_title)) },
+            text = { Text(stringResource(R.string.pomodoro_fsi_body)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showFullScreenIntentDialog = false
+                    FullScreenIntentPermission.settingsIntent(context)?.let { context.startActivity(it) }
+                }) { Text(stringResource(R.string.pomodoro_exact_alarm_open_settings)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showFullScreenIntentDialog = false }) {
+                    Text(stringResource(R.string.pomodoro_fsi_later))
                 }
             }
         )
