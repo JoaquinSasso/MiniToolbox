@@ -97,7 +97,6 @@ fun PomodoroScreen(
         mutableStateOf(
             PomodoroTimersPrefs.loadAll(context).firstOrNull { it.id == timerId }
                 ?: PomodoroTimerConfig(
-                    name = "Default",
                     colorInt = Color(0xFF4DBC52).toArgbInt(),
                     workMin = 25, shortBreakMin = 5, longBreakMin = 15, cyclesBeforeLong = 4
                 )
@@ -205,7 +204,7 @@ fun PomodoroScreen(
 
     Scaffold(
         topBar = {
-            TopBarReusable(timerConfig.name, onBack, onShowInfo = {showInfo = true})
+            TopBarReusable(stringResource(R.string.tool_pomodoro_timer), onBack, onShowInfo = {showInfo = true})
         },
         floatingActionButton = {
             LargeFloatingActionButton(

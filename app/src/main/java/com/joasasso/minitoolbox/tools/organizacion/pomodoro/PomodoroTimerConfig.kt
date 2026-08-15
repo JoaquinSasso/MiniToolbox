@@ -6,7 +6,6 @@ import java.util.UUID
 
 data class PomodoroTimerConfig(
     val id: String = UUID.randomUUID().toString(),
-    val name: String,
     val colorInt: Int,            // ← ARGB Int
     val workMin: Int,
     val shortBreakMin: Int,

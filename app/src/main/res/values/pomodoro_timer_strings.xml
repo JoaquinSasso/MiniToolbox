@@ -46,6 +46,10 @@
     <string name="pomodoro_min_work">min work</string>
     <string name="pomodoro_min_breaks">min breaks</string>
     <string name="pomodoro_cycles_before_long">%1$d cycles</string>
+    <string name="pomodoro_active">Active</string>
+    <string name="pomodoro_timer_busy">There is an active timer. Stop it before making changes or opening another one.</string>
+    <string name="pomodoro_delete_title">Delete timer</string>
+    <string name="pomodoro_delete_message">Are you sure you want to delete this timer?</string>
     <string name="pomodoro_open_detail">Open detail</string>
     <string name="pomodoro_finishing">Finishing cycle…</string>
 
@@ -55,7 +59,7 @@
     <!-- Help: Timers list -->
     <string name="pomolist_help_title">Pomodoro timers list</string>
     <string name="pomolist_help_p1">Create profiles with different work times, breaks, and cycles before the long break.</string>
-    <string name="pomolist_help_p3">Use ✏️ to edit the name, color, and durations. Use 🗑️ to delete a profile.</string>
+    <string name="pomolist_help_p3">Use ✏️ to edit the color and durations. Use 🗑️ to delete a profile.</string>
     <string name="pomolist_help_p2">Tap a profile to open its timer and use it.</string>
     <string name="pomolist_help_p4">Changes are saved automatically on your device.</string>
 

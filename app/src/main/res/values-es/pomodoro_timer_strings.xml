@@ -49,6 +49,10 @@
     <string name="pomodoro_min_work">min trabajo</string>
     <string name="pomodoro_min_breaks">min descansos</string>
     <string name="pomodoro_cycles_before_long">%1$d ciclos</string>
+    <string name="pomodoro_active">Activo</string>
+    <string name="pomodoro_timer_busy">Hay un temporizador activo. Detenlo para realizar cambios o abrir otro.</string>
+    <string name="pomodoro_delete_title">Borrar temporizador</string>
+    <string name="pomodoro_delete_message">¿Estás seguro de que quieres borrar este temporizador?</string>
     <string name="pomodoro_open_detail">Abrir detalle</string>
     <string name="pomodoro_cycles">Ciclos antes del largo</string>
     <string name="pomodoro_finishing">Finalizando ciclo…</string>
@@ -56,7 +60,7 @@
     <!-- Ayuda: Lista de timers -->
     <string name="pomolist_help_title">Lista de timers Pomodoro</string>
     <string name="pomolist_help_p1">Crea perfiles con distintos tiempos de trabajo, descansos y ciclos antes del descanso largo.</string>
-    <string name="pomolist_help_p3">Usa ✏️ para editar nombre, color y duraciones. Usa 🗑️ para eliminar el perfil.</string>
+    <string name="pomolist_help_p3">Usa ✏️ para editar color y duraciones. Usa 🗑️ para eliminar el perfil.</string>
     <string name="pomolist_help_p2">Toca el perfil para abrir su temporizador y usarlo.</string>
     <string name="pomolist_help_p4">Los cambios se guardan automáticamente en el dispositivo.</string>
 

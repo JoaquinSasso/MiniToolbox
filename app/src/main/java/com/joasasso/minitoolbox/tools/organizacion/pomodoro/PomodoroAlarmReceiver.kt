@@ -117,7 +117,7 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
             val app = context.applicationContext
             val endMs = System.currentTimeMillis() + config.workMin * 60_000L
             val route = Screen.PomodoroDetail.createRoute(config.id)
-            Log.d(TAG, "startPomodoro: config=${config.name} workMin=${config.workMin} endMs=$endMs")
+            Log.d(TAG, "startPomodoro: id=${config.id} workMin=${config.workMin} endMs=$endMs")
 
             CoroutineScope(Dispatchers.IO).launch {
                 PomodoroStateRepository(app).updatePhase(
