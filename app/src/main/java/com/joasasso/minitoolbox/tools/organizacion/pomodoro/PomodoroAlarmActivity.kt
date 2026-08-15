@@ -7,35 +7,52 @@ import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.VolumeOff
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.WavyProgressIndicatorDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.joasasso.minitoolbox.R
+import com.joasasso.minitoolbox.ui.theme.MiniToolboxTheme
 
 internal const val EX_ALARM_TITLE = "alarm_title"
 internal const val EX_ALARM_TEXT  = "alarm_text"
@@ -52,12 +69,19 @@ internal const val EX_ALARM_ROUTE = "alarm_route"
  * más falta hace que esta pantalla aparezca sola, sin que el usuario tenga
  * que navegar a mano.
  *
- * TODO: si la app tiene un composable de tema propio (p. ej. MiniToolboxTheme),
- * reemplazar el MaterialTheme { } de abajo por ese, para que colores/tipografía
- * coincidan con el resto de la app. Se dejó MaterialTheme puro para que
- * compile sin depender de un nombre que no puedo confirmar desde acá.
+ * Extiende AppCompatActivity, no ComponentActivity, por el mismo motivo que
+ * MainActivity: Theme.MiniToolbox trae action bar, y hace falta el
+ * supportActionBar?.hide() de abajo para sacarla. Con ComponentActivity no
+ * hay forma de ocultarla sin declarar un tema aparte en el manifiesto.
+ *
+ * El layout es deliberadamente un espejo de PomodoroScreen: mismo título
+ * arriba, mismo círculo con el mismo grosor y separación, y el botón de
+ * silenciar del mismo tamaño y en la misma posición donde vive el de
+ * iniciar/detener. La idea es que el pulgar caiga donde ya está
+ * acostumbrado, y que la pantalla se lea como el timer en otro estado y no
+ * como una pantalla ajena.
  */
-class PomodoroAlarmActivity : ComponentActivity() {
+class PomodoroAlarmActivity : AppCompatActivity() {
 
     private val stopReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -67,6 +91,7 @@ class PomodoroAlarmActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        supportActionBar?.hide()
         showOverLockScreen()
 
         val title = intent.getStringExtra(EX_ALARM_TITLE) ?: getString(R.string.tool_pomodoro_timer)
@@ -74,7 +99,7 @@ class PomodoroAlarmActivity : ComponentActivity() {
         val route = intent.getStringExtra(EX_ALARM_ROUTE)
 
         setContent {
-            MaterialTheme {
+            MiniToolboxTheme {
                 PomodoroAlarmRingingScreen(
                     title = title,
                     text = text,
@@ -138,6 +163,7 @@ class PomodoroAlarmActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun PomodoroAlarmRingingScreen(
     title: String,
@@ -148,69 +174,118 @@ private fun PomodoroAlarmRingingScreen(
 ) {
     val haptic = LocalHapticFeedback.current
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.primaryContainer),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.VolumeOff,
-                contentDescription = null,
-                modifier = Modifier.size(96.dp),
-                tint = MaterialTheme.colorScheme.onPrimaryContainer
-            )
+    // El círculo está completo (la fase terminó), así que el progreso no puede
+    // comunicar nada. Lo que comunica que la alarma está sonando es la onda:
+    // late entre amplitud baja y máxima. Mismo componente y mismos parámetros
+    // que PomodoroScreen, sólo que animado.
+    val pulse = rememberInfiniteTransition(label = "ringPulse")
+    val amplitude by pulse.animateFloat(
+        initialValue = 0.25f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 900, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "ringAmplitude"
+    )
 
-            Spacer(Modifier.height(24.dp))
-
-            Text(
-                text = title,
-                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
-            )
-
-            Spacer(Modifier.height(8.dp))
-
-            Text(
-                text = text,
-                style = MaterialTheme.typography.bodyLarge,
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
-            )
-
-            Spacer(Modifier.height(48.dp))
-
-            Button(
+    Scaffold(
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
                 onClick = {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     onSilence()
                 },
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(64.dp)
+                    .fillMaxWidth(0.9f)
+                    .height(80.dp),
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
-                Text(stringResource(R.string.pomodoro_silence), fontSize = 20.sp)
+                Text(
+                    text = text.uppercase(),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+            }
+        },
+        floatingActionButtonPosition = FabPosition.Center
+    ) { inner ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(inner)
+                .padding(horizontal = 24.dp)
+                // Deja libre la franja donde flota el FAB (80.dp + margen).
+                .padding(bottom = 100.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            // 1) TÍTULO ARRIBA — ocupa el lugar del nombre de fase en el timer
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(Modifier.height(8.dp))
+
+            // 2) CÍRCULO — mismas medidas exactas que PomodoroScreen
+            val stroke = with(LocalDensity.current) {
+                Stroke(width = 18.dp.toPx(), cap = StrokeCap.Round)
             }
 
-            Spacer(Modifier.height(16.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    .aspectRatio(1f),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularWavyProgressIndicator(
+                    progress = { 1f },
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .aspectRatio(1f),
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.70f),
+                    stroke = stroke,
+                    trackStroke = stroke,
+                    gapSize = 10.dp,
+                    amplitude = { amplitude },
+                    wavelength = 80.dp,
+                    waveSpeed = WavyProgressIndicatorDefaults.CircularWavelength
+                )
 
-            TextButton(onClick = {
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                onStopPomodoro()
-            }) {
+                Icon(
+                    imageVector = Icons.Filled.Notifications,
+                    contentDescription = null,
+                    modifier = Modifier.size(72.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            Spacer(Modifier.height(24.dp))
+
+            // 3) ACCIONES SECUNDARIAS — peso visual bajo a propósito: silenciar
+            //    es lo que el usuario quiere el 95% de las veces, y ese es el FAB.
+            Button(
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onStopPomodoro()
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Text(stringResource(R.string.pomodoro_finish_full))
             }
 
             if (onOpenApp != null) {
                 Spacer(Modifier.height(8.dp))
-                TextButton(onClick = onOpenApp) {
+                Button(
+                    onClick = onOpenApp,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Text(stringResource(R.string.pomodoro_open_app))
                 }
             }
