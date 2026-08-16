@@ -16,4 +16,8 @@ local.properties
 # Claves de firma
 keystore.properties
 *.jks
-
+# Ignorar artefactos de build y releases
+*.aab
+*.apk
+/app/release/
+/app/build/
