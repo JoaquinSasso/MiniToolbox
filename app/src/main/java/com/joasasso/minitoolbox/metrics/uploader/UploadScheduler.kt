@@ -96,7 +96,7 @@ object UploadScheduler {
     // --------- UMBRALES (cotas) ---------
 
     data class FlushThreshold(
-        val appOpens: Int = 3,     // al registrar 3 aperturas, gatilla envío
+        val appOpens: Int = 1,     // al registrar 1 apertura, gatilla envío
         val tools: Int = 20,       // o 20 usos de herramientas
         val ads: Int = 20,         // o 20 impresiones de anuncios
         val total: Int? = null     // o umbral global (app+tools+ads). null = no usar

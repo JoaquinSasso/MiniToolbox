@@ -14,6 +14,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.compose.rememberNavController
 import com.joasasso.minitoolbox.metrics.appOpen
 import com.joasasso.minitoolbox.metrics.dailyOpenOnce
@@ -73,8 +76,27 @@ class MainActivity : AppCompatActivity() {
                         // 🔸 Planificador con cotas
                         UploadScheduler.maybeFlushOnThreshold(
                             applicationContext,
-                            UploadScheduler.FlushThreshold(appOpens = 3, tools = Int.MAX_VALUE, ads = Int.MAX_VALUE)
+                            UploadScheduler.FlushThreshold(appOpens = 1, tools = Int.MAX_VALUE, ads = Int.MAX_VALUE)
                         )
+                    }
+                }
+
+                val lifecycleOwner = LocalLifecycleOwner.current
+                DisposableEffect(lifecycleOwner) {
+                    val observer = LifecycleEventObserver { _, event ->
+                        if (event == Lifecycle.Event.ON_STOP) {
+                            if (isMetricsConfigured) {
+                                UploadScheduler.enqueueNowExpedited(
+                                    applicationContext,
+                                    BuildConfig.METRICS_ENDPOINT,
+                                    BuildConfig.METRICS_API_KEY
+                                )
+                            }
+                        }
+                    }
+                    lifecycleOwner.lifecycle.addObserver(observer)
+                    onDispose {
+                        lifecycleOwner.lifecycle.removeObserver(observer)
                     }
                 }
 
