@@ -66,6 +66,12 @@ El proyecto sigue el patrón **MVVM (Model-View-ViewModel)** bajo principios de 
 - **Domain Layer:** Lógica de negocio desacoplada (cálculos financieros, conversores, motores de juegos).
 - **UI Layer:** Interfaces declarativas con Jetpack Compose, utilizando un sistema de temas personalizado (Material 3).
 
+### Configuración local
+Para habilitar la telemetría, configurá `local.properties` con:
+- `METRICS_ENDPOINT`
+- `METRICS_API_KEY`
+Si faltan, la app funciona igual, pero no reporta métricas.
+
 ### Estructura del Repositorio
 - `/app`: Código fuente Android (Kotlin).
 - `/backend`: Firebase Functions (TypeScript) para la API de métricas.

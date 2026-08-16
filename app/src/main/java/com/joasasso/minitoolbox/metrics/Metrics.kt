@@ -2,6 +2,7 @@ package com.joasasso.minitoolbox.metrics
 
 import android.content.Context
 import androidx.core.content.edit
+import com.joasasso.minitoolbox.BuildConfig
 import com.joasasso.minitoolbox.metrics.storage.AggregatesRepository
 import com.joasasso.minitoolbox.metrics.uploader.UploadConfig
 import com.joasasso.minitoolbox.metrics.uploader.UploadScheduler
@@ -19,6 +20,9 @@ private const val METRICS_SP = "metrics_prefs"
 private const val KEY_ENABLED = "enabled"
 
 fun isMetricsEnabled(context: Context): Boolean {
+    // Si no hay credenciales, las métricas están OFF globalmente
+    if (BuildConfig.METRICS_API_KEY.isEmpty() || BuildConfig.METRICS_ENDPOINT.isEmpty()) return false
+
     val sp = context.applicationContext.getSharedPreferences(METRICS_SP, Context.MODE_PRIVATE)
     return sp.getBoolean(KEY_ENABLED, true) // ON por defecto
 }

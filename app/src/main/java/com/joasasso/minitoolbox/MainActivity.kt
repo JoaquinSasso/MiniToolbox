@@ -42,8 +42,8 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.hide()
         startRouteState = intent?.getStringExtra("startRoute")
 
-        Log.d("Metrics", "endpoint=" + UploadConfig.getEndpoint(this))
-        Log.d("Metrics", "apiKey=" + UploadConfig.getApiKey(this).take(6) + "…")
+        val isMetricsConfigured = BuildConfig.METRICS_API_KEY.isNotEmpty() && BuildConfig.METRICS_ENDPOINT.isNotEmpty()
+        Log.d("Metrics", "metrics configured: $isMetricsConfigured")
 
         // 🔹 Inicialización / restauración silenciosa del estado PRO
         ProSilentInitializer.init(
@@ -58,22 +58,24 @@ class MainActivity : AppCompatActivity() {
             )
             ConsentGateProvider {
                 LaunchedEffect(Unit) {
-                    // Configurar una vez
-                    UploadConfig.set(
-                        applicationContext,
-                        endpoint = "https://us-central1-minitoolbox-7ab7d.cloudfunctions.net/ingest",
-                        apiKey = "cc8af2654262d35c72dde40bbb42480b8f60b3a89dfed56e09368f4633187767"
-                    )
+                    if (isMetricsConfigured) {
+                        // Configurar una vez
+                        UploadConfig.set(
+                            applicationContext,
+                            endpoint = BuildConfig.METRICS_ENDPOINT,
+                            apiKey = BuildConfig.METRICS_API_KEY
+                        )
 
-                    // Registrar apertura y "open once" del día
-                    appOpen(applicationContext)
-                    dailyOpenOnce(applicationContext)
+                        // Registrar apertura y "open once" del día
+                        appOpen(applicationContext)
+                        dailyOpenOnce(applicationContext)
 
-                    // 🔸 Planificador con cotas
-                    UploadScheduler.maybeFlushOnThreshold(
-                        applicationContext,
-                        UploadScheduler.FlushThreshold(appOpens = 3, tools = Int.MAX_VALUE, ads = Int.MAX_VALUE)
-                    )
+                        // 🔸 Planificador con cotas
+                        UploadScheduler.maybeFlushOnThreshold(
+                            applicationContext,
+                            UploadScheduler.FlushThreshold(appOpens = 3, tools = Int.MAX_VALUE, ads = Int.MAX_VALUE)
+                        )
+                    }
                 }
 
                 ProStateProvider {

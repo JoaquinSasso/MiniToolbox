@@ -21,6 +21,15 @@ android {
     }
     val hasSigningConfig = keystoreProps.isNotEmpty()
 
+    val localProperties = Properties()
+    val localPropertiesFile = project.rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.inputStream().use { localProperties.load(it) }
+    }
+
+    val metricsEndpoint = localProperties.getProperty("METRICS_ENDPOINT") ?: ""
+    val metricsApiKey = localProperties.getProperty("METRICS_API_KEY") ?: ""
+
     defaultConfig {
         applicationId = "com.joasasso.minitoolbox"
         minSdk = 28
@@ -29,6 +38,10 @@ android {
         versionName = "1.3.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Configuración de telemetría (se carga de local.properties, no se versiona)
+        buildConfigField("String", "METRICS_ENDPOINT", "\"$metricsEndpoint\"")
+        buildConfigField("String", "METRICS_API_KEY", "\"$metricsApiKey\"")
     }
 
     signingConfigs {
