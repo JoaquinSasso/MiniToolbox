@@ -19,6 +19,7 @@ android {
     if (keystoreFile.exists()) {
         keystoreFile.inputStream().use { keystoreProps.load(it) }
     }
+    val hasSigningConfig = keystoreProps.isNotEmpty()
 
     defaultConfig {
         applicationId = "com.joasasso.minitoolbox"
@@ -32,7 +33,7 @@ android {
 
     signingConfigs {
         // Creamos el config "release" SOLO si tenemos el archivo
-        if (keystoreProps.isNotEmpty()) {
+        if (hasSigningConfig) {
             create("release") {
                 storeFile = file(keystoreProps["storeFile"] as String)
                 storePassword = keystoreProps["storePassword"] as String
@@ -43,8 +44,18 @@ android {
     }
 
     buildTypes {
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            if (hasSigningConfig) {
+                signingConfig = signingConfigs.getByName("release")
+            }
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
+
         // hereda configuración de release para que AGP lo considere "publicable"
         create("oss") {
+            // El orden importa: initWith(release) debe ir DESPUÉS de configurar release
             initWith(getByName("release"))
             // firma con debug para poder instalar fácil desde Run
             signingConfig = signingConfigs.getByName("debug")
@@ -53,12 +64,6 @@ android {
             versionNameSuffix = "-oss"         // opcional
             // si tu release tiene minifyEnabled=true y te molesta:
             // isMinifyEnabled = false
-        }
-        release {
-            isMinifyEnabled = true
-            isShrinkResources = true
-            signingConfig = signingConfigs.getByName("release")
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
 
@@ -187,3 +192,5 @@ dependencies {
 
     implementation("androidx.work:work-runtime-ktx:2.10.5")
 }
+
+// cualquier configuración que dependa de un archivo no versionado debe degradar de forma segura cuando ese archivo falta, y la verificación es correr assembleDebug sin él.
