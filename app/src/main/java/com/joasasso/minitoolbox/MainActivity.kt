@@ -21,7 +21,6 @@ import androidx.navigation.compose.rememberNavController
 import com.joasasso.minitoolbox.metrics.appOpen
 import com.joasasso.minitoolbox.metrics.dailyOpenOnce
 import com.joasasso.minitoolbox.metrics.toolUse
-import com.joasasso.minitoolbox.metrics.uploader.UploadConfig
 import com.joasasso.minitoolbox.metrics.uploader.UploadScheduler
 import com.joasasso.minitoolbox.metrics.widgetUse
 import com.joasasso.minitoolbox.nav.Screen
@@ -62,13 +61,6 @@ class MainActivity : AppCompatActivity() {
             ConsentGateProvider {
                 LaunchedEffect(Unit) {
                     if (isMetricsConfigured) {
-                        // Configurar una vez
-                        UploadConfig.set(
-                            applicationContext,
-                            endpoint = BuildConfig.METRICS_ENDPOINT,
-                            apiKey = BuildConfig.METRICS_API_KEY
-                        )
-
                         // Registrar apertura y "open once" del día
                         appOpen(applicationContext)
                         dailyOpenOnce(applicationContext)
