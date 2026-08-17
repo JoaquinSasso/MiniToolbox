@@ -78,3 +78,11 @@ Se gestiona con un `NavGraph` y un `Screen.kt` que definen los destinos. Las her
 - `DataStore` se eligió por sobre `SharedPreferences` para estar alineado con las recomendaciones modernas de Jetpack.
 
 ---
+
+## 🔐 Gestión de Permisos
+
+- **Higiene de permisos**: Un permiso se debe agregar únicamente en el mismo commit que el código que lo requiere. Nunca se deben declarar permisos "por si acaso" ni anticipando funcionalidades futuras.
+- **Data Safety**: Los permisos huérfanos impactan negativamente en el formulario de Data Safety de Google Play, pueden ser motivo de rechazo en revisión y comprometen la confianza del usuario.
+- **Auditoría**: Periódicamente se debe revisar el manifiesto mergeado para asegurar que ninguna librería esté inyectando permisos no deseados.
+
+---
