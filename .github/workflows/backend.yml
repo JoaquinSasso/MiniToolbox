@@ -1,0 +1,38 @@
+name: Backend CI
+
+on:
+  push:
+    paths:
+      - 'backend/**'
+    branches: [ "master" ]
+  pull_request:
+    paths:
+      - 'backend/**'
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: backend/functions/package-lock.json
+
+      - name: Install dependencies
+        working-directory: backend/functions
+        run: npm ci
+
+      - name: Lint
+        working-directory: backend/functions
+        run: npm run lint
+
+      - name: Build
+        working-directory: backend/functions
+        run: npm run build

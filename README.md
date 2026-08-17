@@ -2,8 +2,10 @@
 > **La navaja suiza digital definitiva para Android.**
 > *Arquitectura moderna, alto rendimiento y telemetría avanzada.*
 
+[![Android CI](https://github.com/joasasso/MiniToolbox/actions/workflows/android.yml/badge.svg)](https://github.com/joasasso/MiniToolbox/actions/workflows/android.yml)
+[![Backend CI](https://github.com/joasasso/MiniToolbox/actions/workflows/backend.yml/badge.svg)](https://github.com/joasasso/MiniToolbox/actions/workflows/backend.yml)
 [![Play Store](https://img.shields.io/badge/PlayStore-5%20⭐-green?style=for-the-badge&logo=google-play)](https://play.google.com/store/apps/details?id=com.joasasso.minitoolbox&hl=es_AR)
-[![Kotlin](https://img.shields.io/badge/Kotlin-1.9-purple?style=for-the-badge&logo=kotlin)](https://kotlinlang.org/)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.2.20-purple?style=for-the-badge&logo=kotlin)](https://kotlinlang.org/)
 [![Jetpack Compose](https://img.shields.io/badge/UI-Jetpack%20Compose-blue?style=for-the-badge&logo=android)](https://developer.android.com/jetpack/compose)
 [![Firebase](https://img.shields.io/badge/Backend-Firebase-orange?style=for-the-badge&logo=firebase)](https://firebase.google.com/)
 
@@ -109,7 +111,12 @@ Si faltan, la app funciona igual, pero no reporta métricas.
 
 ---
 
-## 🤝 Contacto
+## 🤝 Contribución
+Este proyecto utiliza Integración Continua (GitHub Actions) para garantizar la calidad del código y la estabilidad del build.
+
+**¿Por qué es importante el CI aquí?**
+Este sistema se implementó después de detectar un bug crítico: el proyecto no compilaba desde un clon limpio porque dependía de archivos locales no versionados. El CI actúa como un "entorno limpio" que verifica que cualquier cambio pueda ser integrado y compilado por cualquier desarrollador desde cero.
+
 Este es mi proyecto más ambicioso y estoy abierto a discutir detalles técnicos sobre la implementación de ProtoBuf, ARCore o la arquitectura del dashboard.
 
 - **LinkedIn:** [Joaquin Sasso](https://www.linkedin.com/in/joasasso/)

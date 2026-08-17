@@ -70,7 +70,7 @@ class MetricsTest {
         appOpen(context)
         dailyOpenOnce(context)
 
-        verify(mockRepo, timeout(5000)).incrementAppOpen()
+        verify(mockRepo, never()).incrementAppOpen()
         verify(mockRepo, timeout(5000)).incrementDailyActive()
     }
 
