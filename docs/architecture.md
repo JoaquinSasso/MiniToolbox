@@ -79,6 +79,16 @@ Se gestiona con un `NavGraph` y un `Screen.kt` que definen los destinos. Las her
 
 ---
 
+## 🚀 Futuro y Mejoras Planificadas
+
+### 🔹 Inyección de Dependencias (Hilt)
+Actualmente, el proyecto carece de un grafo de dependencias explícito, lo que ha llevado a la creación de múltiples `object` globales (como `AdsManager`) y clases `Application` duplicadas para compartir estado. La introducción de **Hilt** es necesaria para centralizar estas dependencias, evitar duplicados y facilitar las pruebas unitarias.
+
+### 🔹 Validación de Navegación
+Existen tres fuentes de verdad para las pantallas: `Screen.kt` (definición de rutas), `NavGraph.kt` (registro de composables) y `ToolRegistry.kt` (exposición en la UI). Es prioritario implementar una validación automática (vía Tests de Unidad o Lint personalizado) para asegurar que cualquier ruta definida en `Screen` esté registrada en `NavGraph` y, si corresponde, expuesta en `ToolRegistry`.
+
+---
+
 ## 🔐 Gestión de Permisos
 
 - **Higiene de permisos**: Un permiso se debe agregar únicamente en el mismo commit que el código que lo requiere. Nunca se deben declarar permisos "por si acaso" ni anticipando funcionalidades futuras.
