@@ -21,8 +21,8 @@ keystore.properties
 *.apk
 /app/release/
 /app/build/
-.idea
-/.idea
-/.stfolder
+.idea/
+desktop.ini
+.stfolder
 build-and-install.ps1
 .stignore
