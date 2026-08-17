@@ -2,8 +2,8 @@
 > **La navaja suiza digital definitiva para Android.**
 > *Arquitectura moderna, alto rendimiento y telemetría avanzada.*
 
-[![Android CI](https://github.com/joasasso/MiniToolbox/actions/workflows/android.yml/badge.svg)](https://github.com/joasasso/MiniToolbox/actions/workflows/android.yml)
-[![Backend CI](https://github.com/joasasso/MiniToolbox/actions/workflows/backend.yml/badge.svg)](https://github.com/joasasso/MiniToolbox/actions/workflows/backend.yml)
+[![Android CI](https://github.com/JoaquinSasso/MiniToolbox/actions/workflows/android.yml/badge.svg)](https://github.com/JoaquinSasso/MiniToolbox/actions/workflows/android.yml)
+[![Backend CI](https://github.com/JoaquinSasso/MiniToolbox/actions/workflows/backend.yml/badge.svg)](https://github.com/JoaquinSasso/MiniToolbox/actions/workflows/backend.yml)
 [![Play Store](https://img.shields.io/badge/PlayStore-5%20⭐-green?style=for-the-badge&logo=google-play)](https://play.google.com/store/apps/details?id=com.joasasso.minitoolbox&hl=es_AR)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.2.20-purple?style=for-the-badge&logo=kotlin)](https://kotlinlang.org/)
 [![Jetpack Compose](https://img.shields.io/badge/UI-Jetpack%20Compose-blue?style=for-the-badge&logo=android)](https://developer.android.com/jetpack/compose)
