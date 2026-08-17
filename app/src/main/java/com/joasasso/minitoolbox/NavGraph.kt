@@ -89,11 +89,7 @@ fun MiniToolboxNavGraph(
         }
     }
 
-    // Mapeo route -> toolId (ajustalo si tenés otro id)
-    val routeToToolId: Map<String, String> = remember {
-        ToolRegistry.tools.associate { it.screen.route to (it.screen.route) }
-    }
-    val toolRoutes: Set<String> = remember { routeToToolId.keys }
+    val toolRoutes: Set<String> = remember { ToolRegistry.tools.map { it.screen.route }.toSet() }
 
     var lastRoute by remember { mutableStateOf<String?>(null) }
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -101,10 +97,9 @@ fun MiniToolboxNavGraph(
     LaunchedEffect(backStackEntry?.destination?.route) {
         val route = backStackEntry?.destination?.route ?: return@LaunchedEffect
         if (route != lastRoute && toolRoutes.contains(route)) {
-            val toolId = routeToToolId[route] ?: route
-            toolUse(context, route!!)
+            toolUse(context, route)
             // contar solo si pasó el cooldown por herramienta
-            val isNewAccess = ToolUsageTracker.onToolOpened(context, toolId)
+            val isNewAccess = ToolUsageTracker.onToolOpened(context, route)
 
             if (isNewAccess && activity != null) {
                 // Realiza conteo global y lleva cooldown de tiempo
