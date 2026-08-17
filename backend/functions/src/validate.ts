@@ -1,6 +1,7 @@
 export type IngestItem = {
 	day: string; // "YYYY-MM-DD"
 	app_open?: number;
+	daily_active?: number;
 	tools?: Record<string, number>;
 	ads?: Record<string, number>;
 
@@ -62,6 +63,12 @@ export function validateBody(
 			(!Number.isInteger(it.app_open) || it.app_open < 0)
 		)
 			return { ok: false, error: "invalid_app_open" };
+
+		if (
+			it.daily_active != null &&
+			(!Number.isInteger(it.daily_active) || it.daily_active < 0)
+		)
+			return { ok: false, error: "invalid_daily_active" };
 
 		if (!checkMap(it.tools)) return { ok: false, error: "invalid_tools" };
 		if (!checkMap(it.ads)) return { ok: false, error: "invalid_ads" };

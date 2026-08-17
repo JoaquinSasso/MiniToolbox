@@ -200,6 +200,11 @@ details.zero textarea{width:100%; margin-top:8px; min-height:70px; background:va
     <div><b>Modo demostración.</b> Estás viendo datos simulados. Cargá tu API Key en <b>⚙ Configuración</b> para ver los datos reales.</div>
   </div>
 
+  <div class="demo-banner" id="biasNotice" style="display:flex; background:color-mix(in srgb,var(--neg) 10%,var(--surface)); border-color:color-mix(in srgb,var(--neg) 40%,var(--border))">
+    <span class="dot" style="background:var(--neg)"></span>
+    <div><b>Sesgo en datos históricos.</b> Las aperturas previas a la corrección del 2025-10-24 contienen un doble conteo sistemático (la primera apertura diaria de cada usuario sumaba +2).</div>
+  </div>
+
   <div class="kpis" id="kpis"></div>
 
   <section class="section">
@@ -285,7 +290,7 @@ details.zero textarea{width:100%; margin-top:8px; min-height:70px; background:va
       <summary style="cursor:pointer; color:var(--muted)">Ver tabla diaria</summary>
       <div style="max-height:420px; overflow:auto; margin-top:12px">
         <table id="tblDaily"><thead><tr>
-          <th>Día</th><th class="num">Aperturas</th><th class="num">Nuevas</th>
+          <th>Día</th><th class="num">Aperturas</th><th class="num">Activos</th><th class="num">Nuevas</th>
           <th>Tools (top)</th><th>Versiones</th><th>Actualizado</th>
         </tr></thead><tbody></tbody></table>
       </div>
@@ -375,16 +380,18 @@ function totalOf(map){return Object.values(map||{}).reduce((a,b)=>a+Number(b||0)
 
 function aggregate(daily){
   const agg={tools:{},ads:{},versions:{},versions_first_seen:{},widgets:{},lang_primary:{},lang_secondary:{}};
-  let opens=0,newInstalls=0,daysWithData=0;
+  let opens=0,dailyActive=0,newInstalls=0,daysWithData=0;
   for(const r of daily){
     const t=r.totals||{};
-    const o=Number(t.app_open||0); opens+=o; if(o>0||Object.keys(t.tools||{}).length)daysWithData++;
+    const o=Number(t.app_open||0); opens+=o;
+    const da=Number(t.daily_active||0); dailyActive+=da;
+    if(o>0||da>0||Object.keys(t.tools||{}).length)daysWithData++;
     sumInto(agg.tools,t.tools); sumInto(agg.ads,t.ads);
     sumInto(agg.versions,t.versions); sumInto(agg.versions_first_seen,t.versions_first_seen);
     sumInto(agg.widgets,t.widgets); sumInto(agg.lang_primary,t.lang_primary); sumInto(agg.lang_secondary,t.lang_secondary);
   }
   newInstalls=totalOf(agg.versions_first_seen);
-  return {agg,opens,newInstalls,daysWithData};
+  return {agg,opens,dailyActive,newInstalls,daysWithData};
 }
 function bucketOpens(daily,gran){
   const buckets={};
@@ -468,10 +475,10 @@ function renderKpis(a,range){
   const toolsTotal=totalOf(a.agg.tools);
   const distinctTools=Object.keys(a.agg.tools).length;
   const cards=[
-    {l:"Aperturas",v:fmt(a.opens),s:`${range.days} días de rango`},
-    {l:"Instalaciones nuevas",v:fmt(a.newInstalls),s:"por first-seen de versión"},
-    {l:"Días con datos",v:fmt(a.daysWithData),s:`de ${range.days} posibles`},
-    {l:"Tools distintas",v:fmt(distinctTools),s:`${fmt(toolsTotal)} usos totales`},
+    {l:"Aperturas",v:fmt(a.opens),s:`Total (sesgo +2 pre-fix)`},
+    {l:"Disp. Activos",v:fmt(a.dailyActive),s:`DDAU (sin doble conteo)`},
+    {l:"Instalaciones",v:fmt(a.newInstalls),s:"por first-seen"},
+    {l:"Tools usadas",v:fmt(distinctTools),s:`${fmt(toolsTotal)} usos totales`},
     {l:"Versión top",v:topVer?topVer[0]:"—",s:topVer?pctS(topVer[1],totalOf(a.agg.versions))+" del uso":""},
     {l:"Idioma top",v:topLang?langLabel(topLang[0]).name:"—",s:topLang?langLabel(topLang[0]).code+" · "+pctS(topLang[1],totalOf(a.agg.lang_primary))+" de dispositivos":""},
   ];
@@ -571,6 +578,7 @@ function renderDaily(daily){
     const topTools=ranked(t.tools).slice(0,3).map(([k,v])=>`${k}:${v}`).join("  ");
     const vers=ranked(t.versions).map(([k,v])=>`${k}:${v}`).join("  ");
     return `<tr><td class="mono">${r.day}</td><td class="num">${fmt(t.app_open)}</td>
+      <td class="num">${fmt(t.daily_active)}</td>
       <td class="num">${fmt(totalOf(t.versions_first_seen))}</td>
       <td class="mono" style="color:var(--muted)">${topTools||"—"}</td>
       <td class="mono" style="color:var(--muted)">${vers||"—"}</td>
@@ -689,9 +697,10 @@ function demoDaily(from,to){
   const rnd=()=>{seed=(seed*1103515245+12345)&0x7fffffff;return seed/0x7fffffff;};
   while(d<=end){
     const opens=8+Math.round(rnd()*14);
+    const dailyActive=Math.round(opens * (0.6 + rnd() * 0.2));
     const tmap={}; tools.forEach((t,i)=>{const base=weights[i];const v=Math.round(base*rnd()*0.5);if(v>0)tmap[t]=v;});
     const pick=(m,k)=>{const o={};for(const key of Object.keys(m))if(rnd()<0.9)o[key]=Math.max(1,Math.round(m[key]*rnd()*(k||0.15)));return o;};
-    out.push({day:ymd(d),totals:{app_open:opens,tools:tmap,ads:pick(ads,0.2),versions:pick(vers,0.25),
+    out.push({day:ymd(d),totals:{app_open:opens,daily_active:dailyActive,tools:tmap,ads:pick(ads,0.2),versions:pick(vers,0.25),
       versions_first_seen:(rnd()<0.4?pick(fs,1):{}),lang_primary:pick(langsP,0.2),
       lang_secondary:pick(langsS,0.2),widgets:pick(widgets,0.25)},meta:{updatedAt:ymd(d)+"T23:59"}});
     d=addDays(d,1);

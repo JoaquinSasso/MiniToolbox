@@ -67,7 +67,7 @@ fun dailyOpenOnce(context: Context) = io {
     val sp = ctx.getSharedPreferences("metrics_daily_once", Context.MODE_PRIVATE)
     val last = sp.getString("last_day", null)
     if (last != today) {
-        ctx.repo().incrementAppOpen()
+        ctx.repo().incrementDailyActive()
         sp.edit { putString("last_day", today) }
         scheduleIfEnabled(ctx)
     }

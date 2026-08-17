@@ -12,6 +12,7 @@ val Context.metricsDataStore: androidx.datastore.core.DataStore<Preferences> by 
 object MetricsKeys {
     // Agregados locales por día (existentes)
     val APP_OPEN_COUNT_BY_DAY      = stringPreferencesKey("app_open_count_by_day")       // Map<day, Int>
+    val DAILY_ACTIVE_BY_DAY        = stringPreferencesKey("daily_active_by_day")         // Map<day, Int>
     val TOOL_USE_BY_DAY_JSON       = stringPreferencesKey("tool_use_by_day_json")        // Map<day, Map<toolId, Int>>
     val AD_IMPRESSIONS_BY_DAY_JSON = stringPreferencesKey("ad_impr_by_day_json")         // Map<day, Map<type, Int>>
 
@@ -29,6 +30,7 @@ object MetricsKeys {
 
     // Envíos (idempotencia/deltas) para Usos de app / Usos de Tools / Impresiones de anuncios
     val SENT_APP_OPEN_BY_DAY       = stringPreferencesKey("sent_app_open_by_day")        // Map<day, Int>
+    val SENT_DAILY_ACTIVE_BY_DAY   = stringPreferencesKey("sent_daily_active_by_day")    // Map<day, Int>
     val SENT_TOOL_USE_BY_DAY_JSON  = stringPreferencesKey("sent_tool_use_by_day_json")   // Map<day, Map<toolId, Int>>
     val SENT_AD_IMPR_BY_DAY_JSON   = stringPreferencesKey("sent_ad_impr_by_day_json")    // Map<day, Map<type, Int>>
     val PENDING_BATCH_ID           = stringPreferencesKey("pending_batch_id")            // String?

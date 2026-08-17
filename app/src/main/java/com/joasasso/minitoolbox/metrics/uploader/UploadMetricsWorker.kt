@@ -37,6 +37,7 @@ class UploadMetricsWorker(appContext: Context, params: WorkerParameters) : Corou
             for (d in deltas) {
                 if (!isValidDay(d.day)) return@withContext Result.success()
                 if (d.appOpen < 0) return@withContext Result.success()
+                if (d.dailyActive < 0) return@withContext Result.success()
                 if (d.tools.values.any { it < 0 }) return@withContext Result.success()
                 if (d.ads.values.any { it < 0 }) return@withContext Result.success()
                 if (d.versions.values.any { it < 0 }) return@withContext Result.success()
@@ -53,6 +54,7 @@ class UploadMetricsWorker(appContext: Context, params: WorkerParameters) : Corou
                 val obj = org.json.JSONObject()
                     .put("day", d.day)
                     .put("app_open", d.appOpen)
+                    .put("daily_active", d.dailyActive)
                     .put("tools", org.json.JSONObject(d.tools as Map<*, *>))
                     .put("ads", org.json.JSONObject(d.ads as Map<*, *>))
                     // NUEVOS campos:
@@ -147,6 +149,7 @@ class UploadMetricsWorker(appContext: Context, params: WorkerParameters) : Corou
                 if (!isValidDay(day)) continue
 
                 val app = item.optInt("app_open", 0)
+                val daily = item.optInt("daily_active", 0)
 
                 fun objToMap(obj: org.json.JSONObject?): MutableMap<String, Int> {
                     val o = obj ?: org.json.JSONObject()
@@ -170,6 +173,7 @@ class UploadMetricsWorker(appContext: Context, params: WorkerParameters) : Corou
                 out += AggregatesRepository.DayDelta(
                     day = day,
                     appOpen = app,
+                    dailyActive = daily,
                     tools = toolsMap,
                     ads = adsMap,
                     versions = verMap,

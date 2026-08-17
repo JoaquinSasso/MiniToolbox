@@ -225,6 +225,7 @@ type DailyDoc = {
 	day: string;
 	totals: {
 		app_open: number;
+		daily_active: number;
 		tools: Record<string, number>;
 		ads: Record<string, number>;
 		versions: Record<string, number>;
@@ -309,6 +310,11 @@ function normDoc(id: string, data: FirebaseFirestore.DocumentData): DailyDoc {
 	const appOpenFlat = Number((data as any)["totals.app_open"] || 0);
 	const app_open = appOpenNested + appOpenFlat;
 
+	// --- totals.daily_active ---
+	const dailyActiveNested = Number((data.totals && data.totals.daily_active) || 0);
+	const dailyActiveFlat = Number((data as any)["totals.daily_active"] || 0);
+	const daily_active = dailyActiveNested + dailyActiveFlat;
+
 	// --- meta.updatedAt ---
 	const updatedAtNested = (data as any)?.meta?.updatedAt;
 	const updatedAtFlat = (data as any)["meta.updatedAt"];
@@ -318,6 +324,7 @@ function normDoc(id: string, data: FirebaseFirestore.DocumentData): DailyDoc {
 		day: id,
 		totals: {
 			app_open,
+			daily_active,
 			tools: toolsCanon,
 			ads,
 			versions,
@@ -394,6 +401,7 @@ export const ingest = onRequest(
 
 			let totalItems = 0;
 			let totalOpens = 0;
+			let totalDaily = 0;
 
 			await db.runTransaction(async (tx) => {
 				const existsSnap = await tx.get(batchRef);
@@ -424,6 +432,11 @@ export const ingest = onRequest(
 					if ((it.app_open ?? 0) > 0) {
 						updates["totals.app_open"] = inc(it.app_open ?? 0);
 						totalOpens += it.app_open ?? 0;
+					}
+
+					if ((it.daily_active ?? 0) > 0) {
+						updates["totals.daily_active"] = inc(it.daily_active ?? 0);
+						totalDaily += it.daily_active ?? 0;
 					}
 
 					if (it.tools) {
@@ -518,6 +531,7 @@ export const ingest = onRequest(
 				app_version: body.app_version,
 				total_items: totalItems,
 				total_app_open_delta: totalOpens,
+				total_daily_active_delta: totalDaily,
 			});
 
 			sendJson(res, 200, { ok: true });
@@ -602,6 +616,7 @@ export const metricsSummary = onRequest(
 			const rows = await fetchDailyRange(from, to);
 
 			let total_app_open = 0;
+			let total_daily_active = 0;
 			const agg_tools: Record<string, number> = {};
 			const agg_ads: Record<string, number> = {};
 			const agg_versions: Record<string, number> = {};
@@ -612,6 +627,7 @@ export const metricsSummary = onRequest(
 
 			for (const r of rows) {
 				total_app_open += Number(r.totals.app_open ?? 0);
+				total_daily_active += Number(r.totals.daily_active ?? 0);
 				sumMap(agg_tools, r.totals.tools);
 				sumMap(agg_ads, r.totals.ads);
 				sumMap(agg_versions, r.totals.versions);
@@ -624,6 +640,7 @@ export const metricsSummary = onRequest(
 			const payload = {
 				range: { from, to, days: rows.length },
 				total_app_open,
+				total_daily_active,
 				top: {
 					tools: topK(agg_tools, 10),
 					ads: topK(agg_ads, 10),
