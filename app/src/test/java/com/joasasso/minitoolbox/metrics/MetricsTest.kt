@@ -12,11 +12,13 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.anyBoolean
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.mockConstruction
 import org.mockito.Mockito.never
-import org.mockito.Mockito.times
+import org.mockito.Mockito.timeout
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 
@@ -33,60 +35,55 @@ class MetricsTest {
     @After
     fun tearDown() {
         Dispatchers.resetMain()
+        metricsTestRepo = null
+        metricsTestScheduleHook = null
+    }
+
+    private fun setupContextMocks(): Pair<Context, Context> {
+        val appContext = mock(Context::class.java)
+        val context = mock(Context::class.java)
+        `when`(context.applicationContext).thenReturn(appContext)
+        `when`(appContext.applicationContext).thenReturn(appContext)
+
+        listOf(context, appContext).forEach { ctx ->
+            val sp = mock(SharedPreferences::class.java)
+            `when`(ctx.getSharedPreferences(anyString(), anyInt())).thenReturn(sp)
+            `when`(sp.getBoolean(anyString(), anyBoolean())).thenReturn(true)
+            `when`(sp.getString(anyString(), any())).thenReturn("1970-01-01")
+
+            val editor = mock(SharedPreferences.Editor::class.java)
+            `when`(sp.edit()).thenReturn(editor)
+            `when`(editor.putString(anyString(), anyString())).thenReturn(editor)
+            `when`(editor.putBoolean(anyString(), anyBoolean())).thenReturn(editor)
+        }
+
+        return context to appContext
     }
 
     @Test
     fun `verify double count fix - appOpen and dailyOpenOnce increment separate counters`() = runTest {
-        val context = mock(Context::class.java)
-        val appContext = mock(Context::class.java)
-        `when`(context.applicationContext).thenReturn(appContext)
+        val (context, _) = setupContextMocks()
+        val mockRepo = mock(AggregatesRepository::class.java)
+        metricsTestRepo = mockRepo
+        metricsTestScheduleHook = { /* no-op */ }
 
-        val sp = mock(SharedPreferences::class.java)
-        `when`(appContext.getSharedPreferences("metrics_prefs", 0)).thenReturn(sp)
-        `when`(sp.getBoolean("enabled", true)).thenReturn(true)
+        appOpen(context)
+        dailyOpenOnce(context)
 
-        val spDaily = mock(SharedPreferences::class.java)
-        `when`(appContext.getSharedPreferences("metrics_daily_once", 0)).thenReturn(spDaily)
-        `when`(spDaily.getString("last_day", null)).thenReturn("1970-01-01")
-
-        val editor = mock(SharedPreferences.Editor::class.java)
-        `when`(spDaily.edit()).thenReturn(editor)
-        `when`(editor.putString(anyString(), anyString())).thenReturn(editor)
-
-        mockConstruction(AggregatesRepository::class.java).use { mockRepo ->
-            appOpen(context)
-            dailyOpenOnce(context)
-
-            val repo = mockRepo.constructed()[0]
-            verify(repo, times(1)).incrementAppOpen()
-            verify(repo, times(1)).incrementDailyActive()
-        }
+        verify(mockRepo, timeout(5000)).incrementAppOpen()
+        verify(mockRepo, timeout(5000)).incrementDailyActive()
     }
-    
+
     @Test
     fun `verify dailyOpenOnce only increments dailyActive and NOT appOpen`() = runTest {
-        val context = mock(Context::class.java)
-        val appContext = mock(Context::class.java)
-        `when`(context.applicationContext).thenReturn(appContext)
+        val (context, _) = setupContextMocks()
+        val mockRepo = mock(AggregatesRepository::class.java)
+        metricsTestRepo = mockRepo
+        metricsTestScheduleHook = { /* no-op */ }
 
-        val sp = mock(SharedPreferences::class.java)
-        `when`(appContext.getSharedPreferences("metrics_prefs", 0)).thenReturn(sp)
-        `when`(sp.getBoolean("enabled", true)).thenReturn(true)
+        dailyOpenOnce(context)
 
-        val spDaily = mock(SharedPreferences::class.java)
-        `when`(appContext.getSharedPreferences("metrics_daily_once", 0)).thenReturn(spDaily)
-        `when`(spDaily.getString("last_day", null)).thenReturn("1970-01-01")
-
-        val editor = mock(SharedPreferences.Editor::class.java)
-        `when`(spDaily.edit()).thenReturn(editor)
-        `when`(editor.putString(anyString(), anyString())).thenReturn(editor)
-
-        mockConstruction(AggregatesRepository::class.java).use { mockRepo ->
-            dailyOpenOnce(context)
-
-            val repo = mockRepo.constructed()[0]
-            verify(repo, times(1)).incrementDailyActive()
-            verify(repo, never()).incrementAppOpen()
-        }
+        verify(mockRepo, timeout(5000)).incrementDailyActive()
+        verify(mockRepo, never()).incrementAppOpen()
     }
 }

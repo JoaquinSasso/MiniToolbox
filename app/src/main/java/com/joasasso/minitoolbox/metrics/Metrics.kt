@@ -40,14 +40,23 @@ fun setMetricsEnabled(context: Context, enabled: Boolean) {
 }
 
 // Helpers
-private fun Context.repo() = AggregatesRepository(applicationContext)
-private fun io(block: suspend () -> Unit) {
-    CoroutineScope(Dispatchers.IO).launch { block() }
-}
+internal var metricsTestRepo: AggregatesRepository? = null
+private fun Context.repo() = metricsTestRepo ?: AggregatesRepository(applicationContext)
+
+internal var metricsTestScheduleHook: ((Context) -> Unit)? = null
 private fun scheduleIfEnabled(ctx: Context) {
+    val hook = metricsTestScheduleHook
+    if (hook != null) {
+        hook(ctx)
+        return
+    }
     if (!isMetricsEnabled(ctx)) return
     UploadScheduler.markDirty(ctx)
     UploadScheduler.maybeSchedule(ctx, UploadConfig.getEndpoint(ctx), UploadConfig.getApiKey(ctx))
+}
+
+private fun io(block: suspend () -> Unit) {
+    CoroutineScope(Dispatchers.IO).launch { block() }
 }
 
 /** Suma app open y agenda upload oportunista (respeta opt-out) */
