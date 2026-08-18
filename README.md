@@ -1,5 +1,5 @@
 # MiniToolbox 🛠️
-> **La navaja suiza digital definitiva para Android.**
+> **Colección de herramientas de utilidad nativas para Android.**
 > *Arquitectura moderna, alto rendimiento y telemetría avanzada.*
 
 [![Android CI](https://github.com/JoaquinSasso/MiniToolbox/actions/workflows/android.yml/badge.svg)](https://github.com/JoaquinSasso/MiniToolbox/actions/workflows/android.yml)
@@ -13,7 +13,7 @@ MiniToolbox es una aplicación de utilidades todo-en-uno desarrollada con un enf
 
 ---
 
-## 🚀 Logros de Ingeniería (The "Power Moves")
+## 🚀 Desafíos Técnicos y Soluciones
 
 ### 1. Optimización de Performance: Del JSON al Binario
 Para la gestión de datasets (como la base de datos de países), se realizó un análisis exhaustivo comparando diferentes formatos de serialización para minimizar el impacto en la experiencia de usuario.
@@ -23,13 +23,13 @@ Para la gestión de datasets (como la base de datos de países), se realizó un 
 | **API REST (Online)** | - | ~3000 ms |
 | **JSON + Moshi** | 132 KB | ~451 ms |
 | **JSON + Gson** | 132 KB | ~75 ms |
-| **Protobuf Lite (Binario)** | **26 KB** | **~45 ms** |
+| **Protobuf (Binario)** | **26 KB** | **~45 ms** |
 
-**Resultado:** Gracias a la migración a **Protobuf Lite**, se logró una reducción del **80% en el tamaño del archivo** y una velocidad de carga **98.5% superior** en comparación con consultas externas. Esto garantiza que la herramienta sea instantánea incluso en dispositivos de gama baja, ademas de ofrecer acceso a los datos sin conexión a internet.
+**Resultado:** Gracias a la migración a **Protobuf (Binario)**, se logró una reducción del **80% en el tamaño del archivo** y una velocidad de carga **98.5% superior** en comparación con consultas externas. Esto garantiza que la herramienta sea instantánea incluso en dispositivos de gama baja, ademas de ofrecer acceso a los datos sin conexión a internet. *Nota: Actualmente se utiliza la variante completa de Protobuf Java para asegurar compatibilidad total, lo cual incrementa el tamaño del APK en comparación con la variante Lite.*
 
 ### 2. Business Intelligence & Telemetría Propia
 Diseñé un motor de telemetría personalizado para monitorear el ciclo de vida del producto sin depender exclusivamente de soluciones genéricas:
-- **Stack:** Firebase Cloud Functions (TypeScript) + Firestore + Web Dashboard.
+- **Stack (Backend):** Firebase Cloud Functions (TypeScript) + Firestore + Web Dashboard. La aplicación móvil se comunica mediante HTTPS estándar.
 - **Métricas:** Adopción de versiones, retención, frecuencia de uso por herramienta e idiomas predominantes.
 - **Impacto:** Decisiones basadas en datos reales para priorizar el desarrollo de las funcionalidades más utilizadas.
 
@@ -41,7 +41,7 @@ Diseñé un motor de telemetría personalizado para monitorear el ciclo de vida 
 ### 4. Documentación de Debugging: Diagnóstico del Pomodoro en Android 17
 El temporizador Pomodoro presentaba fallos en background que requerían debugging profundo a través de 6 problemas independientes apilados. En lugar de simplemente parchear, documenté el proceso completo:
 
-- **Archivo:** `/docs/pomodoro-background-alarm-fix.md` (415 líneas de análisis técnico)
+- **Archivo:** [pomodoro-background-alarm-fix.md](docs/pomodoro-background-alarm-fix.md) (415 líneas de análisis técnico)
 - **Contenido:** Diagnóstico de cada problema, causa raíz, solución implementada y metodología de prueba reutilizable
 - **Herramientas usadas:** adb, dumpsys alarm, Logcat filtering, forced Doze simulation, Android 17 audio hardening flags
 - **Impacto:** Documentación que sirve como referencia para otros desarrolladores enfrentando problemas similares con alarmas exactas, foreground services y audio en background
@@ -62,11 +62,11 @@ El temporizador Pomodoro presentaba fallos en background que requerían debuggin
 
 ## 🏗️ Arquitectura del Software
 
-El proyecto sigue el patrón **MVVM (Model-View-ViewModel)** bajo principios de **Clean Architecture**:
+El proyecto utiliza una arquitectura orientada a componentes con **Jetpack Compose** y **Compose Navigation**:
 
-- **Data Layer:** Gestión de preferencias con `DataStore` y datasets binarios con ProtoBuf.
-- **Domain Layer:** Lógica de negocio desacoplada (cálculos financieros, conversores, motores de juegos).
-- **UI Layer:** Interfaces declarativas con Jetpack Compose, utilizando un sistema de temas personalizado (Material 3).
+- **Persistencia:** Gestión de preferencias con `DataStore` y datasets binarios optimizados con Protobuf.
+- **Lógica de Negocio:** Motores de juego (Buscaminas) y cálculos (Divisor de Gastos) integrados, con una migración progresiva hacia ViewModels para desacoplar el estado de la UI.
+- **UI:** Interfaces 100% declarativas con Material 3 y soporte para Widgets nativos (Glance).
 
 ### Configuración local
 Para habilitar la telemetría, configurá `local.properties` con:
@@ -85,17 +85,35 @@ Si faltan, la app funciona igual, pero no reporta métricas.
 ## 🛠️ Stack Tecnológico
 - **UI:** Jetpack Compose, Material 3, Glance (Widgets).
 - **Asincronía:** Kotlin Coroutines & Flow.
-- **Persistencia:** Jetpack DataStore, Protobuf.
-- **Cloud:** Firebase (Auth, Firestore, Functions, Cloud Messaging).
+- **Persistencia:** Jetpack DataStore, Protobuf (Full Java).
+- **Backend:** Firebase Functions & Firestore (procesamiento externo de métricas).
 - **Monetización:** Google Play Billing Library & AdMob.
-- **Análisis:** Custom Telemetry System + Firebase Analytics.
+- **Análisis:** Custom Telemetry System (sin SDKs externos en la App).
 
 ---
 
 ## 📈 Impacto Real
 - **Rating:** 5/5 ⭐ en Google Play Store, basado en 24 reseñas.
-- **Instalaciones:** +130 descargas orgánicas.
+- **Instalaciones:** +400 usuarios únicos (según métricas internas).
 - **Comunidad:** Feedback activo de usuarios con 19 reseñas positivas.
+
+---
+
+## 🛠️ Estado del Proyecto
+
+Para mantener la transparencia técnica, el proyecto reconoce y documenta su estado actual:
+
+- **Lo Sólido:**
+    - Motor de juego del Buscaminas (Canvas) con lógica desacoplada.
+    - Integración de sensores (Magnetómetro, Acelerómetro) y ARCore funcional.
+    - Sistema de métricas ligero y respetuoso de la privacidad.
+    - Documentación técnica detallada de problemas complejos (Post-mortems).
+
+- **Deuda Técnica Conocida:**
+    - **Modularización:** Actualmente es un módulo único (`:app`).
+    - **Arquitectura:** Gran parte de las herramientas mantienen lógica de negocio y estado dentro de los Composables, en transición hacia ViewModels.
+    - **Inyección de Dependencias:** Pendiente de implementar (Hilt o Koin).
+    - **Cobertura de Tests:** Faltan tests de UI y unitarios fuera del núcleo del buscador de minas.
 
 ---
 
@@ -117,7 +135,7 @@ Este proyecto utiliza Integración Continua (GitHub Actions) para garantizar la 
 **¿Por qué es importante el CI aquí?**
 Este sistema se implementó después de detectar un bug crítico: el proyecto no compilaba desde un clon limpio porque dependía de archivos locales no versionados. El CI actúa como un "entorno limpio" que verifica que cualquier cambio pueda ser integrado y compilado por cualquier desarrollador desde cero.
 
-Este es mi proyecto más ambicioso y estoy abierto a discutir detalles técnicos sobre la implementación de ProtoBuf, ARCore o la arquitectura del dashboard.
+Este es uno de mis proyectos personales más completos y estoy abierto a discutir detalles técnicos sobre la implementación de ProtoBuf, ARCore o la arquitectura del dashboard.
 
 - **LinkedIn:** [Joaquin Sasso](https://www.linkedin.com/in/joasasso/)
 - **Play Store:** [Descarga MiniToolbox](https://play.google.com/store/apps/details?id=com.joasasso.minitoolbox)
