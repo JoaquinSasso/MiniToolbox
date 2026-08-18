@@ -19,6 +19,8 @@ Para que podamos integrar tu aporte rápidamente, solo te pido dos cosas:
 
 Mensaje de commit claro: No hace falta que sea una tesis, pero sí que explique qué hiciste (ej: "Agregada lógica para el conversor de divisas" es mejor que solo "update").
 
+Actualización de Arquitectura: Si tu cambio introduce un nuevo subsistema, un nuevo módulo, o cambia drásticamente la estructura de carpetas o el pipeline de métricas, **debés actualizar [docs/architecture.md](docs/architecture.md)** en el mismo Pull Request. Los diagramas Mermaid deben reflejar el estado final del sistema.
+
 Breve explicación: En el Pull Request, cuéntame en un par de líneas qué cambiaste y por qué crees que es una mejora para la app.
 
 💡 Áreas donde puedes ayudar

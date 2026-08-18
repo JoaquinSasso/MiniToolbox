@@ -62,7 +62,7 @@ El temporizador Pomodoro presentaba fallos en background que requerían debuggin
 
 ## 🏗️ Arquitectura del Software
 
-El proyecto utiliza una arquitectura orientada a componentes con **Jetpack Compose** y **Compose Navigation**:
+El proyecto utiliza una arquitectura orientada a componentes con **Jetpack Compose** y **Compose Navigation**. Podés consultar la documentación técnica detallada en [docs/architecture.md](docs/architecture.md).
 
 - **Persistencia:** Gestión de preferencias con `DataStore` y datasets binarios optimizados con Protobuf.
 - **Lógica de Negocio:** Motores de juego (Buscaminas) y cálculos (Divisor de Gastos) integrados, con una migración progresiva hacia ViewModels para desacoplar el estado de la UI.
