@@ -1,0 +1,2492 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 9.2.1" type="baseline" client="gradle" dependencies="false" name="AGP (9.2.1)" variant="all" version="9.2.1">
+
+    <issue
+        id="MissingSuperCall"
+        message="Overriding method should call `super.onStartCommand`"
+        errorLine1="    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {"
+        errorLine2="                 ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/organizacion/pomodoro/PomodoroAlarmService.kt"
+            line="137"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead"
+        errorLine1="        return String.format(&quot;%02d:%02d&quot;, m, s)"
+        errorLine2="               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/utils/pro/CreditAccessManager.kt"
+            line="200"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead"
+        errorLine1="        return String.format(&quot;%04d%02d%02d&quot;, y, m, d)"
+        errorLine2="               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/utils/pro/CreditAccessManager.kt"
+            line="208"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead"
+        errorLine1="                        text = stringResource(R.string.zoom_label, String.format(&quot;%.1f&quot;, ratioFromState)),"
+        errorLine2="                                                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/herramientas/instrumentos/MagnifierScren.kt"
+            line="443"
+            column="68"/>
+    </issue>
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead"
+        errorLine1="            Text(String.format(&quot;%02d:%02d&quot;, s / 60, s % 60), style = MaterialTheme.typography.titleMedium)"
+        errorLine2="                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/entretenimiento/minijuegos/minesweeper/MinesweeperScreen.kt"
+            line="268"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        message="Field requires API level 33 (current min is 28): `android.content.Context#RECEIVER_NOT_EXPORTED`"
+        errorLine1="        registerReceiver(stopReceiver, IntentFilter(ACTION_POMODORO_ALARM_STOP), Context.RECEIVER_NOT_EXPORTED)"
+        errorLine2="                                                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/organizacion/pomodoro/PomodoroAlarmActivity.kt"
+            line="122"
+            column="82"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="`android:windowSplashScreenBackground` requires API level 31 (current min is 28)"
+        errorLine1="        &lt;item name=&quot;android:windowSplashScreenBackground&quot;>#000000&lt;/item> &lt;!-- o cualquier otro color oscuro o de contraste -->"
+        errorLine2="              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/themes.xml"
+            line="5"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="`android:windowSplashScreenAnimatedIcon` requires API level 31 (current min is 28)"
+        errorLine1="        &lt;item name=&quot;android:windowSplashScreenAnimatedIcon&quot;>@drawable/splash_icon&lt;/item>"
+        errorLine2="              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/themes.xml"
+            line="8"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="`android:windowSplashScreenIconBackgroundColor` requires API level 31 (current min is 28)"
+        errorLine1="        &lt;item name=&quot;android:windowSplashScreenIconBackgroundColor&quot;>@null&lt;/item>"
+        errorLine2="              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/themes.xml"
+            line="11"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="UnusedAttribute"
+        message="Attribute `enableOnBackInvokedCallback` is only used in API level 33 and higher (current min is 28)"
+        errorLine1="        android:enableOnBackInvokedCallback=&quot;true&quot;>"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="28"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="UnusedAttribute"
+        message="Attribute `enableOnBackInvokedCallback` is only used in API level 33 and higher (current min is 28)"
+        errorLine1="            android:enableOnBackInvokedCallback=&quot;true&quot;  "
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="33"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="NonObservableLocale"
+        message="Reading locale in a non-observable way in a composable function"
+        errorLine1="    val locale = Locale.getDefault()"
+        errorLine2="                 ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/organizacion/divisorGastos/AgregarGastoScreen.kt"
+            line="63"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="NonObservableLocale"
+        message="Reading locale in a non-observable way in a composable function"
+        errorLine1="    val locale = locales.get(0) ?: Locale.getDefault()"
+        errorLine2="                                   ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/CategoriesScreen.kt"
+            line="152"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="NonObservableLocale"
+        message="Reading locale in a non-observable way in a composable function"
+        errorLine1="    val locale = Locale.getDefault()"
+        errorLine2="                 ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/info/CountriesInfoScreen.kt"
+            line="49"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="NonObservableLocale"
+        message="Reading locale in a non-observable way in a composable function"
+        errorLine1="                                    text = &quot;Total: ${tirada.resultados.sum()} • ${SimpleDateFormat(&quot;dd/MM/yyyy HH:mm&quot;, Locale.getDefault()).format(Date(tirada.timestamp))}&quot;,"
+        errorLine2="                                                                                                                       ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/entretenimiento/aleatorio/DiceSimulatorScreen.kt"
+            line="239"
+            column="120"/>
+    </issue>
+
+    <issue
+        id="NonObservableLocale"
+        message="Reading locale in a non-observable way in a composable function"
+        errorLine1="    val locale = Locale.getDefault()"
+        errorLine2="                 ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/organizacion/divisorGastos/EditarGastoScreen.kt"
+            line="63"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="NonObservableLocale"
+        message="Reading locale in a non-observable way in a composable function"
+        errorLine1="    val locale = Locale.getDefault()"
+        errorLine2="                 ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/entretenimiento/minijuegos/GuessCapitalScreen.kt"
+            line="65"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="NonObservableLocale"
+        message="Reading locale in a non-observable way in a composable function"
+        errorLine1="    val locale = Locale.getDefault()"
+        errorLine2="                 ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/entretenimiento/minijuegos/GuessFlagScreen.kt"
+            line="61"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="NonObservableLocale"
+        message="Reading locale in a non-observable way in a composable function"
+        errorLine1="    val locale = Locale.getDefault()"
+        errorLine2="                 ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/organizacion/divisorGastos/ReunionDetailScreen.kt"
+            line="85"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="VectorRaster"
+        message="Limit vector icons sizes to 200×200 to keep icon drawing fast; see https://developer.android.com/studio/write/vector-asset-studio#when for more"
+        errorLine1="    android:width=&quot;512dp&quot;"
+        errorLine2="                   ~~~~~">
+        <location
+            file="src/main/res/drawable/noise_generator.xml"
+            line="2"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="VectorRaster"
+        message="Limit vector icons sizes to 200×200 to keep icon drawing fast; see https://developer.android.com/studio/write/vector-asset-studio#when for more"
+        errorLine1="    android:width=&quot;512dp&quot;"
+        errorLine2="                   ~~~~~">
+        <location
+            file="src/main/res/drawable/phrases.xml"
+            line="2"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="VectorRaster"
+        message="Limit vector icons sizes to 200×200 to keep icon drawing fast; see https://developer.android.com/studio/write/vector-asset-studio#when for more"
+        errorLine1="    android:width=&quot;512dp&quot;"
+        errorLine2="                   ~~~~~">
+        <location
+            file="src/main/res/drawable/planet_ringed.xml"
+            line="2"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="VectorRaster"
+        message="Limit vector icons sizes to 200×200 to keep icon drawing fast; see https://developer.android.com/studio/write/vector-asset-studio#when for more"
+        errorLine1="    android:width=&quot;512dp&quot;"
+        errorLine2="                   ~~~~~">
+        <location
+            file="src/main/res/drawable/ruler_triangle.xml"
+            line="2"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="AndroidGradlePluginVersion"
+        message="A newer version of com.android.application than 9.2.1 is available: 9.3.1"
+        errorLine1="agp = &quot;9.2.1&quot;"
+        errorLine2="      ~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="2"
+            column="7"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.appcompat:appcompat than 1.7.1 is available: 1.8.0"
+        errorLine1="    implementation(&quot;androidx.appcompat:appcompat:1.7.1&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="179"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.fragment:fragment-ktx than 1.8.9 is available: 1.9.0"
+        errorLine1="    implementation(&quot;androidx.fragment:fragment-ktx:1.8.9&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="180"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.media:media than 1.7.1 is available: 1.8.0"
+        errorLine1="    implementation(&quot;androidx.media:media:1.7.1&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="206"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.work:work-runtime-ktx than 2.10.5 is available: 2.11.2"
+        errorLine1="    implementation(&quot;androidx.work:work-runtime-ktx:2.10.5&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="214"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.datastore:datastore-preferences than 1.1.7 is available: 1.2.1"
+        errorLine1="datastorePreferences = &quot;1.1.7&quot;"
+        errorLine2="                       ~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="4"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.core:core-ktx than 1.17.0 is available: 1.19.0"
+        errorLine1="coreKtx = &quot;1.17.0&quot;"
+        errorLine2="          ~~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="7"
+            column="11"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.lifecycle:lifecycle-runtime-compose than 2.9.4 is available: 2.11.0"
+        errorLine1="lifecycleRuntimeKtx = &quot;2.9.4&quot;"
+        errorLine2="                      ~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="13"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.lifecycle:lifecycle-runtime-ktx than 2.9.4 is available: 2.11.0"
+        errorLine1="lifecycleRuntimeKtx = &quot;2.9.4&quot;"
+        errorLine2="                      ~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="13"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.activity:activity than 1.11.0 is available: 1.13.0"
+        errorLine1="activityCompose = &quot;1.11.0&quot;"
+        errorLine2="                  ~~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="14"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.activity:activity-compose than 1.11.0 is available: 1.13.0"
+        errorLine1="activityCompose = &quot;1.11.0&quot;"
+        errorLine2="                  ~~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="14"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.compose:compose-bom than 2025.10.00 is available: 2026.08.00"
+        errorLine1="composeBom = &quot;2025.10.00&quot;"
+        errorLine2="             ~~~~~~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="15"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of com.google.android.material:material than 1.13.0 is available: 1.14.0"
+        errorLine1="material = &quot;1.13.0&quot;"
+        errorLine2="           ~~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="17"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.navigation:navigation-compose than 2.9.5 is available: 2.9.8"
+        errorLine1="navigationCompose = &quot;2.9.5&quot;"
+        errorLine2="                    ~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="19"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.camera:camera-camera2 than 1.5.0 is available: 1.6.1"
+        errorLine1="cameraX = &quot;1.5.0&quot;"
+        errorLine2="          ~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="22"
+            column="11"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.camera:camera-lifecycle than 1.5.0 is available: 1.6.1"
+        errorLine1="cameraX = &quot;1.5.0&quot;"
+        errorLine2="          ~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="22"
+            column="11"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.camera:camera-view than 1.5.0 is available: 1.6.1"
+        errorLine1="cameraX = &quot;1.5.0&quot;"
+        errorLine2="          ~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="22"
+            column="11"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.compose.ui:ui-unit than 1.9.1 is available: 1.12.0"
+        errorLine1="uiUnit = &quot;1.9.1&quot;"
+        errorLine2="         ~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="23"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.compose.material3:material3 than 1.5.0-alpha06 is available: 1.5.0-alpha26"
+        errorLine1="material3 = &quot;1.5.0-alpha06&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="24"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of com.google.ar:core than 1.50.0 is available: 1.54.0"
+        errorLine1="arcore = &quot;1.50.0&quot;"
+        errorLine2="         ~~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="27"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="Upgrade `androidx.compose.foundation` for keyboard and mouse support"
+        errorLine1="foundation = &quot;1.9.1&quot;"
+        errorLine2="             ~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="30"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of com.google.android.gms:play-services-ads than 24.6.0 is available: 25.4.0"
+        errorLine1="gma = &quot;24.6.0&quot;"
+        errorLine2="      ~~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="32"
+            column="7"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of com.google.android.ump:user-messaging-platform than 3.2.0 is available: 4.0.0"
+        errorLine1="ump = &quot;3.2.0&quot;"
+        errorLine2="      ~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="33"
+            column="7"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of com.google.ads.mediation:unity than 4.12.5.0 is available: 4.19.0.1"
+        errorLine1="admob-unity = &quot;4.12.5.0&quot;      # com.google.ads.mediation:unity"
+        errorLine2="              ~~~~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="36"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of com.google.ads.mediation:facebook than 6.17.0.0 is available: 6.22.0.0"
+        errorLine1="admob-meta  = &quot;6.17.0.0&quot;      # com.google.ads.mediation:facebook"
+        errorLine2="              ~~~~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="37"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.compose.runtime:runtime-saveable than 1.9.1 is available: 1.12.0"
+        errorLine1="runtimeSaveable = &quot;1.9.1&quot;"
+        errorLine2="                  ~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="42"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of com.android.billingclient:billing-ktx than 8.0.0 is available: 9.1.0"
+        errorLine1="billing = &quot;8.0.0&quot;"
+        errorLine2="          ~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="43"
+            column="11"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.browser:browser than 1.8.0 is available: 1.10.0"
+        errorLine1="androidx-browser = &quot;1.8.0&quot;"
+        errorLine2="                   ~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="44"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.compose.runtime:runtime than 1.9.1 is available: 1.12.0"
+        errorLine1="runtime = &quot;1.9.1&quot;"
+        errorLine2="          ~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="45"
+            column="11"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.compose.runtime:runtime than 1.9.3 is available: 1.12.0"
+        errorLine1="runtimeVersion = &quot;1.9.3&quot;"
+        errorLine2="                 ~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="46"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="Upgrade `androidx.compose.foundation` for keyboard and mouse support"
+        errorLine1="foundationVersion = &quot;1.9.3&quot;"
+        errorLine2="                    ~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="47"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.compose.ui:ui-graphics than 1.9.3 is available: 1.12.0"
+        errorLine1="uiGraphics = &quot;1.9.3&quot;"
+        errorLine2="             ~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="48"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of org.jetbrains.kotlin.android than 2.2.20 is available: 2.4.10"
+        errorLine1="kotlin = &quot;2.2.20&quot;"
+        errorLine2="         ~~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="5"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of org.jetbrains.kotlin.plugin.compose than 2.2.20 is available: 2.4.10"
+        errorLine1="kotlin = &quot;2.2.20&quot;"
+        errorLine2="         ~~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="5"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of org.jetbrains.kotlinx:kotlinx-coroutines-test than 1.10.1 is available: 1.11.0"
+        errorLine1="kotlinxCoroutinesTest = &quot;1.10.1&quot;"
+        errorLine2="                        ~~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="6"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of org.mockito:mockito-core than 5.12.0 is available: 5.23.0"
+        errorLine1="mockito = &quot;5.12.0&quot;"
+        errorLine2="          ~~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="9"
+            column="11"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of org.jetbrains.kotlinx:kotlinx-serialization-json than 1.9.0 is available: 1.11.0"
+        errorLine1="kotlinxSerializationJson = &quot;1.9.0&quot;"
+        errorLine2="                           ~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="12"
+            column="28"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of com.google.protobuf:protobuf-java than 4.32.1 is available: 4.35.1"
+        errorLine1="protobufJava = &quot;4.32.1&quot;"
+        errorLine2="               ~~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="20"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of com.google.code.gson:gson than 2.13.2 is available: 2.14.0"
+        errorLine1="gson = &quot;2.13.2&quot;"
+        errorLine2="       ~~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="21"
+            column="8"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of sh.calvin.reorderable:reorderable than 3.0.0 is available: 3.1.0"
+        errorLine1="reorderable = &quot;3.0.0&quot;"
+        errorLine2="              ~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="25"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of io.github.sceneview:arsceneview than 2.3.0 is available: 4.31.0"
+        errorLine1="sceneview = &quot;2.3.0&quot;"
+        errorLine2="            ~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="26"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of com.google.guava:guava than 33.4.8-android is available: 33.7.0-android"
+        errorLine1="guava = &quot;33.4.8-android&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="34"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of com.facebook.android:audience-network-sdk than 6.17.0 is available: 6.22.0"
+        errorLine1="metaSdk = &quot;6.17.0&quot;"
+        errorLine2="          ~~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="39"
+            column="11"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of com.unity3d.ads:unity-ads than 4.12.5 is available: 4.20.0"
+        errorLine1="unitySdk = &quot;4.12.5&quot;"
+        errorLine2="           ~~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="40"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of org.jetbrains.kotlin.plugin.serialization than 2.2.10 is available: 2.4.10"
+        errorLine1="kotlin-serialization = { id = &quot;org.jetbrains.kotlin.plugin.serialization&quot;, version = &quot;2.2.10&quot; }"
+        errorLine2="                                                                                     ~~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="116"
+            column="86"/>
+    </issue>
+
+    <issue
+        id="SimilarGradleDependency"
+        message="There are multiple dependencies androidx.compose.foundation:foundation but with different version"
+        errorLine1="foundation = { group = &quot;androidx.compose.foundation&quot;, name = &quot;foundation&quot;, version.ref = &quot;foundation&quot; }"
+        errorLine2="              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="91"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="SimilarGradleDependency"
+        message="There are multiple dependencies androidx.compose.runtime:runtime but with different version"
+        errorLine1="androidx-runtime = { group = &quot;androidx.compose.runtime&quot;, name = &quot;runtime&quot;, version.ref = &quot;runtime&quot; }"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="107"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="SimilarGradleDependency"
+        message="There are multiple dependencies androidx.compose.runtime:runtime but with different version"
+        errorLine1="runtime = { group = &quot;androidx.compose.runtime&quot;, name = &quot;runtime&quot;, version.ref = &quot;runtimeVersion&quot; }"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="108"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="SimilarGradleDependency"
+        message="There are multiple dependencies androidx.compose.foundation:foundation but with different version"
+        errorLine1="androidx-compose-foundation-foundation = { group = &quot;androidx.compose.foundation&quot;, name = &quot;foundation&quot;, version.ref = &quot;foundationVersion&quot; }"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
+            line="109"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="ConfigurationScreenWidthHeight"
+        message="Using Configuration.screenHeightDp instead of LocalWindowInfo.current.containerSize"
+        errorLine1="        val maxHeight = (cfg.screenHeightDp * 0.75f).dp   // ocupa hasta ~75% de la pantalla"
+        errorLine2="                         ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/herramientas/instrumentos/ArRulerSceneViewScreen.kt"
+            line="353"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="ConfigurationScreenWidthHeight"
+        message="Using Configuration.screenWidthDp instead of LocalWindowInfo.current.containerSize"
+        errorLine1="                    val screenWidth = LocalConfiguration.current.screenWidthDp.dp"
+        errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/organizacion/recordatorios/ToDoListScreen.kt"
+            line="142"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="LocalContextGetResourceValueCall"
+        message="Querying resource values using LocalContext.current"
+        errorLine1="                Text(&quot;${context.getString(R.string.water_goal_label)} ${(objetivoML / 1000f).let { &quot;%.2f&quot;.format(it) }}L&quot;, fontSize = 16.sp)"
+        errorLine2="                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/organizacion/recordatorios/agua/AguaReminderScreen.kt"
+            line="267"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="LocalContextGetResourceValueCall"
+        message="Querying resource values using LocalContext.current"
+        errorLine1="                                snackbarHostState.showSnackbar(context.getString(R.string.notif_enabled_snackbar))"
+        errorLine2="                                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/organizacion/recordatorios/agua/AguaReminderScreen.kt"
+            line="357"
+            column="64"/>
+    </issue>
+
+    <issue
+        id="LocalContextGetResourceValueCall"
+        message="Querying resource values using LocalContext.current"
+        errorLine1="                                snackbarHostState.showSnackbar(context.getString(R.string.notif_disabled_snackbar))"
+        errorLine2="                                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/organizacion/recordatorios/agua/AguaReminderScreen.kt"
+            line="361"
+            column="64"/>
+    </issue>
+
+    <issue
+        id="LocalContextGetResourceValueCall"
+        message="Querying resource values using LocalContext.current"
+        errorLine1="    var result by remember { mutableStateOf(context.getString(R.string.coin_heads)) }"
+        errorLine2="                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/entretenimiento/aleatorio/CoinFlipScreen.kt"
+            line="57"
+            column="45"/>
+    </issue>
+
+    <issue
+        id="LocalContextGetResourceValueCall"
+        message="Querying resource values using LocalContext.current"
+        errorLine1="                context.getString(R.string.coin_heads)"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/entretenimiento/aleatorio/CoinFlipScreen.kt"
+            line="83"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="LocalContextGetResourceValueCall"
+        message="Querying resource values using LocalContext.current"
+        errorLine1="                context.getString(R.string.coin_tails)"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/entretenimiento/aleatorio/CoinFlipScreen.kt"
+            line="85"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="LocalContextGetResourceValueCall"
+        message="Querying resource values using LocalContext.current"
+        errorLine1="            currentColor = if (newResult == context.getString(R.string.coin_heads)) flipColors[0] else flipColors[1]"
+        errorLine2="                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/entretenimiento/aleatorio/CoinFlipScreen.kt"
+            line="88"
+            column="45"/>
+    </issue>
+
+    <issue
+        id="LocalContextGetResourceValueCall"
+        message="Querying resource values using LocalContext.current"
+        errorLine1="                                        lastResult = context.getString(R.string.result_new_record)"
+        errorLine2="                                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/entretenimiento/minijuegos/GuessCapitalScreen.kt"
+            line="223"
+            column="54"/>
+    </issue>
+
+    <issue
+        id="LocalContextGetResourceValueCall"
+        message="Querying resource values using LocalContext.current"
+        errorLine1="                                    lastResult = context.getString(R.string.result_wrong)"
+        errorLine2="                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/entretenimiento/minijuegos/GuessCapitalScreen.kt"
+            line="230"
+            column="50"/>
+    </issue>
+
+    <issue
+        id="LocalContextGetResourceValueCall"
+        message="Querying resource values using LocalContext.current"
+        errorLine1="                lastResult = context.getString(R.string.result_timeout)"
+        errorLine2="                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/entretenimiento/minijuegos/GuessFlagScreen.kt"
+            line="111"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="LocalContextGetResourceValueCall"
+        message="Querying resource values using LocalContext.current"
+        errorLine1="                                        lastResult = context.getString(R.string.result_new_record)"
+        errorLine2="                                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/entretenimiento/minijuegos/GuessFlagScreen.kt"
+            line="194"
+            column="54"/>
+    </issue>
+
+    <issue
+        id="LocalContextGetResourceValueCall"
+        message="Querying resource values using LocalContext.current"
+        errorLine1="                                    lastResult = context.getString(R.string.result_wrong)"
+        errorLine2="                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/entretenimiento/minijuegos/GuessFlagScreen.kt"
+            line="199"
+            column="50"/>
+    </issue>
+
+    <issue
+        id="LocalContextGetResourceValueCall"
+        message="Querying resource values using LocalContext.current"
+        errorLine1="                        context.getString(R.string.about_licenses_button)"
+        errorLine2="                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/NavGraph.kt"
+            line="319"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="LocalContextGetResourceValueCall"
+        message="Querying resource values using LocalContext.current"
+        errorLine1="                    currentPhaseName = phaseName.ifBlank { context.getString(R.string.pomodoro_work) },"
+        errorLine2="                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/organizacion/pomodoro/PomodoroScreen.kt"
+            line="181"
+            column="60"/>
+    </issue>
+
+    <issue
+        id="LocalContextGetResourceValueCall"
+        message="Querying resource values using LocalContext.current"
+        errorLine1="    val inappId = remember { context.getString(R.string.billing_pro_id) }"
+        errorLine2="                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/ui/screens/ProScreen.kt"
+            line="55"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="LocalContextGetResourceValueCall"
+        message="Querying resource values using LocalContext.current"
+        errorLine1="                Toast.makeText(context, context.getString(R.string.pro_toast_thanks), Toast.LENGTH_SHORT).show()"
+        errorLine2="                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/ui/screens/ProScreen.kt"
+            line="74"
+            column="41"/>
+    </issue>
+
+    <issue
+        id="LocalContextGetResourceValueCall"
+        message="Querying resource values using LocalContext.current"
+        errorLine1="                        Toast.makeText(context, context.getString(R.string.pro_toast_warning_unable_to_buy), Toast.LENGTH_SHORT).show()"
+        errorLine2="                                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/ui/screens/ProScreen.kt"
+            line="133"
+            column="49"/>
+    </issue>
+
+    <issue
+        id="LocalContextGetResourceValueCall"
+        message="Querying resource values using LocalContext.current"
+        errorLine1="            context.startActivity(Intent.createChooser(shareIntent, context.getString(R.string.share)))"
+        errorLine2="                                                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/herramientas/generadores/QRCodeGeneratorScreen.kt"
+            line="102"
+            column="69"/>
+    </issue>
+
+    <issue
+        id="LocalContextGetResourceValueCall"
+        message="Querying resource values using LocalContext.current"
+        errorLine1="                                    dateError = context.getString(R.string.countdown_error_future)"
+        errorLine2="                                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/info/RemainingTimeScreen.kt"
+            line="105"
+            column="49"/>
+    </issue>
+
+    <issue
+        id="LocalContextGetResourceValueCall"
+        message="Querying resource values using LocalContext.current"
+        errorLine1="                                dateError = context.getString(R.string.countdown_error_day, maxDay)"
+        errorLine2="                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/info/RemainingTimeScreen.kt"
+            line="110"
+            column="45"/>
+    </issue>
+
+    <issue
+        id="LocalContextGetResourceValueCall"
+        message="Querying resource values using LocalContext.current"
+        errorLine1="                            dateError = context.getString(R.string.countdown_error_month)"
+        errorLine2="                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/info/RemainingTimeScreen.kt"
+            line="113"
+            column="41"/>
+    </issue>
+
+    <issue
+        id="LocalContextGetResourceValueCall"
+        message="Querying resource values using LocalContext.current"
+        errorLine1="                    equipos = equipos + Equipo(nombre = &quot;${context.getString(R.string.marcador_equipo)} ${equipos.size + 1}&quot;, puntos = 0, color = colorOptions.random())"
+        errorLine2="                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/entretenimiento/ScoreboardScren.kt"
+            line="125"
+            column="60"/>
+    </issue>
+
+    <issue
+        id="LocalContextResourcesRead"
+        message="Reading Resources using LocalContext.current.resources"
+        errorLine1="                                    context.resources.getString(R.string.expenses_share_summary_button)"
+        errorLine2="                                    ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/organizacion/divisorGastos/ReunionDetailScreen.kt"
+            line="320"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="LocalContextResourcesRead"
+        message="Reading Resources using LocalContext.current.resources"
+        errorLine1="    val metrics = context.resources.displayMetrics"
+        errorLine2="                  ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/herramientas/instrumentos/RulerScreen.kt"
+            line="48"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="MutableCollectionMutableState"
+        message="Creating a MutableState object with a mutable collection type"
+        errorLine1="        mutableStateOf("
+        errorLine2="        ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/entretenimiento/aleatorio/OptionSelectorScreen.kt"
+            line="57"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="PluralsCandidate"
+        message="Formatting %d followed by words (&quot;years&quot;): This should probably be a plural rather than a string"
+        errorLine1="    &lt;string name=&quot;age_result_message&quot;>You are %1$d years, %2$d months and %3$d days old&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/age_calculator_strings.xml"
+            line="8"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="PluralsCandidate"
+        message="Formatting %d followed by words (&quot;lux&quot;): This should probably be a plural rather than a string"
+        errorLine1="    &lt;string name=&quot;lightmeter_value_lux&quot;>%1$d lux&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/light_sensor_strings.xml"
+            line="5"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="PluralsCandidate"
+        message="Formatting %d followed by words (&quot;cycles&quot;): This should probably be a plural rather than a string"
+        errorLine1="    &lt;string name=&quot;pomodoro_cycles_before_long&quot;>%1$d cycles&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/pomodoro_timer_strings.xml"
+            line="48"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="PluralsCandidate"
+        message="Formatting %d followed by words (&quot;Glasses&quot;): This should probably be a plural rather than a string"
+        errorLine1="    &lt;string name=&quot;water_glasses_display&quot;>( %1$d / %2$d Glasses)&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/water_reminder_strings.xml"
+            line="9"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        message="Unnecessary; `SDK_INT` is always >= 28"
+        errorLine1="        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/organizacion/pomodoro/PomodoroAlarmActivity.kt"
+            line="143"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="StaticFieldLeak"
+        message="Do not place Android context classes in static fields (static reference to `AggregatesRepository` which has field `context` pointing to `Context`); this is a memory leak"
+        errorLine1="// Helpers"
+        errorLine2="^">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/metrics/Metrics.kt"
+            line="42"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="StaticFieldLeak"
+        message="Do not place Android context classes in static fields (static reference to `BillingClientWrapper` which has field `context` pointing to `Context`); this is a memory leak"
+        errorLine1="    // Referencia al wrapper interno"
+        errorLine2="    ^">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/utils/pro/ProSilentInitializer.kt"
+            line="29"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="VectorPath"
+        message="Very long vector path (3664 characters), which is bad for performance. Considering reducing precision, removing minor details or rasterizing vector."
+        errorLine1="      android:pathData=&quot;M286.8,40.1c-6.2,3.2 -7.8,7.7 -7.8,21.7v11.9l-6.7,-1.3c-27.6,-5.2 -57.1,-4 -82.8,3.2 -12,3.3 -30.6,12.4 -33,16.1 -2.6,3.9 -3.1,11 -1.1,15.8 1.6,3.8 1.6,4.1 -0.2,5.5 -1.1,0.8 -5.7,4.4 -10.3,8 -10.2,7.9 -29.2,26.7 -37.8,37.3 -28.4,35.1 -47,79.9 -52.2,125.6 -1.7,15.6 -0.7,50.6 2,65.6 2.9,16.5 7.4,32.9 12.7,46.3 31.9,81.7 103.1,138.5 190.4,151.9 16.3,2.5 52,2.4 68.5,-0.1 44.7,-6.9 84.8,-24.8 119.5,-53.5 43.6,-36.2 72.9,-87.1 83.1,-144.6 2.7,-15.2 3.7,-48.2 2,-64.6 -3.5,-34.1 -15.7,-70.6 -33.2,-99.6 -13.9,-23 -37.8,-49.8 -58.6,-65.8 -5.7,-4.3 -10.3,-7.9 -10.3,-8 0,-0.2 0.7,-2 1.6,-4.1 2,-4.7 1.5,-11.8 -1.1,-15.7 -2.3,-3.6 -20.8,-12.7 -32.5,-16.1 -25.2,-7.1 -55.9,-8.3 -83.2,-3.2l-6.8,1.3V61.8c0,-9.9 -0.3,-12.5 -2,-15.8 -3.7,-7.3 -12.7,-9.9 -20.2,-5.9M256,100.5c6.9,0.8 18.2,2.8 25.3,4.4l12.7,2.9 12.8,-2.9c23.6,-5.4 44,-7 61.7,-4.8 8.8,1.1 27.2,5.3 28.4,6.5 1.2,1.1 -6.7,7.2 -12,9.2 -3,1.1 -8.6,2.3 -12.4,2.7 -11,1.2 -14.7,3.9 -17.1,12.5 -3.5,12.7 -11.1,28 -13.9,28 -0.5,0 -3.8,-0.7 -7.2,-1.5 -8.8,-2.1 -18,-6.8 -26.5,-13.6 -11.4,-9.1 -16.2,-9.1 -27.6,0 -8.5,6.8 -17.7,11.5 -26.5,13.6 -3.4,0.8 -6.7,1.5 -7.2,1.5 -2.8,0 -10.4,-15.3 -13.9,-28 -2.4,-8.6 -6.1,-11.3 -17.1,-12.5 -3.8,-0.4 -9.3,-1.6 -12.1,-2.6 -5.2,-2 -13.4,-8.2 -12.3,-9.3s19.5,-5.5 27.1,-6.4c11.3,-1.4 24.2,-1.3 37.8,0.3m-63.1,43.6c3.1,1.1 6.9,2.3 8.6,2.6 7.4,1.4 7.1,3.8 -1,8.6 -35.6,21.2 -64,56.9 -77.5,97.4 -7.2,21.9 -8.4,29.7 -8.5,56.3 0,20.9 0.3,24.8 2.4,35 14.7,71.4 69,126.8 139.1,141.8 95.1,20.5 188.8,-37.9 213,-132.6 5.1,-20.1 6.6,-49.2 3.5,-69.6 -7.8,-51.4 -36,-95.7 -79.8,-124.9 -5.3,-3.6 -10.3,-6.7 -11,-7 -2.6,-1 1,-4 6.3,-5.4 6.1,-1.5 16.6,-6.2 21,-9.3l2.8,-2 7.9,5.8c31.3,23.2 56.8,57 70.6,93.2 9.2,24.1 12.7,42.3 13.4,69.1 0.8,28.8 -1.9,47.6 -10.3,72.9 -17.6,52.9 -55.8,96.8 -106,121.9 -19.1,9.5 -36.9,15.3 -59.2,19.3 -16.6,2.9 -50,3.2 -65.7,0.5 -47.9,-8.3 -86.2,-28.2 -119.2,-61.8C111.2,423.2 90.8,380.4 85,334c-1.4,-12 -1.2,-39.6 0.5,-52.1 7.4,-56.2 37.4,-107.2 82.7,-141l7.8,-5.8 5.7,3.5c3.1,1.9 8.2,4.3 11.2,5.5m33.6,38c2.2,2.3 5.4,4.8 7.2,5.5 6.4,2.7 23,1.1 35.8,-3.6 3.3,-1.2 6.8,-2.4 7.8,-2.7 1.6,-0.5 1.7,1.9 1.7,41.5v42l-5.5,2.7c-17.8,8.7 -28.7,29.3 -25.8,48.6 4.5,28.8 32.9,46.4 60.9,37.8l6.7,-2.1 36.9,36.9c20.2,20.2 36.8,37 36.8,37.3 -0.1,1.3 -16.3,11.9 -26.3,17 -12.9,6.8 -25,11 -39.4,13.9 -14.8,3.1 -14,3.3 -14.5,-4.9 -0.3,-5 -0.9,-7.7 -2.4,-9.7 -6.4,-8.6 -18.4,-8.6 -24.8,0 -1.5,2 -2.1,4.7 -2.4,9.7 -0.5,8.2 0.4,7.9 -14,5.1 -22,-4.3 -46.6,-15.3 -62,-27.9l-4.4,-3.5 4,-4.1c5.1,-5.3 6.2,-7.5 6.2,-12.9 0,-6 -3.2,-10.6 -9.2,-13.1 -6.5,-2.7 -10.8,-1.6 -16.9,4.1 -5.9,5.5 -5.5,5.6 -14,-7 -12.5,-18.7 -20.9,-40.3 -23.7,-61.3l-0.8,-6.1 7,-0.6c7.7,-0.7 10.7,-2.3 14.4,-7.7 4.1,-6.2 2,-15.3 -4.7,-19.7 -2.6,-1.8 -4.8,-2.3 -9.6,-2.3 -3.4,0 -6.4,-0.2 -6.7,-0.5 -0.9,-0.9 2,-16.4 4.7,-25.9 5.1,-17.7 15.9,-39.4 24.9,-50.1l3.4,-4 5,4.7c7.1,6.6 13.6,7.5 20.4,2.7 3.8,-2.7 5.8,-6.9 5.8,-11.9 0,-5.1 -1.1,-7.3 -6.1,-12.6l-3.9,-4 2.2,-2.1c2,-1.8 5.1,-3.9 16.8,-11.6 3.6,-2.3 4.2,-2.2 8.5,2.4m145.7,-0.9c6.2,3.7 15.4,10.4 16.2,11.6 0.3,0.5 -1.1,2.4 -3,4.3 -4.7,4.5 -6.4,7.9 -6.4,12.9s2,9.2 5.8,11.9c6.8,4.8 13.3,3.9 20.3,-2.6 5.8,-5.4 5.6,-5.5 13.3,6.1 12.9,19.3 23,46.2 24.8,65.6l0.3,3.5 -7.2,0.5c-8.2,0.6 -11.7,2.6 -14.5,8.1 -2.5,4.7 -2.3,9.9 0.5,13.9 3.6,5.4 6.6,7 14.3,7.7l7,0.6 -0.8,6.1c-3,22.9 -16,53.5 -29.4,69.2l-3.3,3.9 -37,-37 -37.1,-37 2,-5.2c8.1,-21.4 -2.4,-47.5 -23.5,-57.8l-5.5,-2.7v-42c0,-39.6 0.1,-42 1.8,-41.5 0.9,0.3 4.4,1.5 7.7,2.7 12.8,4.7 29.4,6.3 35.8,3.6 1.8,-0.7 5,-3.2 7.2,-5.5 2.1,-2.2 4.3,-4.1 4.7,-4.1s3.1,1.4 6,3.2M303.9,296c3.7,2.6 7.1,9 7.1,13.5s-3.3,10.9 -6.9,13.5c-6.3,4.4 -16,3.9 -21.5,-1.3 -8.3,-7.9 -6.6,-21.4 3.4,-26.9 4.8,-2.6 13.4,-2.1 17.9,1.2&quot;/>"
+        errorLine2="                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/drawable/ic_pomodoro.xml"
+            line="8"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        message="Prefer `mutableFloatStateOf` instead of `mutableStateOf`"
+        errorLine1="    var frozenScale by remember { mutableStateOf(1f) }"
+        errorLine2="                                  ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/herramientas/instrumentos/MagnifierScren.kt"
+            line="133"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        message="Prefer `mutableFloatStateOf` instead of `mutableStateOf`"
+        errorLine1="    var frozenOffsetX by remember { mutableStateOf(0f) }"
+        errorLine2="                                    ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/herramientas/instrumentos/MagnifierScren.kt"
+            line="134"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        message="Prefer `mutableFloatStateOf` instead of `mutableStateOf`"
+        errorLine1="    var frozenOffsetY by remember { mutableStateOf(0f) }"
+        errorLine2="                                    ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/herramientas/instrumentos/MagnifierScren.kt"
+            line="135"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        message="Prefer `mutableLongStateOf` instead of `mutableStateOf`"
+        errorLine1="    var now by remember { mutableStateOf(System.currentTimeMillis()) }"
+        errorLine2="                          ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/joasasso/minitoolbox/tools/organizacion/pomodoro/PomodoroScreen.kt"
+            line="395"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.about_section_actions_title` appears to be unused"
+        errorLine1="    &lt;string name=&quot;about_section_actions_title&quot;>Actions&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/about_strings.xml"
+            line="8"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.about_metrics_description` appears to be unused"
+        errorLine1="    &lt;string name=&quot;about_metrics_description&quot;>Help improve MiniToolbox by sending anonymous usage metrics.&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/about_strings.xml"
+            line="53"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.about_metrics_label` appears to be unused"
+        errorLine1="    &lt;string name=&quot;about_metrics_label&quot;>Anonymous metrics&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/about_strings.xml"
+            line="54"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.metrics_toggle_off_line` appears to be unused"
+        errorLine1="    &lt;string name=&quot;metrics_toggle_off_line&quot;>Don’t send anonymous metrics&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/about_strings.xml"
+            line="58"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.admob_banner_prod` appears to be unused"
+        errorLine1="    &lt;string name=&quot;admob_banner_prod&quot; translatable=&quot;false&quot;>ca-app-pub-7623187138639860/6833925404&lt;/string> &lt;!-- prod -->"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/ad_related_strings.xml"
+            line="4"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.admob_banner_test` appears to be unused"
+        errorLine1="    &lt;string name=&quot;admob_banner_test&quot; translatable=&quot;false&quot;>ca-app-pub-3940256099942544/6300978111&lt;/string> &lt;!-- test oficial -->"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/ad_related_strings.xml"
+            line="5"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.admob_rewarded_interstitial_prod` appears to be unused"
+        errorLine1="    &lt;string name=&quot;admob_rewarded_interstitial_prod&quot; translatable=&quot;false&quot;>ca-app-pub-7623187138639860/9677986647&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/ad_related_strings.xml"
+            line="10"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.admob_rewarded_interstitial_test` appears to be unused"
+        errorLine1="    &lt;string name=&quot;admob_rewarded_interstitial_test&quot; translatable=&quot;false&quot;>ca-app-pub-3940256099942544/5354046379&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/ad_related_strings.xml"
+            line="11"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.billing_pro_inapp` appears to be unused"
+        errorLine1="    &lt;string name=&quot;billing_pro_inapp&quot; translatable=&quot;false&quot;>pro_lifetime&lt;/string>      &lt;!-- Producto único (INAPP) -->"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/ad_related_strings.xml"
+            line="12"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.billing_pro_sub` appears to be unused"
+        errorLine1="    &lt;string name=&quot;billing_pro_sub&quot; translatable=&quot;false&quot;>pro_monthly&lt;/string>         &lt;!-- Subscripción (SUBS), opcional -->"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/ad_related_strings.xml"
+            line="13"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.drawable.add` appears to be unused"
+        errorLine1="&lt;vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
+        errorLine2="^">
+        <location
+            file="src/main/res/drawable/add.xml"
+            line="1"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.aruler_add_point` appears to be unused"
+        errorLine1="    &lt;string name=&quot;aruler_add_point&quot;>Add point&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/ar_ruler_strings.xml"
+            line="5"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.aruler_close_measure` appears to be unused"
+        errorLine1="    &lt;string name=&quot;aruler_close_measure&quot;>Close measure&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/ar_ruler_strings.xml"
+            line="6"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.aruler_reset_all` appears to be unused"
+        errorLine1="    &lt;string name=&quot;aruler_reset_all&quot;>Reset&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/ar_ruler_strings.xml"
+            line="7"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.aruler_tips_toggle_off` appears to be unused"
+        errorLine1="    &lt;string name=&quot;aruler_tips_toggle_off&quot;>Hide tips&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/ar_ruler_strings.xml"
+            line="9"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.aruler_tips_toggle_on` appears to be unused"
+        errorLine1="    &lt;string name=&quot;aruler_tips_toggle_on&quot;>Show tips&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/ar_ruler_strings.xml"
+            line="10"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.drawable.arrow_north` appears to be unused"
+        errorLine1="&lt;vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
+        errorLine2="^">
+        <location
+            file="src/main/res/drawable/arrow_north.xml"
+            line="1"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.xml.backup_rules` appears to be unused"
+        errorLine1="&lt;full-backup-content>"
+        errorLine2="^">
+        <location
+            file="src/main/res/xml/backup_rules.xml"
+            line="8"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.drawable.bg_ar_label` appears to be unused"
+        errorLine1="&lt;shape xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot; android:shape=&quot;rectangle&quot;>"
+        errorLine2="^">
+        <location
+            file="src/main/res/drawable/bg_ar_label.xml"
+            line="1"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.compass_arrow_content_desc` appears to be unused"
+        errorLine1="    &lt;string name=&quot;compass_arrow_content_desc&quot;>Compass arrow&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/compass_strings.xml"
+            line="3"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.compass_label_n` appears to be unused"
+        errorLine1="    &lt;string name=&quot;compass_label_n&quot;>%1$d° North&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/compass_strings.xml"
+            line="13"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.compass_label_ne` appears to be unused"
+        errorLine1="    &lt;string name=&quot;compass_label_ne&quot;>%1$d° Northeast&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/compass_strings.xml"
+            line="14"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.compass_label_e` appears to be unused"
+        errorLine1="    &lt;string name=&quot;compass_label_e&quot;>%1$d° East&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/compass_strings.xml"
+            line="15"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.compass_label_se` appears to be unused"
+        errorLine1="    &lt;string name=&quot;compass_label_se&quot;>%1$d° Southeast&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/compass_strings.xml"
+            line="16"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.compass_label_s` appears to be unused"
+        errorLine1="    &lt;string name=&quot;compass_label_s&quot;>%1$d° South&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/compass_strings.xml"
+            line="17"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.compass_label_sw` appears to be unused"
+        errorLine1="    &lt;string name=&quot;compass_label_sw&quot;>%1$d° Southwest&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/compass_strings.xml"
+            line="18"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.compass_label_w` appears to be unused"
+        errorLine1="    &lt;string name=&quot;compass_label_w&quot;>%1$d° West&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/compass_strings.xml"
+            line="19"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.compass_label_nw` appears to be unused"
+        errorLine1="    &lt;string name=&quot;compass_label_nw&quot;>%1$d° Northwest&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/compass_strings.xml"
+            line="20"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.compass_mode_magnetic` appears to be unused"
+        errorLine1="    &lt;string name=&quot;compass_mode_magnetic&quot;>Magnetic&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/compass_strings.xml"
+            line="29"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.compass_mode_gps` appears to be unused"
+        errorLine1="    &lt;string name=&quot;compass_mode_gps&quot;>GPS&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/compass_strings.xml"
+            line="30"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.xml.data_extraction_rules` appears to be unused"
+        errorLine1="&lt;data-extraction-rules>"
+        errorLine2="^">
+        <location
+            file="src/main/res/xml/data_extraction_rules.xml"
+            line="6"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.dice_total` appears to be unused"
+        errorLine1="    &lt;string name=&quot;dice_total&quot;>Total: %1$d&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/dice_strings.xml"
+            line="8"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.dice_total_y_fecha` appears to be unused"
+        errorLine1="    &lt;string name=&quot;dice_total_y_fecha&quot;>Total: %1$d • %2$s&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/dice_strings.xml"
+            line="10"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.drawable.disabled_by_default` appears to be unused"
+        errorLine1="&lt;vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
+        errorLine2="^">
+        <location
+            file="src/main/res/drawable/disabled_by_default.xml"
+            line="1"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.drawable.empty_square` appears to be unused"
+        errorLine1="&lt;vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
+        errorLine2="^">
+        <location
+            file="src/main/res/drawable/empty_square.xml"
+            line="1"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.expense_delete_content_desc` appears to be unused"
+        errorLine1="    &lt;string name=&quot;expense_delete_content_desc&quot;>Delete meeting&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/expenses_splitter_strings.xml"
+            line="15"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.date_label` appears to be unused"
+        errorLine1="    &lt;string name=&quot;date_label&quot;>Date: %1$s&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/expenses_splitter_strings.xml"
+            line="53"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.total_spent_label` appears to be unused"
+        errorLine1="    &lt;string name=&quot;total_spent_label&quot;>Total spent: $%1$.2f&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/expenses_splitter_strings.xml"
+            line="54"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.edit_member_content_desc` appears to be unused"
+        errorLine1="    &lt;string name=&quot;edit_member_content_desc&quot;>Edit member&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/expenses_splitter_strings.xml"
+            line="57"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.edit_expense_content_desc` appears to be unused"
+        errorLine1="    &lt;string name=&quot;edit_expense_content_desc&quot;>Edit expense&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/expenses_splitter_strings.xml"
+            line="59"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.unlock_debts_section_button` appears to be unused"
+        errorLine1="    &lt;string name=&quot;unlock_debts_section_button&quot;>See debts&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/expenses_splitter_strings.xml"
+            line="64"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.drawable.flash_off` appears to be unused"
+        errorLine1="&lt;vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
+        errorLine2="^">
+        <location
+            file="src/main/res/drawable/flash_off.xml"
+            line="1"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.flash_widget_level` appears to be unused"
+        errorLine1="    &lt;string name=&quot;flash_widget_level&quot;>Level: %1$d&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/flash_strings.xml"
+            line="25"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.flash_widget_increase` appears to be unused"
+        errorLine1="    &lt;string name=&quot;flash_widget_increase&quot;>Increase brightness&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/flash_strings.xml"
+            line="26"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.flash_widget_decrease` appears to be unused"
+        errorLine1="    &lt;string name=&quot;flash_widget_decrease&quot;>Decrease brightness&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/flash_strings.xml"
+            line="27"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.drawable.ic_pause` appears to be unused"
+        errorLine1="&lt;vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
+        errorLine2="^">
+        <location
+            file="src/main/res/drawable/ic_pause.xml"
+            line="1"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.drawable.ic_refresh` appears to be unused"
+        errorLine1="&lt;vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
+        errorLine2="^">
+        <location
+            file="src/main/res/drawable/ic_refresh.xml"
+            line="1"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.drawable.ic_silence` appears to be unused"
+        errorLine1="&lt;vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
+        errorLine2="^">
+        <location
+            file="src/main/res/drawable/ic_silence.xml"
+            line="1"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.drawable.ic_stop` appears to be unused"
+        errorLine1="&lt;vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
+        errorLine2="^">
+        <location
+            file="src/main/res/drawable/ic_stop.xml"
+            line="1"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.cd_back` appears to be unused"
+        errorLine1="    &lt;string name=&quot;cd_back&quot;>Back&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/magnifier_strings.xml"
+            line="4"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.cd_help` appears to be unused"
+        errorLine1="    &lt;string name=&quot;cd_help&quot;>Help&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/magnifier_strings.xml"
+            line="5"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.filter_invert` appears to be unused"
+        errorLine1="    &lt;string name=&quot;filter_invert&quot;>Invert&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/magnifier_strings.xml"
+            line="19"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.help_ok` appears to be unused"
+        errorLine1="    &lt;string name=&quot;help_ok&quot;>Got it&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/magnifier_strings.xml"
+            line="27"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.mines_title` appears to be unused"
+        errorLine1="    &lt;string name=&quot;mines_title&quot;>Minesweeper&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/minesweeper_strings.xml"
+            line="4"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.mines_help` appears to be unused"
+        errorLine1="    &lt;string name=&quot;mines_help&quot;>Help&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/minesweeper_strings.xml"
+            line="9"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.drawable.noise_generator` appears to be unused"
+        errorLine1="&lt;vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
+        errorLine2="^">
+        <location
+            file="src/main/res/drawable/noise_generator.xml"
+            line="1"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.noise_notif_title` appears to be unused"
+        errorLine1="    &lt;string name=&quot;noise_notif_title&quot;>Playing noise&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/noise_generator_strings.xml"
+            line="3"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.noise_notif_toggle` appears to be unused"
+        errorLine1="    &lt;string name=&quot;noise_notif_toggle&quot;>Pause/Resume&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/noise_generator_strings.xml"
+            line="4"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.noise_notif_stop` appears to be unused"
+        errorLine1="    &lt;string name=&quot;noise_notif_stop&quot;>Stop&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/noise_generator_strings.xml"
+            line="5"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.noise_channel_name` appears to be unused"
+        errorLine1="    &lt;string name=&quot;noise_channel_name&quot;>Noise for relaxation&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/noise_generator_strings.xml"
+            line="6"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.password_generator_generar` appears to be unused"
+        errorLine1="    &lt;string name=&quot;password_generator_generar&quot;>Generate another&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/password_generator_strings.xml"
+            line="4"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.pomodoro_start` appears to be unused"
+        errorLine1="    &lt;string name=&quot;pomodoro_start&quot;>Start&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/pomodoro_timer_strings.xml"
+            line="3"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.pomodoro_stop` appears to be unused"
+        errorLine1="    &lt;string name=&quot;pomodoro_stop&quot;>Stop&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/pomodoro_timer_strings.xml"
+            line="4"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.pomodoro_work_label` appears to be unused"
+        errorLine1="    &lt;string name=&quot;pomodoro_work_label&quot;>Work (min)&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/pomodoro_timer_strings.xml"
+            line="6"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.pomodoro_short_label` appears to be unused"
+        errorLine1="    &lt;string name=&quot;pomodoro_short_label&quot;>Short break (min)&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/pomodoro_timer_strings.xml"
+            line="7"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.pomodoro_long_label` appears to be unused"
+        errorLine1="    &lt;string name=&quot;pomodoro_long_label&quot;>Long break (min)&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/pomodoro_timer_strings.xml"
+            line="8"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.pomodoro_channel_countdown_name` appears to be unused"
+        errorLine1="    &lt;string name=&quot;pomodoro_channel_countdown_name&quot;>Pomodoro (Countdown)&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/pomodoro_timer_strings.xml"
+            line="11"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.pomodoro_channel_countdown_desc` appears to be unused"
+        errorLine1="    &lt;string name=&quot;pomodoro_channel_countdown_desc&quot;>Time remaining updates for Pomodoro&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/pomodoro_timer_strings.xml"
+            line="12"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.pomodoro_channel_alarm_name` appears to be unused"
+        errorLine1="    &lt;string name=&quot;pomodoro_channel_alarm_name&quot;>Pomodoro (Alarm)&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/pomodoro_timer_strings.xml"
+            line="14"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.pomodoro_action_silence` appears to be unused"
+        errorLine1="    &lt;string name=&quot;pomodoro_action_silence&quot;>Silence&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/pomodoro_timer_strings.xml"
+            line="17"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.pomodoro_action_stop` appears to be unused"
+        errorLine1="    &lt;string name=&quot;pomodoro_action_stop&quot;>Stop&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/pomodoro_timer_strings.xml"
+            line="18"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.pomodoro_started` appears to be unused"
+        errorLine1="    &lt;string name=&quot;pomodoro_started&quot;>Pomodoro started&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/pomodoro_timer_strings.xml"
+            line="30"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.pomodoro_timer` appears to be unused"
+        errorLine1="    &lt;string name=&quot;pomodoro_timer&quot;>Timer&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/pomodoro_timer_strings.xml"
+            line="45"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.pomodoro_min_work` appears to be unused"
+        errorLine1="    &lt;string name=&quot;pomodoro_min_work&quot;>min work&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/pomodoro_timer_strings.xml"
+            line="46"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.pomodoro_min_breaks` appears to be unused"
+        errorLine1="    &lt;string name=&quot;pomodoro_min_breaks&quot;>min breaks&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/pomodoro_timer_strings.xml"
+            line="47"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.pomodoro_open_detail` appears to be unused"
+        errorLine1="    &lt;string name=&quot;pomodoro_open_detail&quot;>Open detail&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/pomodoro_timer_strings.xml"
+            line="53"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.pomodetail_help_p4` appears to be unused"
+        errorLine1="    &lt;string name=&quot;pomodetail_help_p4&quot;>If exact alarms are restricted on your device, you may need to enable “Alarms and reminders”.&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/pomodoro_timer_strings.xml"
+            line="71"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.drawable.pro_badge` appears to be unused"
+        errorLine1="&lt;vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
+        errorLine2="^">
+        <location
+            file="src/main/res/drawable/pro_badge.xml"
+            line="1"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.pro_benefit_tools_title` appears to be unused"
+        errorLine1="    &lt;string name=&quot;pro_benefit_tools_title&quot;>Exclusive Tools&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/pro_related_strings.xml"
+            line="8"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.pro_benefit_tools_desc` appears to be unused"
+        errorLine1="    &lt;string name=&quot;pro_benefit_tools_desc&quot;>Unlimited access to the most powerful features.&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/pro_related_strings.xml"
+            line="9"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.pro_buy_button_disabled` appears to be unused"
+        errorLine1="    &lt;string name=&quot;pro_buy_button_disabled&quot;>PRO mode is still in development&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/pro_related_strings.xml"
+            line="16"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.paywall_grace_info` appears to be unused"
+        errorLine1="    &lt;string name=&quot;paywall_grace_info&quot;>Free passes left today: %1$d&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/pro_related_strings.xml"
+            line="31"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.drawable.remove` appears to be unused"
+        errorLine1="&lt;vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
+        errorLine2="^">
+        <location
+            file="src/main/res/drawable/remove.xml"
+            line="1"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.ruler_unit_cm` appears to be unused"
+        errorLine1="    &lt;string name=&quot;ruler_unit_cm&quot;>cm&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/ruler_strings.xml"
+            line="5"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.drawable.ruler_triangle` appears to be unused"
+        errorLine1="&lt;vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
+        errorLine2="^">
+        <location
+            file="src/main/res/drawable/ruler_triangle.xml"
+            line="1"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.marcador_help_linea5` appears to be unused"
+        errorLine1="    &lt;string name=&quot;marcador_help_linea5&quot;>• Ideal for board games, sports, trivia, or homemade contests.&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/scoreboard_strings.xml"
+            line="21"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.reset_all` appears to be unused"
+        errorLine1="    &lt;string name=&quot;reset_all&quot;>Reset all&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="7"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.name` appears to be unused"
+        errorLine1="    &lt;string name=&quot;name&quot;>Name&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="19"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.edit` appears to be unused"
+        errorLine1="    &lt;string name=&quot;edit&quot;>Edit&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="21"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.categories_search_no_results` appears to be unused"
+        errorLine1="    &lt;string name=&quot;categories_search_no_results&quot;>No results&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_auxiliar_screens.xml"
+            line="15"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.tool_noise_generator` appears to be unused"
+        errorLine1="    &lt;string name=&quot;tool_noise_generator&quot;>Noise Generator&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_tools.xml"
+            line="33"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.sum_tool_noise_generator` appears to be unused"
+        errorLine1="    &lt;string name=&quot;sum_tool_noise_generator&quot;>White/pink/brown noise&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/tool_sum.xml"
+            line="35"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.unidad_tipo_longitud` appears to be unused"
+        errorLine1="    &lt;string name=&quot;unidad_tipo_longitud&quot;>Length&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/unit_conversor_strings.xml"
+            line="34"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.unidad_tipo_peso` appears to be unused"
+        errorLine1="    &lt;string name=&quot;unidad_tipo_peso&quot;>Weight&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/unit_conversor_strings.xml"
+            line="35"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.unidad_tipo_temperatura` appears to be unused"
+        errorLine1="    &lt;string name=&quot;unidad_tipo_temperatura&quot;>Temperature&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/unit_conversor_strings.xml"
+            line="36"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.unidad_tipo_tiempo` appears to be unused"
+        errorLine1="    &lt;string name=&quot;unidad_tipo_tiempo&quot;>Time&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/unit_conversor_strings.xml"
+            line="37"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.unidad_boton_copiar` appears to be unused"
+        errorLine1="    &lt;string name=&quot;unidad_boton_copiar&quot;>Copy&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/unit_conversor_strings.xml"
+            line="43"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.unidad_boton_resetear` appears to be unused"
+        errorLine1="    &lt;string name=&quot;unidad_boton_resetear&quot;>Reset&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/unit_conversor_strings.xml"
+            line="44"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.unidad_boton_cerrar` appears to be unused"
+        errorLine1="    &lt;string name=&quot;unidad_boton_cerrar&quot;>Close&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/unit_conversor_strings.xml"
+            line="45"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.unidad_content_desc_copiar` appears to be unused"
+        errorLine1="    &lt;string name=&quot;unidad_content_desc_copiar&quot;>Copy result&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/unit_conversor_strings.xml"
+            line="48"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.unidad_content_desc_resetear` appears to be unused"
+        errorLine1="    &lt;string name=&quot;unidad_content_desc_resetear&quot;>Reset fields&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/unit_conversor_strings.xml"
+            line="49"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.unidad_resultado_copiado` appears to be unused"
+        errorLine1="    &lt;string name=&quot;unidad_resultado_copiado&quot;>Result copied&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/unit_conversor_strings.xml"
+            line="52"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.layout.view_ar_label` appears to be unused"
+        errorLine1="&lt;FrameLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
+        errorLine2="^">
+        <location
+            file="src/main/res/layout/view_ar_label.xml"
+            line="2"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.water_add_title` appears to be unused"
+        errorLine1="    &lt;string name=&quot;water_add_title&quot;>Add water&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/water_reminder_strings.xml"
+            line="5"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="TypographyFractions"
+        message="Use fraction character ½ (&amp;#189;) instead of 1/2?"
+        errorLine1="    &lt;string name=&quot;aruler_tip_calib_step1&quot;>Calibración (1/2): apoyá una tarjeta en un plano. Alineá la cruz con una esquina y tocá +.&lt;/string>"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-es/ar_ruler_strings.xml"
+            line="15"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="TypographyFractions"
+        message="Use fraction character ½ (&amp;#189;) instead of 1/2?"
+        errorLine1="    &lt;string name=&quot;aruler_tip_calib_step1&quot;>Calibration (1/2): place a card on a flat surface. Align the crosshair with one corner and tap +.&lt;/string>"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/ar_ruler_strings.xml"
+            line="15"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="IconLocation"
+        message="Found bitmap drawable `res/drawable/flashlight_widget.png` in densityless folder">
+        <location
+            file="src/main/res/drawable/flashlight_widget.png"/>
+    </issue>
+
+    <issue
+        id="IconLocation"
+        message="Found bitmap drawable `res/drawable/minimal_flashlight_widget.png` in densityless folder">
+        <location
+            file="src/main/res/drawable/minimal_flashlight_widget.png"/>
+    </issue>
+
+    <issue
+        id="IconLocation"
+        message="Found bitmap drawable `res/drawable/shortcuts_widget.png` in densityless folder">
+        <location
+            file="src/main/res/drawable/shortcuts_widget.png"/>
+    </issue>
+
+    <issue
+        id="IconLocation"
+        message="Found bitmap drawable `res/drawable/water_mini_widget.png` in densityless folder">
+        <location
+            file="src/main/res/drawable/water_mini_widget.png"/>
+    </issue>
+
+    <issue
+        id="IconLocation"
+        message="Found bitmap drawable `res/drawable/water_widget.png` in densityless folder">
+        <location
+            file="src/main/res/drawable/water_widget.png"/>
+    </issue>
+
+    <issue
+        id="UseTomlInstead"
+        message="Use version catalog instead"
+        errorLine1="    implementation(&quot;org.jetbrains.kotlin:kotlin-reflect&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="171"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="UseTomlInstead"
+        message="Use version catalog instead"
+        errorLine1="    implementation(&quot;androidx.appcompat:appcompat:1.7.1&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="179"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="UseTomlInstead"
+        message="Use version catalog instead"
+        errorLine1="    implementation(&quot;androidx.fragment:fragment-ktx:1.8.9&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="180"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="UseTomlInstead"
+        message="Use version catalog instead"
+        errorLine1="    implementation(&quot;androidx.media:media:1.7.1&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="206"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="UseTomlInstead"
+        message="Use version catalog instead"
+        errorLine1="    implementation(&quot;androidx.work:work-runtime-ktx:2.10.5&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="214"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;00.0 cm&quot;, should use `@string` resource"
+        errorLine1="        android:text=&quot;00.0 cm&quot;/>"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/view_ar_label.xml"
+            line="25"
+            column="9"/>
+    </issue>
+
+</issues>

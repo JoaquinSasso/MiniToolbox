@@ -135,6 +135,7 @@ class PomodoroAlarmService : MediaSessionService() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        super.onStartCommand(intent, flags, startId)
         Log.d(TAG, "onStartCommand: action=${intent?.action}")
 
         if (intent?.action == ACTION_STOP_RINGING) {
