@@ -18,6 +18,13 @@ import java.util.Locale
 private const val METRICS_SP = "metrics_prefs"
 private const val KEY_ENABLED = "enabled"
 
+/**
+ * Cooldown para deduplicar eventos de uso de herramientas (rebotes de navegación).
+ * 5 segundos es suficiente para que un usuario entre y salga sin inflar la métrica,
+ * pero permite registrar usos legítimos consecutivos en una sesión normal.
+ */
+const val TOOL_USAGE_METRIC_COOLDOWN_MS = 5_000L
+
 fun isMetricsEnabled(context: Context): Boolean {
     val sp = context.applicationContext.getSharedPreferences(METRICS_SP, Context.MODE_PRIVATE)
     return sp.getBoolean(KEY_ENABLED, true) // ON por defecto

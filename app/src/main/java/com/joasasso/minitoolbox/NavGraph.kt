@@ -23,6 +23,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.joasasso.minitoolbox.dev.MetricsDevScreen
+import com.joasasso.minitoolbox.metrics.TOOL_USAGE_METRIC_COOLDOWN_MS
 import com.joasasso.minitoolbox.metrics.toolUse
 import com.joasasso.minitoolbox.nav.Screen
 import com.joasasso.minitoolbox.tools.ToolRegistry
@@ -64,6 +65,7 @@ import com.joasasso.minitoolbox.tools.organizacion.recordatorios.ToDoListScreen
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AguaReminderScreen
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AguaStatisticsScreen
 import com.joasasso.minitoolbox.ui.screens.ProScreen
+import com.joasasso.minitoolbox.utils.ToolDebouncer
 import com.joasasso.minitoolbox.utils.ads.InterstitialManager
 import com.joasasso.minitoolbox.utils.ads.RewardedManager
 import com.joasasso.minitoolbox.utils.ads.ToolUsageTracker
@@ -91,14 +93,21 @@ fun MiniToolboxNavGraph(
 
     val toolRoutes: Set<String> = remember { ToolRegistry.tools.map { it.screen.route }.toSet() }
 
+    // Cooldown para métricas para evitar duplicados por rebotes de navegación
+    val metricsDebouncer = remember { ToolDebouncer(cooldownMs = TOOL_USAGE_METRIC_COOLDOWN_MS) }
+
     var lastRoute by remember { mutableStateOf<String?>(null) }
     val backStackEntry by navController.currentBackStackEntryAsState()
 
     LaunchedEffect(backStackEntry?.destination?.route) {
         val route = backStackEntry?.destination?.route ?: return@LaunchedEffect
         if (route != lastRoute && toolRoutes.contains(route)) {
-            toolUse(context, route)
-            // contar solo si pasó el cooldown por herramienta
+            // Registrar métrica solo si pasó el cooldown de deduplicación
+            if (metricsDebouncer.canExecute(route)) {
+                toolUse(context, route)
+            }
+
+            // contar solo si pasó el cooldown por herramienta (Tracker de anuncios - 30s)
             val isNewAccess = ToolUsageTracker.onToolOpened(context, route)
 
             if (isNewAccess && activity != null) {
