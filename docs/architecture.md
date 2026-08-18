@@ -99,7 +99,7 @@ graph TD
     end
 
     note[Firestore Rules niegan acceso directo.<br/>Todo acceso es vía Cloud Function.]
-    style note fill:#f8bbd0,stroke:#c2185b
+    style note fill:#f8bbd0,stroke:#c2185b,color:#000
 ```
 
 ---
