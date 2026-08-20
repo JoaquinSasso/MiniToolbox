@@ -26,3 +26,4 @@ desktop.ini
 .stfolder
 build-and-install.ps1
 .stignore
+.artifacts/

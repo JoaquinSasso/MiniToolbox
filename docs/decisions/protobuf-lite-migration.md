@@ -1,4 +1,8 @@
-# Informe de Deuda Técnica: Migración a Protobuf-Lite
+# ADR 001: Migración a Protobuf-Lite
+
+*   **Estado:** Pendiente
+*   **Fecha:** 2026-08-20
+*   **Contexto:** Se decidió utilizar `protobuf-java` completo inicialmente para facilitar la integración rápida con herramientas de backend y asegurar compatibilidad total durante la fase de prototipado. Sin embargo, para una aplicación de producción en Android, el impacto en el tamaño del APK y el uso de memoria por la reflexión hace necesaria la migración a la versión Lite.
 
 ## Resumen
 *   **Dificultad:** Media.
@@ -10,9 +14,9 @@
 > El API Lite elimina capacidades de reflexión. Se debe verificar que no existan inspecciones dinámicas de mensajes.
 
 *   **Puntos de Uso Identificados:**
-    *   [`GuessCapitalScreen.kt`](file:///C:/Users/nico_/StudioProjects/MiniToolbox/app/src/main/java/com/joasasso/minitoolbox/tools/entretenimiento/minijuegos/GuessCapitalScreen.kt#L314)
-    *   [`GuessFlagScreen.kt`](file:///C:/Users/nico_/StudioProjects/MiniToolbox/app/src/main/java/com/joasasso/minitoolbox/tools/entretenimiento/minijuegos/GuessFlagScreen.kt#L274)
-    *   [`CountriesInfoScreen.kt`](file:///C:/Users/nico_/StudioProjects/MiniToolbox/app/src/main/java/com/joasasso/minitoolbox/tools/info/CountriesInfoScreen.kt#L62)
+    *   [`GuessCapitalScreen.kt`](../../app/src/main/java/com/joasasso/minitoolbox/tools/entretenimiento/minijuegos/GuessCapitalScreen.kt#L314)
+    *   [`GuessFlagScreen.kt`](../../app/src/main/java/com/joasasso/minitoolbox/tools/entretenimiento/minijuegos/GuessFlagScreen.kt#L274)
+    *   [`CountriesInfoScreen.kt`](../../app/src/main/java/com/joasasso/minitoolbox/tools/info/CountriesInfoScreen.kt#L62)
 *   **Dataset:** Validar que `countries.proto.bin` se deserializa correctamente con el nuevo `CountryList.parseFrom(bytes)`.
 
 ## Plan de Acción
