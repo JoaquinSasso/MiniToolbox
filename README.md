@@ -93,9 +93,9 @@ Si faltan, la app funciona igual, pero no reporta métricas.
 ---
 
 ## 📈 Impacto Real
-- **Rating:** 5/5 ⭐ en Google Play Store, basado en 24 reseñas.
-- **Instalaciones:** +400 usuarios únicos (según métricas internas).
-- **Comunidad:** Feedback activo de usuarios con 19 reseñas positivas.
+- **Rating:** 5/5 ⭐ en Google Play Store, basado en 24 calificaciones.
+- **Instalaciones:** +115 descargas orgánicas (Google Play Console).
+- **Comunidad:** 22 reseñas escritas con feedback detallado de los usuarios.
 
 ---
 
