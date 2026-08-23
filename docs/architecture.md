@@ -77,8 +77,8 @@ El pipeline de métricas es el componente más diferenciador del sistema. Está 
 ### Diagrama B: Pipeline de Telemetría End-to-End
 
 ```mermaid
-graph TD
-    subgraph App ["App (Android)"]
+flowchart TD
+    subgraph App [App Android]
         E["Emisor: Metrics.kt"] --> Gate{isMetricsEnabled?}
         Gate -- "No" --> End["Drop"]
         Gate -- "Yes" --> AR["AggregatesRepository"]
@@ -90,14 +90,14 @@ graph TD
         UM -- "maybeSchedule (re-agenda)" -.-> US
     end
 
-    subgraph Backend ["Backend (Google Cloud)"]
-        UM -- "HTTPS POST (JSON)" --> CF_ingest["Cloud Function: ingest"]
+    subgraph Backend [Backend Google Cloud]
+        UM -- "HTTPS POST JSON" --> CF_ingest["Cloud Function: ingest"]
         CF_ingest -- "Increment Counters" --> FS[(Firestore)]
         
         FS -- "Solo Lectura (Rule: Deny All)" --> CF_read["Cloud Functions: metricsDaily / Summary"]
     end
 
-    subgraph Analytics ["Dashboard"]
+    subgraph Analytics [Dashboard]
         CF_read -- "X-API-Key" --> DB[Dashboard Web]
     end
 
