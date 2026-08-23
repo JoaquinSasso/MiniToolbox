@@ -16,14 +16,14 @@ La aplicación sigue un modelo de **módulo único** (`:app`) con una orquestaci
 Este diagrama muestra cómo conviven las dos estrategias de estado en la app. Se destaca visualmente la asimetría entre pantallas con arquitectura formal (ViewModel) y pantallas con lógica embebida (Local State).
 
 ```mermaid
-graph TD
-    subgraph UI_Layer ["Capa de UI (Jetpack Compose)"]
+flowchart TD
+    subgraph UI_Layer [Capa de UI Jetpack Compose]
         MA[MainActivity] --> CG[ConsentGateProvider]
         CG --> PSP[ProStateProvider]
         PSP --> MT[MiniToolboxTheme]
         MT --> NG[NavGraph]
         
-        subgraph Screens ["Pantallas / Tools"]
+        subgraph Screens [Pantallas / Tools]
             direction TB
             VM_Screens["Screens con ViewModel<br/>(Categories, Minesweeper)"]
             State_Screens["Screens con Local State<br/>(Pomodoro, Agua, Calculadoras...)"]
@@ -32,14 +32,14 @@ graph TD
         end
     end
 
-    subgraph Logic_State ["Lógica y Estado"]
+    subgraph Logic_State [Lógica y Estado]
         VM[ViewModels]
         CS[Compose State]
-        MET[Emisor: Metrics.kt]
+        MET["Emisor: Metrics.kt"]
     end
 
-    subgraph Services_Background ["Servicios y Background"]
-        subgraph Ads_Billing ["Ads & Billing"]
+    subgraph Services_Background [Servicios y Background]
+        subgraph Ads_Billing [Ads & Billing]
             BM[BillingClientWrapper]
             AM[AdsManager]
             IM[InterstitialManager]
@@ -51,7 +51,7 @@ graph TD
         GW[Widgets Glance]
     end
 
-    subgraph Data_Layer ["Capa de Datos"]
+    subgraph Data_Layer [Capa de Datos]
         DS[(19 DataStores Preferences)]
         PB[Protobuf - Countries Data]
     end
@@ -65,7 +65,7 @@ graph TD
     GW --> DS
     NG --> Ads_Billing
     State_Screens -.-> PAS
-    GW -- "widgetUse" --> MET
+    GW -->|widgetUse| MET
 ```
 
 ---
@@ -80,25 +80,25 @@ El pipeline de métricas es el componente más diferenciador del sistema. Está 
 flowchart TD
     subgraph App [App Android]
         E["Emisor: Metrics.kt"] --> Gate{isMetricsEnabled?}
-        Gate -- "No" --> End["Drop"]
-        Gate -- "Yes" --> AR["AggregatesRepository"]
-        AR -- "Delta Diario Local" --> MDS[(MetricsDataStore)]
+        Gate -->|No| End["Drop"]
+        Gate -->|Yes| AR["AggregatesRepository"]
+        AR -->|Delta Diario Local| MDS[(MetricsDataStore)]
         
-        E -- "maybeSchedule" --> US["UploadScheduler"]
-        US -- "WorkManager Enqueue" --> UM["UploadMetricsWorker"]
-        UM -- "Lectura Payload" --> MDS
-        UM -- "maybeSchedule (re-agenda)" -.-> US
+        E -->|maybeSchedule| US["UploadScheduler"]
+        US -->|WorkManager Enqueue| UM["UploadMetricsWorker"]
+        UM -->|Lectura Payload| MDS
+        UM -.->|maybeSchedule re-agenda| US
     end
 
     subgraph Backend [Backend Google Cloud]
-        UM -- "HTTPS POST JSON" --> CF_ingest["Cloud Function: ingest"]
-        CF_ingest -- "Increment Counters" --> FS[(Firestore)]
+        UM -->|HTTPS POST JSON| CF_ingest["Cloud Function: ingest"]
+        CF_ingest -->|Increment Counters| FS[(Firestore)]
         
-        FS -- "Solo Lectura (Rule: Deny All)" --> CF_read["Cloud Functions: metricsDaily / Summary"]
+        FS -->|Solo Lectura| CF_read["Cloud Functions: metricsDaily / Summary"]
     end
 
     subgraph Analytics [Dashboard]
-        CF_read -- "X-API-Key" --> DB[Dashboard Web]
+        CF_read -->|X-API-Key| DB[Dashboard Web]
     end
 
     note[Firestore Rules niegan acceso directo.<br/>Todo acceso es vía Cloud Function.]
@@ -114,23 +114,23 @@ El sistema de navegación desacopla la definición técnica de la ruta de la rep
 ### Diagrama C: Flujo de Navegación
 
 ```mermaid
-graph TD
+flowchart TD
     Entry["Entry Points:<br/>Launcher, Widgets, Shortcuts"] --> MA[MainActivity]
     
-    subgraph Navigation_System ["Sistema de Navegación"]
-        S[Screen.kt<br/>42 Rutas Definidas]
-        TR[ToolRegistry.kt<br/>33 Herramientas Catálogo]
-        NG[NavGraph.kt<br/>42 Destinos Composable]
+    subgraph Navigation_System [Sistema de Navegación]
+        S["Screen.kt (42 Rutas)"]
+        TR["ToolRegistry.kt (33 Herramientas)"]
+        NG["NavGraph.kt (42 Destinos)"]
     end
 
     MA --> NG
-    TR -- "Referencia" --> S
-    NG -- "Implementa" --> S
+    TR -->|Referencia| S
+    NG -->|Implementa| S
     
-    subgraph UI_Nav ["Navegación UI"]
+    subgraph UI_Nav [Navegación UI]
         Cat[CategoriesScreen]
-        Cat -- "Navega" --> Tool[ToolScreen]
-        Tool -- "Sub-navegación" --> Sub[Details Screen]
+        Cat -->|Navega| Tool[ToolScreen]
+        Tool -->|Sub-navegación| Sub[Details Screen]
     end
 
     TR --> Cat
@@ -144,14 +144,14 @@ graph TD
 Debido a las restricciones de Android sobre alarmas exactas y audio en background, este subsistema utiliza un `Foreground Service` orquestado.
 
 ```mermaid
-graph TD
-    AM[AlarmManager] -- "Exact Alarm" --> AR[PomodoroAlarmReceiver]
-    AR -- "Start FGS" --> AS[PomodoroAlarmService]
-    AS -- "MediaSession / ExoPlayer" --> Audio[Audio Alarma]
-    AS -- "Full-screen Intent" --> Notif[PomodoroNotification]
-    Notif -- "Launch" --> Act[PomodoroAlarmActivity]
-    Act -- "Action" --> Receiver[PomodoroActionReceiver]
-    Receiver -- "Stop/Silence" --> AS
+flowchart TD
+    AM[AlarmManager] -->|Exact Alarm| AR[PomodoroAlarmReceiver]
+    AR -->|Start FGS| AS[PomodoroAlarmService]
+    AS -->|MediaSession / ExoPlayer| Audio[Audio Alarma]
+    AS -->|Full-screen Intent| Notif[PomodoroNotification]
+    Notif -->|Launch| Act[PomodoroAlarmActivity]
+    Act -->|Action| Receiver[PomodoroActionReceiver]
+    Receiver -->|Stop/Silence| AS
 ```
 
 ---
