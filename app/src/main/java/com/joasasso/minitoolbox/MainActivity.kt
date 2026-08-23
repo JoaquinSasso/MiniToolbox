@@ -20,6 +20,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.compose.rememberNavController
 import com.joasasso.minitoolbox.metrics.appOpen
 import com.joasasso.minitoolbox.metrics.dailyOpenOnce
+import com.joasasso.minitoolbox.metrics.MetricsConfig
 import com.joasasso.minitoolbox.metrics.toolUse
 import com.joasasso.minitoolbox.metrics.uploader.UploadScheduler
 import com.joasasso.minitoolbox.metrics.widgetUse
@@ -44,7 +45,7 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.hide()
         startRouteState = intent?.getStringExtra("startRoute")
 
-        val isMetricsConfigured = BuildConfig.METRICS_API_KEY.isNotEmpty() && BuildConfig.METRICS_ENDPOINT.isNotEmpty()
+        val isMetricsConfigured = MetricsConfig.isConfigured
         Log.d("Metrics", "metrics configured: $isMetricsConfigured")
 
         // 🔹 Inicialización / restauración silenciosa del estado PRO
@@ -80,8 +81,8 @@ class MainActivity : AppCompatActivity() {
                             if (isMetricsConfigured) {
                                 UploadScheduler.enqueueNowExpedited(
                                     applicationContext,
-                                    BuildConfig.METRICS_ENDPOINT,
-                                    BuildConfig.METRICS_API_KEY
+                                    MetricsConfig.endpoint,
+                                    MetricsConfig.apiKey
                                 )
                             }
                         }

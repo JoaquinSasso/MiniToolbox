@@ -2,7 +2,6 @@ package com.joasasso.minitoolbox.dev
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit
-import com.joasasso.minitoolbox.BuildConfig
 import com.joasasso.minitoolbox.metrics.adImpression
 import com.joasasso.minitoolbox.metrics.appOpen
 import com.joasasso.minitoolbox.metrics.isMetricsEnabled
@@ -11,7 +10,7 @@ import com.joasasso.minitoolbox.metrics.storage.JsonUtils
 import com.joasasso.minitoolbox.metrics.storage.MetricsKeys
 import com.joasasso.minitoolbox.metrics.storage.metricsDataStore
 import com.joasasso.minitoolbox.metrics.toolUse
-import com.joasasso.minitoolbox.metrics.uploader.UploadConfig
+import com.joasasso.minitoolbox.metrics.MetricsConfig
 import com.joasasso.minitoolbox.metrics.uploader.UploadMetricsWorker
 import com.joasasso.minitoolbox.metrics.uploader.UploadScheduler
 import kotlinx.coroutines.Dispatchers
@@ -78,8 +77,8 @@ suspend fun loadDevSnapshot(context: Context): DevSnapshot {
         remaining.sumOf { it.ads.values.sum() }
     )
 
-    val endpoint = UploadConfig.getEndpoint(appCtx).ifBlank { BuildConfig.METRICS_ENDPOINT }
-    val rawKey = UploadConfig.getApiKey(appCtx).ifBlank { BuildConfig.METRICS_API_KEY }
+    val endpoint = MetricsConfig.endpoint
+    val rawKey = MetricsConfig.apiKey
 
     return DevSnapshot(
         isEnabled = isMetricsEnabled(appCtx),
@@ -97,16 +96,15 @@ suspend fun loadDevSnapshot(context: Context): DevSnapshot {
 /** Encola un envío forzado inmediato a través de WorkManager. */
 fun triggerFlushNow(context: Context) {
     val appCtx = context.applicationContext
-    val endpoint = UploadConfig.getEndpoint(appCtx).ifBlank { BuildConfig.METRICS_ENDPOINT }
-    val apiKey = UploadConfig.getApiKey(appCtx).ifBlank { BuildConfig.METRICS_API_KEY }
+    val endpoint = MetricsConfig.endpoint
+    val apiKey = MetricsConfig.apiKey
     UploadMetricsWorker.testEnqueueNow(appCtx, endpoint, apiKey)
 }
 
 /** Envía un payload de prueba síncrono para verificar conexión y clave en el backend. */
 suspend fun testDirectConnection(context: Context): Result<String> = withContext(Dispatchers.IO) {
-    val appCtx = context.applicationContext
-    val endpoint = UploadConfig.getEndpoint(appCtx).ifBlank { BuildConfig.METRICS_ENDPOINT }
-    val apiKey = UploadConfig.getApiKey(appCtx).ifBlank { BuildConfig.METRICS_API_KEY }
+    val endpoint = MetricsConfig.endpoint
+    val apiKey = MetricsConfig.apiKey
 
     if (endpoint.isBlank()) {
         return@withContext Result.failure(Exception("Endpoint no configurado"))

@@ -3,7 +3,6 @@ package com.joasasso.minitoolbox.metrics
 import android.content.Context
 import androidx.core.content.edit
 import com.joasasso.minitoolbox.metrics.storage.AggregatesRepository
-import com.joasasso.minitoolbox.metrics.uploader.UploadConfig
 import com.joasasso.minitoolbox.metrics.uploader.UploadScheduler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -42,7 +41,7 @@ fun setMetricsEnabled(context: Context, enabled: Boolean) {
     if (enabled) {
         // Si vuelven a habilitar, intentamos enviar lo acumulado
         UploadScheduler.markDirty(ctx)
-        UploadScheduler.maybeSchedule(ctx, UploadConfig.getEndpoint(ctx), UploadConfig.getApiKey(ctx))
+        UploadScheduler.maybeSchedule(ctx, MetricsConfig.endpoint, MetricsConfig.apiKey)
     }
 }
 
@@ -59,7 +58,7 @@ private fun scheduleIfEnabled(ctx: Context) {
     }
     if (!isMetricsEnabled(ctx)) return
     UploadScheduler.markDirty(ctx)
-    UploadScheduler.maybeSchedule(ctx, UploadConfig.getEndpoint(ctx), UploadConfig.getApiKey(ctx))
+    UploadScheduler.maybeSchedule(ctx, MetricsConfig.endpoint, MetricsConfig.apiKey)
 }
 
 private fun io(block: suspend () -> Unit) {

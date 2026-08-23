@@ -14,6 +14,7 @@ import androidx.work.workDataOf
 import com.joasasso.minitoolbox.metrics.storage.AggregatesRepository
 import com.joasasso.minitoolbox.metrics.storage.MetricsKeys
 import com.joasasso.minitoolbox.metrics.storage.metricsDataStore
+import com.joasasso.minitoolbox.metrics.MetricsConfig
 import kotlinx.coroutines.flow.first
 import java.time.Duration
 
@@ -119,8 +120,8 @@ object UploadScheduler {
 
     /** Chequea umbrales y, si corresponde, encola envío inmediato (expedited). */
     suspend fun maybeFlushOnThreshold(ctx: Context, thresholds: FlushThreshold = FlushThreshold()) {
-        val endpoint = UploadConfig.getEndpoint(ctx)
-        val apiKey = UploadConfig.getApiKey(ctx)
+        val endpoint = MetricsConfig.endpoint
+        val apiKey = MetricsConfig.apiKey
         if (endpoint.isBlank()) return
 
         // Si ya hay payload congelado, enviarlo directamente
