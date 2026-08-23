@@ -35,7 +35,7 @@ class MetricsTest {
     @After
     fun tearDown() {
         Dispatchers.resetMain()
-        metricsTestRepo = null
+        metricsRepoFactory = null
         metricsTestScheduleHook = null
     }
 
@@ -64,7 +64,7 @@ class MetricsTest {
     fun `verify double count fix - appOpen and dailyOpenOnce increment separate counters`() = runTest {
         val (context, _) = setupContextMocks()
         val mockRepo = mock(AggregatesRepository::class.java)
-        metricsTestRepo = mockRepo
+        metricsRepoFactory = { mockRepo }
         metricsTestScheduleHook = { /* no-op */ }
 
         appOpen(context)
@@ -78,7 +78,7 @@ class MetricsTest {
     fun `verify dailyOpenOnce only increments dailyActive and NOT appOpen`() = runTest {
         val (context, _) = setupContextMocks()
         val mockRepo = mock(AggregatesRepository::class.java)
-        metricsTestRepo = mockRepo
+        metricsRepoFactory = { mockRepo }
         metricsTestScheduleHook = { /* no-op */ }
 
         dailyOpenOnce(context)

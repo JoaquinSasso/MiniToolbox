@@ -1,16 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<issues format="6" by="lint 9.2.1" type="baseline" client="gradle" dependencies="false" name="AGP (9.2.1)" variant="all" version="9.2.1">
-
-    <issue
-        id="MissingSuperCall"
-        message="Overriding method should call `super.onStartCommand`"
-        errorLine1="    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {"
-        errorLine2="                 ~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/joasasso/minitoolbox/tools/organizacion/pomodoro/PomodoroAlarmService.kt"
-            line="137"
-            column="18"/>
-    </issue>
+<issues format="6" by="lint 9.3.1" type="baseline" client="gradle" dependencies="false" name="AGP (9.3.1)" variant="all" version="9.3.1">
 
     <issue
         id="DefaultLocale"
@@ -252,17 +241,6 @@
             file="src/main/res/drawable/ruler_triangle.xml"
             line="2"
             column="20"/>
-    </issue>
-
-    <issue
-        id="AndroidGradlePluginVersion"
-        message="A newer version of com.android.application than 9.2.1 is available: 9.3.1"
-        errorLine1="agp = &quot;9.2.1&quot;"
-        errorLine2="      ~~~~~~~">
-        <location
-            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
-            line="2"
-            column="7"/>
     </issue>
 
     <issue
@@ -509,7 +487,7 @@
 
     <issue
         id="GradleDependency"
-        message="A newer version of com.google.ads.mediation:unity than 4.12.5.0 is available: 4.19.0.1"
+        message="A newer version of com.google.ads.mediation:unity than 4.12.5.0 is available: 4.20.0.0"
         errorLine1="admob-unity = &quot;4.12.5.0&quot;      # com.google.ads.mediation:unity"
         errorLine2="              ~~~~~~~~~~">
         <location
@@ -663,7 +641,7 @@
 
     <issue
         id="NewerVersionAvailable"
-        message="A newer version of com.google.protobuf:protobuf-java than 4.32.1 is available: 4.35.1"
+        message="A newer version of com.google.protobuf:protobuf-java than 4.32.1 is available: 4.36.0"
         errorLine1="protobufJava = &quot;4.32.1&quot;"
         errorLine2="               ~~~~~~~~">
         <location
@@ -696,7 +674,7 @@
 
     <issue
         id="NewerVersionAvailable"
-        message="A newer version of io.github.sceneview:arsceneview than 2.3.0 is available: 4.31.0"
+        message="A newer version of io.github.sceneview:arsceneview than 2.3.0 is available: 4.32.0"
         errorLine1="sceneview = &quot;2.3.0&quot;"
         errorLine2="            ~~~~~~~">
         <location
@@ -707,7 +685,7 @@
 
     <issue
         id="NewerVersionAvailable"
-        message="A newer version of com.google.guava:guava than 33.4.8-android is available: 33.7.0-android"
+        message="A newer version of com.google.guava:guava than 33.4.8-android is available: 33.7.1-android"
         errorLine1="guava = &quot;33.4.8-android&quot;"
         errorLine2="        ~~~~~~~~~~~~~~~~">
         <location
@@ -954,7 +932,7 @@
         errorLine2="                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/joasasso/minitoolbox/NavGraph.kt"
-            line="319"
+            line="328"
             column="25"/>
     </issue>
 
@@ -1143,17 +1121,6 @@
             file="src/main/java/com/joasasso/minitoolbox/tools/organizacion/pomodoro/PomodoroAlarmActivity.kt"
             line="143"
             column="13"/>
-    </issue>
-
-    <issue
-        id="StaticFieldLeak"
-        message="Do not place Android context classes in static fields (static reference to `AggregatesRepository` which has field `context` pointing to `Context`); this is a memory leak"
-        errorLine1="// Helpers"
-        errorLine2="^">
-        <location
-            file="src/main/java/com/joasasso/minitoolbox/metrics/Metrics.kt"
-            line="42"
-            column="1"/>
     </issue>
 
     <issue

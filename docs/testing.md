@@ -29,6 +29,17 @@ Los reportes se generan en: `app/build/reports/tests/testDebugUnitTest/index.htm
 - Usar backticks: `` `el primer toque nunca es mina` ``.
 - Estructura sugerida: `Sujeto de prueba > Escenario > Resultado esperado`.
 
+## Política de Lint Baseline
+
+El archivo `app/lint-baseline.xml` se utiliza exclusivamente para gestionar deuda técnica heredada que se planea resolver a futuro.
+
+1. **No al Silencio Fácil**: No se deben agregar nuevos issues al baseline para silenciar warnings introducidos por cambios recientes. Si un cambio introduce un warning de Lint, debe corregirse en el mismo PR.
+2. **Justificación**: Cualquier adición al baseline debe justificarse explícitamente en la descripción del Pull Request.
+3. **Deuda Conocida**: Actualmente, el baseline contiene un `StaticFieldLeak` en `ProSilentInitializer.kt` relacionado con el subsistema de billing. Este se mantendrá hasta que se implemente inyección de dependencias (Hilt), momento en el cual se espera eliminar todas las referencias estáticas a `Context`.
+4. **Test Seams**: Las costuras de test (como `metricsRepoFactory` en `Metrics.kt`) son ejemplos concretos de la necesidad de DI. Deben estar anotadas con `@VisibleForTesting` y ser eliminadas tras la migración a Hilt.
+
+---
+
 ## Roadmap de Testing (Prioridades)
 
 1. **Lógica de División de Gastos**:

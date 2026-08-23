@@ -1,6 +1,7 @@
 package com.joasasso.minitoolbox.metrics
 
 import android.content.Context
+import androidx.annotation.VisibleForTesting
 import androidx.core.content.edit
 import com.joasasso.minitoolbox.metrics.storage.AggregatesRepository
 import com.joasasso.minitoolbox.metrics.uploader.UploadScheduler
@@ -46,9 +47,23 @@ fun setMetricsEnabled(context: Context, enabled: Boolean) {
 }
 
 // Helpers
-internal var metricsTestRepo: AggregatesRepository? = null
-private fun Context.repo() = metricsTestRepo ?: AggregatesRepository(applicationContext)
+/**
+ * Factory para inyectar un repositorio mock en tests.
+ * Se guarda una función en lugar de la instancia para evitar StaticFieldLeak.
+ * Existe porque el proyecto todavía no tiene inyección de dependencias,
+ * y debe eliminarse cuando se introduzca Hilt.
+ */
+@VisibleForTesting
+internal var metricsRepoFactory: ((Context) -> AggregatesRepository)? = null
+private fun Context.repo() =
+    metricsRepoFactory?.invoke(applicationContext) ?: AggregatesRepository(applicationContext)
 
+/**
+ * Hook para interceptar el agendamiento de subida en tests.
+ * Existe porque el proyecto todavía no tiene inyección de dependencias,
+ * y debe eliminarse cuando se introduzca Hilt.
+ */
+@VisibleForTesting
 internal var metricsTestScheduleHook: ((Context) -> Unit)? = null
 private fun scheduleIfEnabled(ctx: Context) {
     val hook = metricsTestScheduleHook
