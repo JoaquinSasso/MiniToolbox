@@ -8,12 +8,33 @@
     <string name="aruler_history">History</string>
     <string name="aruler_tips_toggle_off">Hide tips</string>
     <string name="aruler_tips_toggle_on">Show tips</string>
-    <string name="aruler_calibration_button">Calibrate</string>
 
-    <!-- Tips banner -->
-    <string name="aruler_tip_scan">Move the phone to detect surfaces. Tap + to set a point on the crosshair position.</string>
-    <string name="aruler_tip_calib_step1">Calibration (1/2): place a card on a flat surface. Align the crosshair with one corner and tap +.</string>
-    <string name="aruler_tip_calib_step2">Calibration (2/2): move the crosshair to the opposite corner (diagonal) and tap +.</string>
+    <!-- Regla AR: modos -->
+    <string name="aruler_mode_segment">Segment</string>
+    <string name="aruler_mode_polyline">Path</string>
+
+    <!-- Regla AR: acciones -->
+    <string name="aruler_undo">Undo</string>
+    <string name="aruler_finish">Finish</string>
+
+    <!-- Regla AR: estado de tracking -->
+    <string name="aruler_status_initializing">Starting up… move the phone slowly</string>
+    <string name="aruler_status_too_dark">Not enough light. Turn on a light or move somewhere brighter</string>
+    <string name="aruler_status_too_fast">You\'re moving the phone too fast. Slow down</string>
+    <string name="aruler_status_no_features">Surface has no texture. Point at something with more detail</string>
+    <string name="aruler_status_camera_off">Camera is unavailable</string>
+    <string name="aruler_status_no_surface">Looking for a surface… move slowly</string>
+    <string name="aruler_status_too_far">Too far away. Get closer than 5 metres</string>
+    <string name="aruler_hint_move_sideways">Blank wall or smooth surface? Move 20–30 cm side to side so depth can be estimated</string>
+
+    <!-- Regla AR: guía paso a paso -->
+    <string name="aruler_tip_place_first">Aim at the first point and tap +</string>
+    <string name="aruler_tip_place_second">Aim at the second point and tap +</string>
+    <string name="aruler_tip_polyline_next">Mark the next point, or tap ✓ to close</string>
+
+    <!-- Regla AR: accesibilidad -->
+    <string name="aruler_cd_capture">Mark point</string>
+    <string name="aruler_cd_delete_item">Delete this measurement</string>
 
     <!-- Titles & descriptions -->
     <string name="aruler_help_title">Help – AR Ruler</string>
@@ -30,33 +51,39 @@
     <string-array name="aruler_help_requirements">
         <item>Good lighting and a textured surface (wood, fabric, etc.).</item>
         <item>Move the phone in a “figure-8” pattern to help plane detection.</item>
+        <item>In devices with Depth API support, surface detection on walls is significantly better.</item>
     </string-array>
 
     <string-array name="aruler_help_steps">
-        <item>Point at the floor or table until the reticle turns green.</item>
-        <item>Tap the “+” button to place the first point at the reticle position.</item>
-        <item>Aim at the second position and tap “+” to place the second point.</item>
-        <item>A line is drawn between the points and the distance label appears in the middle.</item>
-        <item>You can keep creating measurements; previous ones remain visible and go to the history.</item>
+        <item>Move the phone slowly until the green message \"Aim at the first point\" appears.</item>
+        <item>Center the crosshair on the first point and tap +.</item>
+        <item>Move the phone to the second point: the line and measurement update in real-time.</item>
+        <item>Tap + again to confirm. The measurement is fixed and added to history.</item>
+        <item>In Path mode, you can chain multiple segments and tap ✓ to close; the total is shown.</item>
     </string-array>
 
     <string-array name="aruler_help_buttons">
-        <item>“+”: places a point at the reticle position.</item>
-        <item>Reset: clears all points and measurements.</item>
-        <item>cm/m ↔ in/ft: switches the unit system.</item>
-        <item>Calibrate card: measure a credit or debit card diagonal to adjust the scale.</item>
+        <item>Segment / Path: switches between measuring a single segment or chaining several with a total.</item>
+        <item>Undo: removes the last point placed, or the last measurement if none is in progress.</item>
+        <item>Clear: deletes all measurements.</item>
+        <item>m / ft: switches between metric and imperial systems.</item>
+        <item>+ (large button): places a point. It\'s gray when there is no valid surface.</item>
+        <item>✕ in history: deletes that specific measurement.</item>
     </string-array>
 
     <string-array name="aruler_help_tips">
-        <item>Avoid shiny or transparent surfaces.</item>
-        <item>For stability, keep the phone ~0.5–1.5 m from the surface.</item>
-        <item>If the reticle doesn’t turn green, move the phone slowly to explore the plane.</item>
+        <item>Good lighting and textured surfaces provide much more stable measurements.</item>
+        <item>To measure on a smooth wall, move sideways a few centimeters before aiming.</item>
+        <item>Beyond 5 meters, the app won\'t let you mark: precision is no longer reliable there.</item>
+        <item>Numbers are purposefully rounded (half a centimeter, one centimeter, or five depending on distance).</item>
+        <item>The measurement is fixed upon confirmation. If the points move on screen, the distance does not change.</item>
     </string-array>
 
     <string-array name="aruler_help_troubles">
-        <item>Surface not detected: improve lighting or aim at textured materials.</item>
-        <item>Unstable measurements: recalibrate or place points closer to each other.</item>
-        <item>Distance seems off: run the card calibration again.</item>
+        <item>\"Detects nothing\": move slowly side to side for a few seconds so the map can be built.</item>
+        <item>\"Doesn\'t detect the wall\": a smooth white wall has no texture to detect. Aim at the frame, baseboard, or any high-contrast edge.</item>
+        <item>\"Points move\": it\'s normal for them to shift a few millimeters; the measured distance remains the same.</item>
+        <item>\"+ button is gray\": no valid surface in the crosshair, or it\'s more than 5 meters away.</item>
     </string-array>
 
     <!-- Others -->

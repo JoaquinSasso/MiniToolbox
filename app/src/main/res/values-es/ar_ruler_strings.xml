@@ -8,13 +8,33 @@
     <string name="aruler_history">Historial</string>
     <string name="aruler_tips_toggle_off">Ocultar tips</string>
     <string name="aruler_tips_toggle_on">Mostrar tips</string>
-    <string name="aruler_calibration_button">Calibrar</string>
 
-    <!-- Cartel de tips -->
-    <string name="aruler_tip_scan">Mové el teléfono para detectar superficies. Tocá + para fijar un punto en la posición de la cruz.</string>
-    <string name="aruler_tip_calib_step1">Calibración (1/2): apoyá una tarjeta en un plano. Alineá la cruz con una esquina y tocá +.</string>
-    <string name="aruler_tip_calib_step2">Calibración (2/2): mové la cruz a la esquina opuesta (diagonal) y tocá +.</string>
+    <!-- Regla AR: modos -->
+    <string name="aruler_mode_segment">Segmento</string>
+    <string name="aruler_mode_polyline">Recorrido</string>
 
+    <!-- Regla AR: acciones -->
+    <string name="aruler_undo">Deshacer</string>
+    <string name="aruler_finish">Finalizar</string>
+
+    <!-- Regla AR: estado de tracking -->
+    <string name="aruler_status_initializing">Iniciando… movete despacio con el teléfono</string>
+    <string name="aruler_status_too_dark">Hay poca luz. Encendé una luz o buscá una zona más clara</string>
+    <string name="aruler_status_too_fast">Estás moviendo el teléfono muy rápido. Frená un poco</string>
+    <string name="aruler_status_no_features">Superficie sin textura. Apuntá a algo con más detalle</string>
+    <string name="aruler_status_camera_off">La cámara no está disponible</string>
+    <string name="aruler_status_no_surface">Buscando superficie… movete despacio</string>
+    <string name="aruler_status_too_far">Demasiado lejos. Acercate a menos de 5 metros</string>
+    <string name="aruler_hint_move_sideways">¿Pared o superficie lisa? Movete 20–30 cm de lado a lado para que se pueda estimar la profundidad</string>
+
+    <!-- Regla AR: guía paso a paso -->
+    <string name="aruler_tip_place_first">Apuntá al primer punto y tocá +</string>
+    <string name="aruler_tip_place_second">Apuntá al segundo punto y tocá +</string>
+    <string name="aruler_tip_polyline_next">Marcá el siguiente punto o tocá ✓ para cerrar</string>
+
+    <!-- Regla AR: accesibilidad -->
+    <string name="aruler_cd_capture">Marcar punto</string>
+    <string name="aruler_cd_delete_item">Borrar esta medición</string>
 
     <!-- Títulos y descripciones -->
     <string name="aruler_help_title">Ayuda – Regla AR</string>
@@ -31,33 +51,39 @@
     <string-array name="aruler_help_requirements">
         <item>Buena iluminación y una superficie con textura (madera, tela, etc.).</item>
         <item>Mueve el teléfono en forma de “8” para ayudar a detectar el plano.</item>
+        <item>En dispositivos con soporte de Depth API la detección en paredes es notablemente mejor.</item>
     </string-array>
 
     <string-array name="aruler_help_steps">
-        <item>Apunta al piso o mesa hasta que la retícula se ponga verde.</item>
-        <item>Toca el botón “+” para fijar el primer punto en la posición de la retícula.</item>
-        <item>Apunta a la segunda posición y toca “+” para fijar el segundo punto.</item>
-        <item>Se dibuja una línea entre los puntos y aparece la distancia en el centro.</item>
-        <item>Podés seguir creando más mediciones; las anteriores quedan visibles e irán al historial.</item>
+        <item>Movés el teléfono despacio hasta que aparezca el mensaje verde \"Apuntá al primer punto\".</item>
+        <item>Centrás la mira en el primer punto y tocás +.</item>
+        <item>Movés el teléfono hasta el segundo punto: la línea y la medida se actualizan en vivo.</item>
+        <item>Tocás + de nuevo para confirmar. La medida queda fija y pasa al historial.</item>
+        <item>En modo Recorrido podés encadenar varios tramos y tocar ✓ para cerrar; se muestra el total.</item>
     </string-array>
 
     <string-array name="aruler_help_buttons">
-        <item>“+”: coloca un punto en la posición de la retícula.</item>
-        <item>Reiniciar: limpia todos los puntos y mediciones.</item>
-        <item>cm/m ↔ in/ft: cambia el sistema de unidades.</item>
-        <item>Calibrar tarjeta: mide la diagonal de una tarjeta de credito, debito o documento para ajustar la escala.</item>
+        <item>Segmento / Recorrido: alterna entre medir un tramo suelto o encadenar varios con total.</item>
+        <item>Deshacer: quita el último punto colocado, o la última medición si no hay ninguna en curso.</item>
+        <item>Borrar: elimina todas las mediciones.</item>
+        <item>m / ft: alterna entre sistema métrico e imperial.</item>
+        <item>+ (botón grande): coloca un punto. Está gris cuando no hay superficie válida.</item>
+        <item>✕ en el historial: borra esa medición puntual.</item>
     </string-array>
 
     <string-array name="aruler_help_tips">
-        <item>Evita superficies brillantes o transparentes.</item>
-        <item>Para mayor estabilidad, sostén el teléfono a ~0,5–1,5 m de la superficie.</item>
-        <item>Si la retícula no se pone verde, mueve el teléfono despacio para explorar el plano.</item>
+        <item>Buena luz y superficies con textura dan mediciones mucho más estables.</item>
+        <item>Para medir sobre una pared lisa, movete lateralmente unos centímetros antes de apuntar.</item>
+        <item>Más allá de 5 metros la app no deja marcar: la precisión ahí ya no es confiable.</item>
+        <item>Los números se redondean a propósito (medio centímetro, un centímetro o cinco según la distancia).</item>
+        <item>La medición queda fija al confirmarla. Si los puntos se corren en pantalla, la distancia no cambia.</item>
     </string-array>
 
     <string-array name="aruler_help_troubles">
-        <item>No detecta superficie: mejora la iluminación o apunta a materiales con textura.</item>
-        <item>Medición inestable o errática: repite la calibración o fija puntos más cercanos.</item>
-        <item>La distancia no coincide: vuelve a calibrar con la tarjeta.</item>
+        <item>\"No detecta nada\": movete despacio de lado a lado unos segundos para que se construya el mapa.</item>
+        <item>\"No detecta la pared\": una pared blanca lisa no tiene textura para detectar. Apuntá al marco, al zócalo o a algún borde con contraste.</item>
+        <item>\"Los puntos se mueven\": es normal que se corran unos milímetros; la distancia medida no cambia.</item>
+        <item>\"El botón + está gris\": no hay superficie válida en la mira, o está a más de 5 metros.</item>
     </string-array>
 
     <!-- Otros -->
