@@ -36,6 +36,7 @@ UI/UX: Mejoras en los componentes de Jetpack Compose para hacer la interfaz más
 Para mantener el repositorio profesional y seguro, seguimos estas reglas:
 1. **Archivos de Trabajo:** Ningún archivo de trabajo de herramientas externas (planes de agente, scratchpads, exports de IDE) entra al repositorio. Si una herramienta genera artefactos, su directorio debe ir al `.gitignore` antes de la primera ejecución.
 2. **Rutas Relativas:** Ninguna ruta absoluta de una máquina de desarrollo entra a la documentación. Todos los links a archivos del proyecto deben ser relativos al repositorio. Una ruta `file:///C:/Ruta/Absoluta/...` revela el entorno de quien la escribió y no funciona para nadie más.
+3. **Verificabilidad Técnica:** Toda fecha, métrica o afirmación sobre el comportamiento pasado del sistema debe ser verificable desde el historial del repositorio (commit, log) o los datos crudos. Un postmortem o decisión técnica debe indicar el hash del commit relevante o el procedimiento para validar la afirmación. No reconstruyas narrativas de memoria; consultá el historial.
 
 📬 Contacto
 Si tienes dudas técnicas antes de empezar a programar, no dudes en abrir un Issue o contactarme a través de mi perfil de GitHub.

@@ -202,7 +202,7 @@ details.zero textarea{width:100%; margin-top:8px; min-height:70px; background:va
 
   <div class="demo-banner" id="biasNotice" style="display:flex; background:color-mix(in srgb,var(--neg) 10%,var(--surface)); border-color:color-mix(in srgb,var(--neg) 40%,var(--border))">
     <span class="dot" style="background:var(--neg)"></span>
-    <div><b>Sesgo en datos históricos.</b> Las aperturas previas a la corrección del 2025-10-24 contienen un doble conteo sistemático (la primera apertura diaria de cada usuario sumaba +2).</div>
+    <div><b>Sesgo en datos históricos.</b> Toda la serie desde el inicio (2025-09-24) hasta la corrección del 2026-08-17 contiene un doble conteo sistemático (la primera apertura diaria de cada usuario sumaba +2).</div>
   </div>
 
   <div class="kpis" id="kpis"></div>
@@ -475,7 +475,7 @@ function renderKpis(a,range){
   const toolsTotal=totalOf(a.agg.tools);
   const distinctTools=Object.keys(a.agg.tools).length;
   const cards=[
-    {l:"Aperturas",v:fmt(a.opens),s:`Total (sesgo +2 pre-fix)`},
+    {l:"Aperturas",v:fmt(a.opens),s:`Total (sesgo +2 hasta 2026-08-17)`},
     {l:"Disp. Activos",v:fmt(a.dailyActive),s:`DDAU (sin doble conteo)`},
     {l:"Instalaciones",v:fmt(a.newInstalls),s:"por first-seen"},
     {l:"Tools usadas",v:fmt(distinctTools),s:`${fmt(toolsTotal)} usos totales`},
