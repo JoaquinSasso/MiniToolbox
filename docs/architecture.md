@@ -27,8 +27,8 @@ graph TD
             direction TB
             VM_Screens["Screens con ViewModel<br/>(Categories, Minesweeper)"]
             State_Screens["Screens con Local State<br/>(Pomodoro, Agua, Calculadoras...)"]
-            style VM_Screens fill:#e1f5fe,stroke:#01579b
-            style State_Screens fill:#fff9c4,stroke:#fbc02d
+            style VM_Screens fill:#e1f5fe,stroke:#01579b,color:#000
+            style State_Screens fill:#fff9c4,stroke:#fbc02d,color:#000
         end
     end
 
@@ -65,7 +65,7 @@ graph TD
     GW --> DS
     NG --> Ads_Billing
     State_Screens -.-> PAS
-    GW -- "widgetUse()" --> MET
+    GW -- "widgetUse" --> MET
 ```
 
 ---
@@ -79,22 +79,22 @@ El pipeline de métricas es el componente más diferenciador del sistema. Está 
 ```mermaid
 graph TD
     subgraph App ["App (Android)"]
-        E[Emisor: Metrics.kt] --> Gate{isMetricsEnabled?}
-        Gate -- "No" --> End[Drop]
-        Gate -- "Yes" --> AR[AggregatesRepository]
+        E["Emisor: Metrics.kt"] --> Gate{isMetricsEnabled?}
+        Gate -- "No" --> End["Drop"]
+        Gate -- "Yes" --> AR["AggregatesRepository"]
         AR -- "Delta Diario Local" --> MDS[(MetricsDataStore)]
         
-        E -- "maybeSchedule" --> US[UploadScheduler]
-        US -- "WorkManager Enqueue" --> UM[UploadMetricsWorker]
+        E -- "maybeSchedule" --> US["UploadScheduler"]
+        US -- "WorkManager Enqueue" --> UM["UploadMetricsWorker"]
         UM -- "Lectura Payload" --> MDS
         UM -- "maybeSchedule (re-agenda)" -.-> US
     end
 
     subgraph Backend ["Backend (Google Cloud)"]
-        UM -- "HTTPS POST (JSON)" --> CF_ingest[Cloud Function: ingest]
+        UM -- "HTTPS POST (JSON)" --> CF_ingest["Cloud Function: ingest"]
         CF_ingest -- "Increment Counters" --> FS[(Firestore)]
         
-        FS -- "Solo Lectura (Rule: Deny All)" --> CF_read[Cloud Functions: metricsDaily / Summary]
+        FS -- "Solo Lectura (Rule: Deny All)" --> CF_read["Cloud Functions: metricsDaily / Summary"]
     end
 
     subgraph Analytics ["Dashboard"]
