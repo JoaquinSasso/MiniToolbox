@@ -2,8 +2,8 @@
 
 Este documento describe la arquitectura real del sistema MiniToolbox. Ha sido validado contra el código fuente para asegurar que representa la implementación existente, incluyendo sus asimetrías y limitaciones.
 
-**Última verificación:** 18 de agosto de 2026
-**Commit verificado:** `d43a3d53f2d6703d1cc04dd09aab114902cae5a7`
+**Última verificación:** 23 de agosto de 2026
+**Commit verificado:** `8dce4e21fd7adf88a632d93f206c18abdf368f3d`
 
 ---
 
@@ -35,6 +35,7 @@ graph TD
     subgraph Logic_State ["Lógica y Estado"]
         VM[ViewModels]
         CS[Compose State]
+        MET[Emisor: Metrics.kt]
     end
 
     subgraph Services_Background ["Servicios y Background"]
@@ -64,7 +65,7 @@ graph TD
     GW --> DS
     NG --> Ads_Billing
     State_Screens -.-> PAS
-    GW -- "Metrics" --> WM
+    GW -- "widgetUse()" --> MET
 ```
 
 ---
@@ -83,8 +84,10 @@ graph TD
         Gate -- "Yes" --> AR[AggregatesRepository]
         AR -- "Delta Diario Local" --> MDS[(MetricsDataStore)]
         
-        MDS -- "Lectura Payload" --> UM[UploadMetricsWorker]
-        UM -- "Trigger" --> US[UploadScheduler]
+        E -- "maybeSchedule" --> US[UploadScheduler]
+        US -- "WorkManager Enqueue" --> UM[UploadMetricsWorker]
+        UM -- "Lectura Payload" --> MDS
+        UM -- "maybeSchedule (re-agenda)" -.-> US
     end
 
     subgraph Backend ["Backend (Google Cloud)"]
@@ -184,8 +187,11 @@ app/src/main/java/com/joasasso/minitoolbox/
 ## 6. Modelo de Persistencia
 
 El sistema utiliza **19 instancias de `preferencesDataStore`**. 
-- 17 están centralizadas en archivos dentro del paquete `data/`.
+- 16 están centralizadas en archivos dentro del paquete `data/`.
+- 1 está en `metrics/storage/` (MetricsDataStore.kt), aislada a propósito por pertenecer al subsistema de telemetría.
 - 2 están embebidas directamente en los archivos de Screen (`GuessCapitalScreen.kt` y `QuickMathScreen.kt`) por acoplamiento histórico.
+
+**Nota sobre duplicidad:** Algunos archivos en `data/` declaran más de un DataStore (ej. `ExpensesDataStore.kt` y `PomodoroDataStore.kt`). Esto suele indicar una transición incompleta de esquemas o una separación de responsabilidades (estado vs. configuración) pendiente de unificar.
 
 ---
 
@@ -196,3 +202,19 @@ El sistema utiliza **19 instancias de `preferencesDataStore`**.
 3.  **Ausencia de DI**: No se utiliza inyección de dependencias (Hilt/Koin); las dependencias se pasan manualmente o se acceden vía Singleton/Context.
 4.  **Desincronización Taxonómica**: La ruta `"quotes"` está vinculada a `BasicPhrasesScreen`. Las métricas reportadas bajo este ID corresponden en realidad a la herramienta de frases, no a citas.
 5.  **Shadowing de Protobuf**: `CategoriesScreen.kt` importa accidentalmente `com.google.protobuf.LazyStringArrayList.emptyList`, sombreando la función estándar de Kotlin.
+6.  **DataStores Remanentes**: Existen instancias como `reuniones_gastos` (en `ExpensesDataStore.kt`) y `pomodoro_settings` (en `PomodoroDataStore.kt`) que son remanentes de migraciones o estructuras antiguas y no deberían usarse para nuevos desarrollos.
+
+---
+
+## 8. Nota de Método y Validación
+
+Este documento se mantiene bajo un esquema de **validación estricta**. Cada caja y cada flecha de los diagramas debe ser verificable contra una línea de código específica. Cualquier discrepancia entre el código y el diagrama se considera un bug de documentación.
+
+### Propuesta de Verificación Automática (Futuro)
+
+Para evitar desincronizaciones en los números citados, se propone implementar un test de instrumentación o un script de CI que valide:
+- Cantidad de `preferencesDataStore` (vía `grep`).
+- Cantidad de rutas en `Screen.kt` (vía reflexión sobre `sealedSubclasses`).
+- Cantidad de herramientas en `ToolRegistry.kt` (vía inspección de la lista `tools`).
+
+De este modo, un cambio en el código que afecte estas métricas obligaría a actualizar la arquitectura o fallaría el build.
