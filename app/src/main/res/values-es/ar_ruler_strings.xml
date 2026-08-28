@@ -5,9 +5,11 @@
     <string name="aruler_add_point">Agregar punto</string>
     <string name="aruler_close_measure">Cerrar medición</string>
     <string name="aruler_reset_all">Reiniciar</string>
-    <string name="aruler_history">Historial</string>
     <string name="aruler_tips_toggle_off">Ocultar tips</string>
     <string name="aruler_tips_toggle_on">Mostrar tips</string>
+
+    <string name="aruler_clear_confirm_title">¿Borrar todas las mediciones?</string>
+    <string name="aruler_clear_confirm_message">Se van a eliminar todas las mediciones de la escena. Esta acción no se puede deshacer.</string>
 
     <!-- Regla AR: modos -->
     <string name="aruler_mode_segment">Segmento</string>
@@ -25,6 +27,11 @@
     <string name="aruler_status_camera_off">La cámara no está disponible</string>
     <string name="aruler_status_no_surface">Buscando superficie… movete despacio</string>
     <string name="aruler_status_too_far">Demasiado lejos. Acercate a menos de 5 metros</string>
+    <string name="aruler_status_too_close">Demasiado cerca. Alejate a más de 20 cm del objeto</string>
+    <string name="aruler_status_sampling">Midiendo… mantené la mira quieta</string>
+    <string name="aruler_status_lens_changed">El seguimiento saltó y se descartó la medición. Suele pasar al acercarse mucho: alejate un poco y marcá los puntos de nuevo.</string>
+    <string name="aruler_status_unstable">La superficie no se lee con estabilidad. Mantené el teléfono quieto un momento</string>
+    <string name="aruler_status_ill_conditioned">Los dos puntos quedan casi uno detrás del otro. Movete de costado para medirlos</string>
     <string name="aruler_hint_move_sideways">¿Pared o superficie lisa? Movete 20–30 cm de lado a lado para que se pueda estimar la profundidad</string>
 
     <!-- Regla AR: guía paso a paso -->
@@ -34,7 +41,6 @@
 
     <!-- Regla AR: accesibilidad -->
     <string name="aruler_cd_capture">Marcar punto</string>
-    <string name="aruler_cd_delete_item">Borrar esta medición</string>
 
     <!-- Títulos y descripciones -->
     <string name="aruler_help_title">Ayuda – Regla AR</string>
@@ -65,10 +71,9 @@
     <string-array name="aruler_help_buttons">
         <item>Segmento / Recorrido: alterna entre medir un tramo suelto o encadenar varios con total.</item>
         <item>Deshacer: quita el último punto colocado, o la última medición si no hay ninguna en curso.</item>
-        <item>Borrar: elimina todas las mediciones.</item>
         <item>m / ft: alterna entre sistema métrico e imperial.</item>
         <item>+ (botón grande): coloca un punto. Está gris cuando no hay superficie válida.</item>
-        <item>✕ en el historial: borra esa medición puntual.</item>
+        <item>Borrar todo: botón rojo que aparece sobre el + cuando hay mediciones confirmadas. Pide confirmación antes de eliminar.</item>
     </string-array>
 
     <string-array name="aruler_help_tips">

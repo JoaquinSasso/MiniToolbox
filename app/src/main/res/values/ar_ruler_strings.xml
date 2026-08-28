@@ -5,9 +5,11 @@
     <string name="aruler_add_point">Add point</string>
     <string name="aruler_close_measure">Close measure</string>
     <string name="aruler_reset_all">Reset</string>
-    <string name="aruler_history">History</string>
     <string name="aruler_tips_toggle_off">Hide tips</string>
     <string name="aruler_tips_toggle_on">Show tips</string>
+
+    <string name="aruler_clear_confirm_title">Delete all measurements?</string>
+    <string name="aruler_clear_confirm_message">Every measurement in the scene will be removed. This can\'t be undone.</string>
 
     <!-- Regla AR: modos -->
     <string name="aruler_mode_segment">Segment</string>
@@ -25,6 +27,11 @@
     <string name="aruler_status_camera_off">Camera is unavailable</string>
     <string name="aruler_status_no_surface">Looking for a surface… move slowly</string>
     <string name="aruler_status_too_far">Too far away. Get closer than 5 metres</string>
+    <string name="aruler_status_too_close">Too close. Move more than 20 cm away from the object</string>
+    <string name="aruler_status_sampling">Measuring… hold the crosshair steady</string>
+    <string name="aruler_status_lens_changed">Tracking jumped, so the measurement was discarded. This usually happens when you get too close: back off a little and mark the points again.</string>
+    <string name="aruler_status_unstable">The surface reading isn\'t stable. Hold the phone still for a moment</string>
+    <string name="aruler_status_ill_conditioned">The two points are almost one behind the other. Move sideways to measure them</string>
     <string name="aruler_hint_move_sideways">Blank wall or smooth surface? Move 20–30 cm side to side so depth can be estimated</string>
 
     <!-- Regla AR: guía paso a paso -->
@@ -34,7 +41,6 @@
 
     <!-- Regla AR: accesibilidad -->
     <string name="aruler_cd_capture">Mark point</string>
-    <string name="aruler_cd_delete_item">Delete this measurement</string>
 
     <!-- Titles & descriptions -->
     <string name="aruler_help_title">Help – AR Ruler</string>
@@ -65,10 +71,9 @@
     <string-array name="aruler_help_buttons">
         <item>Segment / Path: switches between measuring a single segment or chaining several with a total.</item>
         <item>Undo: removes the last point placed, or the last measurement if none is in progress.</item>
-        <item>Clear: deletes all measurements.</item>
         <item>m / ft: switches between metric and imperial systems.</item>
         <item>+ (large button): places a point. It\'s gray when there is no valid surface.</item>
-        <item>✕ in history: deletes that specific measurement.</item>
+        <item>Clear all: red button that appears above the + when there are confirmed measurements. Asks for confirmation before deleting.</item>
     </string-array>
 
     <string-array name="aruler_help_tips">
