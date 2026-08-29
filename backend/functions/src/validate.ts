@@ -5,7 +5,6 @@ export type IngestItem = {
 	tools?: Record<string, number>;
 	ads?: Record<string, number>;
 
-	// NUEVO
 	versions?: Record<string, number>; // DAU por versión
 	versions_first_seen?: Record<string, number>; // first-seen por versión
 	lang_primary?: Record<string, number>; // idioma principal
@@ -20,12 +19,131 @@ export type IngestBody = {
 	items: IngestItem[];
 };
 
-const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
-const KEY_RE = /^[a-zA-Z0-9._-]{1,64}$/; // claves seguras (toolId, adType, versión, idioma, widgetKind)
+/** Claves descartadas o corregidas durante el saneo de un lote. */
+export type Dropped = {
+	/** Claves originales que hubo que normalizar o descartar. */
+	keys: string[];
+	/** Items completos descartados (día inválido o mapa no-objeto). */
+	items: number;
+};
 
+export const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
+export const KEY_RE = /^[a-zA-Z0-9._-]{1,64}$/;
+
+/** Tope de claves distintas por mapa y por item. Defensa contra payloads abusivos. */
+const MAX_DISTINCT_KEYS = 200;
+
+/**
+ * Segmentos que son identificadores y no aportan información agregable:
+ * UUIDs, hashes hex y números.
+ */
+const ID_SEGMENT_RE =
+	/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|[0-9a-f]{8,}|\d+)$/i;
+
+/**
+ * Convierte una clave con forma de ruta en una clave estable, descartando los
+ * segmentos que son identificadores.
+ *
+ *   "pomodoro/detail/2f7a1b3c-4d5e-6f70-8a9b-0c1d2e3f4a5b" -> "pomodoro_detail"
+ *   "pomodoro/detail/{timerId}"                            -> "pomodoro_detail_timerId"
+ *   "dev/metrics"                                          -> "dev_metrics"
+ *
+ * Sin este colapso, cada timer generaría su propia clave y explotaría la
+ * cardinalidad de los mapas de metrics_daily.
+ */
+export function collapseRouteKey(raw: string): string {
+	return raw
+		.split(/[/?#]/)
+		.map((s) => s.trim())
+		.filter(Boolean)
+		.filter((s) => !ID_SEGMENT_RE.test(s))
+		.map((s) => s.replace(/^\{|\}$/g, ""))
+		.join("_");
+}
+
+/**
+ * Convierte una clave arbitraria en una que cumpla KEY_RE.
+ * Devuelve null si no queda nada utilizable.
+ */
+export function normalizeKey(raw: unknown): string | null {
+	if (typeof raw !== "string") return null;
+	const collapsed = /[/?#]/.test(raw) ? collapseRouteKey(raw) : raw;
+	const clean = collapsed
+		.trim()
+		.replace(/[^a-zA-Z0-9._-]/g, "_")
+		.replace(/_+/g, "_")
+		.replace(/^_+|_+$/g, "")
+		.slice(0, 64);
+	return clean.length > 0 ? clean : null;
+}
+
+/**
+ * Sanea un mapa clave -> contador.
+ *
+ * - Claves que no cumplen KEY_RE se normalizan; si colisionan, los contadores
+ *   se SUMAN en lugar de pisarse.
+ * - Valores que no son enteros >= 0 se descartan.
+ * - Devuelve null solo si el valor recibido no es un objeto: eso es
+ *   estructural y descarta el item completo.
+ */
+function sanitizeMap(m: any, dropped: Dropped): Record<string, number> | null {
+	if (m == null) return {};
+	if (typeof m !== "object" || Array.isArray(m)) return null;
+
+	const out: Record<string, number> = {};
+	let distinct = 0;
+
+	for (const k of Object.keys(m)) {
+		const v = m[k];
+
+		if (!Number.isInteger(v) || v < 0) {
+			dropped.keys.push(k);
+			continue;
+		}
+
+		let key = k;
+		if (!KEY_RE.test(k)) {
+			dropped.keys.push(k);
+			const normalized = normalizeKey(k);
+			if (!normalized) continue;
+			key = normalized;
+		}
+
+		if (!(key in out)) {
+			if (distinct >= MAX_DISTINCT_KEYS) {
+				dropped.keys.push(k);
+				continue;
+			}
+			distinct += 1;
+		}
+
+		out[key] = (out[key] ?? 0) + v;
+	}
+
+	return out;
+}
+
+/** Devuelve el número si es un entero >= 0, o undefined. */
+function safeCount(v: any): number | undefined {
+	return Number.isInteger(v) && v >= 0 ? v : undefined;
+}
+
+/**
+ * Valida y sanea el cuerpo de un lote de ingesta.
+ *
+ * Filosofía: un lote NUNCA se rechaza por una clave rara. Se descarta la clave
+ * o el item y se acepta el resto. El 400 queda reservado para fallas
+ * estructurales que hacen imposible procesar el lote.
+ *
+ * Motivo: un rechazo determinista deja al cliente reintentando el mismo payload
+ * congelado para siempre, lo que bloquea las métricas del dispositivo de forma
+ * permanente.
+ */
 export function validateBody(
-	body: any
-): { ok: true; data: IngestBody } | { ok: false; error: string } {
+	body: any,
+):
+	| { ok: true; data: IngestBody; dropped: Dropped }
+	| { ok: false; error: string } {
 	if (!body || typeof body !== "object")
 		return { ok: false, error: "invalid_body" };
 
@@ -38,51 +156,66 @@ export function validateBody(
 	if (typeof body.app_version !== "string" || body.app_version.trim() === "")
 		return { ok: false, error: "invalid_app_version" };
 
-	if (!Array.isArray(body.items) || body.items.length === 0)
-		return { ok: false, error: "invalid_items" };
+	if (!Array.isArray(body.items)) return { ok: false, error: "invalid_items" };
 
-	const checkMap = (m: any): boolean => {
-		if (m == null) return true;
-		if (typeof m !== "object") return false;
-		for (const k of Object.keys(m)) {
-			if (!KEY_RE.test(k)) return false; // rechazar claves vacías o raras
-			const v = m[k];
-			if (!Number.isInteger(v) || v < 0) return false;
-		}
-		return true;
-	};
+	const dropped: Dropped = { keys: [], items: 0 };
+	const items: IngestItem[] = [];
 
 	for (const it of body.items) {
-		if (!it || typeof it !== "object")
-			return { ok: false, error: "invalid_item" };
-		if (typeof it.day !== "string" || !DAY_RE.test(it.day))
-			return { ok: false, error: "invalid_day" };
-
 		if (
-			it.app_open != null &&
-			(!Number.isInteger(it.app_open) || it.app_open < 0)
-		)
-			return { ok: false, error: "invalid_app_open" };
+			!it ||
+			typeof it !== "object" ||
+			typeof it.day !== "string" ||
+			!DAY_RE.test(it.day)
+		) {
+			dropped.items += 1;
+			continue;
+		}
 
-		if (
-			it.daily_active != null &&
-			(!Number.isInteger(it.daily_active) || it.daily_active < 0)
-		)
-			return { ok: false, error: "invalid_daily_active" };
+		const tools = sanitizeMap(it.tools, dropped);
+		const ads = sanitizeMap(it.ads, dropped);
+		const versions = sanitizeMap(it.versions, dropped);
+		const versionsFirstSeen = sanitizeMap(it.versions_first_seen, dropped);
+		const langPrimary = sanitizeMap(it.lang_primary, dropped);
+		const langSecondary = sanitizeMap(it.lang_secondary, dropped);
+		const widgets = sanitizeMap(it.widgets, dropped);
 
-		if (!checkMap(it.tools)) return { ok: false, error: "invalid_tools" };
-		if (!checkMap(it.ads)) return { ok: false, error: "invalid_ads" };
+		const maps = [
+			tools,
+			ads,
+			versions,
+			versionsFirstSeen,
+			langPrimary,
+			langSecondary,
+			widgets,
+		];
+		if (maps.some((m) => m === null)) {
+			dropped.items += 1;
+			continue;
+		}
 
-		// Nuevos
-		if (!checkMap(it.versions)) return { ok: false, error: "invalid_versions" };
-		if (!checkMap(it.versions_first_seen))
-			return { ok: false, error: "invalid_versions_first_seen" };
-		if (!checkMap(it.lang_primary))
-			return { ok: false, error: "invalid_lang_primary" };
-		if (!checkMap(it.lang_secondary))
-			return { ok: false, error: "invalid_lang_secondary" };
-		if (!checkMap(it.widgets)) return { ok: false, error: "invalid_widgets" };
+		items.push({
+			day: it.day,
+			app_open: safeCount(it.app_open),
+			daily_active: safeCount(it.daily_active),
+			tools: tools as Record<string, number>,
+			ads: ads as Record<string, number>,
+			versions: versions as Record<string, number>,
+			versions_first_seen: versionsFirstSeen as Record<string, number>,
+			lang_primary: langPrimary as Record<string, number>,
+			lang_secondary: langSecondary as Record<string, number>,
+			widgets: widgets as Record<string, number>,
+		});
 	}
 
-	return { ok: true, data: body as IngestBody };
+	return {
+		ok: true,
+		data: {
+			batch_id: body.batch_id,
+			platform: body.platform,
+			app_version: body.app_version,
+			items,
+		},
+		dropped,
+	};
 }

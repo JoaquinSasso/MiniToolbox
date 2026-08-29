@@ -1,7 +1,5 @@
 import { onRequest } from "firebase-functions/v2/https";
 import { initializeApp } from "firebase-admin/app";
-import { getAppCheck } from "firebase-admin/app-check";
-import { logger } from "firebase-functions/v2";
 import {
 	getFirestore,
 	FieldValue,
@@ -10,6 +8,8 @@ import {
 } from "firebase-admin/firestore";
 import { defineSecret } from "firebase-functions/params";
 import { validateBody, type IngestBody } from "./validate.js";
+import { getAppCheck } from "firebase-admin/app-check";
+import * as logger from "firebase-functions/logger";
 
 initializeApp();
 const db = getFirestore();
@@ -54,7 +54,7 @@ function readHeader(req: any, name: string): string {
 	return "";
 }
 
-function (req: any): string {
+function getHeaderApiKey(req: any): string {
 	const k1 = readHeader(req, "x-api-key");
 	const k2 = readHeader(req, "X-API-Key");
 	const auth = readHeader(req, "authorization");
@@ -63,8 +63,13 @@ function (req: any): string {
 	return (k1 || k2 || bearer || "").trim();
 }
 
+/**
+ * Verifica el token de Firebase App Check enviado por la app.
+ * Devuelve false tanto si no vino token como si es invalido.
+ */
 async function verifyAppCheck(req: any): Promise<boolean> {
 	const token = readHeader(req, "X-Firebase-AppCheck");
+	if (!token) return false;
 	try {
 		await getAppCheck().verifyToken(token);
 		return true;
@@ -135,7 +140,7 @@ const TOOL_ROUTE_MAP: Record<string, string> = {
 
 function mergeCounts(
 	a: Record<string, number>,
-	b: Record<string, number>
+	b: Record<string, number>,
 ): Record<string, number> {
 	const out: Record<string, number> = { ...(a || {}) };
 	for (const [k, v] of Object.entries(b || {})) {
@@ -146,7 +151,7 @@ function mergeCounts(
 
 // Quita prefijos accidentales en keys de tools dentro de maps guardados
 function stripToolKeyInMap(
-	map: Record<string, number>
+	map: Record<string, number>,
 ): Record<string, number> {
 	const out: Record<string, number> = {};
 	for (const [k, v] of Object.entries(map || {})) {
@@ -179,7 +184,7 @@ function canonToolKey(raw: string): string | null {
 
 // Re-mapea un objeto {clave: número} a sus claves canónicas, agregando si hay colisiones
 function remapToolCounters(
-	map: Record<string, number> | undefined
+	map: Record<string, number> | undefined,
 ): Record<string, number> {
 	const out: Record<string, number> = {};
 	for (const [k, v] of Object.entries(map || {})) {
@@ -255,7 +260,7 @@ type DailyDoc = {
 // Para docs con claves planas (ej. "tools.linterna": 3)
 function pickPrefix(
 	obj: Record<string, any>,
-	prefix: string
+	prefix: string,
 ): Record<string, number> {
 	const out: Record<string, number> = {};
 	for (const [k, v] of Object.entries(obj)) {
@@ -278,7 +283,7 @@ function normDoc(id: string, data: FirebaseFirestore.DocumentData): DailyDoc {
 	// Limpia prefijos dentro del map y mapea legacy→canónico; también suma flat
 	const toolsCanon = mergeCounts(
 		stripToolKeyInMap(toolsNested),
-		remapToolCounters(toolsFlat)
+		remapToolCounters(toolsFlat),
 	);
 
 	// --- ads ---
@@ -311,11 +316,11 @@ function normDoc(id: string, data: FirebaseFirestore.DocumentData): DailyDoc {
 		data.lang && typeof data.lang === "object" ? data.lang : {};
 	const lang_primary = mergeCounts(
 		langNested.primary || {},
-		pickPrefix(data, "lang.primary")
+		pickPrefix(data, "lang.primary"),
 	);
 	const lang_secondary = mergeCounts(
 		langNested.secondary || {},
-		pickPrefix(data, "lang.secondary")
+		pickPrefix(data, "lang.secondary"),
 	);
 
 	// --- totals.app_open ---
@@ -324,7 +329,9 @@ function normDoc(id: string, data: FirebaseFirestore.DocumentData): DailyDoc {
 	const app_open = appOpenNested + appOpenFlat;
 
 	// --- totals.daily_active ---
-	const dailyActiveNested = Number((data.totals && data.totals.daily_active) || 0);
+	const dailyActiveNested = Number(
+		(data.totals && data.totals.daily_active) || 0,
+	);
 	const dailyActiveFlat = Number((data as any)["totals.daily_active"] || 0);
 	const daily_active = dailyActiveNested + dailyActiveFlat;
 
@@ -350,8 +357,8 @@ function normDoc(id: string, data: FirebaseFirestore.DocumentData): DailyDoc {
 			updatedAt: updatedAt?.toDate
 				? updatedAt.toDate().toISOString()
 				: updatedAt?._seconds
-				? new Date(updatedAt._seconds * 1000).toISOString()
-				: null,
+					? new Date(updatedAt._seconds * 1000).toISOString()
+					: null,
 		},
 	};
 }
@@ -394,6 +401,8 @@ export const ingest = onRequest(
 				sendJson(res, 405, { ok: false, error: "method_not_allowed" });
 				return;
 			}
+			// Autenticacion: App Check (1.3.2+) o API key (versiones anteriores).
+			// La rama de API key se elimina cuando auth_method sea 100% "appcheck".
 			const appCheckOk = await verifyAppCheck(req);
 			const apiKey = getHeaderApiKey(req);
 			const expected = (METRICS_API_KEY.value() || "").trim();
@@ -418,6 +427,17 @@ export const ingest = onRequest(
 				return;
 			}
 			const body = parsed.data as IngestBody;
+			const dropped = parsed.dropped;
+
+			// Senal de alarma que reemplaza al 400: si algo se saneo, queda registrado.
+			if (dropped.keys.length > 0 || dropped.items > 0) {
+				logger.warn("ingest_sanitized", {
+					app_version: body.app_version,
+					auth_method: authMethod,
+					dropped_keys: [...new Set(dropped.keys)].slice(0, 20),
+					dropped_items: dropped.items,
+				});
+			}
 
 			const batchRef = db
 				.collection("metrics_ingest_batches")
@@ -436,7 +456,7 @@ export const ingest = onRequest(
 					platform: body.platform,
 					app_version: body.app_version,
 					items: (body.items ?? []).length,
-					auth_method: authMethod, // "appcheck" | "api_key"
+					auth_method: authMethod,
 				});
 
 				for (const it of body.items) {
@@ -486,7 +506,7 @@ export const ingest = onRequest(
 
 					if ((it as any).versions) {
 						for (const [ver, v] of Object.entries(
-							(it as any).versions as Record<string, number>
+							(it as any).versions as Record<string, number>,
 						)) {
 							const n = Number(v || 0);
 							if (n > 0)
@@ -495,7 +515,7 @@ export const ingest = onRequest(
 					}
 					if ((it as any).versions_first_seen) {
 						for (const [ver, v] of Object.entries(
-							(it as any).versions_first_seen as Record<string, number>
+							(it as any).versions_first_seen as Record<string, number>,
 						)) {
 							const n = Number(v || 0);
 							if (n > 0)
@@ -554,19 +574,26 @@ export const ingest = onRequest(
 				batch_id: body.batch_id,
 				platform: body.platform,
 				app_version: body.app_version,
+				auth_method: authMethod,
 				total_items: totalItems,
 				total_app_open_delta: totalOpens,
 				total_daily_active_delta: totalDaily,
+				dropped_keys: dropped.keys.length,
+				dropped_items: dropped.items,
 			});
 
-			sendJson(res, 200, { ok: true });
+			sendJson(res, 200, {
+				ok: true,
+				dropped_keys: dropped.keys.length,
+				dropped_items: dropped.items,
+			});
 			return;
 		} catch (e) {
 			console.error("ingest_error", e);
 			sendJson(res, 500, { ok: false, error: "internal" });
 			return;
 		}
-	}
+	},
 );
 
 export const metricsDaily = onRequest(
@@ -612,7 +639,7 @@ export const metricsDaily = onRequest(
 			sendJson(res, 500, { ok: false, error: "internal" });
 			return;
 		}
-	}
+	},
 );
 
 export const metricsSummary = onRequest(
@@ -683,5 +710,5 @@ export const metricsSummary = onRequest(
 			sendJson(res, 500, { ok: false, error: "internal" });
 			return;
 		}
-	}
+	},
 );
