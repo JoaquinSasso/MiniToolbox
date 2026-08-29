@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.oss.licenses)
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -106,8 +107,6 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.foundation)
 
-
-
     // 4) Icons, Activity & Navigation
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.activity.compose)
@@ -140,7 +139,6 @@ dependencies {
     implementation(libs.runtime)
     implementation(libs.androidx.compose.foundation.foundation)
     implementation(libs.androidx.ui.graphics)
-
 
     // 7) Testing
     testImplementation(libs.junit)
@@ -199,6 +197,11 @@ dependencies {
     implementation(libs.androidx.browser)
 
     implementation("androidx.work:work-runtime-ktx:2.10.5")
+
+    // --- Firebase App Check ---
+    implementation(platform(libs.firebase.bom))
+    releaseImplementation(libs.firebase.appcheck.playintegrity)
+    debugImplementation(libs.firebase.appcheck.debug)
 }
 
 // cualquier configuración que dependa de un archivo no versionado debe degradar de forma segura cuando ese archivo falta, y la verificación es correr assembleDebug sin él.

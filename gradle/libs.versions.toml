@@ -47,6 +47,9 @@ runtimeVersion = "1.9.3"
 foundationVersion = "1.9.3"
 uiGraphics = "1.9.3"
 
+googleServices = "4.4.3"
+firebaseBom = "34.11.0"
+
 [libraries]
 androidx-activity = { module = "androidx.activity:activity", version.ref = "activityCompose" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -109,10 +112,16 @@ runtime = { group = "androidx.compose.runtime", name = "runtime", version.ref = 
 androidx-compose-foundation-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundationVersion" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics", version.ref = "uiGraphics" }
 
+# Firebase
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-appcheck-playintegrity = { module = "com.google.firebase:firebase-appcheck-playintegrity" }
+firebase-appcheck-debug = { module = "com.google.firebase:firebase-appcheck-debug" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version = "2.2.10" }
 oss-licenses = { id = "com.google.android.gms.oss-licenses-plugin", version.ref = "ossLicensesPlugin" }
+google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
 
