@@ -14,6 +14,9 @@ import kotlinx.coroutines.withContext
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.UUID
+import com.google.android.gms.tasks.Tasks
+import com.google.firebase.appcheck.FirebaseAppCheck
+import java.util.concurrent.TimeUnit
 
 class UploadMetricsWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
 
@@ -111,7 +114,22 @@ class UploadMetricsWorker(appContext: Context, params: WorkerParameters) : Corou
         }
     }
 
+    /**
+     * Obtiene el token de App Check. Devuelve null si falla (sin red, Play Services
+     * desactualizado, cuota agotada). Un null SIEMPRE es un fallo transitorio.
+     */
+    private fun fetchAppCheckToken(): String? = try {
+        Tasks.await(
+            FirebaseAppCheck.getInstance().getAppCheckToken(false),
+            15, TimeUnit.SECONDS
+        ).token
+    } catch (_: Throwable) {
+        null
+    }
+
     private fun postJson(endpoint: String, json: String, apiKey: String): Boolean {
+        val appCheckToken = fetchAppCheckToken()
+
         val url = URL(endpoint)
         val conn = (url.openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"
@@ -119,6 +137,9 @@ class UploadMetricsWorker(appContext: Context, params: WorkerParameters) : Corou
             connectTimeout = 10000
             readTimeout = 15000
             setRequestProperty("Content-Type", "application/json")
+            if (appCheckToken != null) {
+                setRequestProperty("X-Firebase-AppCheck", appCheckToken)
+            }
             if (apiKey.isNotBlank()) setRequestProperty("X-API-Key", apiKey)
         }
         return try {

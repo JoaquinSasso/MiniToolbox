@@ -7,16 +7,22 @@ import com.facebook.ads.AdSettings
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.RequestConfiguration
+import com.joasasso.minitoolbox.metrics.AppCheckSetup
 
 class MiniToolboxApp : Application(), CameraXConfig.Provider {
 
     override fun onCreate() {
         super.onCreate()
+
+        // App Check: debe instalarse antes del primer envío de métricas
+        AppCheckSetup.install(this)
+
         // --- AdMob: test devices ---
         val admobTestIds = listOf(
             "9B8C765995C4CA74CAA5FB846DED2F1A",
             AdRequest.DEVICE_ID_EMULATOR       // emulador
         )
+
         MobileAds.setRequestConfiguration(
             RequestConfiguration.Builder()
                 .setTestDeviceIds(admobTestIds)
