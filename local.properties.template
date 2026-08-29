@@ -1,4 +1,4 @@
 # MiniToolbox - Local Configuration Template
 # Copiá este archivo a local.properties y poné tus claves reales.
 METRICS_ENDPOINT=https://tu-endpoint.cloudfunctions.net/ingest
-METRICS_API_KEY=tu_clave_de_64_caracteres_hex
+# La autenticación se hace mediante App Check

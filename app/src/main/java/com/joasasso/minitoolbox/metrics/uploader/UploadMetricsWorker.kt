@@ -88,12 +88,11 @@ class UploadMetricsWorker(appContext: Context, params: WorkerParameters) : Corou
         }
 
         val endpoint = inputData.getString("endpoint") ?: return@withContext Result.failure()
-        val apiKey = inputData.getString("api_key") ?: ""
 
         // Solo HTTPS
         if (!endpoint.startsWith("https://")) return@withContext Result.failure()
 
-        val ok = postJson(endpoint, payloadJson, apiKey)
+        val ok = postJson(endpoint, payloadJson)
         if (ok) {
             // Commit SOLO de lo enviado en este batch
             val toCommit = deltasForCommit
@@ -103,7 +102,7 @@ class UploadMetricsWorker(appContext: Context, params: WorkerParameters) : Corou
             val remaining = repo.buildDeltasSinceLastSent()
             if (remaining.isNotEmpty()) {
                 UploadScheduler.markDirty(applicationContext)
-                UploadScheduler.maybeSchedule(applicationContext, endpoint, apiKey)
+                UploadScheduler.maybeSchedule(applicationContext, endpoint)
             } else {
                 UploadScheduler.clearDirty(applicationContext)
             }
@@ -127,7 +126,7 @@ class UploadMetricsWorker(appContext: Context, params: WorkerParameters) : Corou
         null
     }
 
-    private fun postJson(endpoint: String, json: String, apiKey: String): Boolean {
+    private fun postJson(endpoint: String, json: String): Boolean {
         val appCheckToken = fetchAppCheckToken()
 
         val url = URL(endpoint)
@@ -140,7 +139,6 @@ class UploadMetricsWorker(appContext: Context, params: WorkerParameters) : Corou
             if (appCheckToken != null) {
                 setRequestProperty("X-Firebase-AppCheck", appCheckToken)
             }
-            if (apiKey.isNotBlank()) setRequestProperty("X-API-Key", apiKey)
         }
         return try {
             conn.outputStream.use { it.write(json.toByteArray()) }
@@ -211,8 +209,8 @@ class UploadMetricsWorker(appContext: Context, params: WorkerParameters) : Corou
     }
 
     companion object {
-        fun testEnqueueNow(ctx: Context, endpoint: String, apiKey: String) {
-            val data = workDataOf("endpoint" to endpoint, "api_key" to apiKey)
+        fun testEnqueueNow(ctx: Context, endpoint: String) {
+            val data = workDataOf("endpoint" to endpoint)
             androidx.work.WorkManager.getInstance(ctx).enqueue(
                 androidx.work.OneTimeWorkRequestBuilder<UploadMetricsWorker>()
                     .setInputData(data)

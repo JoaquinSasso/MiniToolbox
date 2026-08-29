@@ -42,7 +42,7 @@ fun setMetricsEnabled(context: Context, enabled: Boolean) {
     if (enabled) {
         // Si vuelven a habilitar, intentamos enviar lo acumulado
         UploadScheduler.markDirty(ctx)
-        UploadScheduler.maybeSchedule(ctx, MetricsConfig.endpoint, MetricsConfig.apiKey)
+        UploadScheduler.maybeSchedule(ctx, MetricsConfig.endpoint)
     }
 }
 
@@ -73,7 +73,7 @@ private fun scheduleIfEnabled(ctx: Context) {
     }
     if (!isMetricsEnabled(ctx)) return
     UploadScheduler.markDirty(ctx)
-    UploadScheduler.maybeSchedule(ctx, MetricsConfig.endpoint, MetricsConfig.apiKey)
+    UploadScheduler.maybeSchedule(ctx, MetricsConfig.endpoint)
 }
 
 private fun io(block: suspend () -> Unit) {

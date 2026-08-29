@@ -106,11 +106,6 @@ fun MetricsDevScreen() {
                             fontSize = 12.sp
                         )
                         Text(
-                            text = "API Key: ${s.apiKeyPreview}",
-                            color = cardContent,
-                            fontSize = 12.sp
-                        )
-                        Text(
                             text = "Estado Planificador: ${if (s.isDirty) "Dirty (Pendiente)" else "Limpio"}",
                             color = cardContent,
                             fontSize = 12.sp

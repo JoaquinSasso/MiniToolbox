@@ -81,8 +81,7 @@ class MainActivity : AppCompatActivity() {
                             if (isMetricsConfigured) {
                                 UploadScheduler.enqueueNowExpedited(
                                     applicationContext,
-                                    MetricsConfig.endpoint,
-                                    MetricsConfig.apiKey
+                                    MetricsConfig.endpoint
                                 )
                             }
                         }

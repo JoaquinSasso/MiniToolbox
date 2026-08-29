@@ -2,6 +2,8 @@ package com.joasasso.minitoolbox.dev
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit
+import com.google.android.gms.tasks.Tasks
+import com.google.firebase.appcheck.FirebaseAppCheck
 import com.joasasso.minitoolbox.metrics.adImpression
 import com.joasasso.minitoolbox.metrics.appOpen
 import com.joasasso.minitoolbox.metrics.isMetricsEnabled
@@ -22,6 +24,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 /** Vista neutral para mostrar deltas sin depender de la data class interna del repositorio. */
 data class DayDeltaView(
@@ -39,7 +42,6 @@ data class DayDeltaView(
 data class DevSnapshot(
     val isEnabled: Boolean,
     val endpoint: String,
-    val apiKeyPreview: String,
     val isDirty: Boolean,
     val lastEnqueuedMs: Long,
     val pendingBatchId: String,
@@ -78,12 +80,10 @@ suspend fun loadDevSnapshot(context: Context): DevSnapshot {
     )
 
     val endpoint = MetricsConfig.endpoint
-    val rawKey = MetricsConfig.apiKey
 
     return DevSnapshot(
         isEnabled = isMetricsEnabled(appCtx),
         endpoint = endpoint,
-        apiKeyPreview = previewKey(rawKey),
         isDirty = UploadScheduler.isDirty(appCtx),
         lastEnqueuedMs = UploadScheduler.lastEnqueuedMs(appCtx),
         pendingBatchId = pendingBatchId,
@@ -97,17 +97,26 @@ suspend fun loadDevSnapshot(context: Context): DevSnapshot {
 fun triggerFlushNow(context: Context) {
     val appCtx = context.applicationContext
     val endpoint = MetricsConfig.endpoint
-    val apiKey = MetricsConfig.apiKey
-    UploadMetricsWorker.testEnqueueNow(appCtx, endpoint, apiKey)
+    UploadMetricsWorker.testEnqueueNow(appCtx, endpoint)
 }
 
 /** Envía un payload de prueba síncrono para verificar conexión y clave en el backend. */
 suspend fun testDirectConnection(context: Context): Result<String> = withContext(Dispatchers.IO) {
     val endpoint = MetricsConfig.endpoint
-    val apiKey = MetricsConfig.apiKey
 
     if (endpoint.isBlank()) {
         return@withContext Result.failure(Exception("Endpoint no configurado"))
+    }
+
+    val appCheckToken = try {
+        Tasks.await(
+            FirebaseAppCheck.getInstance().getAppCheckToken(false),
+            15, TimeUnit.SECONDS
+        ).token
+    } catch (_: Throwable) { null }
+
+    if (appCheckToken == null) {
+        return@withContext Result.failure(Exception("No se pudo obtener token de App Check"))
     }
 
     val today = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
@@ -134,7 +143,7 @@ suspend fun testDirectConnection(context: Context): Result<String> = withContext
             connectTimeout = 10000
             readTimeout = 10000
             setRequestProperty("Content-Type", "application/json")
-            if (apiKey.isNotBlank()) setRequestProperty("X-API-Key", apiKey)
+            setRequestProperty("X-Firebase-AppCheck", appCheckToken)
         }
 
         conn.outputStream.use { it.write(testPayload.toString().toByteArray()) }

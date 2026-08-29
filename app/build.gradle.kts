@@ -29,20 +29,18 @@ android {
     }
 
     val metricsEndpoint = localProperties.getProperty("METRICS_ENDPOINT") ?: ""
-    val metricsApiKey = localProperties.getProperty("METRICS_API_KEY") ?: ""
 
     defaultConfig {
         applicationId = "com.joasasso.minitoolbox"
         minSdk = 28
         targetSdk = 37
-        versionCode = 22
-        versionName = "1.3.1"
+        versionCode = 23
+        versionName = "1.3.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // Configuración de telemetría (se carga de local.properties, no se versiona)
         buildConfigField("String", "METRICS_ENDPOINT", "\"$metricsEndpoint\"")
-        buildConfigField("String", "METRICS_API_KEY", "\"$metricsApiKey\"")
     }
 
     signingConfigs {

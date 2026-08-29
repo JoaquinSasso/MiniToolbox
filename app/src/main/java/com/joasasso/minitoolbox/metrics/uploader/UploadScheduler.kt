@@ -36,7 +36,7 @@ object UploadScheduler {
     fun lastEnqueuedMs(ctx: Context): Long = prefs(ctx).getLong(KEY_LAST_ENQUEUED_MS, 0L)
 
     /** Programación “lenta” respetando ventana mínima, batería, etc. */
-    fun maybeSchedule(ctx: Context, endpoint: String, apiKey: String) {
+    fun maybeSchedule(ctx: Context, endpoint: String) {
         if (endpoint.isBlank()) return
         val p = prefs(ctx)
         if (!p.getBoolean(KEY_DIRTY, false)) return
@@ -50,7 +50,7 @@ object UploadScheduler {
             .setRequiresBatteryNotLow(true)
             .build()
 
-        val data = workDataOf("endpoint" to endpoint, "api_key" to apiKey)
+        val data = workDataOf("endpoint" to endpoint)
 
         val req = OneTimeWorkRequestBuilder<UploadMetricsWorker>()
             .setConstraints(constraints)
@@ -69,14 +69,14 @@ object UploadScheduler {
     }
 
     /** Encola un envío inmediato (expedited con fallback). Ideal para gatillos por cota. */
-    fun enqueueNowExpedited(ctx: Context, endpoint: String, apiKey: String) {
+    fun enqueueNowExpedited(ctx: Context, endpoint: String) {
         if (endpoint.isBlank()) return
 
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
 
-        val data = workDataOf("endpoint" to endpoint, "api_key" to apiKey)
+        val data = workDataOf("endpoint" to endpoint)
 
         val req = OneTimeWorkRequestBuilder<UploadMetricsWorker>()
             .setConstraints(constraints)
@@ -121,13 +121,12 @@ object UploadScheduler {
     /** Chequea umbrales y, si corresponde, encola envío inmediato (expedited). */
     suspend fun maybeFlushOnThreshold(ctx: Context, thresholds: FlushThreshold = FlushThreshold()) {
         val endpoint = MetricsConfig.endpoint
-        val apiKey = MetricsConfig.apiKey
         if (endpoint.isBlank()) return
 
         // Si ya hay payload congelado, enviarlo directamente
         if (hasPendingPayload(ctx)) {
             markDirty(ctx)
-            enqueueNowExpedited(ctx, endpoint, apiKey)
+            enqueueNowExpedited(ctx, endpoint)
             return
         }
 
@@ -141,7 +140,7 @@ object UploadScheduler {
 
         if (trigger) {
             markDirty(ctx)
-            enqueueNowExpedited(ctx, endpoint, apiKey)
+            enqueueNowExpedited(ctx, endpoint)
         }
     }
 }

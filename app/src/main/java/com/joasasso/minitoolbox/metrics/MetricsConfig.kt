@@ -9,10 +9,10 @@ import com.joasasso.minitoolbox.BuildConfig
  */
 object MetricsConfig {
     val endpoint: String = BuildConfig.METRICS_ENDPOINT
-    val apiKey: String = BuildConfig.METRICS_API_KEY
-
     /**
      * Indica si el sistema de métricas está configurado correctamente para subir datos.
+     * La autenticación es exclusivamente por Firebase App Check desde la 1.3.2.
+     * Ya no existe API key en el cliente.
      */
-    val isConfigured: Boolean = endpoint.isNotBlank() && apiKey.isNotBlank()
+    val isConfigured: Boolean = endpoint.isNotBlank()
 }
