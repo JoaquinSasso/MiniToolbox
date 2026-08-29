@@ -1,5 +1,7 @@
 import { onRequest } from "firebase-functions/v2/https";
 import { initializeApp } from "firebase-admin/app";
+import { getAppCheck } from "firebase-admin/app-check";
+import { logger } from "firebase-functions/v2";
 import {
 	getFirestore,
 	FieldValue,
@@ -52,13 +54,24 @@ function readHeader(req: any, name: string): string {
 	return "";
 }
 
-function getHeaderApiKey(req: any): string {
+function (req: any): string {
 	const k1 = readHeader(req, "x-api-key");
 	const k2 = readHeader(req, "X-API-Key");
 	const auth = readHeader(req, "authorization");
 	const m = /^Bearer\s+(.+)$/i.exec(auth || "");
 	const bearer = m ? m[1] : "";
 	return (k1 || k2 || bearer || "").trim();
+}
+
+async function verifyAppCheck(req: any): Promise<boolean> {
+	const token = readHeader(req, "X-Firebase-AppCheck");
+	try {
+		await getAppCheck().verifyToken(token);
+		return true;
+	} catch (e) {
+		logger.warn("appcheck_invalid", { reason: (e as Error).message });
+		return false;
+	}
 }
 
 // --- Tools: legacy route -> canonical route (SIN "tool." aquí) ---
@@ -381,12 +394,23 @@ export const ingest = onRequest(
 				sendJson(res, 405, { ok: false, error: "method_not_allowed" });
 				return;
 			}
+			const appCheckOk = await verifyAppCheck(req);
 			const apiKey = getHeaderApiKey(req);
 			const expected = (METRICS_API_KEY.value() || "").trim();
-			if (!expected || apiKey !== expected) {
+			const apiKeyOk = Boolean(expected) && apiKey === expected;
+
+			if (!appCheckOk && !apiKeyOk) {
+				logger.warn("ingest_unauthorized", {
+					app_version:
+						typeof req.body?.app_version === "string"
+							? req.body.app_version
+							: null,
+				});
 				sendJson(res, 401, { ok: false, error: "unauthorized" });
 				return;
 			}
+
+			const authMethod = appCheckOk ? "appcheck" : "api_key";
 
 			const parsed = validateBody(req.body);
 			if (!parsed.ok) {
@@ -412,6 +436,7 @@ export const ingest = onRequest(
 					platform: body.platform,
 					app_version: body.app_version,
 					items: (body.items ?? []).length,
+					auth_method: authMethod, // "appcheck" | "api_key"
 				});
 
 				for (const it of body.items) {
