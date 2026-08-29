@@ -65,19 +65,6 @@ android {
             }
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
-
-        // hereda configuración de release para que AGP lo considere "publicable"
-        create("oss") {
-            // El orden importa: initWith(release) debe ir DESPUÉS de configurar release
-            initWith(getByName("release"))
-            // firma con debug para poder instalar fácil desde Run
-            signingConfig = signingConfigs.getByName("debug")
-            isDebuggable = false               // mantenerlo no-depurable = publicable
-            applicationIdSuffix = ".oss"       // opcional, para instalar junto a debug
-            versionNameSuffix = "-oss"         // opcional
-            // si tu release tiene minifyEnabled=true y te molesta:
-            // isMinifyEnabled = false
-        }
     }
 
     compileOptions {
