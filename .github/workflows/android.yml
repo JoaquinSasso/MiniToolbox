@@ -7,6 +7,13 @@ on:
   pull_request:
     branches: [ "master" ]
 
+# Si se pushea varias veces seguidas a la misma rama, cancela las corridas
+# anteriores que todavía estén en curso. Solo interesa el resultado del
+# último commit.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -29,24 +36,20 @@ jobs:
           # If it causes issues in CI, it should be investigated rather than disabled.
           gradle-version: wrapper
 
-      - name: Assemble Debug
-        run: ./gradlew assembleDebug
-
-      - name: Run Unit Tests
-        run: ./gradlew testDebugUnitTest
-
-      - name: Lint
-        run: ./gradlew lintDebug
+      # Una sola invocación: el daemon arranca y la configuración se evalúa una vez
+      # en lugar de tres. Gradle resuelve el orden de las tareas por sí mismo.
+      - name: Build, test and lint
+        run: ./gradlew assembleDebug testDebugUnitTest lintDebug --build-cache
 
       - name: Upload Test Reports
-        if: always()
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: test-reports
           path: app/build/reports/tests/
 
       - name: Upload Lint Report
-        if: always()
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: lint-report
@@ -56,5 +59,5 @@ jobs:
 # 1. Instrumented Tests: Postponed as they require an emulator and today none are written.
 # 2. Release Job: Requires deciding on secret management for the keystore.
 # 3. Code Coverage: Verification of coverage (Jacoco/Kover) to be added in the future.
-# 
+#
 # NOTE: This workflow MUST work without keystore.properties. If it fails, check signingConfigs in build.gradle.kts.
