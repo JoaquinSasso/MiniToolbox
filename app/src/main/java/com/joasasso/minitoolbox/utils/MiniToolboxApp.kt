@@ -8,14 +8,31 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.RequestConfiguration
 import com.joasasso.minitoolbox.metrics.AppCheckSetup
+import com.joasasso.minitoolbox.metrics.storage.MetricsSanitizer
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 class MiniToolboxApp : Application(), CameraXConfig.Provider {
+
+    /**
+     * Scope de proceso para tareas de mantenimiento que no deben atarse a
+     * ninguna pantalla. SupervisorJob evita que un fallo cancele el resto.
+     */
+    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onCreate() {
         super.onCreate()
 
         // App Check: debe instalarse antes del primer envío de métricas
         AppCheckSetup.install(this)
+
+        // Saneo del almacenamiento local de métricas. Corre una sola vez por
+        // versión de esquema; en el resto de los arranques sale de inmediato.
+        appScope.launch {
+            MetricsSanitizer.runIfNeeded(this@MiniToolboxApp)
+        }
 
         // --- AdMob: test devices ---
         val admobTestIds = listOf(
