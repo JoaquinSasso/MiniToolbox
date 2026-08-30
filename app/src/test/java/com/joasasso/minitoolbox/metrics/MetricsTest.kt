@@ -5,7 +5,8 @@ import android.content.SharedPreferences
 import com.joasasso.minitoolbox.metrics.storage.AggregatesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -18,23 +19,24 @@ import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
-import org.mockito.Mockito.timeout
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MetricsTest {
 
-    private val testDispatcher = UnconfinedTestDispatcher()
+    private val testDispatcher = StandardTestDispatcher()
 
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
+        metricsDispatcher = testDispatcher
     }
 
     @After
     fun tearDown() {
         Dispatchers.resetMain()
+        metricsDispatcher = Dispatchers.IO
         metricsRepoFactory = null
         metricsTestScheduleHook = null
     }
@@ -61,29 +63,30 @@ class MetricsTest {
     }
 
     @Test
-    fun `verify double count fix - appOpen and dailyOpenOnce increment separate counters`() = runTest {
+    fun `appOpen increments app_open and NOT daily_active`() = runTest {
         val (context, _) = setupContextMocks()
         val mockRepo = mock(AggregatesRepository::class.java)
         metricsRepoFactory = { mockRepo }
         metricsTestScheduleHook = { /* no-op */ }
 
         appOpen(context)
-        dailyOpenOnce(context)
+        advanceUntilIdle()
 
-        verify(mockRepo, never()).incrementAppOpen()
-        verify(mockRepo, timeout(5000)).incrementDailyActive()
+        verify(mockRepo).incrementAppOpen()
+        verify(mockRepo, never()).incrementDailyActive()
     }
 
     @Test
-    fun `verify dailyOpenOnce only increments dailyActive and NOT appOpen`() = runTest {
+    fun `dailyOpenOnce increments daily_active and NOT app_open`() = runTest {
         val (context, _) = setupContextMocks()
         val mockRepo = mock(AggregatesRepository::class.java)
         metricsRepoFactory = { mockRepo }
         metricsTestScheduleHook = { /* no-op */ }
 
         dailyOpenOnce(context)
+        advanceUntilIdle()
 
-        verify(mockRepo, timeout(5000)).incrementDailyActive()
+        verify(mockRepo).incrementDailyActive()
         verify(mockRepo, never()).incrementAppOpen()
     }
 }
