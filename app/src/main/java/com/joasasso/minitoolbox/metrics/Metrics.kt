@@ -5,6 +5,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.content.edit
 import com.joasasso.minitoolbox.metrics.storage.AggregatesRepository
 import com.joasasso.minitoolbox.metrics.uploader.UploadScheduler
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -76,8 +77,16 @@ private fun scheduleIfEnabled(ctx: Context) {
     UploadScheduler.maybeSchedule(ctx, MetricsConfig.endpoint)
 }
 
+/**
+ * Dispatcher para operaciones de IO de métricas.
+ * Se puede inyectar en tests para control de concurrencia.
+ * Debe eliminarse cuando se introduzca Hilt.
+ */
+@VisibleForTesting
+internal var metricsDispatcher: CoroutineDispatcher = Dispatchers.IO
+
 private fun io(block: suspend () -> Unit) {
-    CoroutineScope(Dispatchers.IO).launch { block() }
+    CoroutineScope(metricsDispatcher).launch { block() }
 }
 
 /** Suma app open y agenda upload oportunista (respeta opt-out) */

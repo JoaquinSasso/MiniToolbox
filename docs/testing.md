@@ -38,6 +38,13 @@ El archivo `app/lint-baseline.xml` se utiliza exclusivamente para gestionar deud
 3. **Deuda Conocida**: Actualmente, el baseline contiene un `StaticFieldLeak` en `ProSilentInitializer.kt` relacionado con el subsistema de billing. Este se mantendrá hasta que se implemente inyección de dependencias (Hilt), momento en el cual se espera eliminar todas las referencias estáticas a `Context`.
 4. **Test Seams**: Las costuras de test (como `metricsRepoFactory` en `Metrics.kt`) son ejemplos concretos de la necesidad de DI. Deben estar anotadas con `@VisibleForTesting` y ser eliminadas tras la migración a Hilt.
 
+## Concurrencia y Determinismo
+
+1. **No a los Timeouts/Sleeps**: Ningún test de este proyecto debe esperar con `timeout()`, `Thread.sleep()` ni polling. Si un test necesita esperar, es que la concurrencia del código bajo prueba no es inyectable, y eso se arregla en el código de producción (inyectando dispatchers o usando hooks), no en el test.
+2. **Inyección de Dispatchers**: Todo código que use corrutinas debe permitir la inyección de un `CoroutineDispatcher`. En ausencia de DI, usar `@VisibleForTesting internal var` como costura temporal.
+3. **Control del Tiempo**: Usar `StandardTestDispatcher` y `advanceUntilIdle()` para garantizar que todo el trabajo pendiente terminó antes de realizar las aserciones.
+4. **Verificación de Ausencia**: Las aserciones de ausencia (`verify(mock, never())`) sobre código asíncrono solo tienen sentido después de garantizar que todo el trabajo pendiente terminó (`advanceUntilIdle()`). Un `never()` evaluado inmediatamente sobre trabajo asíncrono no verifica nada: siempre pasa porque el trabajo aún no ocurrió.
+
 ---
 
 ## Roadmap de Testing (Prioridades)
