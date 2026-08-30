@@ -1,0 +1,32 @@
+{
+  "_comment": "Contrato de claves de métricas. Consumido por MetricsContractTest.kt (Kotlin) y validate.test.ts (backend). Si cambia el regex o normalizeKey en un lado, el test del otro falla.",
+  "valid": [
+    "water",
+    "ar_ruler",
+    "pomodoro_list",
+    "a",
+    "1.3.2",
+    "es-AR",
+    "a_b.c-d",
+    "widget_shortcuts"
+  ],
+  "normalize": [
+    { "in": "pomodoro/detail/2f7a1b3c-4d5e-6f70-8a9b-0c1d2e3f4a5b", "out": "pomodoro_detail" },
+    { "in": "pomodoro/detail/{timerId}", "out": "pomodoro_detail_timerId" },
+    { "in": "dev/metrics", "out": "dev_metrics" },
+    { "in": "a/b", "out": "a_b" },
+    { "in": "meeting_detail/12345", "out": "meeting_detail" },
+    { "in": "water?from=widget", "out": "water_from_widget" },
+    { "in": "  water  ", "out": "water" },
+    { "in": "café ☕", "out": "caf" },
+    { "in": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "out": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" },
+    { "in": "", "out": null },
+    { "in": "   ", "out": null },
+    { "in": "///", "out": null },
+    { "in": "___", "out": null }
+  ],
+  "days": {
+    "valid": ["2026-08-30", "1970-01-01"],
+    "invalid": ["2026-8-30", "20260830", "BAD", "", "2026-08-30T00:00:00"]
+  }
+}
