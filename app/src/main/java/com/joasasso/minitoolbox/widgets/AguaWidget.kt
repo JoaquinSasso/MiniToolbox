@@ -38,6 +38,7 @@ import com.joasasso.minitoolbox.MainActivity
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AgregarAguaCallback
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.QuitarAguaCallback
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.actualizarWidgetAgua
+import com.joasasso.minitoolbox.nav.Screen
 
 class AguaWidget : GlanceAppWidget() {
 
@@ -55,7 +56,7 @@ class AguaWidget : GlanceAppWidget() {
             val porVaso = prefs[KEY_POR_VASO] ?: 250
 
             val launchIntent = Intent(context, MainActivity::class.java).apply {
-                putExtra("startRoute", "agua")
+                putExtra("startRoute", Screen.Water.route)
             }
 
             Box(

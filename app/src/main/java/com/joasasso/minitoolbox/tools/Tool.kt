@@ -19,5 +19,15 @@ data class Tool(
     @StringRes val summary: Int? = null,
     val icon: ImageVector? = null,
     @DrawableRes val svgResId: Int? = null,
-    val isPro: Boolean = false
+    val isPro: Boolean = false,
+    /**
+     * Identificador estable para métricas.
+     *
+     * Por defecto coincide con la ruta de navegación, que es lo que se venía usando
+     * y mantiene la continuidad histórica de los datos. Pero es un campo aparte a
+     * propósito: si alguna vez cambia la ruta por razones de UX, hay que fijar acá
+     * el valor anterior para no romper las series temporales. Debe cumplir siempre
+     * el contrato de MetricsContract.KEY_RE.
+     */
+    val metricsKey: String = screen.route
 )

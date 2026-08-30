@@ -33,6 +33,7 @@ import androidx.glance.text.TextStyle
 import com.joasasso.minitoolbox.MainActivity
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AgregarAguaCallback
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.actualizarWidgetAgua
+import com.joasasso.minitoolbox.nav.Screen
 
 
 class AguaMiniWidget : GlanceAppWidget() {
@@ -55,7 +56,7 @@ class AguaMiniWidget : GlanceAppWidget() {
             val progresoColor = Color(0xFF2389DA)
 
             val launchIntent = Intent(context, MainActivity::class.java).apply {
-                putExtra("startRoute", "agua")
+                putExtra("startRoute", Screen.Water.route)
             }
 
             // Widget general: clic abre la app
