@@ -14,6 +14,7 @@ import com.joasasso.minitoolbox.data.flujoAguaHoy
 import com.joasasso.minitoolbox.data.flujoObjetivo
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import com.joasasso.minitoolbox.nav.Screen
 
 class WaterReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -36,7 +37,7 @@ class WaterReminderReceiver : BroadcastReceiver() {
         manager.createNotificationChannel(channel)
 
         val intent = Intent(context, MainActivity::class.java).apply {
-            putExtra("startRoute", "agua")
+            putExtra("startRoute", Screen.Water.route)
         }
 
         val pi = PendingIntent.getActivity(
@@ -81,4 +82,3 @@ fun createWaterReminderChannel(context: Context) {
     }
     mgr.createNotificationChannel(channel)
 }
-

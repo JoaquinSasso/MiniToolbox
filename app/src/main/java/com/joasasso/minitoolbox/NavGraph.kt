@@ -24,6 +24,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.joasasso.minitoolbox.dev.MetricsDevScreen
 import com.joasasso.minitoolbox.metrics.TOOL_USAGE_METRIC_COOLDOWN_MS
+import com.joasasso.minitoolbox.metrics.ToolRoutes
 import com.joasasso.minitoolbox.metrics.toolUse
 import com.joasasso.minitoolbox.nav.Screen
 import com.joasasso.minitoolbox.tools.ToolRegistry
@@ -91,7 +92,6 @@ fun MiniToolboxNavGraph(
         }
     }
 
-    val toolRoutes: Set<String> = remember { ToolRegistry.tools.map { it.screen.route }.toSet() }
 
     // Cooldown para métricas para evitar duplicados por rebotes de navegación
     val metricsDebouncer = remember { ToolDebouncer(cooldownMs = TOOL_USAGE_METRIC_COOLDOWN_MS) }
@@ -101,10 +101,13 @@ fun MiniToolboxNavGraph(
 
     LaunchedEffect(backStackEntry?.destination?.route) {
         val route = backStackEntry?.destination?.route ?: return@LaunchedEffect
-        if (route != lastRoute && toolRoutes.contains(route)) {
+        // La clave de métrica se resuelve contra el registry en lugar de usar la ruta
+        // cruda: una ruta desconocida o con argumentos no debe generar métrica.
+        val tool = ToolRoutes.findTool(route)
+        if (route != lastRoute && tool != null) {
             // Registrar métrica solo si pasó el cooldown de deduplicación
             if (metricsDebouncer.canExecute(route)) {
-                toolUse(context, route)
+                toolUse(context, tool.metricsKey)
             }
 
             // contar solo si pasó el cooldown por herramienta (Tracker de anuncios - 30s)
