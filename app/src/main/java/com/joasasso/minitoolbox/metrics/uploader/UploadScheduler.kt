@@ -24,6 +24,9 @@ object UploadScheduler {
     private const val KEY_LAST_ENQUEUED_MS = "last_enqueued_ms"
 
     private const val MIN_INTERVAL_MS = 3 * 60 * 60 * 1000L // 3h ventana mínima para maybeSchedule
+
+    /** Fallos consecutivos a partir de los cuales se deja de forzar envíos inmediatos. */
+    private const val MAX_EXPEDITED_FAILURES = 3
     internal val BACKOFF: Duration = Duration.ofMinutes(15)
     private val INITIAL_DELAY = Duration.ofSeconds(20)
 
@@ -118,13 +121,23 @@ object UploadScheduler {
         return json.isNotBlank()
     }
 
+    private suspend fun consecutiveFailures(ctx: Context): Int = try {
+        ctx.metricsDataStore.data.first()[MetricsKeys.CONSECUTIVE_FAILURES] ?: 0
+    } catch (_: Throwable) {
+        0
+    }
+
     /** Chequea umbrales y, si corresponde, encola envío inmediato (expedited). */
     suspend fun maybeFlushOnThreshold(ctx: Context, thresholds: FlushThreshold = FlushThreshold()) {
         val endpoint = MetricsConfig.endpoint
         if (endpoint.isBlank()) return
 
-        // Si ya hay payload congelado, enviarlo directamente
+        // Si ya hay payload congelado, enviarlo directamente.
+        // Salvo que venga fallando: insistir con envíos expedited ante un backend caído
+        // o un lote problemático sólo gasta batería. Se deja que el agendado lento
+        // (maybeSchedule) se ocupe hasta que la situación se normalice.
         if (hasPendingPayload(ctx)) {
+            if (consecutiveFailures(ctx) >= MAX_EXPEDITED_FAILURES) return
             markDirty(ctx)
             enqueueNowExpedited(ctx, endpoint)
             return

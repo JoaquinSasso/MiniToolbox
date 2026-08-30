@@ -191,6 +191,7 @@ class UploadMetricsWorker(appContext: Context, params: WorkerParameters) :
             .put("batch_id", batchId)
             .put("platform", "android")
             .put("app_version", safeVersionName())
+            .put("schema_version", PAYLOAD_SCHEMA_VERSION)
             .put("client_health", health)
             .put("items", itemsArr)
             .toString()
@@ -297,6 +298,15 @@ class UploadMetricsWorker(appContext: Context, params: WorkerParameters) :
     }
 
     companion object {
+        /**
+         * Versión del formato del payload enviado al backend.
+         *
+         * Permite separar datos históricos si alguna vez cambia la semántica de un campo.
+         * Es imposible de agregar retroactivamente: sin esto, un cambio de significado
+         * mezcla para siempre los datos viejos con los nuevos.
+         */
+        private const val PAYLOAD_SCHEMA_VERSION = 1
+
         /** Intentos antes de descartar un lote y desbloquear la cola. */
         private const val MAX_ATTEMPTS = 5
 
