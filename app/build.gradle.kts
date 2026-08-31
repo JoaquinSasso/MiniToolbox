@@ -81,6 +81,15 @@ android {
         buildConfig = true
     }
 
+    sourceSets {
+        // Las fixtures del contrato de claves viven en la raíz del repo y las comparten
+        // los tests de Kotlin y los del backend en TypeScript. Se exponen como recurso
+        // de test en lugar de duplicarlas, para que no puedan desincronizarse.
+        getByName("test") {
+            resources.srcDir("../metrics-fixtures")
+        }
+    }
+
     lint {
         baseline = file("lint-baseline.xml")
         abortOnError = true
@@ -142,6 +151,9 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.mockito.core)
     testImplementation(libs.kotlinx.coroutines.test)
+    // Implementación real de org.json: en tests unitarios el stub de android.jar
+    // lanza "not mocked" en cada llamada.
+    testImplementation(libs.json)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
