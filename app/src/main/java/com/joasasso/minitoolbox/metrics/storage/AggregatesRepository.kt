@@ -4,6 +4,8 @@ import android.content.Context
 import android.os.LocaleList
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
+import com.joasasso.minitoolbox.BuildConfig
+import com.joasasso.minitoolbox.metrics.MetricsContract
 import kotlinx.coroutines.flow.first
 import org.json.JSONArray
 import java.text.SimpleDateFormat
@@ -27,7 +29,32 @@ class AggregatesRepository(private val context: Context) {
     )
 
     private val dayFmt = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+
+    /**
+     * Día local del dispositivo.
+     *
+     * Nota conocida: usa la zona horaria del dispositivo, así que un mismo "día" agrupa
+     * husos distintos. Es tolerable para conteos diarios, pero invalida cualquier
+     * análisis horario o comparación de días exactos entre dispositivos.
+     */
     private fun today(): String = dayFmt.format(Date())
+
+    /**
+     * Última barrera antes de escribir en disco.
+     *
+     * En debug lanza excepción para que el error se detecte durante el desarrollo y los
+     * tests; en release normaliza en silencio, porque un crash por una métrica sería
+     * mucho peor que un dato imperfecto. Devuelve null si la clave es irrecuperable.
+     */
+    private fun safeKey(raw: String): String? {
+        if (MetricsContract.isValidKey(raw)) return raw
+        if (BuildConfig.DEBUG) {
+            throw IllegalArgumentException(
+                "Clave de métrica inválida: '$raw'. Debe cumplir MetricsContract.KEY_RE."
+            )
+        }
+        return MetricsContract.normalizeKey(raw)
+    }
 
     // ---------------------------
     // Helpers de versión e idioma
@@ -157,34 +184,37 @@ class AggregatesRepository(private val context: Context) {
     }
 
     suspend fun incrementToolUse(toolId: String) {
+        val key = safeKey(toolId) ?: return
         val ds = context.metricsDataStore
         val day = today()
         ds.edit { e ->
             val byDay = JsonUtils.fromDayNestedIntMap(e[MetricsKeys.TOOL_USE_BY_DAY_JSON])
             val bucket = byDay.getOrPut(day) { mutableMapOf() }
-            bucket[toolId] = (bucket[toolId] ?: 0) + 1
+            bucket[key] = (bucket[key] ?: 0) + 1
             e[MetricsKeys.TOOL_USE_BY_DAY_JSON] = JsonUtils.toDayNestedIntMap(byDay)
         }
     }
 
     suspend fun incrementAdImpression(type: String) {
+        val key = safeKey(type) ?: return
         val ds = context.metricsDataStore
         val day = today()
         ds.edit { e ->
             val byDay = JsonUtils.fromDayNestedIntMap(e[MetricsKeys.AD_IMPRESSIONS_BY_DAY_JSON])
             val bucket = byDay.getOrPut(day) { mutableMapOf() }
-            bucket[type] = (bucket[type] ?: 0) + 1
+            bucket[key] = (bucket[key] ?: 0) + 1
             e[MetricsKeys.AD_IMPRESSIONS_BY_DAY_JSON] = JsonUtils.toDayNestedIntMap(byDay)
         }
     }
 
     suspend fun incrementWidgetUse(widgetType: String) {
+        val key = safeKey(widgetType) ?: return
         val ds = context.metricsDataStore
         val day = today()
         ds.edit { e ->
             val byDay = JsonUtils.fromDayNestedIntMap(e[MetricsKeys.WIDGET_USE_BY_DAY_JSON])
             val bucket = byDay.getOrPut(day) { mutableMapOf() }
-            bucket[widgetType] = (bucket[widgetType] ?: 0) + 1
+            bucket[key] = (bucket[key] ?: 0) + 1
             e[MetricsKeys.WIDGET_USE_BY_DAY_JSON] = JsonUtils.toDayNestedIntMap(byDay)
         }
     }
