@@ -16,13 +16,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
-import com.joasasso.minitoolbox.dev.MetricsDevScreen
+import com.joasasso.minitoolbox.dev.MetricsDiagnosticsScreen
 import com.joasasso.minitoolbox.metrics.TOOL_USAGE_METRIC_COOLDOWN_MS
 import com.joasasso.minitoolbox.metrics.ToolRoutes
 import com.joasasso.minitoolbox.metrics.toolUse
@@ -324,11 +325,12 @@ fun MiniToolboxNavGraph(
             ArRulerSceneViewScreen(onBack = onBackSmart)
         }
         composable(Screen.About.route) {
+            val licensesTitle = stringResource(R.string.about_licenses_button)
             AboutScreen(
                 onBack = onBackSmart,
                 onOpenLicenses = {
                     com.google.android.gms.oss.licenses.OssLicensesMenuActivity.setActivityTitle(
-                        context.getString(R.string.about_licenses_button)
+                        licensesTitle
                     )
                     context.startActivity(
                         android.content.Intent(context, com.google.android.gms.oss.licenses.OssLicensesMenuActivity::class.java)
@@ -339,7 +341,9 @@ fun MiniToolboxNavGraph(
             )
         }
         composable(Screen.DevMetrics.route) {
-            MetricsDevScreen()
+            // Diagnóstico de sólo lectura: disponible en release una vez desbloqueado.
+            // Las herramientas destructivas quedan dentro, condicionadas a BuildConfig.DEBUG.
+            MetricsDiagnosticsScreen(onBack = onBackSmart)
         }
         composable(Screen.Pro.route) {
             ProScreen(onBack = onBackSmart)

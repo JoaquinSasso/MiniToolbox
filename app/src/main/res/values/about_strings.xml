@@ -58,4 +58,8 @@ If the app is helpful to you, then it was already worth it.
     <string name="metrics_toggle_off_line">Don’t send anonymous metrics</string>
     <string name="metrics_toggle_caption">Help improve MiniToolbox with aggregated, non-personal usage data. You can change this anytime.</string>
 
+    <string name="dev_diagnostics_button">Metrics diagnostics</string>
+    <string name="dev_diagnostics_unlocked">Metrics diagnostics unlocked</string>
+    <string name="dev_diagnostics_steps_left">You are %1$d steps away from unlocking metrics diagnostics</string>
+
 </resources>
