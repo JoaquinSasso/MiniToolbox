@@ -1,22 +1,115 @@
 package com.joasasso.minitoolbox.dev
 
 import android.content.Context
+import com.joasasso.minitoolbox.metrics.MetricsContract
 import com.joasasso.minitoolbox.metrics.isMetricsEnabled
 import com.joasasso.minitoolbox.metrics.storage.MetricsKeys
 import com.joasasso.minitoolbox.metrics.storage.MetricsSanitizer
 import com.joasasso.minitoolbox.metrics.storage.metricsDataStore
 import com.joasasso.minitoolbox.metrics.uploader.UploadScheduler
 import kotlinx.coroutines.flow.first
+import org.json.JSONArray
+import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 /**
+ * Resumen estructural del lote congelado.
+ *
+ * Responde "¿por qué el backend rechazaría este lote?" sin volcar el payload entero: si hay
+ * claves o días que no cumplen [MetricsContract], aparecen nombrados y eso suele ser toda
+ * la explicación.
+ */
+data class PayloadAnalysis(
+    val present: Boolean,
+    val sizeChars: Int,
+    val itemCount: Int,
+    val distinctKeys: Int,
+    val invalidKeys: List<String>,
+    val invalidDays: List<String>,
+    val parseError: String?
+) {
+    val looksValid: Boolean
+        get() = !present || (parseError == null && invalidKeys.isEmpty() && invalidDays.isEmpty())
+}
+
+/** Campos del item que contienen mapas clave -> contador. */
+private val COUNTER_FIELDS = listOf(
+    "tools", "ads", "versions", "versions_first_seen",
+    "lang_primary", "lang_secondary", "widgets"
+)
+
+/**
+ * Analiza el payload congelado buscando lo que el backend rechazaría.
+ * Función pura: se puede testear sin Android.
+ */
+fun analyzePendingPayload(json: String): PayloadAnalysis {
+    if (json.isBlank()) {
+        return PayloadAnalysis(
+            present = false,
+            sizeChars = 0,
+            itemCount = 0,
+            distinctKeys = 0,
+            invalidKeys = emptyList(),
+            invalidDays = emptyList(),
+            parseError = null
+        )
+    }
+
+    return try {
+        val root = JSONObject(json)
+        val items: JSONArray = root.optJSONArray("items") ?: JSONArray()
+
+        val allKeys = mutableSetOf<String>()
+        val invalidKeys = mutableSetOf<String>()
+        val invalidDays = mutableSetOf<String>()
+
+        for (i in 0 until items.length()) {
+            val item = items.optJSONObject(i) ?: continue
+
+            val day = item.optString("day", "")
+            if (!MetricsContract.isValidDay(day)) invalidDays.add(day.ifBlank { "(vacío)" })
+
+            for (field in COUNTER_FIELDS) {
+                val map = item.optJSONObject(field) ?: continue
+                val keys = map.keys()
+                while (keys.hasNext()) {
+                    val key = keys.next()
+                    allKeys.add(key)
+                    if (!MetricsContract.isValidKey(key)) invalidKeys.add(key)
+                }
+            }
+        }
+
+        PayloadAnalysis(
+            present = true,
+            sizeChars = json.length,
+            itemCount = items.length(),
+            distinctKeys = allKeys.size,
+            invalidKeys = invalidKeys.sorted(),
+            invalidDays = invalidDays.sorted(),
+            parseError = null
+        )
+    } catch (t: Throwable) {
+        PayloadAnalysis(
+            present = true,
+            sizeChars = json.length,
+            itemCount = 0,
+            distinctKeys = 0,
+            invalidKeys = emptyList(),
+            invalidDays = emptyList(),
+            parseError = "${t.javaClass.simpleName}: ${t.message}"
+        )
+    }
+}
+
+/**
  * Estado de salud del pipeline de métricas, apto para mostrarse en release.
  *
- * Contiene sólo contadores y códigos: ningún dato personal, ninguna credencial. El
- * endpoint se muestra recortado y la clave de API ya no existe en el cliente.
+ * El payload crudo queda en [pendingPayloadRaw] pero fuera del informe por defecto: son
+ * contadores de uso de la persona y conviene que decida explícitamente compartirlos.
  */
 data class MetricsHealth(
     val metricsEnabled: Boolean,
@@ -29,16 +122,15 @@ data class MetricsHealth(
     val sanitizedKeysTotal: Int,
     val lastUploadUsedAppCheck: Boolean,
     val pendingBatchId: String,
-    val pendingPayloadLength: Int,
     val pendingCreatedAtMs: Long,
+    val pendingPayloadRaw: String,
+    val payload: PayloadAnalysis,
     val isDirty: Boolean,
     val appVersion: String
 ) {
-    /** True si el pipeline parece sano: envió alguna vez y no viene fallando. */
     val looksHealthy: Boolean
         get() = lastSuccessAtMs > 0L && consecutiveFailures == 0
 
-    /** Días desde el último envío exitoso, o null si nunca hubo uno. */
     val daysSinceLastSuccess: Long?
         get() = if (lastSuccessAtMs <= 0L) null
         else TimeUnit.MILLISECONDS.toDays(System.currentTimeMillis() - lastSuccessAtMs)
@@ -60,6 +152,8 @@ suspend fun loadMetricsHealth(context: Context): MetricsHealth {
         "unknown"
     }
 
+    val rawPayload = prefs[MetricsKeys.PENDING_BATCH_PAYLOAD_JSON].orEmpty()
+
     return MetricsHealth(
         metricsEnabled = isMetricsEnabled(appCtx),
         schemaVersion = prefs[MetricsKeys.SCHEMA_VERSION] ?: 0,
@@ -71,19 +165,19 @@ suspend fun loadMetricsHealth(context: Context): MetricsHealth {
         sanitizedKeysTotal = prefs[MetricsKeys.SANITIZED_KEYS_TOTAL] ?: 0,
         lastUploadUsedAppCheck = prefs[MetricsKeys.LAST_UPLOAD_USED_APPCHECK] ?: false,
         pendingBatchId = prefs[MetricsKeys.PENDING_BATCH_ID].orEmpty(),
-        pendingPayloadLength = prefs[MetricsKeys.PENDING_BATCH_PAYLOAD_JSON].orEmpty().length,
         pendingCreatedAtMs = prefs[MetricsKeys.PENDING_BATCH_CREATED_AT] ?: 0L,
+        pendingPayloadRaw = rawPayload,
+        payload = analyzePendingPayload(rawPayload),
         isDirty = UploadScheduler.isDirty(appCtx),
         appVersion = appVersion
     )
 }
 
 /**
- * Texto plano del diagnóstico, pensado para que el usuario lo copie y lo mande.
+ * Informe de texto plano para que el usuario lo copie y lo mande.
  *
- * Es la razón principal para exponer esta pantalla en release: convierte un
- * "no me andan las métricas" en un reporte accionable sin pedirle a nadie que instale
- * una build especial.
+ * Incluye el análisis del lote pendiente con las claves problemáticas nombradas, pero no el
+ * payload completo: con esto suele alcanzar para identificar por qué el backend rechaza.
  */
 fun buildDiagnosticsText(health: MetricsHealth): String = buildString {
     appendLine("--- MiniToolbox: diagnóstico de métricas ---")
@@ -101,15 +195,46 @@ fun buildDiagnosticsText(health: MetricsHealth): String = buildString {
     appendLine()
     appendLine("dropped_batches: ${health.droppedBatches}")
     appendLine("sanitized_keys: ${health.sanitizedKeysTotal}")
-    appendLine("pending_batch: ${health.pendingBatchId.ifBlank { "-" }}")
-    appendLine("pending_size: ${health.pendingPayloadLength}")
-    appendLine("pending_since: ${formatTimestamp(health.pendingCreatedAtMs)}")
     appendLine("dirty: ${health.isDirty}")
+    appendLine()
+
+    val p = health.payload
+    if (!p.present) {
+        appendLine("pending_batch: ninguno")
+        return@buildString
+    }
+
+    appendLine("pending_batch: ${health.pendingBatchId.ifBlank { "(sin id)" }}")
+    appendLine("pending_since: ${formatTimestamp(health.pendingCreatedAtMs)}")
+    appendLine("pending_size: ${p.sizeChars} chars")
+    appendLine("pending_items: ${p.itemCount}")
+    appendLine("pending_distinct_keys: ${p.distinctKeys}")
+
+    p.parseError?.let { appendLine("pending_parse_error: $it") }
+
+    if (p.looksValid) {
+        appendLine("pending_contract: OK")
+        return@buildString
+    }
+
+    if (p.invalidKeys.isNotEmpty()) {
+        appendLine("pending_invalid_keys (${p.invalidKeys.size}):")
+        p.invalidKeys.take(MAX_LISTED_KEYS).forEach { appendLine("  - $it") }
+        if (p.invalidKeys.size > MAX_LISTED_KEYS) {
+            appendLine("  … y ${p.invalidKeys.size - MAX_LISTED_KEYS} más")
+        }
+    }
+    if (p.invalidDays.isNotEmpty()) {
+        appendLine("pending_invalid_days: ${p.invalidDays.joinToString(", ")}")
+    }
 }
+
+private const val MAX_LISTED_KEYS = 20
 
 /** Resumen de una línea para encabezar la pantalla. */
 fun summarizeHealth(health: MetricsHealth): String = when {
     !health.metricsEnabled -> "Métricas desactivadas en Configuración"
+    !health.payload.looksValid -> "Lote pendiente con datos que el servidor rechazaría"
     health.lastSuccessAtMs <= 0L && health.consecutiveFailures == 0 ->
         "Todavía no se envió ningún lote"
     health.looksHealthy -> {
@@ -120,4 +245,11 @@ fun summarizeHealth(health: MetricsHealth): String = when {
     health.consecutiveFailures > 0 ->
         "Fallando: ${health.consecutiveFailures} intento(s) seguidos, último código ${health.lastUploadCode}"
     else -> "Estado indeterminado"
+}
+
+/** Formatea el payload crudo con indentación, para inspección manual. */
+fun prettyPayload(json: String): String = try {
+    JSONObject(json).toString(2)
+} catch (_: Throwable) {
+    json
 }

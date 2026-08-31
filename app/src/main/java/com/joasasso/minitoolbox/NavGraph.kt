@@ -16,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -324,11 +325,12 @@ fun MiniToolboxNavGraph(
             ArRulerSceneViewScreen(onBack = onBackSmart)
         }
         composable(Screen.About.route) {
+            val licensesTitle = stringResource(R.string.about_licenses_button)
             AboutScreen(
                 onBack = onBackSmart,
                 onOpenLicenses = {
                     com.google.android.gms.oss.licenses.OssLicensesMenuActivity.setActivityTitle(
-                        context.getString(R.string.about_licenses_button)
+                        licensesTitle
                     )
                     context.startActivity(
                         android.content.Intent(context, com.google.android.gms.oss.licenses.OssLicensesMenuActivity::class.java)
@@ -341,7 +343,7 @@ fun MiniToolboxNavGraph(
         composable(Screen.DevMetrics.route) {
             // Diagnóstico de sólo lectura: disponible en release una vez desbloqueado.
             // Las herramientas destructivas quedan dentro, condicionadas a BuildConfig.DEBUG.
-            MetricsDiagnosticsScreen()
+            MetricsDiagnosticsScreen(onBack = onBackSmart)
         }
         composable(Screen.Pro.route) {
             ProScreen(onBack = onBackSmart)
