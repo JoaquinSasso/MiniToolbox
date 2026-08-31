@@ -66,7 +66,7 @@ fun AboutScreen(
 ) {
     val context = LocalContext.current
     val url = stringResource(R.string.privacy_policy_url)
-    var hapticFeedback = LocalHapticFeedback.current
+    val hapticFeedback = LocalHapticFeedback.current
 
     // Version name segura (sin BuildConfig)
     val versionName by remember {
@@ -81,6 +81,8 @@ fun AboutScreen(
     }
 
     val flaticonAuthors = stringArrayResource(R.array.about_flaticon_authors)
+    val devUnlockedMsg = stringResource(R.string.dev_diagnostics_unlocked)
+    val devStepsHintFormat = stringResource(R.string.dev_diagnostics_steps_left)
 
     // Desbloqueo del diagnóstico de métricas al estilo de las opciones de desarrollador
     // de Android: varios toques sobre el número de versión.
@@ -120,7 +122,7 @@ fun AboutScreen(
                                     devUnlocked = true
                                     Toast.makeText(
                                         context,
-                                        context.getString(R.string.dev_diagnostics_unlocked),
+                                        devUnlockedMsg,
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 }
@@ -128,10 +130,7 @@ fun AboutScreen(
                                     if (!devUnlocked) {
                                         Toast.makeText(
                                             context,
-                                            context.getString(
-                                                R.string.dev_diagnostics_steps_left,
-                                                result.remaining
-                                            ),
+                                            devStepsHintFormat.format(result.remaining),
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     }
@@ -308,7 +307,6 @@ private fun SectionTitle(text: String) {
 
 @Composable
 fun PrivacyOptionsButton(
-    modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val activity = remember(context) { context.findActivity() }
@@ -326,7 +324,7 @@ fun PrivacyOptionsButton(
         Button(
             onClick = {
                 activity?.let { act ->
-                    com.google.android.ump.UserMessagingPlatform.showPrivacyOptionsForm(act) { /* FormError? */ }
+                    UserMessagingPlatform.showPrivacyOptionsForm(act) { /* FormError? */ }
                 }
             },
             modifier = Modifier.fillMaxWidth()
