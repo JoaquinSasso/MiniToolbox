@@ -56,4 +56,8 @@ Si la app te resulta útil, para mí ya valió la pena.
     <string name="metrics_toggle_off_line">No enviar métricas anónimas</string>
     <string name="metrics_toggle_caption">Ayuda a mejorar MiniToolbox con datos de uso agregados y sin información personal. Puedes cambiarlo en cualquier momento.</string>
 
+    <string name="dev_diagnostics_button">Diagnóstico de métricas</string>
+    <string name="dev_diagnostics_unlocked">Diagnóstico de métricas desbloqueado</string>
+    <string name="dev_diagnostics_steps_left">Estás a %1$d pasos de desbloquear el diagnóstico de métricas</string>
+
 </resources>

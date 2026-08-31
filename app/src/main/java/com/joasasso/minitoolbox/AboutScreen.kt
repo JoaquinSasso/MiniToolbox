@@ -52,6 +52,9 @@ import com.joasasso.minitoolbox.metrics.setMetricsEnabled
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import com.joasasso.minitoolbox.utils.openPrivacyUrl
 import com.joasasso.minitoolbox.utils.pro.LocalProState
+import com.joasasso.minitoolbox.dev.DevUnlock
+import android.widget.Toast
+import androidx.compose.foundation.clickable
 
 
 @Composable
@@ -79,6 +82,11 @@ fun AboutScreen(
 
     val flaticonAuthors = stringArrayResource(R.array.about_flaticon_authors)
 
+    // Desbloqueo del diagnóstico de métricas al estilo de las opciones de desarrollador
+    // de Android: varios toques sobre el número de versión.
+    val tapCounter = remember { DevUnlock.TapCounter() }
+    var devUnlocked by remember { mutableStateOf(DevUnlock.isUnlocked(context)) }
+
     val proState = LocalProState.current
 
     Scaffold(
@@ -104,7 +112,33 @@ fun AboutScreen(
                     HorizontalDivider(thickness = 3.dp, color = MaterialTheme.colorScheme.outlineVariant)
                     Text(
                         text = stringResource(R.string.about_version_label, versionName),
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.clickable {
+                            when (val result = tapCounter.onTap(System.currentTimeMillis())) {
+                                is DevUnlock.TapCounter.Result.Unlocked -> {
+                                    DevUnlock.setUnlocked(context, true)
+                                    devUnlocked = true
+                                    Toast.makeText(
+                                        context,
+                                        context.getString(R.string.dev_diagnostics_unlocked),
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                                is DevUnlock.TapCounter.Result.Hint -> {
+                                    if (!devUnlocked) {
+                                        Toast.makeText(
+                                            context,
+                                            context.getString(
+                                                R.string.dev_diagnostics_steps_left,
+                                                result.remaining
+                                            ),
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                }
+                                is DevUnlock.TapCounter.Result.Ignored -> Unit
+                            }
+                        }
                     )
                     Text(
                         text = stringResource(R.string.about_app_summary),
@@ -197,12 +231,12 @@ fun AboutScreen(
                 ) {
                     Text(stringResource(R.string.about_licenses_button))
                 }
-                if (BuildConfig.DEBUG) {
+                if (BuildConfig.DEBUG || devUnlocked) {
                     OutlinedButton(
                         onClick = onOpenDevTools,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Developer Metrics Tools")
+                        Text(stringResource(R.string.dev_diagnostics_button))
                     }
                 }
             }
@@ -230,7 +264,7 @@ fun AboutScreen(
                     LaunchedEffect(Unit) {
                         enabled = isMetricsEnabled(ctx)
                     }
-                        Text(stringResource(R.string.metrics_toggle_on_line))
+                    Text(stringResource(R.string.metrics_toggle_on_line))
                     Row()
                     {
                         Text(stringResource(R.string.metrics_toggle_caption), Modifier.padding(horizontal = 3.dp).widthIn(max = 275.dp))
@@ -248,19 +282,19 @@ fun AboutScreen(
             }
         }
 
-            HorizontalDivider(thickness = 3.dp, color = MaterialTheme.colorScheme.outlineVariant)
-            // Espaciado final
-            Spacer(Modifier.height(6.dp))
+        HorizontalDivider(thickness = 3.dp, color = MaterialTheme.colorScheme.outlineVariant)
+        // Espaciado final
+        Spacer(Modifier.height(6.dp))
 
-            // Firma pequeñita
-            Text(
-                text = stringResource(R.string.about_footer_signature),
-                style = MaterialTheme.typography.labelMedium,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp)
-            )
+        // Firma pequeñita
+        Text(
+            text = stringResource(R.string.about_footer_signature),
+            style = MaterialTheme.typography.labelMedium,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
+        )
     }
 }
 
@@ -308,5 +342,3 @@ private fun Context.findActivity(): Activity? = when (this) {
     is ContextWrapper -> baseContext.findActivity()
     else -> null
 }
-
-

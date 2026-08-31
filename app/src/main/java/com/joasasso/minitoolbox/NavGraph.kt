@@ -22,7 +22,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
-import com.joasasso.minitoolbox.dev.MetricsDevScreen
+import com.joasasso.minitoolbox.dev.MetricsDiagnosticsScreen
 import com.joasasso.minitoolbox.metrics.TOOL_USAGE_METRIC_COOLDOWN_MS
 import com.joasasso.minitoolbox.metrics.ToolRoutes
 import com.joasasso.minitoolbox.metrics.toolUse
@@ -339,7 +339,9 @@ fun MiniToolboxNavGraph(
             )
         }
         composable(Screen.DevMetrics.route) {
-            MetricsDevScreen()
+            // Diagnóstico de sólo lectura: disponible en release una vez desbloqueado.
+            // Las herramientas destructivas quedan dentro, condicionadas a BuildConfig.DEBUG.
+            MetricsDiagnosticsScreen()
         }
         composable(Screen.Pro.route) {
             ProScreen(onBack = onBackSmart)
