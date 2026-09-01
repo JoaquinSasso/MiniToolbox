@@ -1,5 +1,5 @@
 [versions]
-agp = "9.3.1"
+agp = "9.3.2"
 composeQrCode = "1.0.1"
 datastorePreferences = "1.1.7"
 kotlin = "2.2.20"

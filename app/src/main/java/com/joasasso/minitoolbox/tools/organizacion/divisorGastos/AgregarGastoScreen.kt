@@ -50,6 +50,7 @@ import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
 import java.util.UUID
+import androidx.compose.ui.platform.LocalLocale
 
 @Composable
 fun AgregarGastoScreen(
@@ -60,7 +61,7 @@ fun AgregarGastoScreen(
     val scope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
 
-    val locale = Locale.getDefault()
+    val locale = LocalLocale.current.platformLocale
     val formatter = NumberFormat.getCurrencyInstance(locale).apply {
         maximumFractionDigits = 2
         minimumFractionDigits = 0
