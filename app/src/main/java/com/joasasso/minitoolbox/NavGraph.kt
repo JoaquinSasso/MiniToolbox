@@ -25,6 +25,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.joasasso.minitoolbox.dev.MetricsDiagnosticsScreen
 import com.joasasso.minitoolbox.metrics.TOOL_USAGE_METRIC_COOLDOWN_MS
+import com.joasasso.minitoolbox.metrics.PendingEntrySource
 import com.joasasso.minitoolbox.metrics.ToolRoutes
 import com.joasasso.minitoolbox.metrics.toolUse
 import com.joasasso.minitoolbox.nav.Screen
@@ -106,9 +107,11 @@ fun MiniToolboxNavGraph(
         // cruda: una ruta desconocida o con argumentos no debe generar métrica.
         val tool = ToolRoutes.findTool(route)
         if (route != lastRoute && tool != null) {
-            // Registrar métrica solo si pasó el cooldown de deduplicación
+            // Registrar métrica solo si pasó el cooldown de deduplicación.
+            // El origen lo deja MainActivity al procesar un deep link; si no hay
+            // ninguno pendiente, la apertura se atribuye a la navegación interna.
             if (metricsDebouncer.canExecute(route)) {
-                toolUse(context, tool.metricsKey)
+                toolUse(context, tool.metricsKey, PendingEntrySource.consume())
             }
 
             // contar solo si pasó el cooldown por herramienta (Tracker de anuncios - 30s)

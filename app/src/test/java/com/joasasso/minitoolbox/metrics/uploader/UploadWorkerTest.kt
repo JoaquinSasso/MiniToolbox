@@ -269,27 +269,27 @@ class UploadMetricsWorkerTest {
         )
     }
 
-//    @Test
-//    fun `el origen de la apertura viaja en la clave compuesta`() = runTest {
-//        markSchemaCurrent()
-//        val repo = com.joasasso.minitoolbox.metrics.storage.AggregatesRepository(context)
-//        repo.incrementToolUse("water", com.joasasso.minitoolbox.metrics.MetricsSource.WIDGET)
-//        repo.incrementToolUse("water", com.joasasso.minitoolbox.metrics.MetricsSource.NAV)
-//
-//        val (_, fake) = runWorker(UploadOutcome.Success)
-//
-//        val item = org.json.JSONObject(fake.lastPayload.orEmpty())
-//            .getJSONArray("items").getJSONObject(0)
-//        val entry = item.getJSONObject("tool_entry")
-//
-//        assertEquals(1, entry.getInt("water.widget"))
-//        assertEquals(1, entry.getInt("water.nav"))
-//        assertEquals(
-//            "el total de aperturas por origen debe cuadrar con el contador de usos",
-//            2,
-//            item.getJSONObject("tools").getInt("water")
-//        )
-//    }
+    @Test
+    fun `el origen de la apertura viaja en la clave compuesta`() = runTest {
+        markSchemaCurrent()
+        val repo = com.joasasso.minitoolbox.metrics.storage.AggregatesRepository(context)
+        repo.incrementToolUse("water", com.joasasso.minitoolbox.metrics.MetricsSource.WIDGET)
+        repo.incrementToolUse("water", com.joasasso.minitoolbox.metrics.MetricsSource.NAV)
+
+        val (_, fake) = runWorker(UploadOutcome.Success)
+
+        val item = org.json.JSONObject(fake.lastPayload.orEmpty())
+            .getJSONArray("items").getJSONObject(0)
+        val entry = item.getJSONObject("tool_entry")
+
+        assertEquals(1, entry.getInt("water.widget"))
+        assertEquals(1, entry.getInt("water.nav"))
+        assertEquals(
+            "el total de aperturas por origen debe cuadrar con el contador de usos",
+            2,
+            item.getJSONObject("tools").getInt("water")
+        )
+    }
 
     @Test
     fun `un origen desconocido no crea claves nuevas`() = runTest {

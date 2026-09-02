@@ -21,8 +21,8 @@ import androidx.navigation.compose.rememberNavController
 import com.joasasso.minitoolbox.metrics.appOpen
 import com.joasasso.minitoolbox.metrics.dailyOpenOnce
 import com.joasasso.minitoolbox.metrics.MetricsConfig
-import com.joasasso.minitoolbox.metrics.ToolRoutes
-import com.joasasso.minitoolbox.metrics.toolUse
+import com.joasasso.minitoolbox.metrics.MetricsSource
+import com.joasasso.minitoolbox.metrics.PendingEntrySource
 import com.joasasso.minitoolbox.metrics.uploader.UploadScheduler
 import com.joasasso.minitoolbox.metrics.widgetUse
 import com.joasasso.minitoolbox.nav.Screen
@@ -127,14 +127,13 @@ class MainActivity : AppCompatActivity() {
                             // Validamos que no sea null antes de intentar nada
                             if (!route.isNullOrBlank() && route != Screen.Categories.route) {
                                 try {
-                                    // La clave de métrica se resuelve contra el registry.
-                                    // Mandar la ruta cruda generaba claves como
-                                    // "pomodoro/detail/<uuid>", que el backend rechazaba y
-                                    // dejaban al dispositivo sin poder enviar métricas.
-                                    // La navegación sigue usando la ruta completa.
-                                    ToolRoutes.metricsKey(route)?.let { key ->
-                                        toolUse(applicationContext, key)
-                                    }
+                                    // El uso NO se registra acá: al navegar, el NavGraph
+                                    // dispara su propio registro y la apertura contaría dos
+                                    // veces. Sólo se deja anotado el origen para que el
+                                    // NavGraph lo atribuya a esa apertura.
+                                    PendingEntrySource.set(
+                                        intent?.getStringExtra(MetricsSource.EXTRA_START_SOURCE)
+                                    )
                                     widgetUse(applicationContext, "widget_shortcuts")
 
                                     navController.popBackStack(Screen.Categories.route, inclusive = false)
