@@ -19,6 +19,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenu
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
@@ -50,6 +51,7 @@ import com.joasasso.minitoolbox.data.Frase
 import com.joasasso.minitoolbox.data.idiomasDisponibles
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import java.util.Locale
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 
 
 @Composable
@@ -125,7 +127,7 @@ fun BasicPhrasesScreen(onBack: () -> Unit) {
                         label = { Text(stringResource(R.string.frases_idioma)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedLanguage) },
                         colors = ExposedDropdownMenuDefaults.textFieldColors(),
-                        modifier = Modifier.menuAnchor()
+                        modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                     )
                     ExposedDropdownMenu(
                         expanded = expandedLanguage,
@@ -156,7 +158,7 @@ fun BasicPhrasesScreen(onBack: () -> Unit) {
                         label = { Text(stringResource(R.string.frases_categoria)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedCategory) },
                         colors = ExposedDropdownMenuDefaults.textFieldColors(),
-                        modifier = Modifier.menuAnchor()
+                        modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                     )
                     ExposedDropdownMenu(
                         expanded = expandedCategory,
