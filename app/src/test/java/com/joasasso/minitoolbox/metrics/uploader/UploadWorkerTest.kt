@@ -250,6 +250,66 @@ class UploadMetricsWorkerTest {
     }
 
     @Test
+    fun `el uso de una herramienta genera tambien su marca de dispositivo-dia`() = runTest {
+        markSchemaCurrent()
+        // Tres usos de la misma herramienta en el mismo día: 3 usos, 1 dispositivo-día.
+        val repo = com.joasasso.minitoolbox.metrics.storage.AggregatesRepository(context)
+        repeat(3) { repo.incrementToolUse("water") }
+
+        val (_, fake) = runWorker(UploadOutcome.Success)
+
+        val payload = org.json.JSONObject(fake.lastPayload.orEmpty())
+        val item = payload.getJSONArray("items").getJSONObject(0)
+
+        assertEquals(3, item.getJSONObject("tools").getInt("water"))
+        assertEquals(
+            "el DAU se marca, no se acumula: es el denominador de tools",
+            1,
+            item.getJSONObject("tools_dau").getInt("water")
+        )
+    }
+
+//    @Test
+//    fun `el origen de la apertura viaja en la clave compuesta`() = runTest {
+//        markSchemaCurrent()
+//        val repo = com.joasasso.minitoolbox.metrics.storage.AggregatesRepository(context)
+//        repo.incrementToolUse("water", com.joasasso.minitoolbox.metrics.MetricsSource.WIDGET)
+//        repo.incrementToolUse("water", com.joasasso.minitoolbox.metrics.MetricsSource.NAV)
+//
+//        val (_, fake) = runWorker(UploadOutcome.Success)
+//
+//        val item = org.json.JSONObject(fake.lastPayload.orEmpty())
+//            .getJSONArray("items").getJSONObject(0)
+//        val entry = item.getJSONObject("tool_entry")
+//
+//        assertEquals(1, entry.getInt("water.widget"))
+//        assertEquals(1, entry.getInt("water.nav"))
+//        assertEquals(
+//            "el total de aperturas por origen debe cuadrar con el contador de usos",
+//            2,
+//            item.getJSONObject("tools").getInt("water")
+//        )
+//    }
+
+    @Test
+    fun `un origen desconocido no crea claves nuevas`() = runTest {
+        markSchemaCurrent()
+        val repo = com.joasasso.minitoolbox.metrics.storage.AggregatesRepository(context)
+        repo.incrementToolUse("water", "origen_inventado")
+
+        val (_, fake) = runWorker(UploadOutcome.Success)
+
+        val entry = org.json.JSONObject(fake.lastPayload.orEmpty())
+            .getJSONArray("items").getJSONObject(0).getJSONObject("tool_entry")
+
+        assertEquals(
+            "los orígenes libres explotarían la cardinalidad del documento diario",
+            1,
+            entry.getInt("water.unknown")
+        )
+    }
+
+    @Test
     fun `el payload incluye la version de esquema y la salud del cliente`() = runTest {
         markSchemaCurrent()
         seedPendingUsage("water")

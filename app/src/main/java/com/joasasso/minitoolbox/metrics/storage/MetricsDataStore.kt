@@ -32,6 +32,19 @@ object MetricsKeys {
     val TOOL_USE_BY_DAY_JSON       = stringPreferencesKey("tool_use_by_day_json")        // Map<day, Map<toolId, Int>>
     val AD_IMPRESSIONS_BY_DAY_JSON = stringPreferencesKey("ad_impr_by_day_json")         // Map<day, Map<type, Int>>
 
+    /**
+     * Dispositivos-día por herramienta: 1 por herramienta y por día, sin importar cuántas
+     * veces se abrió. Es el denominador que le da sentido a TOOL_USE_BY_DAY_JSON: sin él,
+     * 500 usos pueden ser 10 personas fanáticas o 400 que probaron una vez.
+     */
+    val TOOL_DAU_BY_DAY_JSON       = stringPreferencesKey("tool_dau_by_day_json")         // Map<day, Map<toolId, 0|1>>
+
+    /**
+     * Aperturas por herramienta y origen, con clave compuesta "<toolId>.<source>".
+     * Indica de dónde viene la actividad: navegación, notificación, widget o shortcut.
+     */
+    val TOOL_ENTRY_BY_DAY_JSON     = stringPreferencesKey("tool_entry_by_day_json")       // Map<day, Map<toolId.source, Int>>
+
     // Versiones
     val VERSION_DAU_BY_DAY_JSON            = stringPreferencesKey("version_dau_by_day_json")             // Map<day, Map<version, Int>>
     val VERSION_FIRST_SEEN_BY_DAY_JSON     = stringPreferencesKey("version_first_seen_by_day_json")      // Map<day, Map<version, Int>>
@@ -50,6 +63,8 @@ object MetricsKeys {
     val SENT_DAILY_ACTIVE_BY_DAY   = stringPreferencesKey("sent_daily_active_by_day")    // Map<day, Int>
     val SENT_TOOL_USE_BY_DAY_JSON  = stringPreferencesKey("sent_tool_use_by_day_json")   // Map<day, Map<toolId, Int>>
     val SENT_AD_IMPR_BY_DAY_JSON   = stringPreferencesKey("sent_ad_impr_by_day_json")    // Map<day, Map<type, Int>>
+    val SENT_TOOL_DAU_BY_DAY_JSON  = stringPreferencesKey("sent_tool_dau_by_day_json")   // Map<day, Map<toolId, 0|1>>
+    val SENT_TOOL_ENTRY_BY_DAY_JSON = stringPreferencesKey("sent_tool_entry_by_day_json") // Map<day, Map<toolId.source, Int>>
 
     val SENT_VERSION_DAU_BY_DAY_JSON        = stringPreferencesKey("sent_version_dau_by_day_json")       // Map<day, Map<version, Int>>
     val SENT_VERSION_FIRST_SEEN_BY_DAY_JSON = stringPreferencesKey("sent_version_first_seen_by_day_json")// Map<day, Map<version, Int>>

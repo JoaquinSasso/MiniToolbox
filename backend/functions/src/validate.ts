@@ -3,6 +3,10 @@ export type IngestItem = {
 	app_open?: number;
 	daily_active?: number;
 	tools?: Record<string, number>;
+	/** Dispositivos-día por herramienta: 0 o 1 por clave. Denominador de tools. */
+	tools_dau?: Record<string, number>;
+	/** Aperturas por herramienta y origen, clave "<toolId>.<source>". */
+	tool_entry?: Record<string, number>;
 	ads?: Record<string, number>;
 
 	versions?: Record<string, number>; // DAU por versión
@@ -173,6 +177,8 @@ export function validateBody(
 		}
 
 		const tools = sanitizeMap(it.tools, dropped);
+		const toolsDau = sanitizeMap(it.tools_dau, dropped);
+		const toolEntry = sanitizeMap(it.tool_entry, dropped);
 		const ads = sanitizeMap(it.ads, dropped);
 		const versions = sanitizeMap(it.versions, dropped);
 		const versionsFirstSeen = sanitizeMap(it.versions_first_seen, dropped);
@@ -182,6 +188,8 @@ export function validateBody(
 
 		const maps = [
 			tools,
+			toolsDau,
+			toolEntry,
 			ads,
 			versions,
 			versionsFirstSeen,
@@ -199,6 +207,8 @@ export function validateBody(
 			app_open: safeCount(it.app_open),
 			daily_active: safeCount(it.daily_active),
 			tools: tools as Record<string, number>,
+			tools_dau: toolsDau as Record<string, number>,
+			tool_entry: toolEntry as Record<string, number>,
 			ads: ads as Record<string, number>,
 			versions: versions as Record<string, number>,
 			versions_first_seen: versionsFirstSeen as Record<string, number>,

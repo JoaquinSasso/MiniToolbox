@@ -497,6 +497,32 @@ export const ingest = onRequest(
 						}
 					}
 
+					// Dispositivos-día por herramienta. Cada cliente aporta como mucho 1
+					// por herramienta y por día, así que la suma es el número de
+					// dispositivos distintos que la usaron: el denominador de tools.
+					if (it.tools_dau) {
+						const tmp: Record<string, number> = {};
+						for (const [rawKey, v] of Object.entries(it.tools_dau)) {
+							const ck = canonToolKey(rawKey);
+							if (!ck) continue;
+							const n = Number(v || 0) > 0 ? 1 : 0;
+							if (n > 0) tmp[ck] = 1;
+						}
+						for (const ck of Object.keys(tmp)) {
+							updates[`tools_dau.${ck}`] = inc(1);
+						}
+					}
+
+					// Origen de la apertura: clave "<herramienta>.<origen>".
+					// No pasa por canonToolKey porque la clave es compuesta; se guarda
+					// tal cual llega, ya saneada por validateBody.
+					if (it.tool_entry) {
+						for (const [k, v] of Object.entries(it.tool_entry)) {
+							const n = Number(v || 0);
+							if (n > 0) updates[`tool_entry.${k}`] = inc(n);
+						}
+					}
+
 					if (it.ads) {
 						for (const [k, v] of Object.entries(it.ads)) {
 							const n = Number(v || 0);

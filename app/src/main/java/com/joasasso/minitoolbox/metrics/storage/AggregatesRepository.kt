@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import com.joasasso.minitoolbox.BuildConfig
 import com.joasasso.minitoolbox.metrics.MetricsContract
+import com.joasasso.minitoolbox.metrics.MetricsSource
 import kotlinx.coroutines.flow.first
 import org.json.JSONArray
 import java.text.SimpleDateFormat
@@ -19,6 +20,10 @@ class AggregatesRepository(private val context: Context) {
         val appOpen: Int,
         val dailyActive: Int,
         val tools: MutableMap<String, Int>,
+        /** Dispositivos-día por herramienta: 0 o 1 por clave. Denominador de [tools]. */
+        val toolsDau: MutableMap<String, Int>,
+        /** Aperturas por herramienta y origen, clave "<toolId>.<source>". */
+        val toolEntry: MutableMap<String, Int>,
         val ads: MutableMap<String, Int>,
         // NUEVO:
         val versions: MutableMap<String, Int>,
@@ -183,8 +188,9 @@ class AggregatesRepository(private val context: Context) {
         }
     }
 
-    suspend fun incrementToolUse(toolId: String) {
+    suspend fun incrementToolUse(toolId: String, source: String = MetricsSource.NAV) {
         val key = safeKey(toolId) ?: return
+        val entryKey = safeKey(MetricsSource.entryKey(key, source))
         val ds = context.metricsDataStore
         val day = today()
         ds.edit { e ->
@@ -192,6 +198,21 @@ class AggregatesRepository(private val context: Context) {
             val bucket = byDay.getOrPut(day) { mutableMapOf() }
             bucket[key] = (bucket[key] ?: 0) + 1
             e[MetricsKeys.TOOL_USE_BY_DAY_JSON] = JsonUtils.toDayNestedIntMap(byDay)
+
+            // Marca de dispositivo-día: se asigna, no se incrementa. Este dispositivo
+            // aporta como mucho 1 por herramienta y por día.
+            val dauByDay = JsonUtils.fromDayNestedIntMap(e[MetricsKeys.TOOL_DAU_BY_DAY_JSON])
+            val dauBucket = dauByDay.getOrPut(day) { mutableMapOf() }
+            dauBucket[key] = 1
+            e[MetricsKeys.TOOL_DAU_BY_DAY_JSON] = JsonUtils.toDayNestedIntMap(dauByDay)
+
+            // Origen de la apertura. Se cuenta por apertura, igual que TOOL_USE.
+            if (entryKey != null) {
+                val entryByDay = JsonUtils.fromDayNestedIntMap(e[MetricsKeys.TOOL_ENTRY_BY_DAY_JSON])
+                val entryBucket = entryByDay.getOrPut(day) { mutableMapOf() }
+                entryBucket[entryKey] = (entryBucket[entryKey] ?: 0) + 1
+                e[MetricsKeys.TOOL_ENTRY_BY_DAY_JSON] = JsonUtils.toDayNestedIntMap(entryByDay)
+            }
         }
     }
 
@@ -253,6 +274,8 @@ class AggregatesRepository(private val context: Context) {
         val currentApp    = JsonUtils.fromDayIntMap(prefs[MetricsKeys.APP_OPEN_COUNT_BY_DAY])
         val currentDaily  = JsonUtils.fromDayIntMap(prefs[MetricsKeys.DAILY_ACTIVE_BY_DAY])
         val currentTool   = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.TOOL_USE_BY_DAY_JSON])
+        val currentToolDau = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.TOOL_DAU_BY_DAY_JSON])
+        val currentToolEntry = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.TOOL_ENTRY_BY_DAY_JSON])
         val currentAds    = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.AD_IMPRESSIONS_BY_DAY_JSON])
 
         val currentVerDAU  = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.VERSION_DAU_BY_DAY_JSON])
@@ -266,6 +289,8 @@ class AggregatesRepository(private val context: Context) {
         val sentApp     = JsonUtils.fromDayIntMap(prefs[MetricsKeys.SENT_APP_OPEN_BY_DAY])
         val sentDaily   = JsonUtils.fromDayIntMap(prefs[MetricsKeys.SENT_DAILY_ACTIVE_BY_DAY])
         val sentTool    = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.SENT_TOOL_USE_BY_DAY_JSON])
+        val sentToolDau = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.SENT_TOOL_DAU_BY_DAY_JSON])
+        val sentToolEntry = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.SENT_TOOL_ENTRY_BY_DAY_JSON])
         val sentAds     = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.SENT_AD_IMPR_BY_DAY_JSON])
 
         val sentVerDAU = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.SENT_VERSION_DAU_BY_DAY_JSON])
@@ -277,11 +302,12 @@ class AggregatesRepository(private val context: Context) {
         val sentWidgets = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.SENT_WIDGET_USE_BY_DAY_JSON])
 
         val allDays = (currentApp.keys + currentDaily.keys +
-                currentTool.keys + currentAds.keys +
+                currentTool.keys + currentToolDau.keys + currentToolEntry.keys + currentAds.keys +
                 currentVerDAU.keys + currentVerFS.keys +
                 currentLangP.keys + currentLangS.keys +
                 currentWidgets.keys +
-                sentApp.keys + sentDaily.keys + sentTool.keys + sentAds.keys +
+                sentApp.keys + sentDaily.keys + sentTool.keys + sentToolDau.keys +
+                sentToolEntry.keys + sentAds.keys +
                 sentVerDAU.keys + sentVerFS.keys +
                 sentLangP.keys + sentLangS.keys +
                 sentWidgets.keys).toSortedSet()
@@ -304,6 +330,8 @@ class AggregatesRepository(private val context: Context) {
             }
 
             val toolsDelta   = diffMap(currentTool[day],   sentTool[day])
+            val toolsDauDelta = diffMap(currentToolDau[day], sentToolDau[day])
+            val toolEntryDelta = diffMap(currentToolEntry[day], sentToolEntry[day])
             val adsDelta     = diffMap(currentAds[day],    sentAds[day])
             val verDauDelta  = diffMap(currentVerDAU[day], sentVerDAU[day])
             val verFsDelta   = diffMap(currentVerFS[day],  sentVerFS[day])
@@ -311,7 +339,8 @@ class AggregatesRepository(private val context: Context) {
             val langSDelta   = diffMap(currentLangS[day],  sentLangS[day])
             val widgetsDelta = diffMap(currentWidgets[day], sentWidgets[day])
 
-            if (appDelta > 0 || dailyDelta > 0 || toolsDelta.isNotEmpty() || adsDelta.isNotEmpty() ||
+            if (appDelta > 0 || dailyDelta > 0 || toolsDelta.isNotEmpty() ||
+                toolsDauDelta.isNotEmpty() || toolEntryDelta.isNotEmpty() || adsDelta.isNotEmpty() ||
                 verDauDelta.isNotEmpty() || verFsDelta.isNotEmpty() ||
                 langPDelta.isNotEmpty() || langSDelta.isNotEmpty() ||
                 widgetsDelta.isNotEmpty()
@@ -321,6 +350,8 @@ class AggregatesRepository(private val context: Context) {
                     appOpen = appDelta.coerceAtLeast(0),
                     dailyActive = dailyDelta.coerceAtLeast(0),
                     tools = toolsDelta,
+                    toolsDau = toolsDauDelta,
+                    toolEntry = toolEntryDelta,
                     ads = adsDelta,
                     versions = verDauDelta,
                     versionsFirstSeen = verFsDelta,
@@ -345,6 +376,8 @@ class AggregatesRepository(private val context: Context) {
         val sentApp     = JsonUtils.fromDayIntMap(prefs[MetricsKeys.SENT_APP_OPEN_BY_DAY])
         val sentDaily   = JsonUtils.fromDayIntMap(prefs[MetricsKeys.SENT_DAILY_ACTIVE_BY_DAY])
         val sentTools   = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.SENT_TOOL_USE_BY_DAY_JSON])
+        val sentToolsDau = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.SENT_TOOL_DAU_BY_DAY_JSON])
+        val sentToolEntry = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.SENT_TOOL_ENTRY_BY_DAY_JSON])
         val sentAds     = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.SENT_AD_IMPR_BY_DAY_JSON])
 
         val sentVerDAU  = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.SENT_VERSION_DAU_BY_DAY_JSON])
@@ -363,6 +396,12 @@ class AggregatesRepository(private val context: Context) {
             // tools
             val t = sentTools.getOrPut(d.day) { mutableMapOf() }
             for ((k, v) in d.tools) t[k] = (t[k] ?: 0) + v
+            // tools DAU: la marca se satura en 1, nunca se acumula
+            val td = sentToolsDau.getOrPut(d.day) { mutableMapOf() }
+            for ((k, v) in d.toolsDau) td[k] = ((td[k] ?: 0) + v).coerceAtMost(1)
+            // origen de entrada
+            val te = sentToolEntry.getOrPut(d.day) { mutableMapOf() }
+            for ((k, v) in d.toolEntry) te[k] = (te[k] ?: 0) + v
             // ads
             val a = sentAds.getOrPut(d.day) { mutableMapOf() }
             for ((k, v) in d.ads) a[k] = (a[k] ?: 0) + v
@@ -387,6 +426,8 @@ class AggregatesRepository(private val context: Context) {
             e[MetricsKeys.SENT_APP_OPEN_BY_DAY]             = JsonUtils.toDayIntMap(sentApp)
             e[MetricsKeys.SENT_DAILY_ACTIVE_BY_DAY]         = JsonUtils.toDayIntMap(sentDaily)
             e[MetricsKeys.SENT_TOOL_USE_BY_DAY_JSON]        = JsonUtils.toDayNestedIntMap(sentTools)
+            e[MetricsKeys.SENT_TOOL_DAU_BY_DAY_JSON]        = JsonUtils.toDayNestedIntMap(sentToolsDau)
+            e[MetricsKeys.SENT_TOOL_ENTRY_BY_DAY_JSON]      = JsonUtils.toDayNestedIntMap(sentToolEntry)
             e[MetricsKeys.SENT_AD_IMPR_BY_DAY_JSON]         = JsonUtils.toDayNestedIntMap(sentAds)
 
             e[MetricsKeys.SENT_VERSION_DAU_BY_DAY_JSON]     = JsonUtils.toDayNestedIntMap(sentVerDAU)
