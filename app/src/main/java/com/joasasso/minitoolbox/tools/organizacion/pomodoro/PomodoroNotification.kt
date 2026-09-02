@@ -14,6 +14,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.joasasso.minitoolbox.MainActivity
 import com.joasasso.minitoolbox.R
+import com.joasasso.minitoolbox.metrics.MetricsSource
 
 const val CHANNEL_RUNNING = "pomodoro_running"
 const val CHANNEL_ALARM   = "pomodoro_alarm_v2"
@@ -98,7 +99,10 @@ internal fun mainPendingIntent(context: Context, startRoute: String?): PendingIn
                     Intent.FLAG_ACTIVITY_CLEAR_TOP or
                     Intent.FLAG_ACTIVITY_SINGLE_TOP
         )
-        if (!startRoute.isNullOrBlank()) putExtra("startRoute", startRoute)
+        if (!startRoute.isNullOrBlank()) {
+            putExtra("startRoute", startRoute)
+            putExtra(MetricsSource.EXTRA_START_SOURCE, MetricsSource.NOTIFICATION)
+        }
     }
     val reqCode = (startRoute ?: "default_route").hashCode()
     return PendingIntent.getActivity(

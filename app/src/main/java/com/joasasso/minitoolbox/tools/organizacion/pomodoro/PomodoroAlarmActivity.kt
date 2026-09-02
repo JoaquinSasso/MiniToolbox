@@ -53,6 +53,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.ui.theme.MiniToolboxTheme
+import com.joasasso.minitoolbox.metrics.MetricsSource
 
 internal const val EX_ALARM_TITLE = "alarm_title"
 internal const val EX_ALARM_TEXT  = "alarm_text"
@@ -157,6 +158,7 @@ class PomodoroAlarmActivity : AppCompatActivity() {
         val i = Intent(this, com.joasasso.minitoolbox.MainActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
             putExtra("startRoute", route)
+            putExtra(MetricsSource.EXTRA_START_SOURCE, MetricsSource.NOTIFICATION)
         }
         startActivity(i)
         finish()

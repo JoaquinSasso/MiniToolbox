@@ -34,6 +34,7 @@ import com.joasasso.minitoolbox.MainActivity
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AgregarAguaCallback
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.actualizarWidgetAgua
 import com.joasasso.minitoolbox.nav.Screen
+import com.joasasso.minitoolbox.metrics.MetricsSource
 
 
 class AguaMiniWidget : GlanceAppWidget() {
@@ -57,6 +58,7 @@ class AguaMiniWidget : GlanceAppWidget() {
 
             val launchIntent = Intent(context, MainActivity::class.java).apply {
                 putExtra("startRoute", Screen.Water.route)
+                putExtra(MetricsSource.EXTRA_START_SOURCE, MetricsSource.WIDGET)
             }
 
             // Widget general: clic abre la app

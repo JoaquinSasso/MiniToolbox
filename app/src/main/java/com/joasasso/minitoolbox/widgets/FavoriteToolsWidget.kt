@@ -42,6 +42,7 @@ import com.joasasso.minitoolbox.data.flujoToolsFavoritas
 import com.joasasso.minitoolbox.tools.ToolRegistry
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import com.joasasso.minitoolbox.metrics.MetricsSource
 
 class FavoriteToolsWidget : GlanceAppWidget() {
 
@@ -112,6 +113,7 @@ class FavoriteToolsWidget : GlanceAppWidget() {
                                             actionStartActivity(
                                                 Intent(context, MainActivity::class.java).apply {
                                                     putExtra("startRoute", tool.screen.route)
+                                                    putExtra(MetricsSource.EXTRA_START_SOURCE, MetricsSource.WIDGET)
                                                     addFlags(
                                                         Intent.FLAG_ACTIVITY_CLEAR_TOP or
                                                                 Intent.FLAG_ACTIVITY_SINGLE_TOP
