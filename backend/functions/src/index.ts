@@ -96,6 +96,9 @@ const TOOL_ROUTE_MAP: Record<string, string> = {
 	age_calculator: "age_calculator",
 	zodiac_sign: "zodiac_sign",
 	pomodoro: "pomodoro",
+	// La ruta cambio a "pomodoro_list" en el cliente; se mapea a la clave historica
+	// para no partir la serie en dos.
+	pomodoro_list: "pomodoro",
 	bubble_level: "bubble_level",
 	porcentaje: "percentage",
 	conversor_horas: "time_converter",
@@ -149,6 +152,36 @@ function mergeCounts(
 	return out;
 }
 
+/**
+ * Herramientas conocidas. Cualquier clave fuera de este conjunto se agrupa en
+ * UNKNOWN_TOOL_BUCKET en lugar de crear un campo nuevo en el documento diario.
+ *
+ * Motivo: los documentos de metrics_daily tienen un limite de tamano y cada clave nueva
+ * es un campo mas. Sin este tope, una version del cliente con un bug de claves puede
+ * hacer crecer el documento hasta romperlo, y ahi se pierde el dia entero.
+ *
+ * Costo asumido: al agregar una herramienta nueva a la app hay que sumarla aca o sus
+ * datos caen en "other" hasta el proximo deploy. El log "ingest_unknown_tools" avisa.
+ */
+const EXTRA_KNOWN_TOOLS = ["minesweeper", "about"];
+
+const KNOWN_TOOLS = new Set<string>([
+	...Object.values(TOOL_ROUTE_MAP).filter((v) => v),
+	...EXTRA_KNOWN_TOOLS,
+]);
+
+const UNKNOWN_TOOL_BUCKET = "other";
+
+/** Origenes de apertura aceptados. Debe coincidir con MetricsSource del cliente. */
+const KNOWN_SOURCES = new Set(["nav", "notification", "widget", "shortcut", "unknown"]);
+const UNKNOWN_SOURCE = "unknown";
+
+function bucketToolKey(ck: string, seenUnknown: Set<string>): string {
+	if (KNOWN_TOOLS.has(ck)) return ck;
+	seenUnknown.add(ck);
+	return UNKNOWN_TOOL_BUCKET;
+}
+
 // Quita prefijos accidentales en keys de tools dentro de maps guardados
 function stripToolKeyInMap(
 	map: Record<string, number>,
@@ -193,6 +226,17 @@ function remapToolCounters(
 		out[ck] = (out[ck] ?? 0) + Number(v || 0);
 	}
 	return out;
+}
+
+/** Días que se conservan los documentos operativos de ingesta. */
+const RETENTION_DAYS = 90;
+
+/**
+ * Momento de expiración para la política TTL de Firestore.
+ * Estas colecciones crecen un documento por lote y sin esto no dejan de crecer nunca.
+ */
+function expiryTimestamp(days: number): Date {
+	return new Date(Date.now() + days * 24 * 60 * 60 * 1000);
 }
 
 // ------------ Date utils ------------
@@ -421,6 +465,11 @@ export const ingest = onRequest(
 
 			const authMethod = appCheckOk ? "appcheck" : "api_key";
 
+			// Claves de herramienta no reconocidas en este lote. Se acumulan para
+			// loguear una sola vez: si aparece algo aca, o hay una herramienta nueva
+			// sin registrar en KNOWN_TOOLS, o un cliente genera claves que no deberia.
+			const unknownTools = new Set<string>();
+
 			const parsed = validateBody(req.body);
 			if (!parsed.ok) {
 				sendJson(res, 400, { ok: false, error: parsed.error ?? "invalid" });
@@ -457,6 +506,10 @@ export const ingest = onRequest(
 					app_version: body.app_version,
 					items: (body.items ?? []).length,
 					auth_method: authMethod,
+					// Campo de expiracion para la politica TTL de Firestore. Esta coleccion
+					// solo sirve para deduplicar reenvios y el cliente descarta un lote
+					// pendiente a los 14 dias, asi que 90 es margen de sobra.
+					expiresAt: expiryTimestamp(RETENTION_DAYS),
 				});
 
 				for (const it of body.items) {
@@ -487,8 +540,9 @@ export const ingest = onRequest(
 					if (it.tools) {
 						const tmp: Record<string, number> = {};
 						for (const [rawKey, v] of Object.entries(it.tools)) {
-							const ck = canonToolKey(rawKey); // quita prefijos y mapea
-							if (!ck) continue;
+							const canon = canonToolKey(rawKey); // quita prefijos y mapea
+							if (!canon) continue;
+							const ck = bucketToolKey(canon, unknownTools);
 							const n = Number(v || 0);
 							if (n > 0) tmp[ck] = (tmp[ck] || 0) + n;
 						}
@@ -503,8 +557,9 @@ export const ingest = onRequest(
 					if (it.tools_dau) {
 						const tmp: Record<string, number> = {};
 						for (const [rawKey, v] of Object.entries(it.tools_dau)) {
-							const ck = canonToolKey(rawKey);
-							if (!ck) continue;
+							const canon = canonToolKey(rawKey);
+							if (!canon) continue;
+							const ck = bucketToolKey(canon, unknownTools);
 							const n = Number(v || 0) > 0 ? 1 : 0;
 							if (n > 0) tmp[ck] = 1;
 						}
@@ -519,7 +574,24 @@ export const ingest = onRequest(
 					if (it.tool_entry) {
 						for (const [k, v] of Object.entries(it.tool_entry)) {
 							const n = Number(v || 0);
-							if (n > 0) updates[`tool_entry.${k}`] = inc(n);
+							if (n <= 0) continue;
+
+							// La clave llega como "<herramienta>.<origen>". Se separa por el
+							// ultimo punto porque el origen nunca contiene puntos.
+							const cut = k.lastIndexOf(".");
+							if (cut <= 0) continue;
+
+							const canon = canonToolKey(k.slice(0, cut));
+							if (!canon) continue;
+							const tool = bucketToolKey(canon, unknownTools);
+
+							const rawSource = k.slice(cut + 1);
+							const source = KNOWN_SOURCES.has(rawSource)
+								? rawSource
+								: UNKNOWN_SOURCE;
+
+							// Se guarda anidado: tool_entry.<herramienta>.<origen>
+							updates[`tool_entry.${tool}.${source}`] = inc(n);
 						}
 					}
 
@@ -595,6 +667,13 @@ export const ingest = onRequest(
 				}
 			});
 
+			if (unknownTools.size > 0) {
+				logger.warn("ingest_unknown_tools", {
+					app_version: body.app_version,
+					tools: [...unknownTools].slice(0, 20),
+				});
+			}
+
 			await db.collection("metrics_ingest_logs").doc().set({
 				at: FieldValue.serverTimestamp(),
 				batch_id: body.batch_id,
@@ -606,6 +685,7 @@ export const ingest = onRequest(
 				total_daily_active_delta: totalDaily,
 				dropped_keys: dropped.keys.length,
 				dropped_items: dropped.items,
+				expiresAt: expiryTimestamp(RETENTION_DAYS),
 			});
 
 			sendJson(res, 200, {
