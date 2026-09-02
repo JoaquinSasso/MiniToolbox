@@ -49,6 +49,8 @@ object MetricsSanitizer {
     /** Mapas día -> (clave -> contador). Incluye los acumulados y sus pares "enviados". */
     private val NESTED_KEYS = listOf(
         MetricsKeys.TOOL_USE_BY_DAY_JSON,
+        MetricsKeys.TOOL_DAU_BY_DAY_JSON,
+        MetricsKeys.TOOL_ENTRY_BY_DAY_JSON,
         MetricsKeys.AD_IMPRESSIONS_BY_DAY_JSON,
         MetricsKeys.VERSION_DAU_BY_DAY_JSON,
         MetricsKeys.VERSION_FIRST_SEEN_BY_DAY_JSON,
@@ -56,6 +58,8 @@ object MetricsSanitizer {
         MetricsKeys.LANG_SECONDARY_BY_DAY_JSON,
         MetricsKeys.WIDGET_USE_BY_DAY_JSON,
         MetricsKeys.SENT_TOOL_USE_BY_DAY_JSON,
+        MetricsKeys.SENT_TOOL_DAU_BY_DAY_JSON,
+        MetricsKeys.SENT_TOOL_ENTRY_BY_DAY_JSON,
         MetricsKeys.SENT_AD_IMPR_BY_DAY_JSON,
         MetricsKeys.SENT_VERSION_DAU_BY_DAY_JSON,
         MetricsKeys.SENT_VERSION_FIRST_SEEN_BY_DAY_JSON,

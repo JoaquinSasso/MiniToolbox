@@ -15,6 +15,7 @@ import com.joasasso.minitoolbox.data.flujoObjetivo
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import com.joasasso.minitoolbox.nav.Screen
+import com.joasasso.minitoolbox.metrics.MetricsSource
 
 class WaterReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -38,6 +39,7 @@ class WaterReminderReceiver : BroadcastReceiver() {
 
         val intent = Intent(context, MainActivity::class.java).apply {
             putExtra("startRoute", Screen.Water.route)
+            putExtra(MetricsSource.EXTRA_START_SOURCE, MetricsSource.NOTIFICATION)
         }
 
         val pi = PendingIntent.getActivity(

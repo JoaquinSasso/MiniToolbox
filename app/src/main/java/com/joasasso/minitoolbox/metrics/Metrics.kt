@@ -112,11 +112,19 @@ fun dailyOpenOnce(context: Context) = io {
     }
 }
 
-/** Uso de tool + agenda upload (respeta opt-out) */
-fun toolUse(context: Context, toolId: String) = io {
+/**
+ * Uso de tool + agenda upload (respeta opt-out).
+ *
+ * @param source de dónde vino la apertura. Ver [MetricsSource].
+ */
+fun toolUse(
+    context: Context,
+    toolId: String,
+    source: String = MetricsSource.NAV
+) = io {
     val ctx = context.applicationContext
     if (!isMetricsEnabled(ctx)) return@io
-    ctx.repo().incrementToolUse(toolId)
+    ctx.repo().incrementToolUse(toolId, source)
     scheduleIfEnabled(ctx)
 }
 
