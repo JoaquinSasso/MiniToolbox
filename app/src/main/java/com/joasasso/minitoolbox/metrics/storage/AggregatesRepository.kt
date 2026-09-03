@@ -3,10 +3,12 @@ package com.joasasso.minitoolbox.metrics.storage
 import android.content.Context
 import android.os.LocaleList
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.emptyPreferences
 import com.joasasso.minitoolbox.BuildConfig
 import com.joasasso.minitoolbox.metrics.MetricsContract
 import com.joasasso.minitoolbox.metrics.MetricsSource
+import com.joasasso.minitoolbox.metrics.RetentionBuckets
 import kotlinx.coroutines.flow.first
 import org.json.JSONArray
 import java.text.SimpleDateFormat
@@ -24,6 +26,8 @@ class AggregatesRepository(private val context: Context) {
         val toolsDau: MutableMap<String, Int>,
         /** Aperturas por herramienta y origen, clave "<toolId>.<source>". */
         val toolEntry: MutableMap<String, Int>,
+        /** Retencion: 1 marca diaria en "<antiguedad>.<intensidad>". */
+        val retention: MutableMap<String, Int>,
         val ads: MutableMap<String, Int>,
         // NUEVO:
         val versions: MutableMap<String, Int>,
@@ -185,7 +189,37 @@ class AggregatesRepository(private val context: Context) {
             val byDay = JsonUtils.fromDayIntMap(e[MetricsKeys.DAILY_ACTIVE_BY_DAY])
             byDay[day] = (byDay[day] ?: 0) + 1
             e[MetricsKeys.DAILY_ACTIVE_BY_DAY] = JsonUtils.toDayIntMap(byDay)
+
+            markRetention(e, day)
         }
+    }
+
+    /**
+     * Calcula y marca el bucket de retención del día.
+     *
+     * Todo el cálculo ocurre acá, con datos que nunca salen del dispositivo: la lista de
+     * días activos y el primer día visto. Al servidor sólo viaja un 1 en una de las 25
+     * categorías posibles, que no permite distinguir un dispositivo de otro.
+     *
+     * Corre dentro del edit de [incrementDailyActive], así que sucede una vez por día.
+     */
+    private fun markRetention(e: MutablePreferences, day: String) {
+        // Primer día visto: si no existe, este dispositivo empieza hoy.
+        val firstSeen = e[MetricsKeys.FIRST_SEEN_DAY]?.takeIf { it.isNotBlank() } ?: day
+        e[MetricsKeys.FIRST_SEEN_DAY] = firstSeen
+
+        val previous = parseStringSet(e[MetricsKeys.ACTIVE_DAYS_JSON])
+        val activeDays = RetentionBuckets.updateActiveDays(previous, day)
+        e[MetricsKeys.ACTIVE_DAYS_JSON] = toJsonArrayString(activeDays.toSet())
+
+        val ageDays = RetentionBuckets.daysBetween(firstSeen, day)
+        val key = RetentionBuckets.key(ageDays, activeDays.size)
+
+        val byDay = JsonUtils.fromDayNestedIntMap(e[MetricsKeys.RETENTION_BY_DAY_JSON])
+        val bucket = byDay.getOrPut(day) { mutableMapOf() }
+        // Se asigna, no se acumula: un dispositivo cae en una sola categoría por día.
+        bucket[key] = 1
+        e[MetricsKeys.RETENTION_BY_DAY_JSON] = JsonUtils.toDayNestedIntMap(byDay)
     }
 
     suspend fun incrementToolUse(toolId: String, source: String = MetricsSource.NAV) {
@@ -276,6 +310,7 @@ class AggregatesRepository(private val context: Context) {
         val currentTool   = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.TOOL_USE_BY_DAY_JSON])
         val currentToolDau = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.TOOL_DAU_BY_DAY_JSON])
         val currentToolEntry = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.TOOL_ENTRY_BY_DAY_JSON])
+        val currentRetention = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.RETENTION_BY_DAY_JSON])
         val currentAds    = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.AD_IMPRESSIONS_BY_DAY_JSON])
 
         val currentVerDAU  = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.VERSION_DAU_BY_DAY_JSON])
@@ -291,6 +326,7 @@ class AggregatesRepository(private val context: Context) {
         val sentTool    = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.SENT_TOOL_USE_BY_DAY_JSON])
         val sentToolDau = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.SENT_TOOL_DAU_BY_DAY_JSON])
         val sentToolEntry = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.SENT_TOOL_ENTRY_BY_DAY_JSON])
+        val sentRetention = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.SENT_RETENTION_BY_DAY_JSON])
         val sentAds     = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.SENT_AD_IMPR_BY_DAY_JSON])
 
         val sentVerDAU = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.SENT_VERSION_DAU_BY_DAY_JSON])
@@ -302,12 +338,13 @@ class AggregatesRepository(private val context: Context) {
         val sentWidgets = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.SENT_WIDGET_USE_BY_DAY_JSON])
 
         val allDays = (currentApp.keys + currentDaily.keys +
-                currentTool.keys + currentToolDau.keys + currentToolEntry.keys + currentAds.keys +
+                currentTool.keys + currentToolDau.keys + currentToolEntry.keys +
+                currentRetention.keys + currentAds.keys +
                 currentVerDAU.keys + currentVerFS.keys +
                 currentLangP.keys + currentLangS.keys +
                 currentWidgets.keys +
                 sentApp.keys + sentDaily.keys + sentTool.keys + sentToolDau.keys +
-                sentToolEntry.keys + sentAds.keys +
+                sentToolEntry.keys + sentRetention.keys + sentAds.keys +
                 sentVerDAU.keys + sentVerFS.keys +
                 sentLangP.keys + sentLangS.keys +
                 sentWidgets.keys).toSortedSet()
@@ -332,6 +369,7 @@ class AggregatesRepository(private val context: Context) {
             val toolsDelta   = diffMap(currentTool[day],   sentTool[day])
             val toolsDauDelta = diffMap(currentToolDau[day], sentToolDau[day])
             val toolEntryDelta = diffMap(currentToolEntry[day], sentToolEntry[day])
+            val retentionDelta = diffMap(currentRetention[day], sentRetention[day])
             val adsDelta     = diffMap(currentAds[day],    sentAds[day])
             val verDauDelta  = diffMap(currentVerDAU[day], sentVerDAU[day])
             val verFsDelta   = diffMap(currentVerFS[day],  sentVerFS[day])
@@ -340,7 +378,8 @@ class AggregatesRepository(private val context: Context) {
             val widgetsDelta = diffMap(currentWidgets[day], sentWidgets[day])
 
             if (appDelta > 0 || dailyDelta > 0 || toolsDelta.isNotEmpty() ||
-                toolsDauDelta.isNotEmpty() || toolEntryDelta.isNotEmpty() || adsDelta.isNotEmpty() ||
+                toolsDauDelta.isNotEmpty() || toolEntryDelta.isNotEmpty() ||
+                retentionDelta.isNotEmpty() || adsDelta.isNotEmpty() ||
                 verDauDelta.isNotEmpty() || verFsDelta.isNotEmpty() ||
                 langPDelta.isNotEmpty() || langSDelta.isNotEmpty() ||
                 widgetsDelta.isNotEmpty()
@@ -352,6 +391,7 @@ class AggregatesRepository(private val context: Context) {
                     tools = toolsDelta,
                     toolsDau = toolsDauDelta,
                     toolEntry = toolEntryDelta,
+                    retention = retentionDelta,
                     ads = adsDelta,
                     versions = verDauDelta,
                     versionsFirstSeen = verFsDelta,
@@ -378,6 +418,7 @@ class AggregatesRepository(private val context: Context) {
         val sentTools   = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.SENT_TOOL_USE_BY_DAY_JSON])
         val sentToolsDau = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.SENT_TOOL_DAU_BY_DAY_JSON])
         val sentToolEntry = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.SENT_TOOL_ENTRY_BY_DAY_JSON])
+        val sentRetention = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.SENT_RETENTION_BY_DAY_JSON])
         val sentAds     = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.SENT_AD_IMPR_BY_DAY_JSON])
 
         val sentVerDAU  = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.SENT_VERSION_DAU_BY_DAY_JSON])
@@ -402,6 +443,9 @@ class AggregatesRepository(private val context: Context) {
             // origen de entrada
             val te = sentToolEntry.getOrPut(d.day) { mutableMapOf() }
             for ((k, v) in d.toolEntry) te[k] = (te[k] ?: 0) + v
+            // retencion: marca por dia, se satura en 1
+            val rt = sentRetention.getOrPut(d.day) { mutableMapOf() }
+            for ((k, v) in d.retention) rt[k] = ((rt[k] ?: 0) + v).coerceAtMost(1)
             // ads
             val a = sentAds.getOrPut(d.day) { mutableMapOf() }
             for ((k, v) in d.ads) a[k] = (a[k] ?: 0) + v
@@ -428,6 +472,7 @@ class AggregatesRepository(private val context: Context) {
             e[MetricsKeys.SENT_TOOL_USE_BY_DAY_JSON]        = JsonUtils.toDayNestedIntMap(sentTools)
             e[MetricsKeys.SENT_TOOL_DAU_BY_DAY_JSON]        = JsonUtils.toDayNestedIntMap(sentToolsDau)
             e[MetricsKeys.SENT_TOOL_ENTRY_BY_DAY_JSON]      = JsonUtils.toDayNestedIntMap(sentToolEntry)
+            e[MetricsKeys.SENT_RETENTION_BY_DAY_JSON]       = JsonUtils.toDayNestedIntMap(sentRetention)
             e[MetricsKeys.SENT_AD_IMPR_BY_DAY_JSON]         = JsonUtils.toDayNestedIntMap(sentAds)
 
             e[MetricsKeys.SENT_VERSION_DAU_BY_DAY_JSON]     = JsonUtils.toDayNestedIntMap(sentVerDAU)
