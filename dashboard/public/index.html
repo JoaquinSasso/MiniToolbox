@@ -323,8 +323,21 @@
 
   <section class="section">
     <div class="section-head">
-      <span class="eyebrow">07</span><h2>Autenticación</h2>
+      <span class="eyebrow">07</span><h2>Estado operativo</h2>
       <span class="meta" id="authMeta"></span>
+    </div>
+    <div class="card pad" style="margin-bottom:16px">
+      <div id="healthSummary" style="font-size:13px"></div>
+      <div class="grid g2" style="margin-top:12px">
+        <div><table id="tblHealth"><thead><tr>
+          <th>Indicador</th><th class="num">Lotes</th><th class="num">%</th>
+        </tr></thead><tbody></tbody></table></div>
+        <div style="font-size:12px; color:var(--muted)">
+          Cuenta <b>lotes</b> provenientes de dispositivos con problemas, no suma los
+          contadores: son acumulados de por vida del dispositivo y cada lote repite el
+          mismo total. Un dispositivo que envía más seguido pesa más en estos porcentajes.
+        </div>
+      </div>
     </div>
     <div class="card pad">
       <div id="authSummary" style="margin-bottom:12px; font-size:13px"></div>
@@ -753,6 +766,38 @@
 
     tb.innerHTML=rows.join("");
   }
+  /* ---------- salud del pipeline de envío ---------- */
+  function renderHealth(h){
+    const tb=$("#tblHealth tbody");
+    if(!h.batches){
+      $("#healthSummary").innerHTML=`<span style="color:var(--faint)">Sin datos de salud. Llega con la versión 1.3.2.</span>`;
+      tb.innerHTML=`<tr><td colspan="3" class="empty">Sin datos</td></tr>`;
+      return;
+    }
+
+    const rows=[
+      ["Lotes descartados en el dispositivo",h.withDropped,
+       "El cliente tuvo que tirar datos por rechazo permanente o por agotar reintentos."],
+      ["Claves corregidas por el sanitizador",h.withSanitized,
+       "El dispositivo tenía datos que el servidor habría rechazado."],
+      ["Fallos de envío consecutivos",h.withFailures,
+       "El dispositivo venía fallando al momento de enviar."],
+    ];
+
+    const worst=Math.max(h.withDropped,h.withSanitized,h.withFailures);
+    const pctWorst=Math.round(worst*100/h.batches);
+    $("#healthSummary").innerHTML= worst===0
+      ? `<span style="color:var(--pos)">Pipeline sano.</span> Ninguno de los ${fmt(h.batches)} lotes reporta problemas.`
+      : `<b>${pctWorst}%</b> de los ${fmt(h.batches)} lotes vienen de dispositivos que registraron algún problema de envío.`;
+
+    tb.innerHTML=rows.map(([label,n,tip])=>{
+      const pct=Math.round(n*100/h.batches);
+      const color=n===0?"var(--pos)":pct>=10?"var(--neg)":"var(--warn)";
+      return `<tr><td title="${tip}">${label}</td>
+        <td class="num">${fmt(n)}</td>
+        <td class="num" style="color:${color}">${pct}%</td></tr>`;
+    }).join("");
+  }
   /* ---------- estado de la migración a App Check ---------- */
   async function renderAuth(){
     let data;
@@ -766,15 +811,22 @@
 
     const byVersion={};
     let appcheck=0, apikey=0;
+    let batches=0, withDropped=0, withSanitized=0, withFailures=0;
     for(const m of (data.months||[])){
       appcheck+=Number(m.appcheck||0);
       apikey+=Number(m.api_key||0);
+      batches+=Number(m.batches||0);
+      withDropped+=Number(m.with_dropped||0);
+      withSanitized+=Number(m.with_sanitized||0);
+      withFailures+=Number(m.with_failures||0);
       for(const [v,counts] of Object.entries(m.by_version||{})){
         if(!byVersion[v])byVersion[v]={appcheck:0,api_key:0};
         byVersion[v].appcheck+=Number(counts.appcheck||0);
         byVersion[v].api_key+=Number(counts.api_key||0);
       }
     }
+
+    renderHealth({batches,withDropped,withSanitized,withFailures});
 
     const total=appcheck+apikey;
     $("#authMeta").textContent=total?`${fmt(total)} lotes · últimos 3 meses`:"";

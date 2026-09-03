@@ -173,23 +173,11 @@ const KNOWN_TOOLS = new Set<string>([
 const UNKNOWN_TOOL_BUCKET = "other";
 
 /** Origenes de apertura aceptados. Debe coincidir con MetricsSource del cliente. */
-const KNOWN_SOURCES = new Set([
-	"nav",
-	"notification",
-	"widget",
-	"shortcut",
-	"unknown",
-]);
+const KNOWN_SOURCES = new Set(["nav", "notification", "widget", "shortcut", "unknown"]);
 const UNKNOWN_SOURCE = "unknown";
 
 /** Categorias de retencion aceptadas. Debe coincidir con RetentionBuckets del cliente. */
-const KNOWN_AGE = new Set([
-	"age0_6",
-	"age7_29",
-	"age30_89",
-	"age90_179",
-	"age180p",
-]);
+const KNOWN_AGE = new Set(["age0_6", "age7_29", "age30_89", "age90_179", "age180p"]);
 const KNOWN_INTENSITY = new Set(["d1", "d2_3", "d4_7", "d8_14", "d15_28"]);
 
 function bucketToolKey(ck: string, seenUnknown: Set<string>): string {
@@ -394,8 +382,7 @@ function normDoc(id: string, data: FirebaseFirestore.DocumentData): DailyDoc {
 	// las claves planas por si algun documento quedo con la forma anterior.
 	const retention: Record<string, Record<string, number>> = {};
 	const addRetention = (age: string, intensity: string, n: number) => {
-		if (!KNOWN_AGE.has(age) || !KNOWN_INTENSITY.has(intensity) || !(n > 0))
-			return;
+		if (!KNOWN_AGE.has(age) || !KNOWN_INTENSITY.has(intensity) || !(n > 0)) return;
 		if (!retention[age]) retention[age] = {};
 		retention[age][intensity] = (retention[age][intensity] ?? 0) + n;
 	};
@@ -694,8 +681,7 @@ export const ingest = onRequest(
 							if (cut <= 0) continue;
 							const age = k.slice(0, cut);
 							const intensity = k.slice(cut + 1);
-							if (!KNOWN_AGE.has(age) || !KNOWN_INTENSITY.has(intensity))
-								continue;
+							if (!KNOWN_AGE.has(age) || !KNOWN_INTENSITY.has(intensity)) continue;
 							updates[`retention.${age}.${intensity}`] = inc(1);
 						}
 					}
@@ -779,19 +765,35 @@ export const ingest = onRequest(
 				});
 			}
 
+			const health = body.client_health ?? {
+				dropped_batches: 0,
+				sanitized_keys: 0,
+				consecutive_failures: 0,
+			};
+
 			// Rollup mensual del metodo de autenticacion.
 			// Es el contador que decide cuando se puede retirar la rama de API key:
 			// mientras haya trafico con "api_key", hay dispositivos que quedarian
 			// bloqueados de forma permanente si se elimina.
-			const authMonth = (
-				body.items?.[0]?.day || ymdTZ(new Date(), DEFAULT_TZ)
-			).slice(0, 7);
+			const authMonth = (body.items?.[0]?.day || ymdTZ(new Date(), DEFAULT_TZ)).slice(
+				0,
+				7,
+			);
 			await db
 				.collection("metrics_auth")
 				.doc(authMonth)
 				.set(
 					{
 						[authMethod]: FieldValue.increment(1),
+						// Salud del cliente: se cuentan LOTES con problema, no se suman los
+						// contadores. Son acumulados de por vida del dispositivo y cada lote
+						// repite el mismo total historico, asi que sumarlos no significa nada.
+						batches: FieldValue.increment(1),
+						with_dropped: FieldValue.increment(health.dropped_batches > 0 ? 1 : 0),
+						with_sanitized: FieldValue.increment(health.sanitized_keys > 0 ? 1 : 0),
+						with_failures: FieldValue.increment(
+							health.consecutive_failures > 0 ? 1 : 0,
+						),
 						// Las claves con puntos ("1.3.2") van dentro de un objeto literal,
 						// no como field path, asi que no se interpretan como anidamiento.
 						by_version: {
@@ -802,22 +804,22 @@ export const ingest = onRequest(
 					{ merge: true },
 				);
 
-			await db
-				.collection("metrics_ingest_logs")
-				.doc()
-				.set({
-					at: FieldValue.serverTimestamp(),
-					batch_id: body.batch_id,
-					platform: body.platform,
-					app_version: body.app_version,
-					auth_method: authMethod,
-					total_items: totalItems,
-					total_app_open_delta: totalOpens,
-					total_daily_active_delta: totalDaily,
-					dropped_keys: dropped.keys.length,
-					dropped_items: dropped.items,
-					expiresAt: expiryTimestamp(RETENTION_DAYS),
-				});
+			await db.collection("metrics_ingest_logs").doc().set({
+				at: FieldValue.serverTimestamp(),
+				batch_id: body.batch_id,
+				platform: body.platform,
+				app_version: body.app_version,
+				auth_method: authMethod,
+				total_items: totalItems,
+				total_app_open_delta: totalOpens,
+				total_daily_active_delta: totalDaily,
+				dropped_keys: dropped.keys.length,
+				dropped_items: dropped.items,
+				client_dropped_batches: health.dropped_batches,
+				client_sanitized_keys: health.sanitized_keys,
+				client_consecutive_failures: health.consecutive_failures,
+				expiresAt: expiryTimestamp(RETENTION_DAYS),
+			});
 
 			sendJson(res, 200, {
 				ok: true,
@@ -924,6 +926,10 @@ export const metricsAuth = onRequest(
 						month: snap.id,
 						appcheck: Number(d.appcheck || 0),
 						api_key: Number(d.api_key || 0),
+						batches: Number(d.batches || 0),
+						with_dropped: Number(d.with_dropped || 0),
+						with_sanitized: Number(d.with_sanitized || 0),
+						with_failures: Number(d.with_failures || 0),
 						by_version: (d.by_version || {}) as Record<
 							string,
 							Record<string, number>
@@ -997,9 +1003,7 @@ export const metricsSummary = onRequest(
 					sumMap(agg_entry_sources, bySource);
 				}
 				// Marginales del cruce: sumando por un eje se obtiene el otro.
-				for (const [age, byIntensity] of Object.entries(
-					r.totals.retention || {},
-				)) {
+				for (const [age, byIntensity] of Object.entries(r.totals.retention || {})) {
 					for (const [intensity, n] of Object.entries(byIntensity)) {
 						const v = Number(n || 0);
 						agg_retention_age[age] = (agg_retention_age[age] ?? 0) + v;
