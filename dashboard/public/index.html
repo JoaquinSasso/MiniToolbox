@@ -200,7 +200,7 @@ details.zero textarea{width:100%; margin-top:8px; min-height:70px; background:va
     <div><b>Modo demostración.</b> Estás viendo datos simulados. Cargá tu API Key en <b>⚙ Configuración</b> para ver los datos reales.</div>
   </div>
 
-  <div class="demo-banner" id="biasNotice" style="display:flex; background:color-mix(in srgb,var(--neg) 10%,var(--surface)); border-color:color-mix(in srgb,var(--neg) 40%,var(--border))">
+  <div class="demo-banner" id="biasNotice" style="background:color-mix(in srgb,var(--neg) 10%,var(--surface)); border-color:color-mix(in srgb,var(--neg) 40%,var(--border))">
     <span class="dot" style="background:var(--neg)"></span>
     <div><b>Sesgo en datos históricos.</b> Toda la serie desde el inicio (2025-09-24) hasta la corrección del 2026-08-17 contiene un doble conteo sistemático (la primera apertura diaria de cada usuario sumaba +2).</div>
   </div>
@@ -284,7 +284,40 @@ details.zero textarea{width:100%; margin-top:8px; min-height:70px; background:va
   </section>
 
   <section class="section">
-    <div class="section-head"><span class="eyebrow">06</span><h2>Detalle diario</h2>
+    <div class="section-head">
+      <span class="eyebrow">06</span><h2>Alcance y origen</h2>
+      <span class="meta" id="reachMeta"></span>
+    </div>
+    <div class="grid g2">
+      <div class="card">
+        <div style="max-height:480px; overflow:auto">
+          <table id="tblReach"><thead><tr>
+            <th>Herramienta</th>
+            <th class="num">Dispositivos</th>
+            <th class="num">Usos</th>
+            <th class="num">Usos/disp.</th>
+          </tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+      <div class="card">
+        <div style="max-height:480px; overflow:auto">
+          <table id="tblEntry"><thead><tr>
+            <th>Herramienta</th>
+            <th class="num">App</th>
+            <th class="num">Notif.</th>
+            <th class="num">Widget</th>
+          </tr></thead><tbody></tbody></table>
+        </div>
+        <div class="pad" style="padding-top:12px; font-size:12px; color:var(--muted)">
+          De dónde vienen las aperturas. Si una herramienta se abre casi siempre desde
+          widget o notificación, su lugar en el menú importa menos de lo que parece.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><span class="eyebrow">07</span><h2>Detalle diario</h2>
       <span class="meta">Datos crudos por día</span></div>
     <details class="card pad">
       <summary style="cursor:pointer; color:var(--muted)">Ver tabla diaria</summary>
@@ -378,8 +411,26 @@ function sumInto(dst,src){for(const[k,v]of Object.entries(src||{}))dst[k]=(dst[k
 function ranked(map){return Object.entries(map||{}).sort((a,b)=>b[1]-a[1]);}
 function totalOf(map){return Object.values(map||{}).reduce((a,b)=>a+Number(b||0),0);}
 
+/* ---------- sesgo histórico ----------
+   Hasta la corrección del 2026-08-17, la primera apertura diaria de cada usuario
+   sumaba +2. El aviso sólo tiene sentido si el rango elegido incluye días afectados
+   CON datos, y sólo sobre datos reales: en modo demostración los números son
+   simulados y no arrastran ningún sesgo. */
+const BIAS_FROM="2025-09-24", BIAS_TO="2026-08-17";
+let biasActive=false;
+
+function updateBiasNotice(daily,isDemo){
+  biasActive = !isDemo && (daily||[]).some(r=>
+    r.day>=BIAS_FROM && r.day<=BIAS_TO &&
+    (Number(r.totals?.app_open||0)>0 || Number(r.totals?.daily_active||0)>0));
+  $("#biasNotice").classList.toggle("show",biasActive);
+}
+
 function aggregate(daily){
-  const agg={tools:{},ads:{},versions:{},versions_first_seen:{},widgets:{},lang_primary:{},lang_secondary:{}};
+  const agg={tools:{},tools_dau:{},ads:{},versions:{},versions_first_seen:{},widgets:{},lang_primary:{},lang_secondary:{}};
+  // tool_entry viene anidado: {herramienta:{origen:n}}. Se conserva la forma para
+  // poder mostrar el desglose por herramienta, y se agrega aparte por origen.
+  const entryByTool={}, entryBySource={};
   let opens=0,dailyActive=0,newInstalls=0,daysWithData=0;
   for(const r of daily){
     const t=r.totals||{};
@@ -389,9 +440,15 @@ function aggregate(daily){
     sumInto(agg.tools,t.tools); sumInto(agg.ads,t.ads);
     sumInto(agg.versions,t.versions); sumInto(agg.versions_first_seen,t.versions_first_seen);
     sumInto(agg.widgets,t.widgets); sumInto(agg.lang_primary,t.lang_primary); sumInto(agg.lang_secondary,t.lang_secondary);
+    sumInto(agg.tools_dau,t.tools_dau);
+    for(const [tool,bySource] of Object.entries(t.tool_entry||{})){
+      if(!entryByTool[tool])entryByTool[tool]={};
+      sumInto(entryByTool[tool],bySource);
+      sumInto(entryBySource,bySource);
+    }
   }
   newInstalls=totalOf(agg.versions_first_seen);
-  return {agg,opens,dailyActive,newInstalls,daysWithData};
+  return {agg,entryByTool,entryBySource,opens,dailyActive,newInstalls,daysWithData};
 }
 function bucketOpens(daily,gran){
   const buckets={};
@@ -475,7 +532,7 @@ function renderKpis(a,range){
   const toolsTotal=totalOf(a.agg.tools);
   const distinctTools=Object.keys(a.agg.tools).length;
   const cards=[
-    {l:"Aperturas",v:fmt(a.opens),s:`Total (sesgo +2 hasta 2026-08-17)`},
+    {l:"Aperturas",v:fmt(a.opens),s:biasActive?`Total (sesgo +2 hasta ${BIAS_TO})`:"Total"},
     {l:"Disp. Activos",v:fmt(a.dailyActive),s:`DDAU (sin doble conteo)`},
     {l:"Instalaciones",v:fmt(a.newInstalls),s:"por first-seen"},
     {l:"Tools usadas",v:fmt(distinctTools),s:`${fmt(toolsTotal)} usos totales`},
@@ -522,6 +579,42 @@ function renderTools(map){
   });
   renderRankTable("#tblTools",entries,total,true,toolCell);
   updateZeroList(map);
+}
+/* ---------- alcance (DAU por herramienta) y origen de entrada ---------- */
+function renderReach(a){
+  const dau=a.agg.tools_dau||{}, uses=a.agg.tools||{};
+  const rows=Object.keys(dau).map(k=>{
+    const d=Number(dau[k]||0), u=Number(uses[k]||0);
+    return [k,d,u,d>0?u/d:0];
+  }).sort((x,y)=>y[1]-x[1]);
+
+  const tb=$("#tblReach tbody");
+  if(!rows.length){
+    tb.innerHTML=`<tr><td colspan="4" class="empty">Sin datos todavía. Esta métrica arranca con la versión 1.3.2.</td></tr>`;
+    $("#reachMeta").textContent="";
+  }else{
+    const totalDev=rows.reduce((s,r)=>s+r[1],0);
+    $("#reachMeta").textContent=`${rows.length} herramientas · ${fmt(totalDev)} dispositivos-día`;
+    tb.innerHTML=rows.map(([k,d,u,r])=>`
+      <tr><td>${toolCell(k)}</td>
+      <td class="num">${fmt(d)}</td>
+      <td class="num">${fmt(u)}</td>
+      <td class="num">${r?r.toFixed(1):"–"}</td></tr>`).join("");
+  }
+
+  const entry=a.entryByTool||{};
+  const eRows=Object.entries(entry).map(([k,v])=>[
+    k, Number(v.nav||0), Number(v.notification||0), Number(v.widget||0)+Number(v.shortcut||0)
+  ]).sort((x,y)=>(y[1]+y[2]+y[3])-(x[1]+x[2]+x[3]));
+
+  const tb2=$("#tblEntry tbody");
+  tb2.innerHTML=eRows.length
+    ? eRows.map(([k,nav,noti,wid])=>`
+        <tr><td>${toolCell(k)}</td>
+        <td class="num">${fmt(nav)}</td>
+        <td class="num">${fmt(noti)}</td>
+        <td class="num">${fmt(wid)}</td></tr>`).join("")
+    : `<tr><td colspan="4" class="empty">Sin datos todavía. Esta métrica arranca con la versión 1.3.2.</td></tr>`;
 }
 /* ---------- tabla rankeada genérica ---------- */
 function renderRankTable(sel,entries,total,isTools,keyCell){
@@ -599,7 +692,7 @@ async function loadRange(){
   lastRange={from,to,days};
   $("#rangeLabel").textContent=`${from} → ${to} · ${days} días`;
 
-  let daily;
+  let daily, isDemo=false;
   const {key}=getSettings();
   try{
     if(!key)throw new Error("missing_settings");
@@ -607,17 +700,19 @@ async function loadRange(){
     $("#demoBanner").classList.remove("show");
   }catch(e){
     if(String(e.message).includes("missing_settings")){
-      daily=demoDaily(from,to); $("#demoBanner").classList.add("show");
+      daily=demoDaily(from,to); isDemo=true; $("#demoBanner").classList.add("show");
     }else if(String(e.message).includes("unauthorized")){
       openSettings(); showToast("API Key inválida"); return;
     }else{ showToast("Error: "+e.message); return; }
   }
   destroyCharts();
   lastData=daily;
+  updateBiasNotice(daily,isDemo);
   const a=aggregate(daily);
   renderKpis(a,lastRange);
   renderTrend(daily,$("#granularity").value,days);
   renderTools(a.agg.tools);
+  renderReach(a);
   renderLangs(a);
   renderPie("#chVersions",a.agg.versions,"versions");
   renderPie("#chFirstSeen",a.agg.versions_first_seen,"firstseen");
