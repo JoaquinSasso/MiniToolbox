@@ -176,6 +176,10 @@ const UNKNOWN_TOOL_BUCKET = "other";
 const KNOWN_SOURCES = new Set(["nav", "notification", "widget", "shortcut", "unknown"]);
 const UNKNOWN_SOURCE = "unknown";
 
+/** Categorias de retencion aceptadas. Debe coincidir con RetentionBuckets del cliente. */
+const KNOWN_AGE = new Set(["age0_6", "age7_29", "age30_89", "age90_179", "age180p"]);
+const KNOWN_INTENSITY = new Set(["d1", "d2_3", "d4_7", "d8_14", "d15_28"]);
+
 function bucketToolKey(ck: string, seenUnknown: Set<string>): string {
 	if (KNOWN_TOOLS.has(ck)) return ck;
 	seenUnknown.add(ck);
@@ -638,6 +642,21 @@ export const ingest = onRequest(
 						}
 					}
 
+					// Retencion: clave "<antiguedad>.<intensidad>", calculada en el
+					// dispositivo. Se guarda anidada para poder leer las marginales.
+					if (it.retention) {
+						for (const [k, v] of Object.entries(it.retention)) {
+							const n = Number(v || 0) > 0 ? 1 : 0;
+							if (n <= 0) continue;
+							const cut = k.indexOf(".");
+							if (cut <= 0) continue;
+							const age = k.slice(0, cut);
+							const intensity = k.slice(cut + 1);
+							if (!KNOWN_AGE.has(age) || !KNOWN_INTENSITY.has(intensity)) continue;
+							updates[`retention.${age}.${intensity}`] = inc(1);
+						}
+					}
+
 					if (it.ads) {
 						for (const [k, v] of Object.entries(it.ads)) {
 							const n = Number(v || 0);
@@ -717,6 +736,30 @@ export const ingest = onRequest(
 				});
 			}
 
+			// Rollup mensual del metodo de autenticacion.
+			// Es el contador que decide cuando se puede retirar la rama de API key:
+			// mientras haya trafico con "api_key", hay dispositivos que quedarian
+			// bloqueados de forma permanente si se elimina.
+			const authMonth = (body.items?.[0]?.day || ymdTZ(new Date(), DEFAULT_TZ)).slice(
+				0,
+				7,
+			);
+			await db
+				.collection("metrics_auth")
+				.doc(authMonth)
+				.set(
+					{
+						[authMethod]: FieldValue.increment(1),
+						// Las claves con puntos ("1.3.2") van dentro de un objeto literal,
+						// no como field path, asi que no se interpretan como anidamiento.
+						by_version: {
+							[body.app_version]: { [authMethod]: FieldValue.increment(1) },
+						},
+						updatedAt: FieldValue.serverTimestamp(),
+					},
+					{ merge: true },
+				);
+
 			await db.collection("metrics_ingest_logs").doc().set({
 				at: FieldValue.serverTimestamp(),
 				batch_id: body.batch_id,
@@ -785,6 +828,68 @@ export const metricsDaily = onRequest(
 			return;
 		} catch (e) {
 			console.error("metricsDaily_error", e);
+			sendJson(res, 500, { ok: false, error: "internal" });
+			return;
+		}
+	},
+);
+
+/**
+ * Estado de la migracion a App Check: cuantos lotes llegaron con cada metodo de
+ * autenticacion, por mes y por version de app.
+ *
+ * Lee documentos de rollup (uno por mes), no la coleccion de lotes, asi que el costo
+ * no crece con el volumen de ingesta.
+ */
+export const metricsAuth = onRequest(
+	{ secrets: [READ_METRICS_API_KEY, METRICS_API_KEY] },
+	async (req, res) => {
+		try {
+			if (req.method !== "GET") {
+				sendJson(res, 405, { ok: false, error: "method_not_allowed" });
+				return;
+			}
+			const apiKey = getHeaderApiKey(req);
+			const readK = (READ_METRICS_API_KEY.value() || "").trim();
+			const writeK = (METRICS_API_KEY.value() || "").trim();
+			if (!(apiKey && (apiKey === readK || apiKey === writeK))) {
+				sendJson(res, 401, { ok: false, error: "unauthorized" });
+				return;
+			}
+
+			const months = Math.max(1, Math.min(12, Number(req.query.months ?? 3)));
+			const now = new Date();
+			const ids: string[] = [];
+			for (let i = 0; i < months; i++) {
+				const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+				ids.push(
+					`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`,
+				);
+			}
+
+			const snaps = await db.getAll(
+				...ids.map((id) => db.collection("metrics_auth").doc(id)),
+			);
+
+			const out = snaps
+				.filter((snap) => snap.exists)
+				.map((snap) => {
+					const d = snap.data() || {};
+					return {
+						month: snap.id,
+						appcheck: Number(d.appcheck || 0),
+						api_key: Number(d.api_key || 0),
+						by_version: (d.by_version || {}) as Record<
+							string,
+							Record<string, number>
+						>,
+					};
+				});
+
+			sendJson(res, 200, { months: out });
+			return;
+		} catch (e) {
+			console.error("metricsAuth_error", e);
 			sendJson(res, 500, { ok: false, error: "internal" });
 			return;
 		}
