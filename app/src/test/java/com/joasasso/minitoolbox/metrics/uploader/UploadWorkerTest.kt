@@ -310,6 +310,45 @@ class UploadMetricsWorkerTest {
     }
 
     @Test
+    fun `la retencion se marca una vez por dia y viaja como categoria`() = runTest {
+        markSchemaCurrent()
+        val repo = com.joasasso.minitoolbox.metrics.storage.AggregatesRepository(context)
+
+        // Tres llamadas el mismo día: la marca no debe acumularse.
+        repeat(3) { repo.incrementDailyActive() }
+
+        val (_, fake) = runWorker(UploadOutcome.Success)
+
+        val item = org.json.JSONObject(fake.lastPayload.orEmpty())
+            .getJSONArray("items").getJSONObject(0)
+        val retention = item.getJSONObject("retention")
+
+        assertEquals("un dispositivo cae en una sola categoría por día", 1, retention.length())
+
+        val key = retention.keys().next()
+        assertEquals(
+            "un dispositivo nuevo con una sola marca cae en age0_6.d1",
+            "age0_6.d1",
+            key
+        )
+        assertEquals(1, retention.getInt(key))
+    }
+
+    @Test
+    fun `la retencion no expone identificadores`() = runTest {
+        markSchemaCurrent()
+        com.joasasso.minitoolbox.metrics.storage.AggregatesRepository(context)
+            .incrementDailyActive()
+
+        val (_, fake) = runWorker(UploadOutcome.Success)
+        val payload = fake.lastPayload.orEmpty()
+
+        // Los datos que alimentan el cálculo son locales y no deben salir nunca.
+        assertTrue("la lista de días activos no puede viajar", !payload.contains("active_days"))
+        assertTrue("el primer día visto no puede viajar", !payload.contains("first_seen_day"))
+    }
+
+    @Test
     fun `el payload incluye la version de esquema y la salud del cliente`() = runTest {
         markSchemaCurrent()
         seedPendingUsage("water")
