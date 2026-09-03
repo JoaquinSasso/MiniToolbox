@@ -289,6 +289,10 @@ type DailyDoc = {
 		app_open: number;
 		daily_active: number;
 		tools: Record<string, number>;
+		/** Dispositivos-dia por herramienta. Denominador de tools. */
+		tools_dau: Record<string, number>;
+		/** Aperturas por herramienta y origen: tool_entry[tool][source]. */
+		tool_entry: Record<string, Record<string, number>>;
 		ads: Record<string, number>;
 		versions: Record<string, number>;
 		versions_first_seen: Record<string, number>;
@@ -329,6 +333,43 @@ function normDoc(id: string, data: FirebaseFirestore.DocumentData): DailyDoc {
 		stripToolKeyInMap(toolsNested),
 		remapToolCounters(toolsFlat),
 	);
+
+	// --- tools_dau ---
+	const toolsDauNested =
+		data.tools_dau && typeof data.tools_dau === "object" ? data.tools_dau : {};
+	const toolsDauFlat = pickPrefix(data, "tools_dau");
+	const tools_dau = mergeCounts(
+		remapToolCounters(toolsDauNested),
+		remapToolCounters(toolsDauFlat),
+	);
+
+	// --- tool_entry ---
+	// Se guarda anidado (tool_entry.<tool>.<source>), pero documentos viejos pueden
+	// tener la clave plana. Se reconstruyen los dos niveles en cualquier caso.
+	const tool_entry: Record<string, Record<string, number>> = {};
+	const addEntry = (tool: string, source: string, n: number) => {
+		if (!tool || !source || !(n > 0)) return;
+		const canon = canonToolKey(tool);
+		if (!canon) return;
+		if (!tool_entry[canon]) tool_entry[canon] = {};
+		tool_entry[canon][source] = (tool_entry[canon][source] ?? 0) + n;
+	};
+
+	const entryNested =
+		data.tool_entry && typeof data.tool_entry === "object"
+			? data.tool_entry
+			: {};
+	for (const [tool, bySource] of Object.entries(entryNested)) {
+		if (!bySource || typeof bySource !== "object") continue;
+		for (const [source, v] of Object.entries(bySource as Record<string, any>)) {
+			addEntry(tool, source, Number(v || 0));
+		}
+	}
+	for (const [k, v] of Object.entries(pickPrefix(data, "tool_entry"))) {
+		const cut = k.lastIndexOf(".");
+		if (cut <= 0) continue;
+		addEntry(k.slice(0, cut), k.slice(cut + 1), Number(v || 0));
+	}
 
 	// --- ads ---
 	const adsNested = data.ads && typeof data.ads === "object" ? data.ads : {};
@@ -390,6 +431,8 @@ function normDoc(id: string, data: FirebaseFirestore.DocumentData): DailyDoc {
 			app_open,
 			daily_active,
 			tools: toolsCanon,
+			tools_dau,
+			tool_entry,
 			ads,
 			versions,
 			versions_first_seen,
@@ -782,6 +825,8 @@ export const metricsSummary = onRequest(
 			const agg_lang_primary: Record<string, number> = {};
 			const agg_lang_secondary: Record<string, number> = {};
 			const agg_widgets: Record<string, number> = {};
+			const agg_tools_dau: Record<string, number> = {};
+			const agg_entry_sources: Record<string, number> = {};
 
 			for (const r of rows) {
 				total_app_open += Number(r.totals.app_open ?? 0);
@@ -793,6 +838,12 @@ export const metricsSummary = onRequest(
 				sumMap(agg_lang_primary, r.totals.lang_primary);
 				sumMap(agg_lang_secondary, r.totals.lang_secondary);
 				sumMap(agg_widgets, r.totals.widgets);
+				sumMap(agg_tools_dau, r.totals.tools_dau);
+				// El origen se agrega a nivel global: por herramienta se consulta
+				// con metricsDaily, que devuelve el detalle completo.
+				for (const bySource of Object.values(r.totals.tool_entry || {})) {
+					sumMap(agg_entry_sources, bySource);
+				}
 			}
 
 			const payload = {
@@ -807,6 +858,8 @@ export const metricsSummary = onRequest(
 					lang_primary: topK(agg_lang_primary, 10),
 					lang_secondary: topK(agg_lang_secondary, 10),
 					widgets: topK(agg_widgets, 10),
+					tools_dau: topK(agg_tools_dau, 10),
+					entry_sources: topK(agg_entry_sources, 10),
 				},
 			};
 			sendJson(res, 200, payload);
