@@ -1,145 +1,145 @@
 <!doctype html>
 <html lang="es" data-theme="dark">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>MiniToolbox · Métricas</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<style>
-/* ============ Tokens ============ */
-:root{
-  --bg:#14171c; --surface:#1b1f26; --surface2:#232830; --border:#2e353f;
-  --text:#e6e9ee; --muted:#98a0ac; --faint:#6b7480;
-  --accent:#e8a13a; --accent-ink:#14171c;
-  --pos:#4ade80; --neg:#f87171; --warn:#f5b34a;
-  --grid:rgba(255,255,255,.06); --axis:rgba(255,255,255,.16);
-  --shadow:0 1px 0 rgba(255,255,255,.03), 0 8px 24px -18px rgba(0,0,0,.8);
-  --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
-  --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-}
-html[data-theme="light"]{
-  --bg:#f4f1ea; --surface:#ffffff; --surface2:#faf8f3; --border:#e4ded2;
-  --text:#1c2128; --muted:#5b636e; --faint:#8a919c;
-  --accent:#bd7d1c; --accent-ink:#ffffff;
-  --pos:#1a7f45; --neg:#c0392b; --warn:#b7791f;
-  --grid:rgba(0,0,0,.06); --axis:rgba(0,0,0,.18);
-  --shadow:0 1px 0 rgba(0,0,0,.02), 0 8px 24px -20px rgba(0,0,0,.25);
-}
-*{box-sizing:border-box}
-html,body{margin:0}
-body{
-  background:var(--bg); color:var(--text); font-family:var(--sans);
-  font-size:14px; line-height:1.45; -webkit-font-smoothing:antialiased;
-}
-.mono{font-family:var(--mono); font-variant-numeric:tabular-nums}
-a{color:var(--accent)}
-button,select,input{font-family:inherit; font-size:inherit; color:inherit}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MiniToolbox · Métricas</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    /* ============ Tokens ============ */
+    :root{
+      --bg:#14171c; --surface:#1b1f26; --surface2:#232830; --border:#2e353f;
+      --text:#e6e9ee; --muted:#98a0ac; --faint:#6b7480;
+      --accent:#e8a13a; --accent-ink:#14171c;
+      --pos:#4ade80; --neg:#f87171; --warn:#f5b34a;
+      --grid:rgba(255,255,255,.06); --axis:rgba(255,255,255,.16);
+      --shadow:0 1px 0 rgba(255,255,255,.03), 0 8px 24px -18px rgba(0,0,0,.8);
+      --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+      --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    }
+    html[data-theme="light"]{
+      --bg:#f4f1ea; --surface:#ffffff; --surface2:#faf8f3; --border:#e4ded2;
+      --text:#1c2128; --muted:#5b636e; --faint:#8a919c;
+      --accent:#bd7d1c; --accent-ink:#ffffff;
+      --pos:#1a7f45; --neg:#c0392b; --warn:#b7791f;
+      --grid:rgba(0,0,0,.06); --axis:rgba(0,0,0,.18);
+      --shadow:0 1px 0 rgba(0,0,0,.02), 0 8px 24px -20px rgba(0,0,0,.25);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0}
+    body{
+      background:var(--bg); color:var(--text); font-family:var(--sans);
+      font-size:14px; line-height:1.45; -webkit-font-smoothing:antialiased;
+    }
+    .mono{font-family:var(--mono); font-variant-numeric:tabular-nums}
+    a{color:var(--accent)}
+    button,select,input{font-family:inherit; font-size:inherit; color:inherit}
 
-/* ============ Tick-rule motif (signature) ============ */
-.ticks{height:10px; background-image:repeating-linear-gradient(90deg,var(--axis) 0 1px,transparent 1px 12px);
-  opacity:.5; border-radius:2px}
+    /* ============ Tick-rule motif (signature) ============ */
+    .ticks{height:10px; background-image:repeating-linear-gradient(90deg,var(--axis) 0 1px,transparent 1px 12px);
+      opacity:.5; border-radius:2px}
 
-/* ============ Topbar ============ */
-.topbar{position:sticky; top:0; z-index:30; background:color-mix(in srgb,var(--bg) 88%, transparent);
-  backdrop-filter:saturate(140%) blur(8px); border-bottom:1px solid var(--border)}
-.topbar-inner{max-width:1240px; margin:0 auto; padding:12px 20px; display:flex; align-items:center; gap:16px; flex-wrap:wrap}
-.brand{display:flex; flex-direction:column; gap:4px; margin-right:auto}
-.brand b{font-weight:650; letter-spacing:.2px}
-.brand .sub{font-size:11px; color:var(--faint); text-transform:uppercase; letter-spacing:.14em}
-.brand .tickline{width:118px}
-.controls{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
-.field{display:flex; align-items:center; gap:6px}
-.field label{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em}
-select,.btn{
-  background:var(--surface2); border:1px solid var(--border); border-radius:8px;
-  padding:7px 10px; cursor:pointer; transition:border-color .15s, background .15s;
-}
-select:hover,.btn:hover{border-color:var(--accent)}
-.btn.primary{background:var(--accent); color:var(--accent-ink); border-color:var(--accent); font-weight:600}
-.btn.primary:hover{filter:brightness(1.06)}
-.icon-btn{width:36px; height:36px; display:grid; place-items:center; padding:0}
-.dropdown{position:relative}
-.menu{position:absolute; right:0; top:calc(100% + 6px); background:var(--surface); border:1px solid var(--border);
-  border-radius:10px; box-shadow:var(--shadow); min-width:230px; padding:6px; display:none; z-index:40}
-.menu.open{display:block}
-.menu button{display:flex; width:100%; align-items:center; gap:10px; background:none; border:0; text-align:left;
-  padding:9px 10px; border-radius:7px; cursor:pointer}
-.menu button:hover{background:var(--surface2)}
-.menu .hint{font-size:11px; color:var(--faint); padding:2px 10px 6px}
-.menu .sep{height:1px; background:var(--border); margin:5px 4px}
-.tag{font-size:10px; padding:1px 6px; border-radius:20px; border:1px solid var(--border); color:var(--muted)}
-.tag.reco{color:var(--accent); border-color:var(--accent)}
+    /* ============ Topbar ============ */
+    .topbar{position:sticky; top:0; z-index:30; background:color-mix(in srgb,var(--bg) 88%, transparent);
+      backdrop-filter:saturate(140%) blur(8px); border-bottom:1px solid var(--border)}
+    .topbar-inner{max-width:1240px; margin:0 auto; padding:12px 20px; display:flex; align-items:center; gap:16px; flex-wrap:wrap}
+    .brand{display:flex; flex-direction:column; gap:4px; margin-right:auto}
+    .brand b{font-weight:650; letter-spacing:.2px}
+    .brand .sub{font-size:11px; color:var(--faint); text-transform:uppercase; letter-spacing:.14em}
+    .brand .tickline{width:118px}
+    .controls{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+    .field{display:flex; align-items:center; gap:6px}
+    .field label{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em}
+    select,.btn{
+      background:var(--surface2); border:1px solid var(--border); border-radius:8px;
+      padding:7px 10px; cursor:pointer; transition:border-color .15s, background .15s;
+    }
+    select:hover,.btn:hover{border-color:var(--accent)}
+    .btn.primary{background:var(--accent); color:var(--accent-ink); border-color:var(--accent); font-weight:600}
+    .btn.primary:hover{filter:brightness(1.06)}
+    .icon-btn{width:36px; height:36px; display:grid; place-items:center; padding:0}
+    .dropdown{position:relative}
+    .menu{position:absolute; right:0; top:calc(100% + 6px); background:var(--surface); border:1px solid var(--border);
+      border-radius:10px; box-shadow:var(--shadow); min-width:230px; padding:6px; display:none; z-index:40}
+    .menu.open{display:block}
+    .menu button{display:flex; width:100%; align-items:center; gap:10px; background:none; border:0; text-align:left;
+      padding:9px 10px; border-radius:7px; cursor:pointer}
+    .menu button:hover{background:var(--surface2)}
+    .menu .hint{font-size:11px; color:var(--faint); padding:2px 10px 6px}
+    .menu .sep{height:1px; background:var(--border); margin:5px 4px}
+    .tag{font-size:10px; padding:1px 6px; border-radius:20px; border:1px solid var(--border); color:var(--muted)}
+    .tag.reco{color:var(--accent); border-color:var(--accent)}
 
-/* ============ Layout ============ */
-main{max-width:1240px; margin:0 auto; padding:20px}
-.demo-banner{display:none; align-items:center; gap:12px; background:color-mix(in srgb,var(--warn) 14%,var(--surface));
-  border:1px solid color-mix(in srgb,var(--warn) 40%,var(--border)); border-radius:10px; padding:10px 14px; margin-bottom:16px}
-.demo-banner.show{display:flex}
-.demo-banner .dot{width:8px; height:8px; border-radius:50%; background:var(--warn)}
+    /* ============ Layout ============ */
+    main{max-width:1240px; margin:0 auto; padding:20px}
+    .demo-banner{display:none; align-items:center; gap:12px; background:color-mix(in srgb,var(--warn) 14%,var(--surface));
+      border:1px solid color-mix(in srgb,var(--warn) 40%,var(--border)); border-radius:10px; padding:10px 14px; margin-bottom:16px}
+    .demo-banner.show{display:flex}
+    .demo-banner .dot{width:8px; height:8px; border-radius:50%; background:var(--warn)}
 
-.section{margin:26px 0}
-.section-head{display:flex; align-items:baseline; gap:12px; margin-bottom:12px}
-.section-head h2{font-size:15px; font-weight:600; margin:0; letter-spacing:.2px}
-.section-head .eyebrow{font-family:var(--mono); font-size:11px; color:var(--accent); letter-spacing:.1em}
-.section-head .meta{margin-left:auto; font-size:12px; color:var(--faint)}
-.card{background:var(--surface); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow)}
-.pad{padding:16px}
-.grid{display:grid; gap:16px}
-.g2{grid-template-columns:1fr 1fr}
-.g3{grid-template-columns:repeat(3,1fr)}
-@media(max-width:880px){.g2,.g3{grid-template-columns:1fr}}
+    .section{margin:26px 0}
+    .section-head{display:flex; align-items:baseline; gap:12px; margin-bottom:12px}
+    .section-head h2{font-size:15px; font-weight:600; margin:0; letter-spacing:.2px}
+    .section-head .eyebrow{font-family:var(--mono); font-size:11px; color:var(--accent); letter-spacing:.1em}
+    .section-head .meta{margin-left:auto; font-size:12px; color:var(--faint)}
+    .card{background:var(--surface); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow)}
+    .pad{padding:16px}
+    .grid{display:grid; gap:16px}
+    .g2{grid-template-columns:1fr 1fr}
+    .g3{grid-template-columns:repeat(3,1fr)}
+    @media(max-width:880px){.g2,.g3{grid-template-columns:1fr}}
 
-/* KPI */
-.kpis{display:grid; grid-template-columns:repeat(6,1fr); gap:12px}
-@media(max-width:1080px){.kpis{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:560px){.kpis{grid-template-columns:repeat(2,1fr)}}
-.kpi{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:13px 14px; box-shadow:var(--shadow)}
-.kpi .k-label{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; display:flex; justify-content:space-between}
-.kpi .k-val{font-family:var(--mono); font-size:26px; font-weight:600; margin-top:6px; letter-spacing:-.5px}
-.kpi .k-sub{font-size:11px; color:var(--faint); margin-top:2px; min-height:14px}
-.kpi .k-tick{margin-top:9px}
+    /* KPI */
+    .kpis{display:grid; grid-template-columns:repeat(6,1fr); gap:12px}
+    @media(max-width:1080px){.kpis{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:560px){.kpis{grid-template-columns:repeat(2,1fr)}}
+    .kpi{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:13px 14px; box-shadow:var(--shadow)}
+    .kpi .k-label{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; display:flex; justify-content:space-between}
+    .kpi .k-val{font-family:var(--mono); font-size:26px; font-weight:600; margin-top:6px; letter-spacing:-.5px}
+    .kpi .k-sub{font-size:11px; color:var(--faint); margin-top:2px; min-height:14px}
+    .kpi .k-tick{margin-top:9px}
 
-/* chart canvases */
-.chart-wrap{position:relative; width:100%}
-.chart-wrap.line{height:300px}
-.chart-wrap.pie{height:240px}
-.tools-scroll{max-height:640px; overflow:auto}
+    /* chart canvases */
+    .chart-wrap{position:relative; width:100%}
+    .chart-wrap.line{height:300px}
+    .chart-wrap.pie{height:240px}
+    .tools-scroll{max-height:640px; overflow:auto}
 
-/* table */
-table{width:100%; border-collapse:collapse; font-size:13px}
-th,td{text-align:left; padding:8px 10px; border-bottom:1px solid var(--border); white-space:nowrap}
-th{font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); cursor:pointer; user-select:none; position:sticky; top:0; background:var(--surface)}
-th.num,td.num{text-align:right; font-family:var(--mono); font-variant-numeric:tabular-nums}
-tbody tr:hover{background:var(--surface2)}
-.share{position:relative; min-width:120px}
-.share .fill{position:absolute; inset:0 auto 0 0; background:color-mix(in srgb,var(--accent) 26%,transparent); border-radius:0 4px 4px 0}
-.share span{position:relative; padding-left:8px; font-family:var(--mono); font-size:12px; color:var(--muted)}
-.empty{color:var(--faint); padding:22px; text-align:center; font-size:13px}
-.zero-list{display:flex; flex-wrap:wrap; gap:6px; margin-top:10px}
-.chip{font-family:var(--mono); font-size:12px; padding:3px 8px; border-radius:6px; background:var(--surface2);
-  border:1px solid var(--border); color:var(--neg)}
-.chip.paywall{color:var(--warn); border-color:color-mix(in srgb,var(--warn) 50%, var(--border))}
-.chip.util{color:var(--faint); border-color:var(--border)}
-details.zero{margin-top:12px}
-details.zero summary{cursor:pointer; color:var(--muted); font-size:12px}
-details.zero textarea{width:100%; margin-top:8px; min-height:70px; background:var(--surface2); color:var(--text);
-  border:1px solid var(--border); border-radius:8px; padding:8px; font-family:var(--mono); font-size:12px; resize:vertical}
+    /* table */
+    table{width:100%; border-collapse:collapse; font-size:13px}
+    th,td{text-align:left; padding:8px 10px; border-bottom:1px solid var(--border); white-space:nowrap}
+    th{font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); cursor:pointer; user-select:none; position:sticky; top:0; background:var(--surface)}
+    th.num,td.num{text-align:right; font-family:var(--mono); font-variant-numeric:tabular-nums}
+    tbody tr:hover{background:var(--surface2)}
+    .share{position:relative; min-width:120px}
+    .share .fill{position:absolute; inset:0 auto 0 0; background:color-mix(in srgb,var(--accent) 26%,transparent); border-radius:0 4px 4px 0}
+    .share span{position:relative; padding-left:8px; font-family:var(--mono); font-size:12px; color:var(--muted)}
+    .empty{color:var(--faint); padding:22px; text-align:center; font-size:13px}
+    .zero-list{display:flex; flex-wrap:wrap; gap:6px; margin-top:10px}
+    .chip{font-family:var(--mono); font-size:12px; padding:3px 8px; border-radius:6px; background:var(--surface2);
+      border:1px solid var(--border); color:var(--neg)}
+    .chip.paywall{color:var(--warn); border-color:color-mix(in srgb,var(--warn) 50%, var(--border))}
+    .chip.util{color:var(--faint); border-color:var(--border)}
+    details.zero{margin-top:12px}
+    details.zero summary{cursor:pointer; color:var(--muted); font-size:12px}
+    details.zero textarea{width:100%; margin-top:8px; min-height:70px; background:var(--surface2); color:var(--text);
+      border:1px solid var(--border); border-radius:8px; padding:8px; font-family:var(--mono); font-size:12px; resize:vertical}
 
-/* modal */
-.overlay{position:fixed; inset:0; background:rgba(0,0,0,.5); display:none; place-items:center; z-index:60}
-.overlay.open{display:grid}
-.modal{background:var(--surface); border:1px solid var(--border); border-radius:14px; width:min(460px,92vw); box-shadow:var(--shadow)}
-.modal h3{margin:0; padding:16px 18px; border-bottom:1px solid var(--border); font-size:15px}
-.modal .body{padding:18px}
-.modal label{display:block; font-size:12px; color:var(--muted); margin:12px 0 5px}
-.modal input{width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:9px 11px; font-family:var(--mono)}
-.modal .foot{padding:14px 18px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:8px}
-.toast{position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px); opacity:0;
-  background:var(--text); color:var(--bg); padding:10px 16px; border-radius:10px; font-weight:600; font-size:13px;
-  transition:.25s; z-index:80; pointer-events:none}
-.toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
-.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
-</style>
+    /* modal */
+    .overlay{position:fixed; inset:0; background:rgba(0,0,0,.5); display:none; place-items:center; z-index:60}
+    .overlay.open{display:grid}
+    .modal{background:var(--surface); border:1px solid var(--border); border-radius:14px; width:min(460px,92vw); box-shadow:var(--shadow)}
+    .modal h3{margin:0; padding:16px 18px; border-bottom:1px solid var(--border); font-size:15px}
+    .modal .body{padding:18px}
+    .modal label{display:block; font-size:12px; color:var(--muted); margin:12px 0 5px}
+    .modal input{width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:9px 11px; font-family:var(--mono)}
+    .modal .foot{padding:14px 18px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:8px}
+    .toast{position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px); opacity:0;
+      background:var(--text); color:var(--bg); padding:10px 16px; border-radius:10px; font-weight:600; font-size:13px;
+      transition:.25s; z-index:80; pointer-events:none}
+    .toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+    .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  </style>
 </head>
 <body>
 
@@ -271,6 +271,11 @@ details.zero textarea{width:100%; margin-top:8px; min-height:70px; background:va
       <div class="card pad"><h3 style="margin:0 0 10px; font-size:13px; color:var(--muted)">Instalaciones nuevas por versión</h3>
         <div class="chart-wrap pie"><canvas id="chFirstSeen"></canvas></div></div>
     </div>
+    <div class="card pad" style="margin-top:16px">
+      <h3 style="margin:0 0 10px; font-size:13px; color:var(--muted)">Adopción en el tiempo</h3>
+      <div class="chart-wrap" style="height:280px"><canvas id="chAdoption"></canvas></div>
+      <p style="font-size:12px; color:var(--muted); margin:12px 0 0" id="adoptionNote"></p>
+    </div>
   </section>
 
   <section class="section">
@@ -399,605 +404,693 @@ details.zero textarea{width:100%; margin-top:8px; min-height:70px; background:va
 <div class="toast" id="toast"></div>
 
 <script>
-/* =================================================================
-   MiniToolbox metrics dashboard
-   Contrato de API preservado: metricsSummary({last}), metricsDaily({from,to})
-   ================================================================= */
-const LS_BASE="metrics_api_base", LS_KEY="metrics_api_key", LS_THEME="metrics_theme", LS_ZERO="metrics_tool_ids";
-const LAUNCH_DATE="2025-09-24";           // ← ajustá si tu primer registro es otra fecha
-const $=s=>document.querySelector(s);
-const fmt=n=>Number(n||0).toLocaleString("es-AR");
-const pct=(n,d)=>d?((n/d)*100):0;
-const pctS=(n,d)=>d?((n/d)*100).toFixed(1)+"%":"—";
+  /* =================================================================
+     MiniToolbox metrics dashboard
+     Contrato de API preservado: metricsSummary({last}), metricsDaily({from,to})
+     ================================================================= */
+  const LS_BASE="metrics_api_base", LS_KEY="metrics_api_key", LS_THEME="metrics_theme", LS_ZERO="metrics_tool_ids";
+  const LAUNCH_DATE="2025-09-24";           // ← ajustá si tu primer registro es otra fecha
+  const $=s=>document.querySelector(s);
+  const fmt=n=>Number(n||0).toLocaleString("es-AR");
+  const pct=(n,d)=>d?((n/d)*100):0;
+  const pctS=(n,d)=>d?((n/d)*100).toFixed(1)+"%":"—";
 
-/* ---------- estado ---------- */
-let charts={}, lastData=null, lastRange=null, sortState={};
+  /* ---------- estado ---------- */
+  let charts={}, lastData=null, lastRange=null, sortState={};
 
-/* ---------- tema ---------- */
-function cssVar(name){return getComputedStyle(document.documentElement).getPropertyValue(name).trim();}
-function applyTheme(t){
-  document.documentElement.setAttribute("data-theme",t);
-  Chart.defaults.color=cssVar("--muted");
-  Chart.defaults.borderColor=cssVar("--grid");
-  Chart.defaults.font.family=cssVar("--sans");
-}
-/* ---------- settings / API ---------- */
-function getSettings(){return{base:localStorage.getItem(LS_BASE)||"",key:localStorage.getItem(LS_KEY)||""};}
-function setSettings({base,key}){if(base!=null)localStorage.setItem(LS_BASE,base.trim());if(key!=null)localStorage.setItem(LS_KEY,key.trim());}
-function resolveApiBase(){
-  const s=getSettings();
-  const onHosting=location.origin.endsWith(".web.app")||location.origin.endsWith(".firebaseapp.com");
-  const onEmu=location.hostname==="localhost"&&location.port==="5000";
-  const def=(onHosting||onEmu)?"/api":"https://us-central1-minitoolbox-7ab7d.cloudfunctions.net";
-  let base=(s.base||"").trim()||def;
-  if(onHosting&&/^https?:\/\//i.test(base))base="/api";
-  return base;
-}
-async function apiGet(path,params={}){
-  const {key}=getSettings();
-  if(!key)throw new Error("missing_settings");
-  const b=resolveApiBase().replace(/\/$/,"");
-  const p="/"+String(path).replace(/^\/+/,"");
-  const qs=new URLSearchParams(params).toString();
-  const r=await fetch(`${b}${p}${qs?"?"+qs:""}`,{headers:{"X-API-Key":key,"Content-Type":"application/json"}});
-  if(r.status===401)throw new Error("unauthorized");
-  if(!r.ok)throw new Error("http_"+r.status);
-  return r.json();
-}
-/* ---------- fechas ---------- */
-function ymd(d){return d.toISOString().slice(0,10);}
-function addDays(d,n){const t=new Date(d);t.setDate(t.getDate()+n);return t;}
-function daysBetween(a,b){return Math.round((new Date(b)-new Date(a))/86400000)+1;}
-function mondayOf(dstr){const d=new Date(dstr+"T00:00:00");const wd=(d.getDay()+6)%7;return ymd(addDays(d,-wd));}
-
-/* ---------- agregación ---------- */
-function sumInto(dst,src){for(const[k,v]of Object.entries(src||{}))dst[k]=(dst[k]||0)+Number(v||0);}
-function ranked(map){return Object.entries(map||{}).sort((a,b)=>b[1]-a[1]);}
-function totalOf(map){return Object.values(map||{}).reduce((a,b)=>a+Number(b||0),0);}
-
-/* ---------- sesgo histórico ----------
-   Hasta la corrección del 2026-08-17, la primera apertura diaria de cada usuario
-   sumaba +2. El aviso sólo tiene sentido si el rango elegido incluye días afectados
-   CON datos, y sólo sobre datos reales: en modo demostración los números son
-   simulados y no arrastran ningún sesgo. */
-const BIAS_FROM="2025-09-24", BIAS_TO="2026-08-17";
-let biasActive=false;
-
-function updateBiasNotice(daily,isDemo){
-  biasActive = !isDemo && (daily||[]).some(r=>
-    r.day>=BIAS_FROM && r.day<=BIAS_TO &&
-    (Number(r.totals?.app_open||0)>0 || Number(r.totals?.daily_active||0)>0));
-  $("#biasNotice").classList.toggle("show",biasActive);
-}
-
-function aggregate(daily){
-  const agg={tools:{},tools_dau:{},ads:{},versions:{},versions_first_seen:{},widgets:{},lang_primary:{},lang_secondary:{}};
-  // tool_entry viene anidado: {herramienta:{origen:n}}. Se conserva la forma para
-  // poder mostrar el desglose por herramienta, y se agrega aparte por origen.
-  const entryByTool={}, entryBySource={};
-  // retention[antiguedad][intensidad]: se acumula la tabla cruzada completa.
-  const retention={};
-  let opens=0,dailyActive=0,newInstalls=0,daysWithData=0;
-  for(const r of daily){
-    const t=r.totals||{};
-    const o=Number(t.app_open||0); opens+=o;
-    const da=Number(t.daily_active||0); dailyActive+=da;
-    if(o>0||da>0||Object.keys(t.tools||{}).length)daysWithData++;
-    sumInto(agg.tools,t.tools); sumInto(agg.ads,t.ads);
-    sumInto(agg.versions,t.versions); sumInto(agg.versions_first_seen,t.versions_first_seen);
-    sumInto(agg.widgets,t.widgets); sumInto(agg.lang_primary,t.lang_primary); sumInto(agg.lang_secondary,t.lang_secondary);
-    sumInto(agg.tools_dau,t.tools_dau);
-    for(const [tool,bySource] of Object.entries(t.tool_entry||{})){
-      if(!entryByTool[tool])entryByTool[tool]={};
-      sumInto(entryByTool[tool],bySource);
-      sumInto(entryBySource,bySource);
-    }
-    for(const [age,byInt] of Object.entries(t.retention||{})){
-      if(!retention[age])retention[age]={};
-      sumInto(retention[age],byInt);
-    }
+  /* ---------- tema ---------- */
+  function cssVar(name){return getComputedStyle(document.documentElement).getPropertyValue(name).trim();}
+  function applyTheme(t){
+    document.documentElement.setAttribute("data-theme",t);
+    Chart.defaults.color=cssVar("--muted");
+    Chart.defaults.borderColor=cssVar("--grid");
+    Chart.defaults.font.family=cssVar("--sans");
   }
-  newInstalls=totalOf(agg.versions_first_seen);
-  return {agg,entryByTool,entryBySource,retention,opens,dailyActive,newInstalls,daysWithData};
-}
-function bucketOpens(daily,gran){
-  const buckets={};
-  for(const r of daily){
-    const day=r.day; let key=day;
-    if(gran==="week")key=mondayOf(day);
-    else if(gran==="month")key=day.slice(0,7);
-    buckets[key]=(buckets[key]||0)+Number(r.totals?.app_open||0);
+  /* ---------- settings / API ---------- */
+  function getSettings(){return{base:localStorage.getItem(LS_BASE)||"",key:localStorage.getItem(LS_KEY)||""};}
+  function setSettings({base,key}){if(base!=null)localStorage.setItem(LS_BASE,base.trim());if(key!=null)localStorage.setItem(LS_KEY,key.trim());}
+  function resolveApiBase(){
+    const s=getSettings();
+    const onHosting=location.origin.endsWith(".web.app")||location.origin.endsWith(".firebaseapp.com");
+    const onEmu=location.hostname==="localhost"&&location.port==="5000";
+    const def=(onHosting||onEmu)?"/api":"https://us-central1-minitoolbox-7ab7d.cloudfunctions.net";
+    let base=(s.base||"").trim()||def;
+    if(onHosting&&/^https?:\/\//i.test(base))base="/api";
+    return base;
   }
-  const labels=Object.keys(buckets).sort();
-  return {labels,data:labels.map(l=>buckets[l])};
-}
-function resolveGranularity(gran,rangeDays){
-  if(gran!=="auto")return gran;
-  if(rangeDays<=45)return "day";
-  if(rangeDays<=220)return "week";
-  return "month";
-}
-
-/* ---------- paleta de charts ---------- */
-function palette(n){
-  const base=[cssVar("--accent"),"#5aa9e6","#7ecb8f","#c88be0","#e6795a","#e6c15a","#6ad0c4","#b0b8c4","#d98cae","#8f9bd6"];
-  const out=[]; for(let i=0;i<n;i++)out.push(base[i%base.length]); return out;
-}
-function destroyCharts(){Object.values(charts).forEach(c=>c&&c.destroy());charts={};}
-
-/* ---------- nombres de idioma (ISO 639-1 -> español) ---------- */
-const LANG_DISPLAY=(()=>{try{return new Intl.DisplayNames(["es"],{type:"language",fallback:"code"});}catch(e){return null;}})();
-function langLabel(raw){
-  const code=String(raw||"").trim();
-  if(!code)return{name:"—",code:""};
-  if(code.toLowerCase()==="und")return{name:"Sin determinar",code};
-  let name=code;
-  if(LANG_DISPLAY){
-    try{const n=LANG_DISPLAY.of(code);if(n&&n!==code)name=n.charAt(0).toUpperCase()+n.slice(1);}catch(e){}
-  }
-  return{name,code};
-}
-function langCell(raw){
-  const{name,code}=langLabel(raw);
-  if(name===code)return `<span class="mono">${code}</span>`;
-  return `${name} <span class="mono" style="color:var(--faint); font-size:11px">${code}</span>`;
-}
-
-/* ---------- catálogo de tools (desde Screen.kt + tool_sum.xml) ---------- */
-const TOOL_CATALOG={
-  random_color:{name:"Colores (hex)"}, group_selector:{name:"Generador de grupos"},
-  coin_flip:{name:"Cara o cruz"}, decimal_binary:{name:"Decimal ↔ binario"},
-  text_binary:{name:"Texto ↔ binario"}, truco_scoreboard:{name:"Marcador de truco"},
-  age_calculator:{name:"Calculadora de edad"}, zodiac_sign:{name:"Signo zodiacal"},
-  pomodoro_list:{name:"Pomodoro"}, bubble_level:{name:"Nivel de burbuja"},
-  percentage:{name:"Porcentajes"}, time_converter:{name:"Horas 12/24"},
-  bmi_calculator:{name:"IMC"}, roman_numerals:{name:"Números romanos"},
-  unit_converter:{name:"Conversor de unidades"}, password_generator:{name:"Generador de contraseñas"},
-  activity_suggester:{name:"Sugeridor de actividades"}, name_generator:{name:"Nombres aleatorios"},
-  qr_generator:{name:"Generador de QR"}, vcard_generator:{name:"QR vCard"},
-  lorem_ipsum:{name:"Lorem ipsum"}, ruler:{name:"Regla en pantalla"},
-  light_meter:{name:"Medidor de luz"}, flashlight:{name:"Linterna"},
-  streaks:{name:"Rachas / hábitos"}, water:{name:"Recordatorio de agua"},
-  countdown:{name:"Cuenta regresiva"}, countries_info:{name:"Info de países"},
-  selector_wheel:{name:"Selector de opciones"}, guess_flag:{name:"Adivina la bandera"},
-  meetings:{name:"Divisor de gastos"}, dice:{name:"Dados"},
-  quick_calcs:{name:"Cálculo rápido"}, quotes:{name:"Frases",note:"sin descripción en tool_sum.xml"},
-  multiverse_me:{name:"Multiverso / En otro mundo"}, guess_capital:{name:"Adivina la capital"},
-  compass:{name:"Brújula"}, todo:{name:"To-Do list"}, events:{name:"Eventos importantes"},
-  compound_interest:{name:"Interés compuesto"}, scoreboard:{name:"Marcador de equipos"},
-  magnifier:{name:"Lupa"}, ar_ruler:{name:"Regla AR"}, minesweeper:{name:"Buscaminas"},
-  pro:{name:"Pro (paywall)",isPaywall:true,note:"no es una tool: desbloquea widgets y saca ads"},
-  about:{name:"Acerca de",isUtility:true,note:"marcada para ocultar de métricas en el código, pero igual registra uso"},
-};
-const TOOL_CATALOG_IDS=Object.keys(TOOL_CATALOG).sort();
-function toolCell(id){
-  const c=TOOL_CATALOG[id];
-  if(!c)return `<span class="mono">${id}</span>`;
-  return `${c.name} <span class="mono" style="color:var(--faint); font-size:11px">${id}</span>`;
-}
-
-/* ---------- render: KPIs ---------- */
-function renderKpis(a,range){
-  const topVer=ranked(a.agg.versions)[0], topLang=ranked(a.agg.lang_primary)[0];
-  const toolsTotal=totalOf(a.agg.tools);
-  const distinctTools=Object.keys(a.agg.tools).length;
-  const cards=[
-    {l:"Aperturas",v:fmt(a.opens),s:biasActive?`Total (sesgo +2 hasta ${BIAS_TO})`:"Total"},
-    {l:"Disp. Activos",v:fmt(a.dailyActive),s:`DDAU (sin doble conteo)`},
-    {l:"Instalaciones",v:fmt(a.newInstalls),s:"por first-seen"},
-    {l:"Tools usadas",v:fmt(distinctTools),s:`${fmt(toolsTotal)} usos totales`},
-    {l:"Versión top",v:topVer?topVer[0]:"—",s:topVer?pctS(topVer[1],totalOf(a.agg.versions))+" del uso":""},
-    {l:"Idioma top",v:topLang?langLabel(topLang[0]).name:"—",s:topLang?langLabel(topLang[0]).code+" · "+pctS(topLang[1],totalOf(a.agg.lang_primary))+" de dispositivos":""},
-  ];
-  $("#kpis").innerHTML=cards.map(c=>`
-    <div class="kpi"><div class="k-label"><span>${c.l}</span></div>
-    <div class="k-val">${c.v}</div><div class="k-sub">${c.s||""}</div>
-    <div class="k-tick ticks"></div></div>`).join("");
-}
-/* ---------- render: línea de aperturas ---------- */
-function renderTrend(daily,gran,rangeDays){
-  const g=resolveGranularity(gran,rangeDays);
-  const {labels,data}=bucketOpens(daily,g);
-  const label={day:"Aperturas por día",week:"Aperturas por semana",month:"Aperturas por mes"}[g];
-  $("#trendMeta").textContent=`${labels.length} puntos · agrupado por ${({day:"día",week:"semana",month:"mes"})[g]}`;
-  const acc=cssVar("--accent");
-  charts.opens=new Chart($("#chOpens"),{
-    type:"line",
-    data:{labels,datasets:[{label,data,borderColor:acc,backgroundColor:acc+"22",
-      borderWidth:2,tension:.28,fill:true,pointRadius:labels.length>60?0:3,pointHoverRadius:5}]},
-    options:{responsive:true,maintainAspectRatio:false,animation:false,
-      scales:{y:{beginAtZero:true,grid:{color:cssVar("--grid")}},x:{grid:{display:false},ticks:{maxRotation:0,autoSkip:true,maxTicksLimit:12}}},
-      plugins:{legend:{display:false},tooltip:{intersect:false,mode:"index"}}}
-  });
-}
-/* ---------- render: tools (bar completo + tabla) ---------- */
-function renderTools(map){
-  const entries=ranked(map), total=totalOf(map);
-  $("#toolsMeta").textContent=`${entries.length} herramientas · ${fmt(total)} interacciones`;
-  // barra: altura dinámica + SIN autoSkip (arregla el "una de por medio")
-  const wrap=$("#toolsChartWrap");
-  wrap.style.height=Math.max(220,entries.length*28+40)+"px";
-  const asc=[...entries].reverse();
-  charts.tools=new Chart($("#chTools"),{
-    type:"bar",
-    data:{labels:asc.map(e=>e[0]),datasets:[{data:asc.map(e=>e[1]),
-      backgroundColor:palette(asc.length),borderRadius:4,borderSkipped:false}]},
-    options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,animation:false,
-      scales:{x:{beginAtZero:true,grid:{color:cssVar("--grid")}},
-              y:{grid:{display:false},ticks:{autoSkip:false,font:{family:cssVar("--mono"),size:12}}}},
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${fmt(c.raw)} (${pctS(c.raw,total)})`}}}}
-  });
-  renderRankTable("#tblTools",entries,total,true,toolCell);
-  updateZeroList(map);
-}
-/* ---------- retención: cruce antigüedad x intensidad ---------- */
-const RET_AGES=[["age0_6","0-6 días"],["age7_29","7-29 días"],["age30_89","30-89 días"],
-                ["age90_179","90-179 días"],["age180p","180+ días"]];
-const RET_INT=["d1","d2_3","d4_7","d8_14","d15_28"];
-
-function renderRetention(a){
-  const ret=a.retention||{};
-  const tb=$("#tblRetention tbody");
-  const grand=Object.values(ret).reduce((s,byInt)=>s+totalOf(byInt),0);
-
-  if(!grand){
-    tb.innerHTML=`<tr><td colspan="7" class="empty">Sin datos todavía. Esta métrica arranca con la versión 1.3.2.</td></tr>`;
-    $("#retMeta").textContent="";
-    return;
-  }
-  $("#retMeta").textContent=`${fmt(grand)} marcas diarias`;
-
-  const rows=RET_AGES.map(([key,label])=>{
-    const byInt=ret[key]||{};
-    const cells=RET_INT.map(i=>Number(byInt[i]||0));
-    const total=cells.reduce((s,n)=>s+n,0);
-    return `<tr><td>${label}</td>${cells.map(n=>
-      `<td class="num">${n?fmt(n):"–"}</td>`).join("")}<td class="num"><b>${fmt(total)}</b></td></tr>`;
-  });
-
-  const totals=RET_INT.map(i=>RET_AGES.reduce((s,[k])=>s+Number((ret[k]||{})[i]||0),0));
-  rows.push(`<tr><td><b>Total</b></td>${totals.map(n=>
-    `<td class="num"><b>${fmt(n)}</b></td>`).join("")}<td class="num"><b>${fmt(grand)}</b></td></tr>`);
-
-  tb.innerHTML=rows.join("");
-}
-/* ---------- estado de la migración a App Check ---------- */
-async function renderAuth(){
-  let data;
-  try{ data=await apiGet("metricsAuth",{months:3}); }
-  catch(e){
-    $("#authSummary").innerHTML=`<span style="color:var(--faint)">Sin datos de autenticación disponibles.</span>`;
-    $("#tblAuth tbody").innerHTML="";
-    $("#authMeta").textContent="";
-    return;
-  }
-
-  const byVersion={};
-  let appcheck=0, apikey=0;
-  for(const m of (data.months||[])){
-    appcheck+=Number(m.appcheck||0);
-    apikey+=Number(m.api_key||0);
-    for(const [v,counts] of Object.entries(m.by_version||{})){
-      if(!byVersion[v])byVersion[v]={appcheck:0,api_key:0};
-      byVersion[v].appcheck+=Number(counts.appcheck||0);
-      byVersion[v].api_key+=Number(counts.api_key||0);
-    }
-  }
-
-  const total=appcheck+apikey;
-  $("#authMeta").textContent=total?`${fmt(total)} lotes · últimos 3 meses`:"";
-  if(!total){
-    $("#authSummary").innerHTML=`<span style="color:var(--faint)">Todavía no se registraron lotes.</span>`;
-    $("#tblAuth tbody").innerHTML=`<tr><td colspan="3" class="empty">Sin datos</td></tr>`;
-    return;
-  }
-
-  const pct=Math.round(appcheck*100/total);
-  const clean=apikey===0;
-  $("#authSummary").innerHTML=
-    `<b>${pct}%</b> de los lotes autenticaron con App Check `+
-    `(${fmt(appcheck)} contra ${fmt(apikey)} por API Key). `+
-    (clean
-      ? `<span style="color:var(--pos)">Se puede retirar la API Key.</span>`
-      : `<span style="color:var(--warn)">Todavía no conviene retirar la API Key.</span>`);
-
-  const rows=Object.entries(byVersion).sort((a,b)=>b[1].api_key-a[1].api_key);
-  $("#tblAuth tbody").innerHTML=rows.map(([v,c])=>`
-    <tr><td><span class="mono">${v}</span></td>
-    <td class="num">${fmt(c.appcheck)}</td>
-    <td class="num">${fmt(c.api_key)}</td></tr>`).join("");
-}
-/* ---------- alcance (DAU por herramienta) y origen de entrada ---------- */
-function renderReach(a){
-  const dau=a.agg.tools_dau||{}, uses=a.agg.tools||{};
-  const rows=Object.keys(dau).map(k=>{
-    const d=Number(dau[k]||0), u=Number(uses[k]||0);
-    return [k,d,u,d>0?u/d:0];
-  }).sort((x,y)=>y[1]-x[1]);
-
-  const tb=$("#tblReach tbody");
-  if(!rows.length){
-    tb.innerHTML=`<tr><td colspan="4" class="empty">Sin datos todavía. Esta métrica arranca con la versión 1.3.2.</td></tr>`;
-    $("#reachMeta").textContent="";
-  }else{
-    const totalDev=rows.reduce((s,r)=>s+r[1],0);
-    $("#reachMeta").textContent=`${rows.length} herramientas · ${fmt(totalDev)} dispositivos-día`;
-    tb.innerHTML=rows.map(([k,d,u,r])=>`
-      <tr><td>${toolCell(k)}</td>
-      <td class="num">${fmt(d)}</td>
-      <td class="num">${fmt(u)}</td>
-      <td class="num">${r?r.toFixed(1):"–"}</td></tr>`).join("");
-  }
-
-  const entry=a.entryByTool||{};
-  const eRows=Object.entries(entry).map(([k,v])=>[
-    k, Number(v.nav||0), Number(v.notification||0), Number(v.widget||0)+Number(v.shortcut||0)
-  ]).sort((x,y)=>(y[1]+y[2]+y[3])-(x[1]+x[2]+x[3]));
-
-  const tb2=$("#tblEntry tbody");
-  tb2.innerHTML=eRows.length
-    ? eRows.map(([k,nav,noti,wid])=>`
-        <tr><td>${toolCell(k)}</td>
-        <td class="num">${fmt(nav)}</td>
-        <td class="num">${fmt(noti)}</td>
-        <td class="num">${fmt(wid)}</td></tr>`).join("")
-    : `<tr><td colspan="4" class="empty">Sin datos todavía. Esta métrica arranca con la versión 1.3.2.</td></tr>`;
-}
-/* ---------- tabla rankeada genérica ---------- */
-function renderRankTable(sel,entries,total,isTools,keyCell){
-  const tb=$(sel+" tbody");
-  if(!entries.length){tb.innerHTML=`<tr><td colspan="4" class="empty">Sin datos en el rango</td></tr>`;return;}
-  const max=entries[0][1];
-  const cell=keyCell||(k=>`<span class="mono">${k}</span>`);
-  tb.innerHTML=entries.map(([k,v])=>`
-    <tr><td>${cell(k)}</td>
-    <td class="num">${fmt(v)}</td>
-    <td class="num">${pctS(v,total)}</td>
-    <td class="share"><div class="fill" style="width:${(v/max*100).toFixed(1)}%"></div><span>${pctS(v,total)}</span></td></tr>`).join("");
-}
-/* ---------- zero-use detector ---------- */
-function updateZeroList(map){
-  const raw=$("#zeroInput").value;
-  const ids=raw.split(/[\s,]+/).map(s=>s.trim()).filter(Boolean);
-  const box=$("#zeroList");
-  if(!ids.length){box.innerHTML="";return;}
-  const used=new Set(Object.keys(map||{}));
-  const zero=ids.filter(id=>!used.has(id));
-  if(!zero.length){box.innerHTML=`<div style="font-size:12px;color:var(--pos)">Todas las tools listadas registran al menos un uso.</div>`;return;}
-  const rows=zero.map(id=>{
-    const c=TOOL_CATALOG[id];
-    const label=c?c.name:id;
-    const cls=c?.isPaywall?"chip paywall":c?.isUtility?"chip util":"chip";
-    const suffix=c?.isPaywall?" · paywall":c?.isUtility?" · utilidad":"";
-    return `<span class="${cls}" title="${id}${c?.note?" — "+c.note:""}">${label}${suffix}</span>`;
-  }).join("");
-  box.innerHTML=`<div style="width:100%;font-size:12px;color:var(--muted);margin-bottom:4px">${zero.length} de ${ids.length} sin uso en el rango:</div>`+rows;
-}
-/* ---------- pies ---------- */
-function renderPie(sel,map,key){
-  const entries=ranked(map);
-  if(!entries.length){charts[key]=null;const c=$(sel).getContext("2d");c.clearRect(0,0,999,999);c.font="13px system-ui";c.fillStyle=cssVar("--faint");c.fillText("Sin datos",12,22);return;}
-  charts[key]=new Chart($(sel),{
-    type:"doughnut",
-    data:{labels:entries.map(e=>e[0]),datasets:[{data:entries.map(e=>e[1]),backgroundColor:palette(entries.length),borderWidth:0}]},
-    options:{responsive:true,maintainAspectRatio:false,animation:false,cutout:"58%",
-      plugins:{legend:{position:"right",labels:{boxWidth:10,font:{size:11}}},
-      tooltip:{callbacks:{label:c=>`${c.label}: ${fmt(c.raw)} (${pctS(c.raw,totalOf(map))})`}}}}
-  });
-}
-/* ---------- idiomas ---------- */
-function renderLangs(a){
-  renderRankTable("#tblLangP",ranked(a.agg.lang_primary),totalOf(a.agg.lang_primary),false,langCell);
-  renderRankTable("#tblLangS",ranked(a.agg.lang_secondary),totalOf(a.agg.lang_secondary),false,langCell);
-}
-/* ---------- tabla diaria ---------- */
-function renderDaily(daily){
-  const tb=$("#tblDaily tbody");
-  tb.innerHTML=daily.slice().reverse().map(r=>{
-    const t=r.totals||{};
-    const topTools=ranked(t.tools).slice(0,3).map(([k,v])=>`${k}:${v}`).join("  ");
-    const vers=ranked(t.versions).map(([k,v])=>`${k}:${v}`).join("  ");
-    return `<tr><td class="mono">${r.day}</td><td class="num">${fmt(t.app_open)}</td>
-      <td class="num">${fmt(t.daily_active)}</td>
-      <td class="num">${fmt(totalOf(t.versions_first_seen))}</td>
-      <td class="mono" style="color:var(--muted)">${topTools||"—"}</td>
-      <td class="mono" style="color:var(--muted)">${vers||"—"}</td>
-      <td style="color:var(--faint)">${(r.meta?.updatedAt||"").toString().slice(0,16).replace("T"," ")}</td></tr>`;
-  }).join("");
-}
-
-/* ---------- carga principal ---------- */
-async function loadRange(){
-  const preset=$("#rangePreset").value;
-  let from,to,days;
-  const today=new Date();
-  if(preset==="custom"){from=$("#fromDate").value;to=$("#toDate").value;}
-  else if(preset==="all"){from=LAUNCH_DATE;to=ymd(today);}
-  else {const n=Number(preset);from=ymd(addDays(today,-(n-1)));to=ymd(today);}
-  if(!from||!to){showToast("Elegí un rango de fechas válido");return;}
-  days=daysBetween(from,to);
-  lastRange={from,to,days};
-  $("#rangeLabel").textContent=`${from} → ${to} · ${days} días`;
-
-  let daily, isDemo=false;
-  const {key}=getSettings();
-  try{
+  async function apiGet(path,params={}){
+    const {key}=getSettings();
     if(!key)throw new Error("missing_settings");
-    daily=await apiGet("metricsDaily",{from,to});
-    $("#demoBanner").classList.remove("show");
-  }catch(e){
-    if(String(e.message).includes("missing_settings")){
-      daily=demoDaily(from,to); isDemo=true; $("#demoBanner").classList.add("show");
-    }else if(String(e.message).includes("unauthorized")){
-      openSettings(); showToast("API Key inválida"); return;
-    }else{ showToast("Error: "+e.message); return; }
+    const b=resolveApiBase().replace(/\/$/,"");
+    const p="/"+String(path).replace(/^\/+/,"");
+    const qs=new URLSearchParams(params).toString();
+    const r=await fetch(`${b}${p}${qs?"?"+qs:""}`,{headers:{"X-API-Key":key,"Content-Type":"application/json"}});
+    if(r.status===401)throw new Error("unauthorized");
+    if(!r.ok)throw new Error("http_"+r.status);
+    return r.json();
   }
-  destroyCharts();
-  lastData=daily;
-  updateBiasNotice(daily,isDemo);
-  const a=aggregate(daily);
-  renderKpis(a,lastRange);
-  renderTrend(daily,$("#granularity").value,days);
-  renderTools(a.agg.tools);
-  renderReach(a);
-  renderRetention(a);
-  if(!isDemo)renderAuth();
-  renderLangs(a);
-  renderPie("#chVersions",a.agg.versions,"versions");
-  renderPie("#chFirstSeen",a.agg.versions_first_seen,"firstseen");
-  renderPie("#chWidgets",a.agg.widgets,"widgets");
-  renderPie("#chAds",a.agg.ads,"ads");
-  renderDaily(daily);
-}
+  /* ---------- fechas ---------- */
+  function ymd(d){return d.toISOString().slice(0,10);}
+  function addDays(d,n){const t=new Date(d);t.setDate(t.getDate()+n);return t;}
+  function daysBetween(a,b){return Math.round((new Date(b)-new Date(a))/86400000)+1;}
+  function mondayOf(dstr){const d=new Date(dstr+"T00:00:00");const wd=(d.getDay()+6)%7;return ymd(addDays(d,-wd));}
 
-/* ================= EXPORT ================= */
-function currentReport(){
-  const a=aggregate(lastData); const r=lastRange;
-  return {range:r,summary:{opens:a.opens,newInstalls:a.newInstalls,daysWithData:a.daysWithData,
-    distinctTools:Object.keys(a.agg.tools).length,toolInteractions:totalOf(a.agg.tools)},agg:a.agg,
-    dailyOpens:lastData.map(d=>[d.day,Number(d.totals?.app_open||0)])};
-}
-function mdTable(title,entries,total){
-  if(!entries.length)return `### ${title}\n_(sin datos)_\n`;
-  let s=`### ${title}\n| Clave | Cuenta | % |\n|---|--:|--:|\n`;
-  for(const[k,v]of entries)s+=`| ${k} | ${v} | ${pctS(v,total)} |\n`;
-  return s;
-}
-function buildMarkdown(){
-  const R=currentReport(), a=R.agg;
-  const L=[];
-  L.push(`# MiniToolbox — Métricas`);
-  L.push(`Rango: ${R.range.from} → ${R.range.to} (${R.range.days} días) · Generado: ${new Date().toISOString().slice(0,16).replace("T"," ")}`);
-  L.push(`\n## Resumen`);
-  L.push(`- Aperturas totales: ${R.summary.opens}`);
-  L.push(`- Instalaciones nuevas (first-seen): ${R.summary.newInstalls}`);
-  L.push(`- Días con datos: ${R.summary.daysWithData} de ${R.range.days}`);
-  L.push(`- Herramientas distintas usadas: ${R.summary.distinctTools}`);
-  L.push(`- Interacciones con herramientas: ${R.summary.toolInteractions}`);
-  L.push(`\n## Tablas`);
-  L.push(mdTable("Herramientas (uso, desc)",ranked(a.tools),totalOf(a.tools)));
-  L.push(mdTable("Idiomas principales",ranked(a.lang_primary),totalOf(a.lang_primary)));
-  L.push(mdTable("Idiomas secundarios",ranked(a.lang_secondary),totalOf(a.lang_secondary)));
-  L.push(mdTable("Versiones activas",ranked(a.versions),totalOf(a.versions)));
-  L.push(mdTable("Instalaciones nuevas por versión",ranked(a.versions_first_seen),totalOf(a.versions_first_seen)));
-  L.push(mdTable("Widgets",ranked(a.widgets),totalOf(a.widgets)));
-  L.push(mdTable("Anuncios",ranked(a.ads),totalOf(a.ads)));
-  L.push(`\n## Aperturas por día\n| Día | Aperturas |\n|---|--:|`);
-  for(const[d,v]of R.dailyOpens)L.push(`| ${d} | ${v} |`);
-  return L.join("\n");
-}
-function buildJSON(){return JSON.stringify(currentReport(),null,1);}
-function buildCSV(){
-  const head=["day","app_open","tools","ads","versions","versions_first_seen","lang_primary","lang_secondary","widgets","updatedAt"];
-  const esc=s=>`"${String(s).replace(/"/g,'""')}"`;
-  const lines=[head.join(",")];
-  for(const r of lastData){const t=r.totals||{};
-    lines.push([r.day,t.app_open??0,JSON.stringify(t.tools??{}),JSON.stringify(t.ads??{}),
-      JSON.stringify(t.versions??{}),JSON.stringify(t.versions_first_seen??{}),
-      JSON.stringify(t.lang_primary??{}),JSON.stringify(t.lang_secondary??{}),
-      JSON.stringify(t.widgets??{}),r.meta?.updatedAt??""].map(esc).join(","));}
-  return lines.join("\n");
-}
-function downloadFile(name,text,mime){
-  const b=new Blob([text],{type:mime});const u=URL.createObjectURL(b);
-  const a=document.createElement("a");a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);
-}
-async function copyText(text){
-  try{await navigator.clipboard.writeText(text);return true;}
-  catch(e){const ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.opacity="0";
-    document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand("copy");}catch(_){}
-    document.body.removeChild(ta);return ok;}
-}
-function fileStamp(){return `${lastRange.from}_${lastRange.to}`;}
+  /* ---------- agregación ---------- */
+  function sumInto(dst,src){for(const[k,v]of Object.entries(src||{}))dst[k]=(dst[k]||0)+Number(v||0);}
+  function ranked(map){return Object.entries(map||{}).sort((a,b)=>b[1]-a[1]);}
+  function totalOf(map){return Object.values(map||{}).reduce((a,b)=>a+Number(b||0),0);}
 
-/* ================= DEMO DATA ================= */
-function demoDaily(from,to){
-  const tools=["ar_ruler","meetings","ruler","water","compass","flashlight","magnifier","minesweeper",
-    "pomodoro_list","bubble_level","qr_generator","guess_flag","light_meter","age_calculator","zodiac_sign","truco_scoreboard"];
-  const weights=[24,22,17,15,13,12,9,8,6,5,4,4,3,3,2,2];
-  const langsP={es:78,en:16,pt:4,fr:2}, langsS={en:40,es:30,pt:8}, vers={"1.2.0":10,"1.3.0":26,"1.4.0":64};
-  const fs={"1.3.0":1,"1.4.0":2}, widgets={water:18,flashlight:11,favorites:6}, ads={banner:120,interstitial:14};
-  const out=[]; let d=new Date(from+"T00:00:00"); const end=new Date(to+"T00:00:00"); let seed=42;
-  const rnd=()=>{seed=(seed*1103515245+12345)&0x7fffffff;return seed/0x7fffffff;};
-  while(d<=end){
-    const opens=8+Math.round(rnd()*14);
-    const dailyActive=Math.round(opens * (0.6 + rnd() * 0.2));
-    const tmap={}; tools.forEach((t,i)=>{const base=weights[i];const v=Math.round(base*rnd()*0.5);if(v>0)tmap[t]=v;});
-    const pick=(m,k)=>{const o={};for(const key of Object.keys(m))if(rnd()<0.9)o[key]=Math.max(1,Math.round(m[key]*rnd()*(k||0.15)));return o;};
-    out.push({day:ymd(d),totals:{app_open:opens,daily_active:dailyActive,tools:tmap,ads:pick(ads,0.2),versions:pick(vers,0.25),
-      versions_first_seen:(rnd()<0.4?pick(fs,1):{}),lang_primary:pick(langsP,0.2),
-      lang_secondary:pick(langsS,0.2),widgets:pick(widgets,0.25)},meta:{updatedAt:ymd(d)+"T23:59"}});
-    d=addDays(d,1);
+  /* ---------- sesgo histórico ----------
+     Hasta la corrección del 2026-08-17, la primera apertura diaria de cada usuario
+     sumaba +2. El aviso sólo tiene sentido si el rango elegido incluye días afectados
+     CON datos, y sólo sobre datos reales: en modo demostración los números son
+     simulados y no arrastran ningún sesgo. */
+  const BIAS_FROM="2025-09-24", BIAS_TO="2026-08-17";
+  let biasActive=false;
+
+  function updateBiasNotice(daily,isDemo){
+    biasActive = !isDemo && (daily||[]).some(r=>
+      r.day>=BIAS_FROM && r.day<=BIAS_TO &&
+      (Number(r.totals?.app_open||0)>0 || Number(r.totals?.daily_active||0)>0));
+    $("#biasNotice").classList.toggle("show",biasActive);
   }
-  return out;
-}
 
-/* ================= UI WIRING ================= */
-function showToast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2200);}
-function openSettings(){const s=getSettings();$("#inpApiKey").value=s.key;$("#inpBaseUrl").value=s.base;$("#overlay").classList.add("open");}
-function closeSettings(){$("#overlay").classList.remove("open");}
+  function aggregate(daily){
+    const agg={tools:{},tools_dau:{},ads:{},versions:{},versions_first_seen:{},widgets:{},lang_primary:{},lang_secondary:{}};
+    // tool_entry viene anidado: {herramienta:{origen:n}}. Se conserva la forma para
+    // poder mostrar el desglose por herramienta, y se agrega aparte por origen.
+    const entryByTool={}, entryBySource={};
+    // retention[antiguedad][intensidad]: se acumula la tabla cruzada completa.
+    const retention={};
+    let opens=0,dailyActive=0,newInstalls=0,daysWithData=0;
+    for(const r of daily){
+      const t=r.totals||{};
+      const o=Number(t.app_open||0); opens+=o;
+      const da=Number(t.daily_active||0); dailyActive+=da;
+      if(o>0||da>0||Object.keys(t.tools||{}).length)daysWithData++;
+      sumInto(agg.tools,t.tools); sumInto(agg.ads,t.ads);
+      sumInto(agg.versions,t.versions); sumInto(agg.versions_first_seen,t.versions_first_seen);
+      sumInto(agg.widgets,t.widgets); sumInto(agg.lang_primary,t.lang_primary); sumInto(agg.lang_secondary,t.lang_secondary);
+      sumInto(agg.tools_dau,t.tools_dau);
+      for(const [tool,bySource] of Object.entries(t.tool_entry||{})){
+        if(!entryByTool[tool])entryByTool[tool]={};
+        sumInto(entryByTool[tool],bySource);
+        sumInto(entryBySource,bySource);
+      }
+      for(const [age,byInt] of Object.entries(t.retention||{})){
+        if(!retention[age])retention[age]={};
+        sumInto(retention[age],byInt);
+      }
+    }
+    newInstalls=totalOf(agg.versions_first_seen);
+    return {agg,entryByTool,entryBySource,retention,opens,dailyActive,newInstalls,daysWithData};
+  }
+  function bucketOpens(daily,gran){
+    const buckets={};
+    for(const r of daily){
+      const day=r.day; let key=day;
+      if(gran==="week")key=mondayOf(day);
+      else if(gran==="month")key=day.slice(0,7);
+      buckets[key]=(buckets[key]||0)+Number(r.totals?.app_open||0);
+    }
+    const labels=Object.keys(buckets).sort();
+    return {labels,data:labels.map(l=>buckets[l])};
+  }
+  function resolveGranularity(gran,rangeDays){
+    if(gran!=="auto")return gran;
+    if(rangeDays<=45)return "day";
+    if(rangeDays<=220)return "week";
+    return "month";
+  }
 
-document.addEventListener("DOMContentLoaded",()=>{
-  applyTheme(localStorage.getItem(LS_THEME)||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"));
-  $("#zeroInput").value=localStorage.getItem(LS_ZERO)||TOOL_CATALOG_IDS.join("\n");
+  /* ---------- paleta de charts ---------- */
+  function palette(n){
+    const base=[cssVar("--accent"),"#5aa9e6","#7ecb8f","#c88be0","#e6795a","#e6c15a","#6ad0c4","#b0b8c4","#d98cae","#8f9bd6"];
+    const out=[]; for(let i=0;i<n;i++)out.push(base[i%base.length]); return out;
+  }
+  function destroyCharts(){Object.values(charts).forEach(c=>c&&c.destroy());charts={};}
 
-  $("#btnTheme").onclick=()=>{const t=document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark";
-    localStorage.setItem(LS_THEME,t);applyTheme(t);if(lastData)loadRange();};
-  $("#rangePreset").onchange=e=>{$("#customWrap").style.display=e.target.value==="custom"?"flex":"none";if(e.target.value!=="custom")loadRange();};
-  $("#granularity").onchange=()=>{if(lastData){destroyCharts();const a=aggregate(lastData);
-    renderTrend(lastData,$("#granularity").value,lastRange.days);renderTools(a.agg.tools);renderLangs(a);
-    renderPie("#chVersions",a.agg.versions,"versions");renderPie("#chFirstSeen",a.agg.versions_first_seen,"firstseen");
-    renderPie("#chWidgets",a.agg.widgets,"widgets");renderPie("#chAds",a.agg.ads,"ads");renderKpis(a,lastRange);}};
-  $("#btnReload").onclick=loadRange;
-  $("#btnApply")&&($("#btnApply").onclick=loadRange);
-  $("#fromDate").onchange=()=>$("#rangePreset").value==="custom"&&loadRange();
-  $("#toDate").onchange=()=>$("#rangePreset").value==="custom"&&loadRange();
+  /* ---------- nombres de idioma (ISO 639-1 -> español) ---------- */
+  const LANG_DISPLAY=(()=>{try{return new Intl.DisplayNames(["es"],{type:"language",fallback:"code"});}catch(e){return null;}})();
+  function langLabel(raw){
+    const code=String(raw||"").trim();
+    if(!code)return{name:"—",code:""};
+    if(code.toLowerCase()==="und")return{name:"Sin determinar",code};
+    let name=code;
+    if(LANG_DISPLAY){
+      try{const n=LANG_DISPLAY.of(code);if(n&&n!==code)name=n.charAt(0).toUpperCase()+n.slice(1);}catch(e){}
+    }
+    return{name,code};
+  }
+  function langCell(raw){
+    const{name,code}=langLabel(raw);
+    if(name===code)return `<span class="mono">${code}</span>`;
+    return `${name} <span class="mono" style="color:var(--faint); font-size:11px">${code}</span>`;
+  }
 
-  // settings
-  $("#btnSettings").onclick=openSettings;
-  $("#btnCancelSettings").onclick=closeSettings;
-  $("#overlay").onclick=e=>{if(e.target.id==="overlay")closeSettings();};
-  $("#btnSaveSettings").onclick=()=>{setSettings({base:$("#inpBaseUrl").value,key:$("#inpApiKey").value});closeSettings();loadRange();};
-
-  // export dropdown
-  const menu=$("#exportMenu");
-  $("#btnExport").onclick=e=>{e.stopPropagation();menu.classList.toggle("open");};
-  document.addEventListener("click",()=>menu.classList.remove("open"));
-  menu.onclick=async e=>{
-    const act=e.target.closest("button")?.dataset.act; if(!act)return;
-    if(!lastData){showToast("Cargá datos primero");return;}
-    if(act==="md-copy"){const ok=await copyText(buildMarkdown());showToast(ok?"Markdown copiado — pegalo en tu IA":"No se pudo copiar");}
-    if(act==="md-dl")downloadFile(`minitoolbox_${fileStamp()}.md`,buildMarkdown(),"text/markdown;charset=utf-8");
-    if(act==="json-dl")downloadFile(`minitoolbox_${fileStamp()}.json`,buildJSON(),"application/json");
-    if(act==="csv-dl")downloadFile(`minitoolbox_${fileStamp()}.csv`,buildCSV(),"text/csv;charset=utf-8");
-    menu.classList.remove("open");
+  /* ---------- catálogo de tools (desde Screen.kt + tool_sum.xml) ---------- */
+  const TOOL_CATALOG={
+    random_color:{name:"Colores (hex)"}, group_selector:{name:"Generador de grupos"},
+    coin_flip:{name:"Cara o cruz"}, decimal_binary:{name:"Decimal ↔ binario"},
+    text_binary:{name:"Texto ↔ binario"}, truco_scoreboard:{name:"Marcador de truco"},
+    age_calculator:{name:"Calculadora de edad"}, zodiac_sign:{name:"Signo zodiacal"},
+    pomodoro_list:{name:"Pomodoro"}, bubble_level:{name:"Nivel de burbuja"},
+    percentage:{name:"Porcentajes"}, time_converter:{name:"Horas 12/24"},
+    bmi_calculator:{name:"IMC"}, roman_numerals:{name:"Números romanos"},
+    unit_converter:{name:"Conversor de unidades"}, password_generator:{name:"Generador de contraseñas"},
+    activity_suggester:{name:"Sugeridor de actividades"}, name_generator:{name:"Nombres aleatorios"},
+    qr_generator:{name:"Generador de QR"}, vcard_generator:{name:"QR vCard"},
+    lorem_ipsum:{name:"Lorem ipsum"}, ruler:{name:"Regla en pantalla"},
+    light_meter:{name:"Medidor de luz"}, flashlight:{name:"Linterna"},
+    streaks:{name:"Rachas / hábitos"}, water:{name:"Recordatorio de agua"},
+    countdown:{name:"Cuenta regresiva"}, countries_info:{name:"Info de países"},
+    selector_wheel:{name:"Selector de opciones"}, guess_flag:{name:"Adivina la bandera"},
+    meetings:{name:"Divisor de gastos"}, dice:{name:"Dados"},
+    quick_calcs:{name:"Cálculo rápido"}, quotes:{name:"Frases",note:"sin descripción en tool_sum.xml"},
+    multiverse_me:{name:"Multiverso / En otro mundo"}, guess_capital:{name:"Adivina la capital"},
+    compass:{name:"Brújula"}, todo:{name:"To-Do list"}, events:{name:"Eventos importantes"},
+    compound_interest:{name:"Interés compuesto"}, scoreboard:{name:"Marcador de equipos"},
+    magnifier:{name:"Lupa"}, ar_ruler:{name:"Regla AR"}, minesweeper:{name:"Buscaminas"},
+    pro:{name:"Pro (paywall)",isPaywall:true,note:"no es una tool: desbloquea widgets y saca ads"},
+    about:{name:"Acerca de",isUtility:true,note:"marcada para ocultar de métricas en el código, pero igual registra uso"},
   };
+  const TOOL_CATALOG_IDS=Object.keys(TOOL_CATALOG).sort();
+  function toolCell(id){
+    const c=TOOL_CATALOG[id];
+    if(!c)return `<span class="mono">${id}</span>`;
+    return `${c.name} <span class="mono" style="color:var(--faint); font-size:11px">${id}</span>`;
+  }
 
-  // zero-use detector
-  const zi=$("#zeroInput");
-  zi.oninput=()=>{localStorage.setItem(LS_ZERO,zi.value);if(lastData)updateZeroList(aggregate(lastData).agg.tools);};
-  $("#btnResetZero").onclick=()=>{zi.value=TOOL_CATALOG_IDS.join("\n");localStorage.setItem(LS_ZERO,zi.value);
-    if(lastData)updateZeroList(aggregate(lastData).agg.tools); showToast("Lista restaurada");};
+  /* ---------- render: KPIs ---------- */
+  /* Compara los últimos 7 días completos contra los 7 anteriores.
+     Es la lectura que responde "¿esto está creciendo?" sin depender del ruido diario. */
+  function weekOverWeek(daily){
+    if(!daily||daily.length<14)return null;
+    const sorted=[...daily].sort((x,y)=>x.day<y.day?-1:1);
+    const sum=rows=>rows.reduce((s,r)=>s+Number(r.totals?.app_open||0),0);
+    const last=sum(sorted.slice(-7)), prev=sum(sorted.slice(-14,-7));
+    if(prev===0)return null;
+    return {last,prev,pct:Math.round((last-prev)/prev*100)};
+  }
 
-  // sortable tables
-  document.querySelectorAll("table").forEach(tbl=>{
-    tbl.querySelectorAll("th[data-sort]").forEach((th,idx)=>{
-      th.onclick=()=>{
-        const tb=tbl.querySelector("tbody");const rows=[...tb.rows];
-        const asc=!(sortState[tbl.id+idx]);sortState[tbl.id+idx]=asc;
-        const col=th.cellIndex, num=th.classList.contains("num");
-        rows.sort((r1,r2)=>{let a=r1.cells[col].textContent,b=r2.cells[col].textContent;
-          if(num){a=parseFloat(a.replace(/[^\d.-]/g,""))||0;b=parseFloat(b.replace(/[^\d.-]/g,""))||0;return asc?a-b:b-a;}
-          return asc?a.localeCompare(b):b.localeCompare(a);});
-        rows.forEach(r=>tb.appendChild(r));
-      };
+  function renderKpis(a,range){
+    const topVer=ranked(a.agg.versions)[0], topLang=ranked(a.agg.lang_primary)[0];
+    const toolsTotal=totalOf(a.agg.tools);
+    const distinctTools=Object.keys(a.agg.tools).length;
+    const cards=[
+      {l:"Aperturas",v:fmt(a.opens),s:biasActive?`Total (sesgo +2 hasta ${BIAS_TO})`:"Total"},
+      (()=>{ const w=weekOverWeek(lastData);
+        if(!w)return {l:"Semana vs anterior",v:"—",s:"hacen falta 14 días"};
+        const sign=w.pct>0?"+":"";
+        const color=w.pct>0?"var(--pos)":w.pct<0?"var(--neg)":"var(--muted)";
+        return {l:"Semana vs anterior",v:`<span style="color:${color}">${sign}${w.pct}%</span>`,
+                s:`${fmt(w.last)} contra ${fmt(w.prev)} aperturas`};})(),
+      {l:"Disp. Activos",v:fmt(a.dailyActive),s:`DDAU (sin doble conteo)`},
+      {l:"Instalaciones",v:fmt(a.newInstalls),s:"por first-seen"},
+      {l:"Tools usadas",v:fmt(distinctTools),s:`${fmt(toolsTotal)} usos totales`},
+      {l:"Versión top",v:topVer?topVer[0]:"—",s:topVer?pctS(topVer[1],totalOf(a.agg.versions))+" del uso":""},
+      {l:"Idioma top",v:topLang?langLabel(topLang[0]).name:"—",s:topLang?langLabel(topLang[0]).code+" · "+pctS(topLang[1],totalOf(a.agg.lang_primary))+" de dispositivos":""},
+    ];
+    $("#kpis").innerHTML=cards.map(c=>`
+      <div class="kpi"><div class="k-label"><span>${c.l}</span></div>
+      <div class="k-val">${c.v}</div><div class="k-sub">${c.s||""}</div>
+      <div class="k-tick ticks"></div></div>`).join("");
+  }
+  /* ---------- render: línea de aperturas ---------- */
+  /* Media móvil centrada en la ventana anterior. Con el volumen de una app chica,
+     la serie diaria es mayormente ruido y la tendencia no se puede leer a ojo. */
+  function movingAverage(data,window){
+    if(data.length<window)return null;
+    const out=[];
+    for(let i=0;i<data.length;i++){
+      if(i<window-1){out.push(null);continue;}
+      let sum=0; for(let j=i-window+1;j<=i;j++)sum+=data[j];
+      out.push(sum/window);
+    }
+    return out;
+  }
+
+  function renderTrend(daily,gran,rangeDays){
+    const g=resolveGranularity(gran,rangeDays);
+    const {labels,data}=bucketOpens(daily,g);
+    const label={day:"Aperturas por día",week:"Aperturas por semana",month:"Aperturas por mes"}[g];
+    $("#trendMeta").textContent=`${labels.length} puntos · agrupado por ${({day:"día",week:"semana",month:"mes"})[g]}`;
+    const acc=cssVar("--accent");
+    // La media móvil sólo tiene sentido sobre datos diarios: agrupados por semana o
+    // mes el suavizado ya lo hace el propio agrupamiento.
+    const ma=g==="day"?movingAverage(data,7):null;
+    const datasets=[{label,data,borderColor:acc,backgroundColor:acc+"22",
+        borderWidth:2,tension:.28,fill:true,pointRadius:labels.length>60?0:3,pointHoverRadius:5}];
+    if(ma)datasets.push({label:"Media móvil 7 días",data:ma,borderColor:cssVar("--muted"),
+        borderWidth:2,borderDash:[5,4],tension:.28,fill:false,pointRadius:0,pointHoverRadius:0});
+    charts.opens=new Chart($("#chOpens"),{
+      type:"line",
+      data:{labels,datasets},
+      options:{responsive:true,maintainAspectRatio:false,animation:false,
+        scales:{y:{beginAtZero:true,grid:{color:cssVar("--grid")}},x:{grid:{display:false},ticks:{maxRotation:0,autoSkip:true,maxTicksLimit:12}}},
+        plugins:{legend:{display:!!ma,labels:{boxWidth:12,font:{size:11}}},
+                 tooltip:{intersect:false,mode:"index"}}}
     });
-  });
+  }
+  /* ---------- render: tools (bar completo + tabla) ---------- */
+  function renderTools(map){
+    const entries=ranked(map), total=totalOf(map);
+    $("#toolsMeta").textContent=`${entries.length} herramientas · ${fmt(total)} interacciones`;
+    // barra: altura dinámica + SIN autoSkip (arregla el "una de por medio")
+    const wrap=$("#toolsChartWrap");
+    wrap.style.height=Math.max(220,entries.length*28+40)+"px";
+    const asc=[...entries].reverse();
+    charts.tools=new Chart($("#chTools"),{
+      type:"bar",
+      data:{labels:asc.map(e=>e[0]),datasets:[{data:asc.map(e=>e[1]),
+        backgroundColor:palette(asc.length),borderRadius:4,borderSkipped:false}]},
+      options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,animation:false,
+        scales:{x:{beginAtZero:true,grid:{color:cssVar("--grid")}},
+                y:{grid:{display:false},ticks:{autoSkip:false,font:{family:cssVar("--mono"),size:12}}}},
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${fmt(c.raw)} (${pctS(c.raw,total)})`}}}}
+    });
+    renderRankTable("#tblTools",entries,total,true,toolCell);
+    updateZeroList(map);
+  }
+  /* ---------- adopción de versiones en el tiempo ---------- */
+  /* Área apilada al 100%: lo que importa no es cuánta gente hay cada día sino qué
+     proporción migró. Es el número que decide cuándo se puede dejar de sostener una
+     versión vieja, por ejemplo para retirar la autenticación por API key. */
+  function renderAdoption(daily){
+    const sorted=[...daily].sort((x,y)=>x.day<y.day?-1:1);
+    const totals={};
+    for(const r of sorted)for(const [v,n] of Object.entries(r.totals?.versions||{}))
+      totals[v]=(totals[v]||0)+Number(n||0);
 
-  // fechas por defecto
-  $("#toDate").value=ymd(new Date());$("#fromDate").value=ymd(addDays(new Date(),-29));
-  loadRange();
-});
+    const top=ranked(totals).slice(0,6).map(e=>e[0]);
+    const note=$("#adoptionNote");
+
+    if(!top.length||sorted.length<2){
+      if(charts.adoption){charts.adoption.destroy();charts.adoption=null;}
+      note.textContent="Sin datos suficientes para mostrar la adopción.";
+      return;
+    }
+
+    const labels=sorted.map(r=>r.day);
+    const colors=palette(top.length);
+    const datasets=top.map((v,i)=>({
+      label:v,
+      data:sorted.map(r=>{
+        const byVer=r.totals?.versions||{};
+        const dayTotal=Object.values(byVer).reduce((a,b)=>a+Number(b||0),0);
+        if(!dayTotal)return null;
+        return Number(byVer[v]||0)/dayTotal*100;
+      }),
+      borderColor:colors[i],backgroundColor:colors[i]+"55",
+      borderWidth:1.5,fill:true,tension:.2,pointRadius:0,spanGaps:true
+    }));
+
+    charts.adoption=new Chart($("#chAdoption"),{
+      type:"line",
+      data:{labels,datasets},
+      options:{responsive:true,maintainAspectRatio:false,animation:false,
+        scales:{y:{stacked:true,beginAtZero:true,max:100,grid:{color:cssVar("--grid")},
+                   ticks:{callback:v=>v+"%"}},
+                x:{grid:{display:false},ticks:{maxRotation:0,autoSkip:true,maxTicksLimit:10}}},
+        plugins:{legend:{position:"bottom",labels:{boxWidth:12,font:{size:11}}},
+                 tooltip:{intersect:false,mode:"index",
+                   callbacks:{label:c=>`${c.dataset.label}: ${c.raw==null?"–":c.raw.toFixed(1)+"%"}`}}}}
+    });
+
+    const others=Object.keys(totals).length-top.length;
+    note.textContent=others>0
+      ? `Se muestran las ${top.length} versiones con más actividad; hay ${others} más con uso residual.`
+      : `Proporción diaria de dispositivos activos por versión.`;
+  }
+  /* ---------- retención: cruce antigüedad x intensidad ---------- */
+  const RET_AGES=[["age0_6","0-6 días"],["age7_29","7-29 días"],["age30_89","30-89 días"],
+                  ["age90_179","90-179 días"],["age180p","180+ días"]];
+  const RET_INT=["d1","d2_3","d4_7","d8_14","d15_28"];
+
+  function renderRetention(a){
+    const ret=a.retention||{};
+    const tb=$("#tblRetention tbody");
+    const grand=Object.values(ret).reduce((s,byInt)=>s+totalOf(byInt),0);
+
+    if(!grand){
+      tb.innerHTML=`<tr><td colspan="7" class="empty">Sin datos todavía. Esta métrica arranca con la versión 1.3.2.</td></tr>`;
+      $("#retMeta").textContent="";
+      return;
+    }
+    $("#retMeta").textContent=`${fmt(grand)} marcas diarias`;
+
+    const rows=RET_AGES.map(([key,label])=>{
+      const byInt=ret[key]||{};
+      const cells=RET_INT.map(i=>Number(byInt[i]||0));
+      const total=cells.reduce((s,n)=>s+n,0);
+      return `<tr><td>${label}</td>${cells.map(n=>
+        `<td class="num">${n?fmt(n):"–"}</td>`).join("")}<td class="num"><b>${fmt(total)}</b></td></tr>`;
+    });
+
+    const totals=RET_INT.map(i=>RET_AGES.reduce((s,[k])=>s+Number((ret[k]||{})[i]||0),0));
+    rows.push(`<tr><td><b>Total</b></td>${totals.map(n=>
+      `<td class="num"><b>${fmt(n)}</b></td>`).join("")}<td class="num"><b>${fmt(grand)}</b></td></tr>`);
+
+    tb.innerHTML=rows.join("");
+  }
+  /* ---------- estado de la migración a App Check ---------- */
+  async function renderAuth(){
+    let data;
+    try{ data=await apiGet("metricsAuth",{months:3}); }
+    catch(e){
+      $("#authSummary").innerHTML=`<span style="color:var(--faint)">Sin datos de autenticación disponibles.</span>`;
+      $("#tblAuth tbody").innerHTML="";
+      $("#authMeta").textContent="";
+      return;
+    }
+
+    const byVersion={};
+    let appcheck=0, apikey=0;
+    for(const m of (data.months||[])){
+      appcheck+=Number(m.appcheck||0);
+      apikey+=Number(m.api_key||0);
+      for(const [v,counts] of Object.entries(m.by_version||{})){
+        if(!byVersion[v])byVersion[v]={appcheck:0,api_key:0};
+        byVersion[v].appcheck+=Number(counts.appcheck||0);
+        byVersion[v].api_key+=Number(counts.api_key||0);
+      }
+    }
+
+    const total=appcheck+apikey;
+    $("#authMeta").textContent=total?`${fmt(total)} lotes · últimos 3 meses`:"";
+    if(!total){
+      $("#authSummary").innerHTML=`<span style="color:var(--faint)">Todavía no se registraron lotes.</span>`;
+      $("#tblAuth tbody").innerHTML=`<tr><td colspan="3" class="empty">Sin datos</td></tr>`;
+      return;
+    }
+
+    const pct=Math.round(appcheck*100/total);
+    const clean=apikey===0;
+    $("#authSummary").innerHTML=
+      `<b>${pct}%</b> de los lotes autenticaron con App Check `+
+      `(${fmt(appcheck)} contra ${fmt(apikey)} por API Key). `+
+      (clean
+        ? `<span style="color:var(--pos)">Se puede retirar la API Key.</span>`
+        : `<span style="color:var(--warn)">Todavía no conviene retirar la API Key.</span>`);
+
+    const rows=Object.entries(byVersion).sort((a,b)=>b[1].api_key-a[1].api_key);
+    $("#tblAuth tbody").innerHTML=rows.map(([v,c])=>`
+      <tr><td><span class="mono">${v}</span></td>
+      <td class="num">${fmt(c.appcheck)}</td>
+      <td class="num">${fmt(c.api_key)}</td></tr>`).join("");
+  }
+  /* ---------- alcance (DAU por herramienta) y origen de entrada ---------- */
+  function renderReach(a){
+    const dau=a.agg.tools_dau||{}, uses=a.agg.tools||{};
+    const rows=Object.keys(dau).map(k=>{
+      const d=Number(dau[k]||0), u=Number(uses[k]||0);
+      return [k,d,u,d>0?u/d:0];
+    }).sort((x,y)=>y[1]-x[1]);
+
+    const tb=$("#tblReach tbody");
+    if(!rows.length){
+      tb.innerHTML=`<tr><td colspan="4" class="empty">Sin datos todavía. Esta métrica arranca con la versión 1.3.2.</td></tr>`;
+      $("#reachMeta").textContent="";
+    }else{
+      const totalDev=rows.reduce((s,r)=>s+r[1],0);
+      $("#reachMeta").textContent=`${rows.length} herramientas · ${fmt(totalDev)} dispositivos-día`;
+      tb.innerHTML=rows.map(([k,d,u,r])=>`
+        <tr><td>${toolCell(k)}</td>
+        <td class="num">${fmt(d)}</td>
+        <td class="num">${fmt(u)}</td>
+        <td class="num">${r?r.toFixed(1):"–"}</td></tr>`).join("");
+    }
+
+    const entry=a.entryByTool||{};
+    const eRows=Object.entries(entry).map(([k,v])=>[
+      k, Number(v.nav||0), Number(v.notification||0), Number(v.widget||0)+Number(v.shortcut||0)
+    ]).sort((x,y)=>(y[1]+y[2]+y[3])-(x[1]+x[2]+x[3]));
+
+    const tb2=$("#tblEntry tbody");
+    tb2.innerHTML=eRows.length
+      ? eRows.map(([k,nav,noti,wid])=>`
+          <tr><td>${toolCell(k)}</td>
+          <td class="num">${fmt(nav)}</td>
+          <td class="num">${fmt(noti)}</td>
+          <td class="num">${fmt(wid)}</td></tr>`).join("")
+      : `<tr><td colspan="4" class="empty">Sin datos todavía. Esta métrica arranca con la versión 1.3.2.</td></tr>`;
+  }
+  /* ---------- tabla rankeada genérica ---------- */
+  function renderRankTable(sel,entries,total,isTools,keyCell){
+    const tb=$(sel+" tbody");
+    if(!entries.length){tb.innerHTML=`<tr><td colspan="4" class="empty">Sin datos en el rango</td></tr>`;return;}
+    const max=entries[0][1];
+    const cell=keyCell||(k=>`<span class="mono">${k}</span>`);
+    tb.innerHTML=entries.map(([k,v])=>`
+      <tr><td>${cell(k)}</td>
+      <td class="num">${fmt(v)}</td>
+      <td class="num">${pctS(v,total)}</td>
+      <td class="share"><div class="fill" style="width:${(v/max*100).toFixed(1)}%"></div><span>${pctS(v,total)}</span></td></tr>`).join("");
+  }
+  /* ---------- zero-use detector ---------- */
+  function updateZeroList(map){
+    const raw=$("#zeroInput").value;
+    const ids=raw.split(/[\s,]+/).map(s=>s.trim()).filter(Boolean);
+    const box=$("#zeroList");
+    if(!ids.length){box.innerHTML="";return;}
+    const used=new Set(Object.keys(map||{}));
+    const zero=ids.filter(id=>!used.has(id));
+    if(!zero.length){box.innerHTML=`<div style="font-size:12px;color:var(--pos)">Todas las tools listadas registran al menos un uso.</div>`;return;}
+    const rows=zero.map(id=>{
+      const c=TOOL_CATALOG[id];
+      const label=c?c.name:id;
+      const cls=c?.isPaywall?"chip paywall":c?.isUtility?"chip util":"chip";
+      const suffix=c?.isPaywall?" · paywall":c?.isUtility?" · utilidad":"";
+      return `<span class="${cls}" title="${id}${c?.note?" — "+c.note:""}">${label}${suffix}</span>`;
+    }).join("");
+    box.innerHTML=`<div style="width:100%;font-size:12px;color:var(--muted);margin-bottom:4px">${zero.length} de ${ids.length} sin uso en el rango:</div>`+rows;
+  }
+  /* ---------- pies ---------- */
+  function renderPie(sel,map,key){
+    const entries=ranked(map);
+    if(!entries.length){charts[key]=null;const c=$(sel).getContext("2d");c.clearRect(0,0,999,999);c.font="13px system-ui";c.fillStyle=cssVar("--faint");c.fillText("Sin datos",12,22);return;}
+    charts[key]=new Chart($(sel),{
+      type:"doughnut",
+      data:{labels:entries.map(e=>e[0]),datasets:[{data:entries.map(e=>e[1]),backgroundColor:palette(entries.length),borderWidth:0}]},
+      options:{responsive:true,maintainAspectRatio:false,animation:false,cutout:"58%",
+        plugins:{legend:{position:"right",labels:{boxWidth:10,font:{size:11}}},
+        tooltip:{callbacks:{label:c=>`${c.label}: ${fmt(c.raw)} (${pctS(c.raw,totalOf(map))})`}}}}
+    });
+  }
+  /* ---------- idiomas ---------- */
+  function renderLangs(a){
+    renderRankTable("#tblLangP",ranked(a.agg.lang_primary),totalOf(a.agg.lang_primary),false,langCell);
+    renderRankTable("#tblLangS",ranked(a.agg.lang_secondary),totalOf(a.agg.lang_secondary),false,langCell);
+  }
+  /* ---------- tabla diaria ---------- */
+  function renderDaily(daily){
+    const tb=$("#tblDaily tbody");
+    tb.innerHTML=daily.slice().reverse().map(r=>{
+      const t=r.totals||{};
+      const topTools=ranked(t.tools).slice(0,3).map(([k,v])=>`${k}:${v}`).join("  ");
+      const vers=ranked(t.versions).map(([k,v])=>`${k}:${v}`).join("  ");
+      return `<tr><td class="mono">${r.day}</td><td class="num">${fmt(t.app_open)}</td>
+        <td class="num">${fmt(t.daily_active)}</td>
+        <td class="num">${fmt(totalOf(t.versions_first_seen))}</td>
+        <td class="mono" style="color:var(--muted)">${topTools||"—"}</td>
+        <td class="mono" style="color:var(--muted)">${vers||"—"}</td>
+        <td style="color:var(--faint)">${(r.meta?.updatedAt||"").toString().slice(0,16).replace("T"," ")}</td></tr>`;
+    }).join("");
+  }
+
+  /* ---------- carga principal ---------- */
+  async function loadRange(){
+    const preset=$("#rangePreset").value;
+    let from,to,days;
+    const today=new Date();
+    if(preset==="custom"){from=$("#fromDate").value;to=$("#toDate").value;}
+    else if(preset==="all"){from=LAUNCH_DATE;to=ymd(today);}
+    else {const n=Number(preset);from=ymd(addDays(today,-(n-1)));to=ymd(today);}
+    if(!from||!to){showToast("Elegí un rango de fechas válido");return;}
+    days=daysBetween(from,to);
+    lastRange={from,to,days};
+    $("#rangeLabel").textContent=`${from} → ${to} · ${days} días`;
+
+    let daily, isDemo=false;
+    const {key}=getSettings();
+    try{
+      if(!key)throw new Error("missing_settings");
+      daily=await apiGet("metricsDaily",{from,to});
+      $("#demoBanner").classList.remove("show");
+    }catch(e){
+      if(String(e.message).includes("missing_settings")){
+        daily=demoDaily(from,to); isDemo=true; $("#demoBanner").classList.add("show");
+      }else if(String(e.message).includes("unauthorized")){
+        openSettings(); showToast("API Key inválida"); return;
+      }else{ showToast("Error: "+e.message); return; }
+    }
+    destroyCharts();
+    lastData=daily;
+    updateBiasNotice(daily,isDemo);
+    const a=aggregate(daily);
+    renderKpis(a,lastRange);
+    renderTrend(daily,$("#granularity").value,days);
+    renderTools(a.agg.tools);
+    renderReach(a);
+    renderRetention(a);
+    renderAdoption(daily);
+    if(!isDemo)renderAuth();
+    renderLangs(a);
+    renderPie("#chVersions",a.agg.versions,"versions");
+    renderPie("#chFirstSeen",a.agg.versions_first_seen,"firstseen");
+    renderPie("#chWidgets",a.agg.widgets,"widgets");
+    renderPie("#chAds",a.agg.ads,"ads");
+    renderDaily(daily);
+  }
+
+  /* ================= EXPORT ================= */
+  function currentReport(){
+    const a=aggregate(lastData); const r=lastRange;
+    return {range:r,summary:{opens:a.opens,newInstalls:a.newInstalls,daysWithData:a.daysWithData,
+      distinctTools:Object.keys(a.agg.tools).length,toolInteractions:totalOf(a.agg.tools)},agg:a.agg,
+      dailyOpens:lastData.map(d=>[d.day,Number(d.totals?.app_open||0)])};
+  }
+  function mdTable(title,entries,total){
+    if(!entries.length)return `### ${title}\n_(sin datos)_\n`;
+    let s=`### ${title}\n| Clave | Cuenta | % |\n|---|--:|--:|\n`;
+    for(const[k,v]of entries)s+=`| ${k} | ${v} | ${pctS(v,total)} |\n`;
+    return s;
+  }
+  function buildMarkdown(){
+    const R=currentReport(), a=R.agg;
+    const L=[];
+    L.push(`# MiniToolbox — Métricas`);
+    L.push(`Rango: ${R.range.from} → ${R.range.to} (${R.range.days} días) · Generado: ${new Date().toISOString().slice(0,16).replace("T"," ")}`);
+    L.push(`\n## Resumen`);
+    L.push(`- Aperturas totales: ${R.summary.opens}`);
+    L.push(`- Instalaciones nuevas (first-seen): ${R.summary.newInstalls}`);
+    L.push(`- Días con datos: ${R.summary.daysWithData} de ${R.range.days}`);
+    L.push(`- Herramientas distintas usadas: ${R.summary.distinctTools}`);
+    L.push(`- Interacciones con herramientas: ${R.summary.toolInteractions}`);
+    L.push(`\n## Tablas`);
+    L.push(mdTable("Herramientas (uso, desc)",ranked(a.tools),totalOf(a.tools)));
+    L.push(mdTable("Idiomas principales",ranked(a.lang_primary),totalOf(a.lang_primary)));
+    L.push(mdTable("Idiomas secundarios",ranked(a.lang_secondary),totalOf(a.lang_secondary)));
+    L.push(mdTable("Versiones activas",ranked(a.versions),totalOf(a.versions)));
+    L.push(mdTable("Instalaciones nuevas por versión",ranked(a.versions_first_seen),totalOf(a.versions_first_seen)));
+    L.push(mdTable("Widgets",ranked(a.widgets),totalOf(a.widgets)));
+    L.push(mdTable("Anuncios",ranked(a.ads),totalOf(a.ads)));
+    L.push(`\n## Aperturas por día\n| Día | Aperturas |\n|---|--:|`);
+    for(const[d,v]of R.dailyOpens)L.push(`| ${d} | ${v} |`);
+    return L.join("\n");
+  }
+  function buildJSON(){return JSON.stringify(currentReport(),null,1);}
+  function buildCSV(){
+    const head=["day","app_open","tools","ads","versions","versions_first_seen","lang_primary","lang_secondary","widgets","updatedAt"];
+    const esc=s=>`"${String(s).replace(/"/g,'""')}"`;
+    const lines=[head.join(",")];
+    for(const r of lastData){const t=r.totals||{};
+      lines.push([r.day,t.app_open??0,JSON.stringify(t.tools??{}),JSON.stringify(t.ads??{}),
+        JSON.stringify(t.versions??{}),JSON.stringify(t.versions_first_seen??{}),
+        JSON.stringify(t.lang_primary??{}),JSON.stringify(t.lang_secondary??{}),
+        JSON.stringify(t.widgets??{}),r.meta?.updatedAt??""].map(esc).join(","));}
+    return lines.join("\n");
+  }
+  function downloadFile(name,text,mime){
+    const b=new Blob([text],{type:mime});const u=URL.createObjectURL(b);
+    const a=document.createElement("a");a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);
+  }
+  async function copyText(text){
+    try{await navigator.clipboard.writeText(text);return true;}
+    catch(e){const ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.opacity="0";
+      document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand("copy");}catch(_){}
+      document.body.removeChild(ta);return ok;}
+  }
+  function fileStamp(){return `${lastRange.from}_${lastRange.to}`;}
+
+  /* ================= DEMO DATA ================= */
+  function demoDaily(from,to){
+    const tools=["ar_ruler","meetings","ruler","water","compass","flashlight","magnifier","minesweeper",
+      "pomodoro_list","bubble_level","qr_generator","guess_flag","light_meter","age_calculator","zodiac_sign","truco_scoreboard"];
+    const weights=[24,22,17,15,13,12,9,8,6,5,4,4,3,3,2,2];
+    const langsP={es:78,en:16,pt:4,fr:2}, langsS={en:40,es:30,pt:8}, vers={"1.2.0":10,"1.3.0":26,"1.4.0":64};
+    const fs={"1.3.0":1,"1.4.0":2}, widgets={water:18,flashlight:11,favorites:6}, ads={banner:120,interstitial:14};
+    const out=[]; let d=new Date(from+"T00:00:00"); const end=new Date(to+"T00:00:00"); let seed=42;
+    const rnd=()=>{seed=(seed*1103515245+12345)&0x7fffffff;return seed/0x7fffffff;};
+    while(d<=end){
+      const opens=8+Math.round(rnd()*14);
+      const dailyActive=Math.round(opens * (0.6 + rnd() * 0.2));
+      const tmap={}; tools.forEach((t,i)=>{const base=weights[i];const v=Math.round(base*rnd()*0.5);if(v>0)tmap[t]=v;});
+      const pick=(m,k)=>{const o={};for(const key of Object.keys(m))if(rnd()<0.9)o[key]=Math.max(1,Math.round(m[key]*rnd()*(k||0.15)));return o;};
+      out.push({day:ymd(d),totals:{app_open:opens,daily_active:dailyActive,tools:tmap,ads:pick(ads,0.2),versions:pick(vers,0.25),
+        versions_first_seen:(rnd()<0.4?pick(fs,1):{}),lang_primary:pick(langsP,0.2),
+        lang_secondary:pick(langsS,0.2),widgets:pick(widgets,0.25)},meta:{updatedAt:ymd(d)+"T23:59"}});
+      d=addDays(d,1);
+    }
+    return out;
+  }
+
+  /* ================= UI WIRING ================= */
+  function showToast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2200);}
+  function openSettings(){const s=getSettings();$("#inpApiKey").value=s.key;$("#inpBaseUrl").value=s.base;$("#overlay").classList.add("open");}
+  function closeSettings(){$("#overlay").classList.remove("open");}
+
+  document.addEventListener("DOMContentLoaded",()=>{
+    applyTheme(localStorage.getItem(LS_THEME)||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"));
+    $("#zeroInput").value=localStorage.getItem(LS_ZERO)||TOOL_CATALOG_IDS.join("\n");
+
+    $("#btnTheme").onclick=()=>{const t=document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark";
+      localStorage.setItem(LS_THEME,t);applyTheme(t);if(lastData)loadRange();};
+    $("#rangePreset").onchange=e=>{$("#customWrap").style.display=e.target.value==="custom"?"flex":"none";if(e.target.value!=="custom")loadRange();};
+    $("#granularity").onchange=()=>{if(lastData){destroyCharts();const a=aggregate(lastData);
+      renderTrend(lastData,$("#granularity").value,lastRange.days);renderTools(a.agg.tools);renderLangs(a);
+      renderPie("#chVersions",a.agg.versions,"versions");renderPie("#chFirstSeen",a.agg.versions_first_seen,"firstseen");
+      renderPie("#chWidgets",a.agg.widgets,"widgets");renderPie("#chAds",a.agg.ads,"ads");renderKpis(a,lastRange);}};
+    $("#btnReload").onclick=loadRange;
+    $("#btnApply")&&($("#btnApply").onclick=loadRange);
+    $("#fromDate").onchange=()=>$("#rangePreset").value==="custom"&&loadRange();
+    $("#toDate").onchange=()=>$("#rangePreset").value==="custom"&&loadRange();
+
+    // settings
+    $("#btnSettings").onclick=openSettings;
+    $("#btnCancelSettings").onclick=closeSettings;
+    $("#overlay").onclick=e=>{if(e.target.id==="overlay")closeSettings();};
+    $("#btnSaveSettings").onclick=()=>{setSettings({base:$("#inpBaseUrl").value,key:$("#inpApiKey").value});closeSettings();loadRange();};
+
+    // export dropdown
+    const menu=$("#exportMenu");
+    $("#btnExport").onclick=e=>{e.stopPropagation();menu.classList.toggle("open");};
+    document.addEventListener("click",()=>menu.classList.remove("open"));
+    menu.onclick=async e=>{
+      const act=e.target.closest("button")?.dataset.act; if(!act)return;
+      if(!lastData){showToast("Cargá datos primero");return;}
+      if(act==="md-copy"){const ok=await copyText(buildMarkdown());showToast(ok?"Markdown copiado — pegalo en tu IA":"No se pudo copiar");}
+      if(act==="md-dl")downloadFile(`minitoolbox_${fileStamp()}.md`,buildMarkdown(),"text/markdown;charset=utf-8");
+      if(act==="json-dl")downloadFile(`minitoolbox_${fileStamp()}.json`,buildJSON(),"application/json");
+      if(act==="csv-dl")downloadFile(`minitoolbox_${fileStamp()}.csv`,buildCSV(),"text/csv;charset=utf-8");
+      menu.classList.remove("open");
+    };
+
+    // zero-use detector
+    const zi=$("#zeroInput");
+    zi.oninput=()=>{localStorage.setItem(LS_ZERO,zi.value);if(lastData)updateZeroList(aggregate(lastData).agg.tools);};
+    $("#btnResetZero").onclick=()=>{zi.value=TOOL_CATALOG_IDS.join("\n");localStorage.setItem(LS_ZERO,zi.value);
+      if(lastData)updateZeroList(aggregate(lastData).agg.tools); showToast("Lista restaurada");};
+
+    // sortable tables
+    document.querySelectorAll("table").forEach(tbl=>{
+      tbl.querySelectorAll("th[data-sort]").forEach((th,idx)=>{
+        th.onclick=()=>{
+          const tb=tbl.querySelector("tbody");const rows=[...tb.rows];
+          const asc=!(sortState[tbl.id+idx]);sortState[tbl.id+idx]=asc;
+          const col=th.cellIndex, num=th.classList.contains("num");
+          rows.sort((r1,r2)=>{let a=r1.cells[col].textContent,b=r2.cells[col].textContent;
+            if(num){a=parseFloat(a.replace(/[^\d.-]/g,""))||0;b=parseFloat(b.replace(/[^\d.-]/g,""))||0;return asc?a-b:b-a;}
+            return asc?a.localeCompare(b):b.localeCompare(a);});
+          rows.forEach(r=>tb.appendChild(r));
+        };
+      });
+    });
+
+    // fechas por defecto
+    $("#toDate").value=ymd(new Date());$("#fromDate").value=ymd(addDays(new Date(),-29));
+    loadRange();
+  });
 </script>
 </body>
 </html>
