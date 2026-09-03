@@ -90,13 +90,6 @@ android {
         }
     }
 
-    testOptions {
-        unitTests {
-            // Robolectric necesita los recursos empaquetados para levantar un Context real.
-            isIncludeAndroidResources = true
-        }
-    }
-
     lint {
         baseline = file("lint-baseline.xml")
         abortOnError = true
@@ -114,13 +107,13 @@ dependencies {
 
     // 2) Core Compose UI
     implementation(libs.androidx.ui)
-    implementation(libs.core.ktx)
 
 
     // 3) Compose Material 3 (Actualización a Material3)
     implementation(libs.material3)
     implementation(libs.material)
     implementation(libs.androidx.foundation)
+    implementation(libs.androidx.compose.runtime)
 
     // 4) Icons, Activity & Navigation
     implementation(libs.androidx.material.icons.extended)
@@ -145,14 +138,8 @@ dependencies {
     implementation(libs.protobuf.java)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.gson)
-    implementation(libs.androidx.camera.view)
     implementation(libs.androidx.ui.unit)
-    implementation(libs.androidx.material3)
-    implementation(libs.foundation)
     implementation(libs.androidx.runtime.saveable)
-    implementation(libs.androidx.runtime)
-    implementation(libs.runtime)
-    implementation(libs.androidx.compose.foundation.foundation)
     implementation(libs.androidx.ui.graphics)
 
     // 7) Testing
@@ -162,10 +149,6 @@ dependencies {
     // Implementación real de org.json: en tests unitarios el stub de android.jar
     // lanza "not mocked" en cada llamada.
     testImplementation(libs.json)
-    // Context y DataStore reales en la JVM, sin emulador.
-    testImplementation(libs.robolectric)
-    testImplementation(libs.androidx.test.core)
-    testImplementation(libs.androidx.work.testing)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -175,7 +158,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation(libs.kotlin.reflect)
 
     // Camera
     implementation(libs.androidx.camera.camera2)
@@ -183,8 +166,8 @@ dependencies {
     implementation(libs.androidx.camera.view)
 
     //AR Camera
-    implementation("androidx.appcompat:appcompat:1.7.1")
-    implementation("androidx.fragment:fragment-ktx:1.8.9")
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.fragment.ktx)
 
     // --- AR / SceneView ---
     implementation(libs.arsceneview)
@@ -210,15 +193,21 @@ dependencies {
 
     implementation(libs.google.ump)
 
-    implementation("androidx.media:media:1.7.1")
+    implementation(libs.androidx.media)
 
     implementation(libs.reorderable)
 
-    implementation(libs.play.services.oss.licenses)
+    implementation(libs.play.services.oss.licenses) {
+        // Esta librería arrastra androidx.compose.material3:1.5.0-alpha17, que está
+        // compilada contra foundation 1.11.0-beta02 y rompe en runtime con el
+        // foundation 1.12.0 que fija el BOM (AbstractMethodError en CustomStyle).
+        // Excluyéndola, material3 queda alineado con el resto de Compose.
+        exclude(group = "androidx.compose.material3")
+    }
     implementation(libs.billing.ktx)
     implementation(libs.androidx.browser)
 
-    implementation("androidx.work:work-runtime-ktx:2.10.5")
+    implementation(libs.androidx.work.runtime.ktx)
 
     // --- Firebase App Check ---
     implementation(platform(libs.firebase.bom))
