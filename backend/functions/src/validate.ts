@@ -18,11 +18,25 @@ export type IngestItem = {
 	widgets?: Record<string, number>; // uso de widgets
 };
 
+/**
+ * Salud del pipeline de envio, reportada por el cliente.
+ *
+ * OJO: son contadores ACUMULADOS de por vida del dispositivo, no deltas. Cada lote
+ * repite el total historico, asi que sumarlos entre lotes no significa nada: lo que
+ * se puede contar es cuantos lotes vienen de dispositivos con problemas.
+ */
+export type ClientHealth = {
+	dropped_batches: number;
+	sanitized_keys: number;
+	consecutive_failures: number;
+};
+
 export type IngestBody = {
 	batch_id: string;
 	platform: "android" | "ios" | string;
 	app_version: string;
 	items: IngestItem[];
+	client_health?: ClientHealth;
 };
 
 /** Claves descartadas o corregidas durante el saneo de un lote. */
@@ -129,6 +143,17 @@ function sanitizeMap(m: any, dropped: Dropped): Record<string, number> | null {
 	return out;
 }
 
+/** Sanea el bloque de salud del cliente. Valores no numéricos cuentan como 0. */
+function sanitizeHealth(raw: any): ClientHealth | undefined {
+	if (!raw || typeof raw !== "object") return undefined;
+	const n = (v: any) => (Number.isInteger(v) && v >= 0 ? v : 0);
+	return {
+		dropped_batches: n(raw.dropped_batches),
+		sanitized_keys: n(raw.sanitized_keys),
+		consecutive_failures: n(raw.consecutive_failures),
+	};
+}
+
 /** Devuelve el número si es un entero >= 0, o undefined. */
 function safeCount(v: any): number | undefined {
 	return Number.isInteger(v) && v >= 0 ? v : undefined;
@@ -227,6 +252,7 @@ export function validateBody(
 		ok: true,
 		data: {
 			batch_id: body.batch_id,
+			client_health: sanitizeHealth(body.client_health),
 			platform: body.platform,
 			app_version: body.app_version,
 			items,
