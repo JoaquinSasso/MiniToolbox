@@ -173,8 +173,24 @@ const KNOWN_TOOLS = new Set<string>([
 const UNKNOWN_TOOL_BUCKET = "other";
 
 /** Origenes de apertura aceptados. Debe coincidir con MetricsSource del cliente. */
-const KNOWN_SOURCES = new Set(["nav", "notification", "widget", "shortcut", "unknown"]);
+const KNOWN_SOURCES = new Set([
+	"nav",
+	"notification",
+	"widget",
+	"shortcut",
+	"unknown",
+]);
 const UNKNOWN_SOURCE = "unknown";
+
+/** Categorias de retencion aceptadas. Debe coincidir con RetentionBuckets del cliente. */
+const KNOWN_AGE = new Set([
+	"age0_6",
+	"age7_29",
+	"age30_89",
+	"age90_179",
+	"age180p",
+]);
+const KNOWN_INTENSITY = new Set(["d1", "d2_3", "d4_7", "d8_14", "d15_28"]);
 
 function bucketToolKey(ck: string, seenUnknown: Set<string>): string {
 	if (KNOWN_TOOLS.has(ck)) return ck;
@@ -293,6 +309,8 @@ type DailyDoc = {
 		tools_dau: Record<string, number>;
 		/** Aperturas por herramienta y origen: tool_entry[tool][source]. */
 		tool_entry: Record<string, Record<string, number>>;
+		/** Retencion: retention[antiguedad][intensidad]. Calculada en el dispositivo. */
+		retention: Record<string, Record<string, number>>;
 		ads: Record<string, number>;
 		versions: Record<string, number>;
 		versions_first_seen: Record<string, number>;
@@ -371,6 +389,33 @@ function normDoc(id: string, data: FirebaseFirestore.DocumentData): DailyDoc {
 		addEntry(k.slice(0, cut), k.slice(cut + 1), Number(v || 0));
 	}
 
+	// --- retention ---
+	// Guardado anidado (retention.<antiguedad>.<intensidad>); se contemplan tambien
+	// las claves planas por si algun documento quedo con la forma anterior.
+	const retention: Record<string, Record<string, number>> = {};
+	const addRetention = (age: string, intensity: string, n: number) => {
+		if (!KNOWN_AGE.has(age) || !KNOWN_INTENSITY.has(intensity) || !(n > 0))
+			return;
+		if (!retention[age]) retention[age] = {};
+		retention[age][intensity] = (retention[age][intensity] ?? 0) + n;
+	};
+
+	const retentionNested =
+		data.retention && typeof data.retention === "object" ? data.retention : {};
+	for (const [age, byIntensity] of Object.entries(retentionNested)) {
+		if (!byIntensity || typeof byIntensity !== "object") continue;
+		for (const [intensity, v] of Object.entries(
+			byIntensity as Record<string, any>,
+		)) {
+			addRetention(age, intensity, Number(v || 0));
+		}
+	}
+	for (const [k, v] of Object.entries(pickPrefix(data, "retention"))) {
+		const cut = k.indexOf(".");
+		if (cut <= 0) continue;
+		addRetention(k.slice(0, cut), k.slice(cut + 1), Number(v || 0));
+	}
+
 	// --- ads ---
 	const adsNested = data.ads && typeof data.ads === "object" ? data.ads : {};
 	const adsFlat = pickPrefix(data, "ads");
@@ -433,6 +478,7 @@ function normDoc(id: string, data: FirebaseFirestore.DocumentData): DailyDoc {
 			tools: toolsCanon,
 			tools_dau,
 			tool_entry,
+			retention,
 			ads,
 			versions,
 			versions_first_seen,
@@ -638,6 +684,22 @@ export const ingest = onRequest(
 						}
 					}
 
+					// Retencion: clave "<antiguedad>.<intensidad>", calculada en el
+					// dispositivo. Se guarda anidada para poder leer las marginales.
+					if (it.retention) {
+						for (const [k, v] of Object.entries(it.retention)) {
+							const n = Number(v || 0) > 0 ? 1 : 0;
+							if (n <= 0) continue;
+							const cut = k.indexOf(".");
+							if (cut <= 0) continue;
+							const age = k.slice(0, cut);
+							const intensity = k.slice(cut + 1);
+							if (!KNOWN_AGE.has(age) || !KNOWN_INTENSITY.has(intensity))
+								continue;
+							updates[`retention.${age}.${intensity}`] = inc(1);
+						}
+					}
+
 					if (it.ads) {
 						for (const [k, v] of Object.entries(it.ads)) {
 							const n = Number(v || 0);
@@ -717,19 +779,45 @@ export const ingest = onRequest(
 				});
 			}
 
-			await db.collection("metrics_ingest_logs").doc().set({
-				at: FieldValue.serverTimestamp(),
-				batch_id: body.batch_id,
-				platform: body.platform,
-				app_version: body.app_version,
-				auth_method: authMethod,
-				total_items: totalItems,
-				total_app_open_delta: totalOpens,
-				total_daily_active_delta: totalDaily,
-				dropped_keys: dropped.keys.length,
-				dropped_items: dropped.items,
-				expiresAt: expiryTimestamp(RETENTION_DAYS),
-			});
+			// Rollup mensual del metodo de autenticacion.
+			// Es el contador que decide cuando se puede retirar la rama de API key:
+			// mientras haya trafico con "api_key", hay dispositivos que quedarian
+			// bloqueados de forma permanente si se elimina.
+			const authMonth = (
+				body.items?.[0]?.day || ymdTZ(new Date(), DEFAULT_TZ)
+			).slice(0, 7);
+			await db
+				.collection("metrics_auth")
+				.doc(authMonth)
+				.set(
+					{
+						[authMethod]: FieldValue.increment(1),
+						// Las claves con puntos ("1.3.2") van dentro de un objeto literal,
+						// no como field path, asi que no se interpretan como anidamiento.
+						by_version: {
+							[body.app_version]: { [authMethod]: FieldValue.increment(1) },
+						},
+						updatedAt: FieldValue.serverTimestamp(),
+					},
+					{ merge: true },
+				);
+
+			await db
+				.collection("metrics_ingest_logs")
+				.doc()
+				.set({
+					at: FieldValue.serverTimestamp(),
+					batch_id: body.batch_id,
+					platform: body.platform,
+					app_version: body.app_version,
+					auth_method: authMethod,
+					total_items: totalItems,
+					total_app_open_delta: totalOpens,
+					total_daily_active_delta: totalDaily,
+					dropped_keys: dropped.keys.length,
+					dropped_items: dropped.items,
+					expiresAt: expiryTimestamp(RETENTION_DAYS),
+				});
 
 			sendJson(res, 200, {
 				ok: true,
@@ -791,6 +879,68 @@ export const metricsDaily = onRequest(
 	},
 );
 
+/**
+ * Estado de la migracion a App Check: cuantos lotes llegaron con cada metodo de
+ * autenticacion, por mes y por version de app.
+ *
+ * Lee documentos de rollup (uno por mes), no la coleccion de lotes, asi que el costo
+ * no crece con el volumen de ingesta.
+ */
+export const metricsAuth = onRequest(
+	{ secrets: [READ_METRICS_API_KEY, METRICS_API_KEY] },
+	async (req, res) => {
+		try {
+			if (req.method !== "GET") {
+				sendJson(res, 405, { ok: false, error: "method_not_allowed" });
+				return;
+			}
+			const apiKey = getHeaderApiKey(req);
+			const readK = (READ_METRICS_API_KEY.value() || "").trim();
+			const writeK = (METRICS_API_KEY.value() || "").trim();
+			if (!(apiKey && (apiKey === readK || apiKey === writeK))) {
+				sendJson(res, 401, { ok: false, error: "unauthorized" });
+				return;
+			}
+
+			const months = Math.max(1, Math.min(12, Number(req.query.months ?? 3)));
+			const now = new Date();
+			const ids: string[] = [];
+			for (let i = 0; i < months; i++) {
+				const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+				ids.push(
+					`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`,
+				);
+			}
+
+			const snaps = await db.getAll(
+				...ids.map((id) => db.collection("metrics_auth").doc(id)),
+			);
+
+			const out = snaps
+				.filter((snap) => snap.exists)
+				.map((snap) => {
+					const d = snap.data() || {};
+					return {
+						month: snap.id,
+						appcheck: Number(d.appcheck || 0),
+						api_key: Number(d.api_key || 0),
+						by_version: (d.by_version || {}) as Record<
+							string,
+							Record<string, number>
+						>,
+					};
+				});
+
+			sendJson(res, 200, { months: out });
+			return;
+		} catch (e) {
+			console.error("metricsAuth_error", e);
+			sendJson(res, 500, { ok: false, error: "internal" });
+			return;
+		}
+	},
+);
+
 export const metricsSummary = onRequest(
 	{ secrets: [READ_METRICS_API_KEY, METRICS_API_KEY] },
 	async (req, res) => {
@@ -827,6 +977,8 @@ export const metricsSummary = onRequest(
 			const agg_widgets: Record<string, number> = {};
 			const agg_tools_dau: Record<string, number> = {};
 			const agg_entry_sources: Record<string, number> = {};
+			const agg_retention_age: Record<string, number> = {};
+			const agg_retention_intensity: Record<string, number> = {};
 
 			for (const r of rows) {
 				total_app_open += Number(r.totals.app_open ?? 0);
@@ -844,6 +996,17 @@ export const metricsSummary = onRequest(
 				for (const bySource of Object.values(r.totals.tool_entry || {})) {
 					sumMap(agg_entry_sources, bySource);
 				}
+				// Marginales del cruce: sumando por un eje se obtiene el otro.
+				for (const [age, byIntensity] of Object.entries(
+					r.totals.retention || {},
+				)) {
+					for (const [intensity, n] of Object.entries(byIntensity)) {
+						const v = Number(n || 0);
+						agg_retention_age[age] = (agg_retention_age[age] ?? 0) + v;
+						agg_retention_intensity[intensity] =
+							(agg_retention_intensity[intensity] ?? 0) + v;
+					}
+				}
 			}
 
 			const payload = {
@@ -860,6 +1023,8 @@ export const metricsSummary = onRequest(
 					widgets: topK(agg_widgets, 10),
 					tools_dau: topK(agg_tools_dau, 10),
 					entry_sources: topK(agg_entry_sources, 10),
+					retention_age: topK(agg_retention_age, 10),
+					retention_intensity: topK(agg_retention_intensity, 10),
 				},
 			};
 			sendJson(res, 200, payload);

@@ -7,6 +7,8 @@ export type IngestItem = {
 	tools_dau?: Record<string, number>;
 	/** Aperturas por herramienta y origen, clave "<toolId>.<source>". */
 	tool_entry?: Record<string, number>;
+	/** Retencion: 1 marca por dia en "<antiguedad>.<intensidad>". */
+	retention?: Record<string, number>;
 	ads?: Record<string, number>;
 
 	versions?: Record<string, number>; // DAU por versión
@@ -179,6 +181,7 @@ export function validateBody(
 		const tools = sanitizeMap(it.tools, dropped);
 		const toolsDau = sanitizeMap(it.tools_dau, dropped);
 		const toolEntry = sanitizeMap(it.tool_entry, dropped);
+		const retention = sanitizeMap(it.retention, dropped);
 		const ads = sanitizeMap(it.ads, dropped);
 		const versions = sanitizeMap(it.versions, dropped);
 		const versionsFirstSeen = sanitizeMap(it.versions_first_seen, dropped);
@@ -190,6 +193,7 @@ export function validateBody(
 			tools,
 			toolsDau,
 			toolEntry,
+			retention,
 			ads,
 			versions,
 			versionsFirstSeen,
@@ -209,6 +213,7 @@ export function validateBody(
 			tools: tools as Record<string, number>,
 			tools_dau: toolsDau as Record<string, number>,
 			tool_entry: toolEntry as Record<string, number>,
+			retention: retention as Record<string, number>,
 			ads: ads as Record<string, number>,
 			versions: versions as Record<string, number>,
 			versions_first_seen: versionsFirstSeen as Record<string, number>,

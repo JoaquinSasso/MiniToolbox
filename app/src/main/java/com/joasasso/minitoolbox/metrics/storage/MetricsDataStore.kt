@@ -45,6 +45,12 @@ object MetricsKeys {
      */
     val TOOL_ENTRY_BY_DAY_JSON     = stringPreferencesKey("tool_entry_by_day_json")       // Map<day, Map<toolId.source, Int>>
 
+    /**
+     * Retención: 1 marca por día en la categoría "<antiguedad>.<intensidad>".
+     * El cruce se calcula en el dispositivo; al servidor sólo viaja la categoría.
+     */
+    val RETENTION_BY_DAY_JSON      = stringPreferencesKey("retention_by_day_json")        // Map<day, Map<age.intensity, 0|1>>
+
     // Versiones
     val VERSION_DAU_BY_DAY_JSON            = stringPreferencesKey("version_dau_by_day_json")             // Map<day, Map<version, Int>>
     val VERSION_FIRST_SEEN_BY_DAY_JSON     = stringPreferencesKey("version_first_seen_by_day_json")      // Map<day, Map<version, Int>>
@@ -65,6 +71,7 @@ object MetricsKeys {
     val SENT_AD_IMPR_BY_DAY_JSON   = stringPreferencesKey("sent_ad_impr_by_day_json")    // Map<day, Map<type, Int>>
     val SENT_TOOL_DAU_BY_DAY_JSON  = stringPreferencesKey("sent_tool_dau_by_day_json")   // Map<day, Map<toolId, 0|1>>
     val SENT_TOOL_ENTRY_BY_DAY_JSON = stringPreferencesKey("sent_tool_entry_by_day_json") // Map<day, Map<toolId.source, Int>>
+    val SENT_RETENTION_BY_DAY_JSON  = stringPreferencesKey("sent_retention_by_day_json")  // Map<day, Map<age.intensity, 0|1>>
 
     val SENT_VERSION_DAU_BY_DAY_JSON        = stringPreferencesKey("sent_version_dau_by_day_json")       // Map<day, Map<version, Int>>
     val SENT_VERSION_FIRST_SEEN_BY_DAY_JSON = stringPreferencesKey("sent_version_first_seen_by_day_json")// Map<day, Map<version, Int>>
@@ -92,6 +99,18 @@ object MetricsKeys {
     val LAST_VERSION_HEARTBEAT_DAY = stringPreferencesKey("last_version_heartbeat_day")  // "yyyy-MM-dd"
     val LAST_LANG_HEARTBEAT_DAY    = stringPreferencesKey("last_lang_heartbeat_day")     // "yyyy-MM-dd"
     val FIRST_SEEN_VERSIONS_JSON   = stringPreferencesKey("first_seen_versions_json")    // JSON Array de versiones ya registradas
+
+    /**
+     * Días en que el dispositivo estuvo activo, dentro de la ventana de retención.
+     * Nunca se envía: sólo alimenta el cálculo local del bucket de intensidad.
+     */
+    val ACTIVE_DAYS_JSON           = stringPreferencesKey("active_days_json")            // JSON Array de "yyyy-MM-dd"
+
+    /**
+     * Primer día registrado en este dispositivo. Nunca se envía: sólo alimenta el
+     * cálculo local del bucket de antigüedad.
+     */
+    val FIRST_SEEN_DAY             = stringPreferencesKey("first_seen_day")              // "yyyy-MM-dd"
 
     // ---------------------------------------------------------------------
     // Diagnóstico del pipeline de envío
