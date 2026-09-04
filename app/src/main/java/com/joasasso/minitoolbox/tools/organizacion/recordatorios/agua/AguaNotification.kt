@@ -12,16 +12,26 @@ import com.joasasso.minitoolbox.MainActivity
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.data.flujoAguaHoy
 import com.joasasso.minitoolbox.data.flujoObjetivo
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
-import com.joasasso.minitoolbox.nav.Screen
 import com.joasasso.minitoolbox.metrics.MetricsSource
+import com.joasasso.minitoolbox.nav.Screen
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 class WaterReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        val consumidoML = runBlocking { context.flujoAguaHoy().first() }
-        val objetivoML = runBlocking { context.flujoObjetivo().first() }
-        showNotification(context, consumidoML, objetivoML)
+        val pendingResult = goAsync()
+        CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
+            try {
+                val consumidoML = context.flujoAguaHoy().first()
+                val objetivoML = context.flujoObjetivo().first()
+                showNotification(context, consumidoML, objetivoML)
+            } finally {
+                pendingResult.finish()
+            }
+        }
     }
 
     private fun showNotification(context: Context, consumido: Int, objetivo: Int) {

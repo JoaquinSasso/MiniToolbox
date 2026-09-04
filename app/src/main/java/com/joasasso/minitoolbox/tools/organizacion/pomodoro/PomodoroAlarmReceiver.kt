@@ -129,7 +129,7 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
             schedule(app, PomodoroSchedulePrefs.Pending(endMs, PHASE_WORK, 0, config))
         }
 
-        fun stopPomodoro(context: Context) {
+        fun stopPomodoro(context: Context, pendingResult: PendingResult? = null) {
             val app = context.applicationContext
             Log.d(TAG, "stopPomodoro")
             cancelAlarm(app)
@@ -139,8 +139,12 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
             ContextCompat.getSystemService(app, NotificationManager::class.java)
                 ?.cancel(NOTIF_ID_ALARM_SILENT)
             AlarmState.setActive(app, false)
-            CoroutineScope(Dispatchers.IO).launch {
-                PomodoroStateRepository(app).clearPhase()
+            CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
+                try {
+                    PomodoroStateRepository(app).clearPhase()
+                } finally {
+                    pendingResult?.finish()
+                }
             }
         }
 
@@ -164,11 +168,12 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
          * La llama PomodoroBootReceiver tras un reboot, un cambio de hora, o
          * cuando el usuario concede el permiso de alarmas exactas.
          */
-        fun rescheduleFromPersisted(context: Context) {
+        fun rescheduleFromPersisted(context: Context, pendingResult: PendingResult? = null) {
             val app = context.applicationContext
             val pending = PomodoroSchedulePrefs.load(app)
             if (pending == null) {
                 Log.d(TAG, "rescheduleFromPersisted: no hay pomodoro guardado, nada que hacer")
+                pendingResult?.finish()
                 return
             }
             val now = System.currentTimeMillis()
@@ -182,6 +187,7 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
                     pending.triggerAtMs,
                     Screen.PomodoroDetail.createRoute(pending.config.id)
                 )
+                pendingResult?.finish()
             } else {
                 Log.d(TAG, "rescheduleFromPersisted: la fase ya venció, cortando la cadena")
                 // La fase venció mientras el teléfono estaba apagado. No se puede
@@ -195,8 +201,12 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
                     Screen.PomodoroDetail.createRoute(pending.config.id)
                 )
                 PomodoroSchedulePrefs.clear(app)
-                CoroutineScope(Dispatchers.IO).launch {
-                    PomodoroStateRepository(app).clearPhase()
+                CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
+                    try {
+                        PomodoroStateRepository(app).clearPhase()
+                    } finally {
+                        pendingResult?.finish()
+                    }
                 }
             }
         }

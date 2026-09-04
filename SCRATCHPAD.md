@@ -11,7 +11,7 @@
 
 ## P0 — Bugs activos
 
-- [ ] `goAsync-receivers` — `PomodoroAlarmReceiver.kt`, `ResetAguaReceiver.kt` — Corrutinas en `onReceive()` sin `goAsync()`. Causa raíz documentada de alarmas que no suenan (ver `docs/pomodoro-alarma-postmortem.md`). Fix: `goAsync()` + `pendingResult.finish()` al completar. Dos archivos, lógica intacta.
+- [x] `goAsync-receivers` — `PomodoroAlarmReceiver.kt`, `ResetAguaReceiver.kt`, `AguaNotification.kt`, `PomodoroActionReceiver.kt`, `PomodoroBootReceiver.kt` — Corrutinas en `onReceive()` sin `goAsync()`. Fix: `goAsync()` + `pendingResult.finish()` al completar todas las tareas asíncronas.
 - [ ] `double-money` — `ExpensesDataStore.kt:27` — Dinero almacenado como `Double`. Aritmética de punto flotante pierde centavos en cálculo de deudas.
 
 ## P1 — Deuda de arquitectura

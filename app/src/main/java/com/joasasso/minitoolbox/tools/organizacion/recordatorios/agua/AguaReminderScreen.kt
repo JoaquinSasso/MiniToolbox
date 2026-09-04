@@ -581,40 +581,45 @@ fun cancelarRecordatorioAgua(context: Context) {
     alarmManager.cancel(pendingIntent)
 }
 
+/**Funcion suspendida para actualizar el progreso del consumo de agua en el widget desde la app*/
+suspend fun actualizarWidgetAguaSuspend(context: Context) {
+    val agua = context.flujoAguaHoy().first()
+    val objetivo = context.flujoObjetivo().first()
+    val porVaso = context.flujoPorVaso().first()
+
+    val glanceManager = GlanceAppWidgetManager(context)
+
+    // Actualiza AguaWidget (el largo)
+    val idsLargos = glanceManager.getGlanceIds(AguaWidget::class.java)
+    idsLargos.forEach { glanceId ->
+        updateAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId) { prefs ->
+            prefs.toMutablePreferences().apply {
+                this[AguaWidget.KEY_AGUA] = agua
+                this[AguaWidget.KEY_OBJETIVO] = objetivo
+                this[AguaWidget.KEY_POR_VASO] = porVaso
+            }
+        }
+    }
+    AguaWidget().updateAll(context)
+
+    // Actualiza AguaMiniWidget (el compacto)
+    val idsMini = glanceManager.getGlanceIds(AguaMiniWidget::class.java)
+    idsMini.forEach { glanceId ->
+        updateAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId) { prefs ->
+            prefs.toMutablePreferences().apply {
+                this[AguaMiniWidget.KEY_AGUA] = agua
+                this[AguaMiniWidget.KEY_OBJETIVO] = objetivo
+                this[AguaMiniWidget.KEY_POR_VASO] = porVaso
+            }
+        }
+    }
+    AguaMiniWidget().updateAll(context)
+}
+
 /**Funcion para actualizar el progreso del consumo de agua en el widget desde la app*/
 fun actualizarWidgetAgua(context: Context) {
     CoroutineScope(Dispatchers.IO).launch {
-        val agua = context.flujoAguaHoy().first()
-        val objetivo = context.flujoObjetivo().first()
-        val porVaso = context.flujoPorVaso().first()
-
-        val glanceManager = GlanceAppWidgetManager(context)
-
-        // Actualiza AguaWidget (el largo)
-        val idsLargos = glanceManager.getGlanceIds(AguaWidget::class.java)
-        idsLargos.forEach { glanceId ->
-            updateAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId) { prefs ->
-                prefs.toMutablePreferences().apply {
-                    this[AguaWidget.KEY_AGUA] = agua
-                    this[AguaWidget.KEY_OBJETIVO] = objetivo
-                    this[AguaWidget.KEY_POR_VASO] = porVaso
-                }
-            }
-        }
-        AguaWidget().updateAll(context)
-
-        // Actualiza AguaMiniWidget (el compacto)
-        val idsMini = glanceManager.getGlanceIds(AguaMiniWidget::class.java)
-        idsMini.forEach { glanceId ->
-            updateAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId) { prefs ->
-                prefs.toMutablePreferences().apply {
-                    this[AguaMiniWidget.KEY_AGUA] = agua
-                    this[AguaMiniWidget.KEY_OBJETIVO] = objetivo
-                    this[AguaMiniWidget.KEY_POR_VASO] = porVaso
-                }
-            }
-        }
-        AguaMiniWidget().updateAll(context)
+        actualizarWidgetAguaSuspend(context)
     }
 }
 
