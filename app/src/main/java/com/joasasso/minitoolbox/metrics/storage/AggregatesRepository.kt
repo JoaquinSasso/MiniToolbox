@@ -1,9 +1,12 @@
 package com.joasasso.minitoolbox.metrics.storage
 
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.LocaleList
+import android.util.Log
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.MutablePreferences
+import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.emptyPreferences
 import com.joasasso.minitoolbox.BuildConfig
 import com.joasasso.minitoolbox.metrics.MetricsContract
@@ -11,6 +14,8 @@ import com.joasasso.minitoolbox.metrics.MetricsSource
 import com.joasasso.minitoolbox.metrics.RetentionBuckets
 import kotlinx.coroutines.flow.first
 import org.json.JSONArray
+import org.json.JSONException
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -73,12 +78,20 @@ class AggregatesRepository(private val context: Context) {
         val pm = context.packageManager
         val p = pm.getPackageInfo(context.packageName, 0)
         p.versionName ?: "unknown"
-    } catch (_: Throwable) { "unknown" }
+    } catch (_: PackageManager.NameNotFoundException) {
+        "unknown"
+    } catch (e: Exception) {
+        Log.w(TAG, "No se pudo obtener versionName", e)
+        "unknown"
+    }
 
     private fun primaryLanguage(): String {
         val loc: Locale = try {
             context.resources.configuration.locales.get(0)
-        } catch (_: Throwable) { Locale.getDefault() }
+        } catch (e: Exception) {
+            Log.w(TAG, "No se pudo obtener locale primario", e)
+            Locale.getDefault()
+        }
         return loc.language.lowercase(Locale.ROOT).ifBlank { "und" }
     }
 
@@ -157,7 +170,10 @@ class AggregatesRepository(private val context: Context) {
                 if (v.isNotBlank()) out += v
             }
             out
-        } catch (_: Throwable) { mutableSetOf() }
+        } catch (e: JSONException) {
+            Log.w(TAG, "Error al deserializar conjunto de versiones", e)
+            mutableSetOf()
+        }
     }
 
     private fun toJsonArrayString(set: Set<String>): String {
@@ -283,18 +299,25 @@ class AggregatesRepository(private val context: Context) {
     // Lecturas
     // ----------------------------------
 
+    private suspend fun readPrefs(): Preferences = try {
+        context.metricsDataStore.data.first()
+    } catch (e: IOException) {
+        Log.w(TAG, "Error al leer MetricsDataStore", e)
+        emptyPreferences()
+    }
+
     suspend fun getAppOpenCounts(): Map<String, Int> {
-        val prefs = try { context.metricsDataStore.data.first() } catch (_: Throwable) { emptyPreferences() }
+        val prefs = readPrefs()
         return JsonUtils.fromDayIntMap(prefs[MetricsKeys.APP_OPEN_COUNT_BY_DAY])
     }
 
     suspend fun getToolUseCounts(): Map<String, Map<String, Int>> {
-        val prefs = try { context.metricsDataStore.data.first() } catch (_: Throwable) { emptyPreferences() }
+        val prefs = readPrefs()
         return JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.TOOL_USE_BY_DAY_JSON])
     }
 
     suspend fun getAdImpressionCounts(): Map<String, Map<String, Int>> {
-        val prefs = try { context.metricsDataStore.data.first() } catch (_: Throwable) { emptyPreferences() }
+        val prefs = readPrefs()
         return JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.AD_IMPRESSIONS_BY_DAY_JSON])
     }
 
@@ -303,7 +326,7 @@ class AggregatesRepository(private val context: Context) {
     // ----------------------------------
 
     suspend fun buildDeltasSinceLastSent(): List<DayDelta> {
-        val prefs = try { context.metricsDataStore.data.first() } catch (_: Throwable) { emptyPreferences() }
+        val prefs = readPrefs()
 
         val currentApp    = JsonUtils.fromDayIntMap(prefs[MetricsKeys.APP_OPEN_COUNT_BY_DAY])
         val currentDaily  = JsonUtils.fromDayIntMap(prefs[MetricsKeys.DAILY_ACTIVE_BY_DAY])
@@ -411,7 +434,7 @@ class AggregatesRepository(private val context: Context) {
     /** Marca como "enviados" SOLO los deltas efectivamente enviados en el último batch. */
     suspend fun commitSent(deltas: List<DayDelta>) {
         val ds = context.metricsDataStore
-        val prefs = try { ds.data.first() } catch (_: Throwable) { emptyPreferences() }
+        val prefs = readPrefs()
 
         val sentApp     = JsonUtils.fromDayIntMap(prefs[MetricsKeys.SENT_APP_OPEN_BY_DAY])
         val sentDaily   = JsonUtils.fromDayIntMap(prefs[MetricsKeys.SENT_DAILY_ACTIVE_BY_DAY])
@@ -486,5 +509,9 @@ class AggregatesRepository(private val context: Context) {
             e[MetricsKeys.PENDING_BATCH_ID]                 = ""
             e[MetricsKeys.PENDING_BATCH_PAYLOAD_JSON]       = ""
         }
+    }
+
+    companion object {
+        private const val TAG = "AggregatesRepo"
     }
 }

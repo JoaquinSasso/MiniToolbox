@@ -18,7 +18,7 @@
 
 ### Corrutinas y errores
 
-- [ ] `catch-swallowing` — 33+ bloques `catch (_: Exception)` / `catch (_: Throwable)`. Los de `Throwable` en corrutinas tragan `CancellationException`, rompen cancelación cooperativa. Archivos clave: `Metrics.kt`, `BillingClientWrapper.kt`, `ExpensesDataStore.kt`.
+- [x] `catch-swallowing` — Eliminada captura indiscriminada de `Throwable` en todo el código Kotlin (0 ocurrencias restantes). En corrutinas y funciones suspendidas (`MetricsUploader.kt`, `AggregatesRepository.kt`, widgets de linterna), `CancellationException` se propaga limpiamente preservando la cancelación cooperativa. En DataStores y utilidades, se capturan excepciones tipadas (`IOException`, `SerializationException`, `JSONException`, `ParseException`).
 - [ ] `manual-coroutine-scopes` — ~11 `CoroutineScope(...)` manuales, solo 2 con `SupervisorJob`. En `Metrics.kt:io {}` un fallo en una métrica cancela el scope entero.
 
 ### Divisor de gastos
@@ -55,4 +55,4 @@
 
 ## Siguiente paso sugerido
  
-**`catch-swallowing`** (P1) — 33+ bloques `catch` que tragan `CancellationException` o `Throwable` en corrutinas, rompiendo la cancelación cooperativa (clave en `Metrics.kt`, `BillingClientWrapper.kt`, `ExpensesDataStore.kt`).
+**`manual-coroutine-scopes`** (P1) — ~11 `CoroutineScope(...)` manuales fuera de la UI, solo 2 con `SupervisorJob`. En `Metrics.kt:io {}` o receivers/servicios, un fallo no controlado cancela el scope entero.

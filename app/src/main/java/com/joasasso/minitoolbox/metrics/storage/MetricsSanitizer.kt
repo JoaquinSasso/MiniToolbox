@@ -4,8 +4,10 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import android.content.Context
+import android.util.Log
 import com.joasasso.minitoolbox.metrics.MetricsContract
 import kotlinx.coroutines.flow.first
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -186,7 +188,8 @@ object MetricsSanitizer {
 
     private suspend fun readPrefs(context: Context): Preferences = try {
         context.metricsDataStore.data.first()
-    } catch (_: Throwable) {
+    } catch (e: IOException) {
+        Log.w("MetricsSanitizer", "Error al leer MetricsDataStore en sanitización", e)
         emptyPreferences()
     }
 }

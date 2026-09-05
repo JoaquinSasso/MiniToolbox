@@ -3,6 +3,7 @@ package com.joasasso.minitoolbox.tools.entretenimiento.minijuegos
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.util.Log
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -144,7 +145,8 @@ fun InOtherWoldScreen(onBack: () -> Unit) {
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
             context.startActivity(Intent.createChooser(shareIntent, "Compartir imagen con..."))
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.w("InOtherWorld", "No se pudo compartir la imagen", e)
         }
     }
 

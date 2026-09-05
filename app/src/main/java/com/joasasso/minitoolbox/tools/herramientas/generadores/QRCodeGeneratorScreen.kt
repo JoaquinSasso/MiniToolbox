@@ -4,6 +4,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -100,7 +101,9 @@ fun GeneradorQrScreen(onBack: () -> Unit) {
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
             context.startActivity(Intent.createChooser(shareIntent, context.getString(R.string.share)))
-        } catch (_: Exception) { /* no-op */ }
+        } catch (e: Exception) {
+            Log.w("QRCodeGenerator", "No se pudo compartir la imagen QR", e)
+        }
     }
 
     Scaffold(

@@ -129,7 +129,7 @@ class PomodoroAlarmActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        try { unregisterReceiver(stopReceiver) } catch (_: Exception) { }
+        try { unregisterReceiver(stopReceiver) } catch (_: IllegalArgumentException) { }
     }
 
     private fun showOverLockScreen() {

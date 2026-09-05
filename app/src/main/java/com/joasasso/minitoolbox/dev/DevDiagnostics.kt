@@ -1,6 +1,7 @@
 package com.joasasso.minitoolbox.dev
 
 import android.content.Context
+import android.content.pm.PackageManager
 import com.joasasso.minitoolbox.metrics.MetricsContract
 import com.joasasso.minitoolbox.metrics.isMetricsEnabled
 import com.joasasso.minitoolbox.metrics.storage.MetricsKeys
@@ -9,6 +10,7 @@ import com.joasasso.minitoolbox.metrics.storage.metricsDataStore
 import com.joasasso.minitoolbox.metrics.uploader.UploadScheduler
 import kotlinx.coroutines.flow.first
 import org.json.JSONArray
+import org.json.JSONException
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -92,7 +94,7 @@ fun analyzePendingPayload(json: String): PayloadAnalysis {
             invalidDays = invalidDays.sorted(),
             parseError = null
         )
-    } catch (t: Throwable) {
+    } catch (e: JSONException) {
         PayloadAnalysis(
             present = true,
             sizeChars = json.length,
@@ -100,7 +102,17 @@ fun analyzePendingPayload(json: String): PayloadAnalysis {
             distinctKeys = 0,
             invalidKeys = emptyList(),
             invalidDays = emptyList(),
-            parseError = "${t.javaClass.simpleName}: ${t.message}"
+            parseError = "${e.javaClass.simpleName}: ${e.message}"
+        )
+    } catch (e: Exception) {
+        PayloadAnalysis(
+            present = true,
+            sizeChars = json.length,
+            itemCount = 0,
+            distinctKeys = 0,
+            invalidKeys = emptyList(),
+            invalidDays = emptyList(),
+            parseError = "${e.javaClass.simpleName}: ${e.message}"
         )
     }
 }
@@ -148,7 +160,9 @@ suspend fun loadMetricsHealth(context: Context): MetricsHealth {
 
     val appVersion = try {
         appCtx.packageManager.getPackageInfo(appCtx.packageName, 0).versionName ?: "unknown"
-    } catch (_: Throwable) {
+    } catch (_: PackageManager.NameNotFoundException) {
+        "unknown"
+    } catch (_: Exception) {
         "unknown"
     }
 
@@ -250,6 +264,6 @@ fun summarizeHealth(health: MetricsHealth): String = when {
 /** Formatea el payload crudo con indentación, para inspección manual. */
 fun prettyPayload(json: String): String = try {
     JSONObject(json).toString(2)
-} catch (_: Throwable) {
+} catch (_: JSONException) {
     json
 }

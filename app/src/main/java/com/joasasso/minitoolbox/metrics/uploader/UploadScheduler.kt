@@ -16,6 +16,8 @@ import com.joasasso.minitoolbox.metrics.storage.MetricsKeys
 import com.joasasso.minitoolbox.metrics.storage.metricsDataStore
 import com.joasasso.minitoolbox.metrics.MetricsConfig
 import kotlinx.coroutines.flow.first
+import android.util.Log
+import java.io.IOException
 import java.time.Duration
 
 object UploadScheduler {
@@ -123,7 +125,8 @@ object UploadScheduler {
 
     private suspend fun consecutiveFailures(ctx: Context): Int = try {
         ctx.metricsDataStore.data.first()[MetricsKeys.CONSECUTIVE_FAILURES] ?: 0
-    } catch (_: Throwable) {
+    } catch (e: IOException) {
+        Log.w("UploadScheduler", "Error al leer consecutiveFailures de MetricsDataStore", e)
         0
     }
 

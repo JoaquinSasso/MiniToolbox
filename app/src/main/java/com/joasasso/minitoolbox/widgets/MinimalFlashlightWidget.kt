@@ -1,6 +1,8 @@
 package com.joasasso.minitoolbox.widgets
 
 import android.content.Context
+import android.util.Log
+import kotlinx.coroutines.CancellationException
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.os.Build
@@ -119,8 +121,9 @@ class ToggleFlashAction : ActionCallback {
 
             FlashToggleWidget().updateAll(context)
 
-        } catch (_: Exception) {
-            // ignora errores silenciosamente
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
+            Log.w("MinimalFlashlightWidget", "Error al actualizar widget minimal de linterna", e)
         }
     }
 

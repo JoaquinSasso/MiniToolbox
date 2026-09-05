@@ -109,14 +109,14 @@ object RewardedManager {
         // 🔸 Notifica al InterstitialManager que se mostró un Rewarded
         try {
             InterstitialManager.notifyRewardedShown()
-        } catch (e: Throwable) {
+        } catch (e: Exception) {
             Log.w(TAG, "notifyRewardedShown() failed: ${e.message}")
         }
 
         ad.show(activity) { reward ->
             try {
                 onReward(reward)
-            } catch (t: Throwable) {
+            } catch (t: Exception) {
                 Log.e(TAG, "onReward callback error", t)
             } finally {
                 isShowing.set(false)

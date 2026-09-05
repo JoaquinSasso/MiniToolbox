@@ -297,15 +297,17 @@ class PomodoroAlarmService : MediaSessionService() {
             .build()
         try {
             v.vibrate(VibrationEffect.createWaveform(pattern, 0), attrs)
-        } catch (_: Exception) { }
+        } catch (e: Exception) {
+            Log.w(TAG, "No se pudo vibrar", e)
+        }
     }
 
     private fun stopRinging() {
         Log.d(TAG, "stopRinging")
         handler.removeCallbacks(autoStop)
-        try { player?.stop() } catch (_: Exception) { }
-        try { vibrator()?.cancel() } catch (_: Exception) { }
-        try { if (wakeLock?.isHeld == true) wakeLock?.release() } catch (_: Exception) { }
+        try { player?.stop() } catch (e: Exception) { Log.w(TAG, "Error al detener MediaPlayer", e) }
+        try { vibrator()?.cancel() } catch (e: Exception) { Log.w(TAG, "Error al cancelar vibración", e) }
+        try { if (wakeLock?.isHeld == true) wakeLock?.release() } catch (e: Exception) { Log.w(TAG, "Error al liberar wakeLock", e) }
         wakeLock = null
 
         AlarmState.setActive(this, false)
@@ -324,8 +326,8 @@ class PomodoroAlarmService : MediaSessionService() {
     override fun onDestroy() {
         Log.d(TAG, "onDestroy")
         handler.removeCallbacks(autoStop)
-        try { vibrator()?.cancel() } catch (_: Exception) { }
-        try { if (wakeLock?.isHeld == true) wakeLock?.release() } catch (_: Exception) { }
+        try { vibrator()?.cancel() } catch (e: Exception) { Log.w(TAG, "Error al cancelar vibración", e) }
+        try { if (wakeLock?.isHeld == true) wakeLock?.release() } catch (e: Exception) { Log.w(TAG, "Error al liberar wakeLock", e) }
         wakeLock = null
 
         mediaSession?.run {

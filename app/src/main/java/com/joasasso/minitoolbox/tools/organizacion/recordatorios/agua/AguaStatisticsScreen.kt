@@ -44,6 +44,7 @@ import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlinx.coroutines.flow.first
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -73,7 +74,7 @@ fun AguaStatisticsScreen(
                 try {
                     val fecha = LocalDate.parse(fechaStr, formatter)
                     (v as? Int)?.let { fecha to it }
-                } catch (_: Exception) { null }
+                } catch (_: DateTimeParseException) { null }
             }
             .sortedBy { it.first }
         historico = lista

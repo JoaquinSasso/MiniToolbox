@@ -1,6 +1,8 @@
 package com.joasasso.minitoolbox.metrics.uploader
 
 import android.content.Context
+import android.content.pm.PackageManager
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.datastore.preferences.core.edit
 import androidx.work.CoroutineWorker
@@ -14,6 +16,7 @@ import com.joasasso.minitoolbox.metrics.storage.metricsDataStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import org.json.JSONException
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
@@ -257,7 +260,10 @@ class UploadMetricsWorker(appContext: Context, params: WorkerParameters) :
         val pm = applicationContext.packageManager
         val p = pm.getPackageInfo(applicationContext.packageName, 0)
         p.versionName ?: "unknown"
-    } catch (_: Throwable) {
+    } catch (_: PackageManager.NameNotFoundException) {
+        "unknown"
+    } catch (e: Exception) {
+        Log.w(TAG, "Error al obtener versionName", e)
         "unknown"
     }
 
@@ -301,12 +307,15 @@ class UploadMetricsWorker(appContext: Context, params: WorkerParameters) :
                 )
             }
             out
-        } catch (_: Throwable) {
+        } catch (e: JSONException) {
+            Log.w(TAG, "Error al deserializar pending payload", e)
             emptyList()
         }
     }
 
     companion object {
+        private const val TAG = "UploadMetricsWorker"
+
         /**
          * Versión del formato del payload enviado al backend.
          *
