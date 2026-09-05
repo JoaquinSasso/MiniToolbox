@@ -90,6 +90,13 @@ android {
         }
     }
 
+    testOptions {
+        unitTests {
+            // Robolectric necesita los recursos empaquetados para levantar un Context real.
+            isIncludeAndroidResources = true
+        }
+    }
+
     lint {
         baseline = file("lint-baseline.xml")
         abortOnError = true
@@ -149,6 +156,10 @@ dependencies {
     // Implementación real de org.json: en tests unitarios el stub de android.jar
     // lanza "not mocked" en cada llamada.
     testImplementation(libs.json)
+    // Context y DataStore reales en la JVM, sin emulador.
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.androidx.work.testing)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
