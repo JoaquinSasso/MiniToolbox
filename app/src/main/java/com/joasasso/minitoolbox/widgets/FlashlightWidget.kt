@@ -1,6 +1,8 @@
 package com.joasasso.minitoolbox.widgets
 
 import android.content.Context
+import android.util.Log
+import kotlinx.coroutines.CancellationException
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.os.Build
@@ -197,8 +199,9 @@ class QuickFlashSetLevel : ActionCallback {
             }
 
             FlashQuickWidget().update(context, glanceId)
-        } catch (_: Exception) {
-            // Ignorar
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
+            Log.w("FlashlightWidget", "Error al actualizar widget de linterna", e)
         }
     }
 }

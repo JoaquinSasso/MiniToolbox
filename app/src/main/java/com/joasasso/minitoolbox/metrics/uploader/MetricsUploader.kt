@@ -2,8 +2,10 @@ package com.joasasso.minitoolbox.metrics.uploader
 
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.appcheck.FirebaseAppCheck
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.concurrent.TimeUnit
@@ -71,20 +73,22 @@ class HttpMetricsUploader : MetricsUploader {
                 setRequestProperty("Content-Type", "application/json")
                 setRequestProperty("X-Firebase-AppCheck", token)
             }
-        } catch (t: Throwable) {
-            return UploadOutcome.Transient(null, t.javaClass.simpleName)
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
+            return UploadOutcome.Transient(null, e.javaClass.simpleName)
         }
 
         return try {
             conn.outputStream.use { it.write(json.toByteArray()) }
             val code = conn.responseCode
             classify(code, readBody(conn, code))
-        } catch (t: Throwable) {
-            UploadOutcome.Transient(null, t.javaClass.simpleName)
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
+            UploadOutcome.Transient(null, e.javaClass.simpleName)
         } finally {
             try {
                 conn.disconnect()
-            } catch (_: Throwable) {
+            } catch (_: Exception) {
                 // no-op
             }
         }
@@ -97,7 +101,7 @@ class HttpMetricsUploader : MetricsUploader {
     private fun readBody(conn: HttpURLConnection, code: Int): String? = try {
         val stream = if (code in 200..299) conn.inputStream else conn.errorStream
         stream?.bufferedReader()?.use { it.readText() }?.take(MAX_BODY_CHARS)
-    } catch (_: Throwable) {
+    } catch (_: IOException) {
         null
     }
 
@@ -106,7 +110,7 @@ class HttpMetricsUploader : MetricsUploader {
             FirebaseAppCheck.getInstance().getAppCheckToken(false),
             APPCHECK_TIMEOUT_SECONDS, TimeUnit.SECONDS
         ).token
-    } catch (_: Throwable) {
+    } catch (_: Exception) {
         null
     }
 

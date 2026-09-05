@@ -16,7 +16,7 @@ object WidgetWaterKindResolver {
         val appWidgetId = glanceMgr.getAppWidgetId(glanceId)
         val info = AppWidgetManager.getInstance(context).getAppWidgetInfo(appWidgetId)
         info?.provider?.className
-    } catch (_: Throwable) { null }
+    } catch (_: Exception) { null }
 
     /** Devuelve "widget_water_mini" o "widget_water_normal" (o "widget_water_unknown" si no matchea). */
     fun resolve(context: Context, glanceId: GlanceId): String =

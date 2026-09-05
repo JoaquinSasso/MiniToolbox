@@ -1,12 +1,14 @@
 package com.joasasso.minitoolbox.data
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 
 private val Context.dataStore by preferencesDataStore(name = "todo_list")
@@ -24,7 +26,11 @@ object ToDoDataStore {
             prefs[TODO_LIST]?.let {
                 try {
                     json.decodeFromString<List<ToDoItem>>(it)
-                } catch (e: Exception) {
+                } catch (e: SerializationException) {
+                    Log.w("ToDoDataStore", "JSON de tareas corrupto", e)
+                    emptyList()
+                } catch (e: IllegalArgumentException) {
+                    Log.w("ToDoDataStore", "Error de argumento al deserializar tareas", e)
                     emptyList()
                 }
             } ?: emptyList()

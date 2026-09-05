@@ -1,4 +1,5 @@
 import android.content.Context
+import android.util.Log
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -6,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 
 @Serializable
@@ -28,7 +30,11 @@ object EventosDataStore {
             prefs[EVENTOS_KEY]?.let {
                 try {
                     json.decodeFromString<List<EventoImportante>>(it)
-                } catch (_: Exception) {
+                } catch (e: SerializationException) {
+                    Log.w("EventosDataStore", "JSON de eventos corrupto", e)
+                    emptyList()
+                } catch (e: IllegalArgumentException) {
+                    Log.w("EventosDataStore", "Error de argumento al deserializar eventos", e)
                     emptyList()
                 }
             } ?: emptyList()

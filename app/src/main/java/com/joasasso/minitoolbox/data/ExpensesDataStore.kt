@@ -1,5 +1,6 @@
 package com.joasasso.minitoolbox.data
 import android.content.Context
+import android.util.Log
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -7,6 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 
 
@@ -54,7 +56,11 @@ object ReunionesRepository {
             prefs[REUNIONES_KEY]?.let {
                 try {
                     json.decodeFromString<List<Reunion>>(it)
-                } catch (_: Exception) {
+                } catch (e: SerializationException) {
+                    Log.w("ReunionesRepo", "JSON de reuniones corrupto", e)
+                    emptyList()
+                } catch (e: IllegalArgumentException) {
+                    Log.w("ReunionesRepo", "Error de argumento al deserializar reuniones", e)
                     emptyList()
                 }
             } ?: emptyList()

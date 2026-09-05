@@ -1,6 +1,7 @@
 package com.joasasso.minitoolbox.data
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
@@ -10,6 +11,7 @@ import com.joasasso.minitoolbox.tools.organizacion.pomodoro.PomodoroTimerConfig
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.json.JSONArray
+import org.json.JSONException
 import org.json.JSONObject
 
 private val Context.pomodoroStateStore by preferencesDataStore("pomodoro_state")
@@ -54,7 +56,12 @@ object PomodoroTimersPrefs {
     fun loadAll(context: Context): List<PomodoroTimerConfig> {
         val sp = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
         val raw = sp.getString(KEY, "[]") ?: "[]"
-        val arr = try { JSONArray(raw) } catch (_: Exception) { JSONArray("[]") }
+        val arr = try {
+            JSONArray(raw)
+        } catch (e: JSONException) {
+            Log.w("PomodoroTimersPrefs", "Error al parsear JSON de timers pomodoro", e)
+            JSONArray("[]")
+        }
 
         fun ensureOpaque(intColor: Int): Int {
             // Si no hay alpha (0x00------), forzamos 0xFF------

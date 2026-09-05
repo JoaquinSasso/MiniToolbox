@@ -12,6 +12,7 @@ import androidx.core.content.ContextCompat
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.data.PomodoroStateRepository
 import com.joasasso.minitoolbox.nav.Screen
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -98,10 +99,11 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
             try {
                 advanceToNextPhase(app, pending)
                 Log.d(TAG, "Fase siguiente encadenada correctamente")
-            } catch (t: Throwable) {
-                Log.e(TAG, "Error al encadenar la fase siguiente", t)
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                Log.e(TAG, "Error al encadenar la fase siguiente", e)
             } finally {
-                try { if (wl?.isHeld == true) wl.release() } catch (_: Exception) { }
+                try { if (wl?.isHeld == true) wl.release() } catch (e: Exception) { Log.w(TAG, "Error al liberar WakeLock", e) }
                 result.finish()
             }
         }

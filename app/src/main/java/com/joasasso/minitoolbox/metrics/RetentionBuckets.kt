@@ -1,5 +1,6 @@
 package com.joasasso.minitoolbox.metrics
 
+import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -84,7 +85,7 @@ object RetentionBuckets {
         val fmt = formatter()
         val date = try {
             fmt.parse(today) ?: return today
-        } catch (_: Throwable) {
+        } catch (_: ParseException) {
             return today
         }
         val cal = Calendar.getInstance()
@@ -104,7 +105,7 @@ object RetentionBuckets {
             val b = fmt.parse(to) ?: return 0
             val diff = b.time - a.time
             max(0, (diff / MILLIS_PER_DAY).toInt())
-        } catch (_: Throwable) {
+        } catch (_: ParseException) {
             0
         }
     }

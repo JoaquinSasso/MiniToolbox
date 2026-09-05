@@ -15,9 +15,11 @@ import com.joasasso.minitoolbox.metrics.toolUse
 import com.joasasso.minitoolbox.metrics.MetricsConfig
 import com.joasasso.minitoolbox.metrics.uploader.UploadMetricsWorker
 import com.joasasso.minitoolbox.metrics.uploader.UploadScheduler
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import org.json.JSONException
 import java.net.HttpURLConnection
 import java.net.URL
 import java.text.SimpleDateFormat
@@ -113,7 +115,7 @@ suspend fun testDirectConnection(context: Context): Result<String> = withContext
             FirebaseAppCheck.getInstance().getAppCheckToken(false),
             15, TimeUnit.SECONDS
         ).token
-    } catch (_: Throwable) { null }
+    } catch (_: Exception) { null }
 
     if (appCheckToken == null) {
         return@withContext Result.failure(Exception("No se pudo obtener token de App Check"))
@@ -160,6 +162,7 @@ suspend fun testDirectConnection(context: Context): Result<String> = withContext
             Result.failure(Exception("HTTP $code Error: $responseBody"))
         }
     } catch (e: Exception) {
+        if (e is CancellationException) throw e
         Result.failure(e)
     }
 }
@@ -184,8 +187,8 @@ suspend fun clearPendingBatch(context: Context) {
 
 fun prettyJson(json: String): String = try {
     org.json.JSONObject(json).toString(2)
-} catch (_: Throwable) {
-    try { org.json.JSONArray(json).toString(2) } catch (_: Throwable) { json }
+} catch (_: JSONException) {
+    try { org.json.JSONArray(json).toString(2) } catch (_: JSONException) { json }
 }
 
 private fun previewKey(k: String): String =

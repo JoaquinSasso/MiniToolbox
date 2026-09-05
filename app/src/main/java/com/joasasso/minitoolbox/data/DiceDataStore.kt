@@ -1,6 +1,7 @@
 package com.joasasso.minitoolbox.data
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -8,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 
 @Serializable
@@ -30,7 +32,11 @@ object DadosHistorialRepository {
             prefs[HISTORIAL_KEY]?.let {
                 try {
                     json.decodeFromString<List<TiradaDeDados>>(it)
-                } catch (e: Exception) {
+                } catch (e: SerializationException) {
+                    Log.w("DadosHistorialRepo", "Historial de dados corrupto", e)
+                    emptyList()
+                } catch (e: IllegalArgumentException) {
+                    Log.w("DadosHistorialRepo", "Error de argumento al deserializar dados", e)
                     emptyList()
                 }
             } ?: emptyList()
