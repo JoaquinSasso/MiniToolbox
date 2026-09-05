@@ -6,9 +6,14 @@ import android.content.Intent
 
 class PomodoroActionReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
+        val pendingResult = goAsync()
         when (intent.action) {
-            ACTION_STOP    -> PomodoroAlarmReceiver.stopPomodoro(context)
-            ACTION_SILENCE -> PomodoroAlarmReceiver.silenceAlarm(context)
+            ACTION_STOP -> PomodoroAlarmReceiver.stopPomodoro(context, pendingResult)
+            ACTION_SILENCE -> {
+                PomodoroAlarmReceiver.silenceAlarm(context)
+                pendingResult.finish()
+            }
+            else -> pendingResult.finish()
         }
     }
 }

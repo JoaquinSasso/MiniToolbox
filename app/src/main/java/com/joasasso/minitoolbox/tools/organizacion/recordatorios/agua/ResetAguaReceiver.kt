@@ -5,12 +5,18 @@ import android.content.Context
 import android.content.Intent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
 class ResetAguaReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
-        CoroutineScope(Dispatchers.IO).launch {
-            actualizarWidgetAgua(context)
+        val pendingResult = goAsync()
+        CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
+            try {
+                actualizarWidgetAguaSuspend(context)
+            } finally {
+                pendingResult.finish()
+            }
         }
     }
 }

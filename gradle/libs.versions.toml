@@ -9,51 +9,49 @@ junit = "4.13.2"
 json = "20260814"
 robolectric = "4.16.1"
 androidxTestCore = "1.7.0"
-workTesting = "2.11.2"
+workTesting = "2.10.5"
 mockito = "5.23.0"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
 kotlinxSerializationJson = "1.9.0"
 lifecycleRuntimeKtx = "2.9.4"
-activityCompose = "1.11.0"
-composeBom = "2025.10.00"
-glance = "1.1.1"
-material = "1.13.0"
+activityCompose = "1.13.0"
+composeBom = "2026.08.00"
+glance = "1.2.0"
+material = "1.14.0"
 media3Session = "1.11.0"
-navigationCompose = "2.9.5"
+navigationCompose = "2.10.0"
 protobufJava = "4.32.1"
 gson = "2.13.2"
 cameraX = "1.5.0"
 uiUnit = "1.9.1"
-material3 = "1.5.0-alpha27"
 reorderable = "3.0.0"
 sceneview = "2.3.0"
 arcore = "1.50.0"
 ossLicenses = "17.5.1"
 ossLicensesPlugin = "0.13.0"
-foundation = "1.9.1"
 # Ads / Consent
-gma = "24.6.0"
-ump = "3.2.0"
-guava = "33.4.8-android"
+gma = "25.4.0"
+ump = "4.0.0"
+guava = "33.7.1-android"
 # Mediation adapters (usa las últimas de cada partner)
-admob-unity = "4.12.5.0"      # com.google.ads.mediation:unity
-admob-meta  = "6.17.0.0"      # com.google.ads.mediation:facebook
+admob-unity = "4.20.0.1"      # com.google.ads.mediation:unity
+admob-meta  = "6.22.0.0"      # com.google.ads.mediation:facebook
 
-metaSdk = "6.17.0"
-unitySdk = "4.12.5"
+metaSdk = "6.22.0"
+unitySdk = "4.20.0"
 
 runtimeSaveable = "1.9.1"
-billing = "8.0.0"
+billing = "9.1.0"
 androidx-browser = "1.8.0"
-runtime = "1.9.1"
-runtimeVersion = "1.9.3"
-foundationVersion = "1.9.3"
-uiGraphics = "1.12.0"
+appcompat = "1.7.1"
+fragmentKtx = "1.8.9"
+media = "1.7.1"
+work = "2.10.5"
+uiGraphics = "1.9.3"
 
 googleServices = "4.5.0"
 firebaseBom = "34.18.0"
-coreKtxVersion = "1.7.0"
 
 [libraries]
 androidx-activity = { module = "androidx.activity:activity", version.ref = "activityCompose" }
@@ -76,8 +74,11 @@ androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecyc
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-glance-appwidget = { group = "androidx.glance", name = "glance-appwidget", version.ref = "glance" }
 androidx-glance-material3 = { group = "androidx.glance", name = "glance-material3", version.ref = "glance" }
-androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
-
+# BOM alpha: material3 1.5.x trae la API expresiva (CircularWavyProgressIndicator),
+# usada en la animación del Pomodoro. Las variantes alpha/beta/estable del BOM comparten
+# numeración, y lo importante es que TODAS las librerías de Compose salgan de la misma:
+# mezclar material3 alpha con foundation estable produce AbstractMethodError en runtime.
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom-alpha", version.ref = "composeBom" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-foundation = { group = "androidx.compose.foundation", name = "foundation" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
@@ -87,7 +88,8 @@ androidx-material-icons-extended = { group = "androidx.compose.material", name =
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
-material3 = { module = "androidx.compose.material3:material3"}
+# Sin version.ref a proposito: la version la fija el BOM de Compose.
+material3 = { module = "androidx.compose.material3:material3" }
 protobuf-java = { module = "com.google.protobuf:protobuf-java", version.ref = "protobufJava" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 
@@ -95,12 +97,10 @@ androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", 
 androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "cameraX" }
 androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "cameraX" }
 androidx-ui-unit = { group = "androidx.compose.ui", name = "ui-unit", version.ref = "uiUnit" }
-androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 arsceneview = { module = "io.github.sceneview:arsceneview", version.ref = "sceneview" }
 arcore = { module = "com.google.ar:core", version.ref = "arcore" }
 play-services-oss-licenses = { module = "com.google.android.gms:play-services-oss-licenses", version.ref = "ossLicenses" }
-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 
 # Ads + Consent
 google-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "gma" }
@@ -116,16 +116,19 @@ unity-sdk = { module = "com.unity3d.ads:unity-ads", version.ref = "unitySdk" }
 
 billing-ktx = { module = "com.android.billingclient:billing-ktx", version.ref = "billing" }
 androidx-browser = { module = "androidx.browser:browser", version.ref = "androidx-browser" }
-androidx-runtime = { group = "androidx.compose.runtime", name = "runtime", version.ref = "runtime" }
-runtime = { group = "androidx.compose.runtime", name = "runtime", version.ref = "runtimeVersion" }
-androidx-compose-foundation-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundationVersion" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+androidx-fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragmentKtx" }
+androidx-media = { group = "androidx.media", name = "media", version.ref = "media" }
+androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work" }
+kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }
+# Sin version.ref: alineado por el BOM, igual que material3 y foundation.
+androidx-compose-runtime = { module = "androidx.compose.runtime:runtime" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics", version.ref = "uiGraphics" }
 
 # Firebase
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-appcheck-playintegrity = { module = "com.google.firebase:firebase-appcheck-playintegrity" }
 firebase-appcheck-debug = { module = "com.google.firebase:firebase-appcheck-debug" }
-core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "coreKtxVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

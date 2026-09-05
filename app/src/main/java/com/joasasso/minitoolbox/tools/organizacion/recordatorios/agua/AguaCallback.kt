@@ -22,7 +22,7 @@ class AgregarAguaCallback : ActionCallback {
         val nuevo = actual + porVaso
         context.guardarAguaHoy(nuevo)
 
-        actualizarWidgetAgua(context)
+        actualizarWidgetAguaSuspend(context)
 
         //Agregar uso a las metricas
         val kind = WidgetWaterKindResolver.resolve(context, glanceId) // ← mini vs normal por Receiver
@@ -44,7 +44,7 @@ class QuitarAguaCallback : ActionCallback {
         val nuevo = (actual - porVaso).coerceAtLeast(0)
         context.guardarAguaHoy(nuevo)
 
-        actualizarWidgetAgua(context)
+        actualizarWidgetAguaSuspend(context)
 
         //Agregar uso a las metricas
         val kind = WidgetWaterKindResolver.resolve(context, glanceId) // ← mini vs normal por Receiver

@@ -31,6 +31,7 @@ class PomodoroBootReceiver : BroadcastReceiver() {
             else -> return
         }
         Log.d(TAG, "onReceive: action=${intent.action}, reprogramando si hay pomodoro pendiente")
-        PomodoroAlarmReceiver.rescheduleFromPersisted(context.applicationContext)
+        val pendingResult = goAsync()
+        PomodoroAlarmReceiver.rescheduleFromPersisted(context.applicationContext, pendingResult)
     }
 }
