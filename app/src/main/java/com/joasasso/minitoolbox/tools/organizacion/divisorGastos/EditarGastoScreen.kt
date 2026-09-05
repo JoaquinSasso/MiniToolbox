@@ -58,6 +58,7 @@ fun EditarGastoScreen(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
     val haptic = LocalHapticFeedback.current
 
     val locale = Locale.getDefault()
@@ -67,7 +68,6 @@ fun EditarGastoScreen(
     }
 
     var showInfo by remember { mutableStateOf(false) }
-    val snackbarHostState = remember { SnackbarHostState() }
 
     val msgNombreOblig = stringResource(R.string.expense_name_required)
     val msgSinAporte = stringResource(R.string.expense_amount_required)
@@ -78,15 +78,6 @@ fun EditarGastoScreen(
     var aportes by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
     var consumidores by remember { mutableStateOf<Map<String, Int>>(emptyMap()) }
 
-    fun parseFlexibleDouble(text: String): Double? {
-        if (text.isBlank()) return null
-        val cleaned = text.trim()
-            .replace(',', '.')
-            .replace(Regex("[^0-9.]"), "")
-        if (cleaned.count { it == '.' } > 1) return null
-        return cleaned.toDoubleOrNull()
-    }
-
     LaunchedEffect(Unit) {
         val reuniones = ReunionesRepository.flujoReuniones(context).firstOrNull().orEmpty()
         val r = reuniones.find { it.id == reunionId }
@@ -94,7 +85,9 @@ fun EditarGastoScreen(
         if (r != null && gasto != null) {
             reunion = r
             descripcion = gasto.descripcion
-            aportes = gasto.aportesIndividuales.mapValues { it.value.toString() }
+            aportes = gasto.obtenerAportesCentavos().mapValues { (_, cents) ->
+                if (cents % 100L == 0L) (cents / 100L).toString() else String.format(Locale.US, "%.2f", cents / 100.0)
+            }
             consumidores = r.integrantes.associate { nombre ->
                 val savedValue = gasto.consumidoPor[nombre] ?: 0
                 nombre to savedValue
@@ -102,7 +95,8 @@ fun EditarGastoScreen(
         }
     }
 
-    val montoTotal = aportes.values.sumOf { parseFlexibleDouble(it) ?: 0.0 }
+    val montoTotalCentavos = aportes.values.sumOf { DebtEngine.parseTextToCents(it) ?: 0L }
+    val montoTotal = montoTotalCentavos / 100.0
 
     Scaffold(
         topBar = {
@@ -238,12 +232,12 @@ fun EditarGastoScreen(
                                 return@launch
                             }
 
-                            val aporteValido = aportes
-                                .mapValues { parseFlexibleDouble(it.value) }
-                                .filterValues { it != null }
+                            val aportesCentavosValidos = aportes
+                                .mapValues { DebtEngine.parseTextToCents(it.value) }
+                                .filterValues { it != null && it > 0L }
                                 .mapValues { it.value!! }
 
-                            if (aporteValido.values.sum() <= 0.0) {
+                            if (aportesCentavosValidos.values.sum() <= 0L) {
                                 snackbarHostState.showSnackbar(msgSinAporte)
                                 return@launch
                             }
@@ -258,7 +252,8 @@ fun EditarGastoScreen(
                             val nuevoGasto = Gasto(
                                 id = gastoId,
                                 descripcion = descripcion.trim(),
-                                aportesIndividuales = aporteValido,
+                                aportesIndividuales = aportesCentavosValidos.mapValues { it.value / 100.0 },
+                                aportesCentavos = aportesCentavosValidos,
                                 consumidoPor = consumidoresValidos
                             )
 

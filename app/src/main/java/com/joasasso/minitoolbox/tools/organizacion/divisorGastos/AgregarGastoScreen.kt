@@ -79,22 +79,14 @@ fun AgregarGastoScreen(
     var aportes by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
     var consumidores by remember { mutableStateOf<Map<String, Int>>(emptyMap()) }
 
-    fun parseFlexibleDouble(text: String): Double? {
-        if (text.isBlank()) return null
-        val cleaned = text.trim()
-            .replace(',', '.')
-            .replace(Regex("[^0-9.]"), "")
-        if (cleaned.count { it == '.' } > 1) return null
-        return cleaned.toDoubleOrNull()
-    }
-
     LaunchedEffect(Unit) {
         val reuniones = ReunionesRepository.flujoReuniones(context).firstOrNull().orEmpty()
         reunion = reuniones.find { it.id == reunionId }
         consumidores = reunion?.integrantes?.associate { it to 1 } ?: emptyMap()
     }
 
-    val montoTotal = aportes.values.sumOf { parseFlexibleDouble(it) ?: 0.0 }
+    val montoTotalCentavos = aportes.values.sumOf { DebtEngine.parseTextToCents(it) ?: 0L }
+    val montoTotal = montoTotalCentavos / 100.0
 
     Scaffold(
         topBar = {
@@ -229,12 +221,12 @@ fun AgregarGastoScreen(
                                 return@launch
                             }
 
-                            val aporteValido = aportes
-                                .mapValues { parseFlexibleDouble(it.value) }
-                                .filterValues { it != null }
+                            val aportesCentavosValidos = aportes
+                                .mapValues { DebtEngine.parseTextToCents(it.value) }
+                                .filterValues { it != null && it > 0L }
                                 .mapValues { it.value!! }
 
-                            if (aporteValido.values.sum() <= 0.0) {
+                            if (aportesCentavosValidos.values.sum() <= 0L) {
                                 snackbarHostState.showSnackbar(msgSinAporte)
                                 return@launch
                             }
@@ -248,7 +240,8 @@ fun AgregarGastoScreen(
                             val nuevoGasto = Gasto(
                                 id = UUID.randomUUID().toString(),
                                 descripcion = descripcion.trim(),
-                                aportesIndividuales = aporteValido,
+                                aportesIndividuales = aportesCentavosValidos.mapValues { it.value / 100.0 },
+                                aportesCentavos = aportesCentavosValidos,
                                 consumidoPor = consumidoresFinales
                             )
 
