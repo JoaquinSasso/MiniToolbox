@@ -10,6 +10,8 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 
+import kotlin.math.roundToLong
+
 @Serializable
 data class Reunion(
     val id: String,
@@ -17,7 +19,9 @@ data class Reunion(
     val fecha: Long,
     val integrantes: List<String>, // Simplificado: lista de nombres
     val gastos: List<Gasto>
-)
+) {
+    fun totalEnCentavos(): Long = gastos.sumOf { it.totalEnCentavos() }
+}
 
 @Serializable
 data class Gasto(
@@ -25,49 +29,19 @@ data class Gasto(
     val descripcion: String,
     val consumidoPor: Map<String, Int>, // Se mantiene Map por compatibilidad, pero el Int siempre será 1 o 0
     val aportesIndividuales: Map<String, Double> = emptyMap(),
+    val aportesCentavos: Map<String, Long> = emptyMap(),
     val imagenComprobante: String? = null
-)
-
-
-private val Context.dataStore by preferencesDataStore(name = "reuniones_gastos")
-private val REUNIONES_KEY = stringPreferencesKey("lista_reuniones")
-
-object GastosDataStore {
-
-    private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
-
-    fun getReuniones(context: Context): Flow<List<Reunion>> =
-        context.reunionesDataStore.data.map { prefs ->
-            prefs[REUNIONES_KEY]?.let {
-                try {
-                    json.decodeFromString<List<Reunion>>(it)
-                } catch (e: Exception) {
-                    emptyList()
-                }
-            } ?: emptyList()
-        }
-
-    suspend fun obtenerReunionPorId(context: Context, id: String): Reunion? {
-        return getReuniones(context).firstOrNull()?.find { it.id == id }
+) {
+    fun obtenerAportesCentavos(): Map<String, Long> {
+        if (aportesCentavos.isNotEmpty()) return aportesCentavos
+        return aportesIndividuales.mapValues { (it.value * 100.0).roundToLong() }
     }
 
-    private suspend fun setReuniones(context: Context, reuniones: List<Reunion>) {
-        val encoded = json.encodeToString(reuniones)
-        context.dataStore.edit { prefs -> prefs[REUNIONES_KEY] = encoded }
-    }
-
-    suspend fun guardarReunion(context: Context, reunion: Reunion) {
-        val actuales = getReuniones(context).firstOrNull() ?: emptyList()
-        val actualizadas = actuales.filter { it.id != reunion.id } + reunion
-        setReuniones(context, actualizadas)
-    }
-
-    suspend fun eliminarReunion(context: Context, reunionId: String) {
-        val actuales = getReuniones(context).firstOrNull() ?: emptyList()
-        val filtradas = actuales.filterNot { it.id == reunionId }
-        setReuniones(context, filtradas)
-    }
+    fun totalEnCentavos(): Long = obtenerAportesCentavos().values.sum()
+    fun aporteEnCentavos(nombre: String): Long = obtenerAportesCentavos()[nombre] ?: 0L
 }
+
+private val REUNIONES_KEY = stringPreferencesKey("lista_reuniones")
 
 
 val Context.reunionesDataStore by preferencesDataStore("reuniones")

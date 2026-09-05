@@ -138,7 +138,7 @@ fun DetallesReunionScreen(
         ) {
             item {
                 reunion?.let { r ->
-                    val total = r.gastos.sumOf { it.aportesIndividuales.values.sum() }
+                    val total = r.totalEnCentavos() / 100.0
                     Text(r.nombre, style = MaterialTheme.typography.titleLarge)
                     Text("${stringResource(R.string.share_date)} ${formatearFecha(r.fecha)}")
                     Text(
@@ -153,7 +153,7 @@ fun DetallesReunionScreen(
             item { Text(stringResource(R.string.expenses_section), style = MaterialTheme.typography.titleSmall) }
 
             items(reunion?.gastos ?: emptyList()) { gasto ->
-                val totalGasto = gasto.aportesIndividuales.values.sum()
+                val totalGasto = gasto.totalEnCentavos() / 100.0
                 val totalPersonas = gasto.consumidoPor.values.sum()
                 val porPersona = if (totalPersonas > 0) totalGasto / totalPersonas else 0.0
                 val resumenConsumidores = if (gasto.consumidoPor.isNotEmpty()) {
@@ -241,7 +241,7 @@ fun DetallesReunionScreen(
             }
 
             items(reunion?.integrantes ?: emptyList()) { integrante ->
-                val totalPagado = reunion?.gastos?.sumOf { it.aportesIndividuales[integrante] ?: 0.0 } ?: 0.0
+                val totalPagado = (reunion?.gastos?.sumOf { it.aporteEnCentavos(integrante) } ?: 0L) / 100.0
 
                 Card(
                     modifier = Modifier
@@ -520,19 +520,19 @@ fun generarTextoCompartible(reunion: Reunion, context: Context): String {
     val sb = StringBuilder()
     sb.appendLine("📋 ${context.resources.getString(R.string.share_meeting_title)} ${reunion.nombre}")
     sb.appendLine("📅 ${context.resources.getString(R.string.share_date)} ${formatearFecha(reunion.fecha)}")
-    sb.appendLine("💰 ${context.resources.getString(R.string.share_total)} ${formatoMoneda.format(reunion.gastos.sumOf { it.aportesIndividuales.values.sum() })}")
+    sb.appendLine("💰 ${context.resources.getString(R.string.share_total)} ${formatoMoneda.format(reunion.totalEnCentavos() / 100.0)}")
     sb.appendLine()
 
     sb.appendLine("🧾 ${context.resources.getString(R.string.share_expenses)}")
     reunion.gastos.forEach {
-        val monto = it.aportesIndividuales.values.sum()
+        val monto = it.totalEnCentavos() / 100.0
         sb.appendLine("- ${it.descripcion}: ${formatoMoneda.format(monto)}")
     }
 
     sb.appendLine()
     sb.appendLine("👥 ${context.resources.getString(R.string.share_members)}")
     reunion.integrantes.forEach { integrante ->
-        val pagado = reunion.gastos.sumOf { it.aportesIndividuales[integrante] ?: 0.0 }
+        val pagado = reunion.gastos.sumOf { it.aporteEnCentavos(integrante) } / 100.0
         sb.appendLine("- $integrante: ${context.resources.getString(R.string.share_paid)} ${formatoMoneda.format(pagado)}")
     }
 
@@ -543,68 +543,6 @@ fun generarTextoCompartible(reunion: Reunion, context: Context): String {
     return sb.toString()
 }
 
-fun calcularDeudas(reunion: Reunion, context: Context): List<String> {
-    val deudaPorIntegrante = reunion.integrantes.associate { it to 0.0 }.toMutableMap()
-    val nombresIntegrantes = reunion.integrantes.toSet()
+fun calcularDeudas(reunion: Reunion, context: Context): List<String> =
+    DebtEngine.calcularDeudas(reunion, context)
 
-    for (gasto in reunion.gastos) {
-        val consumidoPor = gasto.consumidoPor.filter { it.key in nombresIntegrantes && it.value > 0 }
-        val aportes = gasto.aportesIndividuales.filterKeys { it in nombresIntegrantes }
-        val totalPersonas = consumidoPor.size
-        if (totalPersonas == 0) continue
-
-        val montoTotal = aportes.values.sum()
-        val montoPorPersona = montoTotal / totalPersonas
-
-        consumidoPor.forEach { (nombre, _) ->
-            deudaPorIntegrante[nombre] = deudaPorIntegrante.getOrDefault(nombre, 0.0) + montoPorPersona
-        }
-    }
-
-    val pagadoPorIntegrante = reunion.integrantes.associate { nombre ->
-        nombre to reunion.gastos.sumOf { it.aportesIndividuales[nombre] ?: 0.0 }
-    }
-
-    val balance = reunion.integrantes.associate { nombre ->
-        val pagado = pagadoPorIntegrante[nombre] ?: 0.0
-        val debe = deudaPorIntegrante[nombre] ?: 0.0
-        nombre to (pagado - debe)
-    }
-
-    val deudores = balance.filterValues { it < -0.01 }.toMutableMap()
-    val acreedores = balance.filterValues { it > 0.01 }.toMutableMap()
-
-    val resultados = mutableListOf<String>()
-
-    val locale = Locale.getDefault()
-    val formatoMoneda = NumberFormat.getCurrencyInstance(locale).apply {
-        maximumFractionDigits = 2
-        minimumFractionDigits = 0
-    }
-
-    for ((deudor, deuda) in deudores) {
-        var pendiente = -deuda
-
-        val pagos = mutableListOf<String>()
-        val acreedoresKeys = acreedores.keys.toList()
-
-        for (acreedor in acreedoresKeys) {
-            val credito = acreedores[acreedor] ?: continue
-            if (credito <= 0.01) continue
-
-            val monto = minOf(pendiente, credito)
-            pagos.add(
-                context.getString(R.string.debt_line, deudor, formatoMoneda.format(monto), acreedor)
-            )
-
-            pendiente -= monto
-            acreedores[acreedor] = credito - monto
-
-            if (pendiente <= 0.01) break
-        }
-
-        resultados.addAll(pagos)
-    }
-
-    return resultados
-}

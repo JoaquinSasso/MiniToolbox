@@ -12,7 +12,7 @@
 ## P0 — Bugs activos
 
 - [x] `goAsync-receivers` — `PomodoroAlarmReceiver.kt`, `ResetAguaReceiver.kt`, `AguaNotification.kt`, `PomodoroActionReceiver.kt`, `PomodoroBootReceiver.kt` — Corrutinas en `onReceive()` sin `goAsync()`. Fix: `goAsync()` + `pendingResult.finish()` al completar todas las tareas asíncronas.
-- [ ] `double-money` — `ExpensesDataStore.kt:27` — Dinero almacenado como `Double`. Aritmética de punto flotante pierde centavos en cálculo de deudas.
+- [x] `double-money` — `ExpensesDataStore.kt`, `DebtEngine.kt` — Dinero modelado y calculado en centavos enteros (`Long`). Residuo distribuido determinísticamente; 0 centavos perdidos.
 
 ## P1 — Deuda de arquitectura
 
@@ -23,7 +23,7 @@
 
 ### Divisor de gastos
 
-- [ ] `calcular-deudas-untestable` — `ReunionDetailScreen.kt:546` — `calcularDeudas(reunion, context)` mezcla lógica de negocio con presentación. Recibe `Context`, devuelve `List<String>` formateados.
+- [x] `calcular-deudas-untestable` — `DebtEngine.kt`, `ReunionDetailScreen.kt` — Lógica de deudas extraída a `DebtEngine` puro sin dependencias de `Context`/Android, cubierto con `DebtEngineTest`.
 - [ ] `flow-snapshots` — `ReunionDetailScreen.kt:97`, `AgregarGastoScreen.kt:92`, `EditarGastoScreen.kt:91` — Snapshots con `firstOrNull()` sobre Flows reactivos. Pierde reactividad, puede mostrar datos stale.
 
 ### AR Ruler
@@ -54,5 +54,5 @@
 ---
 
 ## Siguiente paso sugerido
-
-**`goAsync-receivers`** — Único ítem con bug de producto confirmado y postmortem existente. Fix quirúrgico en dos archivos. Después: `catch-swallowing` en los mismos archivos (mismo tema: corrutinas mal manejadas).
+ 
+**`catch-swallowing`** (P1) — 33+ bloques `catch` que tragan `CancellationException` o `Throwable` en corrutinas, rompiendo la cancelación cooperativa (clave en `Metrics.kt`, `BillingClientWrapper.kt`, `ExpensesDataStore.kt`).
