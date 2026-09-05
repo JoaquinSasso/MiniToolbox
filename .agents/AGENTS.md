@@ -23,7 +23,13 @@ Leer **antes** de proponer cambios:
 
 1. Leer `DECISIONS.md`. Las violaciones se rechazan sin discusión.
 2. Leer `SCRATCHPAD.md` para entender prioridades y no duplicar trabajo.
-3. Si la tarea toca el pipeline de métricas, leer el skill en `.agents/skills/metrics-pipeline/SKILL.md`.
+3. **Flujo de Git (Creación de ramas):** Antes de realizar cualquier cambio en el código, crear una nueva rama descriptiva a partir de `master`:
+   ```bash
+   git checkout master
+   git pull
+   git checkout -b <tipo>/<nombre-descriptivo>
+   ```
+4. Si la tarea toca el pipeline de métricas, leer el skill en `.agents/skills/metrics-pipeline/SKILL.md`.
 
 ### Al terminar trabajo
 
