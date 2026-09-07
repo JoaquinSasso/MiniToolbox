@@ -16,8 +16,14 @@ private val KEY_POR_VASO = intPreferencesKey("agua_ml_por_vaso")
 private val KEY_NOTIF_ACTIVAS = intPreferencesKey("agua_notif_activas")
 private val KEY_FRECUENCIA_MIN = intPreferencesKey("agua_notif_frecuencia_min")
 
+fun keyFecha(fecha: LocalDate): Preferences.Key<Int> =
+    intPreferencesKey("agua_ml_$fecha")
+
 private fun keyHoy(): Preferences.Key<Int> =
-    intPreferencesKey("agua_ml_${LocalDate.now()}")
+    keyFecha(LocalDate.now())
+
+fun Context.flujoAguaFecha(fecha: LocalDate): Flow<Int> =
+    aguaDataStore.data.map { it[keyFecha(fecha)] ?: 0 }
 
 fun Context.flujoAguaHoy(): Flow<Int> =
     aguaDataStore.data.map { it[keyHoy()] ?: 0 }
@@ -34,8 +40,12 @@ fun Context.flujoNotificacionesActivas(): Flow<Boolean> =
 fun Context.flujoFrecuenciaMinutos(): Flow<Int> =
     aguaDataStore.data.map { it[KEY_FRECUENCIA_MIN] ?: 30 }
 
+suspend fun Context.guardarAguaFecha(fecha: LocalDate, valor: Int) {
+    aguaDataStore.edit { it[keyFecha(fecha)] = valor }
+}
+
 suspend fun Context.guardarAguaHoy(valor: Int) {
-    aguaDataStore.edit { it[keyHoy()] = valor }
+    guardarAguaFecha(LocalDate.now(), valor)
 }
 
 suspend fun Context.guardarObjetivo(valor: Int) {

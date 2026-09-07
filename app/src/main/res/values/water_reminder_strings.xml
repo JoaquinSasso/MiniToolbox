@@ -50,6 +50,12 @@
     <string name="water_statistics_help_line2">• In the history, the liters consumed appear in green if you met your goal that day, or red if not.</string>
     <string name="water_statistics_help_line3">• The weekly average is based on your last 7 recorded days.</string>
     <string name="water_statistics_help_line4">• All data is stored locally on your device.</string>
+    <string name="water_statistics_help_line5">• Tap any day in the history to edit the recorded water intake.</string>
+
+    <string name="water_edit_dialog_title">Edit consumption</string>
+    <string name="water_edit_amount_label">Amount (ml)</string>
+    <string name="water_edit_save">Save</string>
+    <string name="water_edit_hint">Tap to edit</string>
 
     <!-- Notification -->
     <string name="water_reminder_title">Time to drink water 💧</string>

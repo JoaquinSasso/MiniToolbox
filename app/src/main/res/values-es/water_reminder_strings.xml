@@ -50,6 +50,12 @@
     <string name="water_statistics_help_line2">• En el historial, los litros consumidos aparecen en verde si ese día cumpliste tu meta, y en rojo si no.</string>
     <string name="water_statistics_help_line3">• El promedio semanal se calcula sobre los últimos 7 días registrados.</string>
     <string name="water_statistics_help_line4">• Todos los datos se guardan localmente en tu dispositivo.</string>
+    <string name="water_statistics_help_line5">• Puedes pulsar sobre cualquier día del historial para editar la cantidad de agua consumida.</string>
+
+    <string name="water_edit_dialog_title">Editar consumo</string>
+    <string name="water_edit_amount_label">Cantidad (ml)</string>
+    <string name="water_edit_save">Guardar</string>
+    <string name="water_edit_hint">Toca para editar</string>
 
     <!-- Notificacion -->
     <string name="water_reminder_title">Hora de beber agua 💧</string>
