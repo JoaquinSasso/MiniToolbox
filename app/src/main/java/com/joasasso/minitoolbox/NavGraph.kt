@@ -164,6 +164,20 @@ fun MiniToolboxNavGraph(
                 targetOffset = { it },
                 animationSpec = tween(animationDuration, easing = FastOutSlowInEasing)
             )
+        },
+        predictivePopEnterTransition = { _ ->
+            slideIntoContainer(
+                AnimatedContentTransitionScope.SlideDirection.End,
+                initialOffset = { -(it * 0.35f).toInt() },
+                animationSpec = tween(animationDuration, easing = FastOutSlowInEasing)
+            ) + fadeIn(animationSpec = tween(animationDuration))
+        },
+        predictivePopExitTransition = { _ ->
+            slideOutOfContainer(
+                AnimatedContentTransitionScope.SlideDirection.End,
+                targetOffset = { it },
+                animationSpec = tween(animationDuration, easing = FastOutSlowInEasing)
+            )
         }
     ) {
         composable(Screen.Categories.route) {
