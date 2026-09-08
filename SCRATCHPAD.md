@@ -32,6 +32,7 @@
 
 ### Navegación
 
+- [x] `nav-back-animation` — `NavGraph.kt`, `ArRulerSceneViewScreen.kt`, `MagnifierScren.kt` — Animación de retroceso / predictive back sin reducción de escala (no shrinking / scale-to-center). Transición horizontal fluida de ancho completo (100% scale) con curva `FastOutSlowInEasing`, efecto paralaje sutil y eliminación de `BackHandler` incondicionales que interceptaban eventos forzando el fallback de ventana.
 - [ ] `type-safe-nav` — `NavGraph.kt` (478 líneas, ~45 rutas manuales por string) — Sin type-safe navigation. Prerrequisitos cumplidos: Navigation Compose 2.10 + kotlinx.serialization. Migrar elimina limitación conocida #4 (`quotes` != `basic_phrases`).
 
 ## P2 — Deuda de build y dependencias

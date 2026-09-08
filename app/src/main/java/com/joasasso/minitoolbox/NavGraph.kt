@@ -6,6 +6,7 @@ import android.app.Activity
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -82,7 +83,7 @@ fun MiniToolboxNavGraph(
     interstitialAdUnitId: String,
     rewardedAdUnitId: String
 ) {
-    val animationDuration = 150
+    val animationDuration = 280
     val context = LocalContext.current
     val activity = context.findActivity()
 
@@ -139,21 +140,29 @@ fun MiniToolboxNavGraph(
         startDestination = Screen.Categories.route,
         enterTransition = {
             slideIntoContainer(
-                AnimatedContentTransitionScope.SlideDirection.Left,
-                animationSpec = tween(animationDuration)
+                AnimatedContentTransitionScope.SlideDirection.Start,
+                animationSpec = tween(animationDuration, easing = FastOutSlowInEasing)
             )
         },
-        exitTransition = { fadeOut(animationSpec = tween(animationDuration)) },
+        exitTransition = {
+            slideOutOfContainer(
+                AnimatedContentTransitionScope.SlideDirection.Start,
+                targetOffset = { (it * 0.35f).toInt() },
+                animationSpec = tween(animationDuration, easing = FastOutSlowInEasing)
+            ) + fadeOut(animationSpec = tween(animationDuration))
+        },
         popEnterTransition = {
             slideIntoContainer(
-                AnimatedContentTransitionScope.SlideDirection.Right,
-                animationSpec = tween(animationDuration)
+                AnimatedContentTransitionScope.SlideDirection.End,
+                initialOffset = { -(it * 0.35f).toInt() },
+                animationSpec = tween(animationDuration, easing = FastOutSlowInEasing)
             ) + fadeIn(animationSpec = tween(animationDuration))
         },
         popExitTransition = {
             slideOutOfContainer(
-                AnimatedContentTransitionScope.SlideDirection.Right,
-                animationSpec = tween(animationDuration)
+                AnimatedContentTransitionScope.SlideDirection.End,
+                targetOffset = { it },
+                animationSpec = tween(animationDuration, easing = FastOutSlowInEasing)
             )
         }
     ) {
