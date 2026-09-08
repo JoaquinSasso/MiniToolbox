@@ -45,6 +45,7 @@
 
 - [ ] `remember-saveable` — ~300+ `remember {}` vs ~22 `rememberSaveable`. En herramientas donde el usuario acumula trabajo (divisor de gastos, pomodoro, marcador de truco, QR, selector de grupos), el estado se pierde si el sistema mata el proceso. Priorizar: generador de equipos (58 usos), generador de QR (41 usos).
 - [ ] `lazy-keys` — ~5 de 20 llamadas a `items(...)` con `key =`. Sin clave, estado se reasigna por posición en listas editables (favoritos, gastos, tareas, timers).
+- [ ] `nav-back-animation` — `NavGraph.kt`, `AndroidManifest.xml` — Animación de retroceso (onBack) reduce el tamaño de la pantalla y la desplaza hacia el centro en lugar de deslizarse lateralmente sin encogerse. Provocado por la activación de Predictive Back en Navigation Compose 2.10 y `android:enableOnBackInvokedCallback="true"`.
 
 ## Proceso
 
