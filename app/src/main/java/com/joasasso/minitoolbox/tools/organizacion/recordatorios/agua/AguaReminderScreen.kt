@@ -81,8 +81,11 @@ import com.joasasso.minitoolbox.data.guardarPorVaso
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import com.joasasso.minitoolbox.widgets.AguaMiniWidget
 import com.joasasso.minitoolbox.widgets.AguaWidget
+import android.util.Log
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -618,8 +621,13 @@ suspend fun actualizarWidgetAguaSuspend(context: Context) {
 
 /**Funcion para actualizar el progreso del consumo de agua en el widget desde la app*/
 fun actualizarWidgetAgua(context: Context) {
-    CoroutineScope(Dispatchers.IO).launch {
-        actualizarWidgetAguaSuspend(context)
+    CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
+        try {
+            actualizarWidgetAguaSuspend(context)
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
+            Log.e("AguaReminder", "Error al actualizar widget de agua", e)
+        }
     }
 }
 
