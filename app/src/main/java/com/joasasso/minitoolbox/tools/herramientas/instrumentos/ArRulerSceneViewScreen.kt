@@ -7,7 +7,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.view.WindowManager
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
@@ -776,8 +775,6 @@ fun ArRulerSceneViewScreen(onBack: () -> Unit) {
 
         }
     }
-
-    BackHandler { onBack() }
 
     if (showClearConfirm) {
         AlertDialog(

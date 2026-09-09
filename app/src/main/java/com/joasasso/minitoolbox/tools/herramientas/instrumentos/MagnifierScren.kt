@@ -139,17 +139,13 @@ fun MagnifierScreen(onBack: () -> Unit) {
     // Ayuda
     var showInfo by remember { mutableStateOf(false) }
 
-    // Back: si está pausada, reanudar; si no, salir
-    BackHandler {
-        if (isFrozen) {
-            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-            frozenBitmap = null
-            frozenScale = 1f
-            frozenOffsetX = 0f
-            frozenOffsetY = 0f
-        } else {
-            onBack()
-        }
+    // Back: si está pausada, reanudar; si no, dejar que el NavHost maneje la navegación atrás
+    BackHandler(enabled = isFrozen) {
+        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+        frozenBitmap = null
+        frozenScale = 1f
+        frozenOffsetX = 0f
+        frozenOffsetY = 0f
     }
 
     // --- Filtro automático: alto contraste + leve brillo ---
