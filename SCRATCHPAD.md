@@ -19,7 +19,7 @@
 ### Corrutinas y errores
 
 - [x] `catch-swallowing` — Eliminada captura indiscriminada de `Throwable` en todo el código Kotlin (0 ocurrencias restantes). En corrutinas y funciones suspendidas (`MetricsUploader.kt`, `AggregatesRepository.kt`, widgets de linterna), `CancellationException` se propaga limpiamente preservando la cancelación cooperativa. En DataStores y utilidades, se capturan excepciones tipadas (`IOException`, `SerializationException`, `JSONException`, `ParseException`).
-- [ ] `manual-coroutine-scopes` — ~11 `CoroutineScope(...)` manuales, solo 2 con `SupervisorJob`. En `Metrics.kt:io {}` un fallo en una métrica cancela el scope entero.
+- [x] `manual-coroutine-scopes` — CoroutineScopes manuales estandarizados con `SupervisorJob()`, `CoroutineExceptionHandler` y manejo de excepciones en `Metrics.kt`, `FavoriteToolsWidget.kt` (con `goAsync()`), `BillingClientWrapper.kt`, `AguaReminderScreen.kt` y `PomodoroAlarmReceiver.kt`.
 
 ### Divisor de gastos
 
@@ -46,7 +46,6 @@
 
 - [ ] `remember-saveable` — ~300+ `remember {}` vs ~22 `rememberSaveable`. En herramientas donde el usuario acumula trabajo (divisor de gastos, pomodoro, marcador de truco, QR, selector de grupos), el estado se pierde si el sistema mata el proceso. Priorizar: generador de equipos (58 usos), generador de QR (41 usos).
 - [ ] `lazy-keys` — ~5 de 20 llamadas a `items(...)` con `key =`. Sin clave, estado se reasigna por posición en listas editables (favoritos, gastos, tareas, timers).
-- [ ] `nav-back-animation` — `NavGraph.kt`, `AndroidManifest.xml` — Animación de retroceso (onBack) reduce el tamaño de la pantalla y la desplaza hacia el centro en lugar de deslizarse lateralmente sin encogerse. Provocado por la activación de Predictive Back en Navigation Compose 2.10 y `android:enableOnBackInvokedCallback="true"`.
 
 ## Proceso
 
@@ -57,4 +56,4 @@
 
 ## Siguiente paso sugerido
  
-**`manual-coroutine-scopes`** (P1) — ~11 `CoroutineScope(...)` manuales fuera de la UI, solo 2 con `SupervisorJob`. En `Metrics.kt:io {}` o receivers/servicios, un fallo no controlado cancela el scope entero.
+**`flow-snapshots`** (P1) — `ReunionDetailScreen.kt:97`, `AgregarGastoScreen.kt:92`, `EditarGastoScreen.kt:91` — Snapshots con `firstOrNull()` sobre Flows reactivos. Pierde reactividad, puede mostrar datos stale.

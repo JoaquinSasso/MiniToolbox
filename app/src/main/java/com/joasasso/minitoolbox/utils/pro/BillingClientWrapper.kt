@@ -26,6 +26,7 @@ import com.joasasso.minitoolbox.widgets.AguaWidget
 import com.joasasso.minitoolbox.widgets.FavoriteToolsWidget
 import com.joasasso.minitoolbox.widgets.FlashQuickWidget
 import com.joasasso.minitoolbox.widgets.FlashToggleWidget
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -128,12 +129,17 @@ class BillingClientWrapper(
         if (purchase.purchaseState == PurchaseState.PURCHASED) {
             // Persistimos PRO para offline
             ProRepository.setProStatus(context, true)
-            CoroutineScope(Dispatchers.IO).launch {
-                FlashToggleWidget().updateAll(context)
-                AguaMiniWidget().updateAll(context)
-                AguaWidget().updateAll(context)
-                FavoriteToolsWidget().updateAll(context)
-                FlashQuickWidget().updateAll(context)
+            scope.launch(Dispatchers.IO) {
+                try {
+                    FlashToggleWidget().updateAll(context)
+                    AguaMiniWidget().updateAll(context)
+                    AguaWidget().updateAll(context)
+                    FavoriteToolsWidget().updateAll(context)
+                    FlashQuickWidget().updateAll(context)
+                } catch (e: Exception) {
+                    if (e is CancellationException) throw e
+                    Log.e("BillingClientWrapper", "Error actualizando widgets tras compra PRO", e)
+                }
             }
 
             if (!purchase.isAcknowledged) {

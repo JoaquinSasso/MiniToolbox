@@ -40,6 +40,9 @@ import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.data.FAVORITOS_KEYS
 import com.joasasso.minitoolbox.data.flujoToolsFavoritas
 import com.joasasso.minitoolbox.tools.ToolRegistry
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import com.joasasso.minitoolbox.metrics.MetricsSource
@@ -155,8 +158,13 @@ class FavoriteToolsWidgetReceiver : GlanceAppWidgetReceiver() {
     override fun onEnabled(context: Context) {
         super.onEnabled(context)
         // Sembrar estado inicial desde DataStore → estado del widget
-        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
-            actualizarWidgetFavoritos(context)
+        val pendingResult = goAsync()
+        CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
+            try {
+                actualizarWidgetFavoritos(context)
+            } finally {
+                pendingResult.finish()
+            }
         }
     }
 
@@ -167,8 +175,13 @@ class FavoriteToolsWidgetReceiver : GlanceAppWidgetReceiver() {
         appWidgetIds: IntArray
     ) {
         super.onUpdate(context, appWidgetManager, appWidgetIds)
-        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
-            actualizarWidgetFavoritos(context)
+        val pendingResult = goAsync()
+        CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
+            try {
+                actualizarWidgetFavoritos(context)
+            } finally {
+                pendingResult.finish()
+            }
         }
     }
     class OpenPaywallAction : ActionCallback {

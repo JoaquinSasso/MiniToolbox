@@ -121,10 +121,15 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
             val route = Screen.PomodoroDetail.createRoute(config.id)
             Log.d(TAG, "startPomodoro: id=${config.id} workMin=${config.workMin} endMs=$endMs")
 
-            CoroutineScope(Dispatchers.IO).launch {
-                PomodoroStateRepository(app).updatePhase(
-                    app.getString(R.string.pomodoro_work), endMs, config.workMin * 60L
-                )
+            CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
+                try {
+                    PomodoroStateRepository(app).updatePhase(
+                        app.getString(R.string.pomodoro_work), endMs, config.workMin * 60L
+                    )
+                } catch (e: Exception) {
+                    if (e is CancellationException) throw e
+                    Log.e(TAG, "Error actualizando fase inicial de Pomodoro", e)
+                }
             }
 
             showRunningNotification(app, app.getString(R.string.pomodoro_work), endMs, route)

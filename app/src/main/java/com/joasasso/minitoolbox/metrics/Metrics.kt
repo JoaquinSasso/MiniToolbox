@@ -5,9 +5,13 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.content.edit
 import com.joasasso.minitoolbox.metrics.storage.AggregatesRepository
 import com.joasasso.minitoolbox.metrics.uploader.UploadScheduler
+import android.util.Log
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -85,8 +89,20 @@ private fun scheduleIfEnabled(ctx: Context) {
 @VisibleForTesting
 internal var metricsDispatcher: CoroutineDispatcher = Dispatchers.IO
 
+private val metricsExceptionHandler = CoroutineExceptionHandler { _, throwable ->
+    Log.e("Metrics", "Error no capturado en pipeline de métricas", throwable)
+}
+
 private fun io(block: suspend () -> Unit) {
-    CoroutineScope(metricsDispatcher).launch { block() }
+    CoroutineScope(SupervisorJob() + metricsDispatcher + metricsExceptionHandler).launch {
+        try {
+            block()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.e("Metrics", "Error ejecutando métrica", e)
+        }
+    }
 }
 
 /** Suma app open y agenda upload oportunista (respeta opt-out) */
