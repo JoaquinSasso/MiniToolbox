@@ -30,20 +30,18 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.data.Reunion
-import com.joasasso.minitoolbox.data.ReunionesRepository
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
-import kotlinx.coroutines.launch
 import java.text.DateFormat.getDateInstance
 import java.util.Date
 
@@ -51,21 +49,16 @@ import java.util.Date
 fun ReunionesScreen(
     onBack: () -> Unit,
     onCrearReunion: () -> Unit,
-    onReunionClick: (Reunion) -> Unit
+    onReunionClick: (Reunion) -> Unit,
+    vm: ReunionesViewModel = viewModel()
 ) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
 
     var showInfo by remember { mutableStateOf(false) }
-    var reuniones by remember { mutableStateOf<List<Reunion>>(emptyList()) }
+    val uiState by vm.uiState.collectAsStateWithLifecycle()
+    val reuniones = uiState.reuniones
     var reunionAEliminar by remember { mutableStateOf<Reunion?>(null) }
 
-    LaunchedEffect(Unit) {
-        ReunionesRepository.flujoReuniones(context).collect {
-            reuniones = it.sortedByDescending { r -> r.fecha }
-        }
-    }
 
     Scaffold(
         topBar = {
@@ -149,11 +142,9 @@ fun ReunionesScreen(
             },
             confirmButton = {
                 TextButton(onClick = {
-                    scope.launch {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        ReunionesRepository.eliminarReunion(context, reunionAEliminar!!.id)
-                        reunionAEliminar = null
-                    }
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    vm.eliminarReunion(reunionAEliminar!!.id)
+                    reunionAEliminar = null
                 }) {
                     Text(stringResource(R.string.delete))
                 }

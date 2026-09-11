@@ -32,11 +32,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,14 +45,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.data.Reunion
-import com.joasasso.minitoolbox.data.ReunionesRepository
 import com.joasasso.minitoolbox.ui.components.ProToolPaywallDialog
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import com.joasasso.minitoolbox.utils.ads.RewardedManager
 import com.joasasso.minitoolbox.utils.pro.CreditAccessManager
 import com.joasasso.minitoolbox.utils.pro.LocalProState
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.launch
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import java.text.DateFormat.getDateInstance
 import java.text.NumberFormat
 import java.util.Date
@@ -66,20 +63,21 @@ fun DetallesReunionScreen(
     onBack: () -> Unit,
     onEditarGasto: (String, String) -> Unit,
     onAgregarGasto: (String) -> Unit,
-    onNavigateToPro: () -> Unit
+    onNavigateToPro: () -> Unit,
+    vm: ReunionDetailViewModel = viewModel()
 ) {
     val context = LocalContext.current
     val activity = context as? Activity
-    val scope = rememberCoroutineScope()
     var showInfo by remember { mutableStateOf(false) }
     val haptic = LocalHapticFeedback.current
 
-    var reunion by remember { mutableStateOf<Reunion?>(null) }
+    val uiState by vm.uiState.collectAsStateWithLifecycle()
+    val reunion = uiState.reunion
+    val deudas = uiState.deudas
+    val textoCompartir = uiState.textoCompartir
+
     var integranteAEditar by remember { mutableStateOf<String?>(null) }
     var nombreEditado by remember { mutableStateOf("") }
-    var textoCompartir by remember { mutableStateOf("") }
-    var deudas by remember { mutableStateOf(emptyList<String>()) }
-
     var integranteAEliminar by remember { mutableStateOf<String?>(null) }
 
     val locale = Locale.getDefault()
@@ -92,39 +90,9 @@ fun DetallesReunionScreen(
     var showPaywallDialog by remember { mutableStateOf(false) }
     var hasActivePass by remember { mutableStateOf(CreditAccessManager.hasActivePass(context)) }
 
-
-    LaunchedEffect(Unit) {
-        val reuniones = ReunionesRepository.flujoReuniones(context).firstOrNull().orEmpty()
-        reuniones.find { it.id == reunionId.trim() }?.let {
-            reunion = it
-            textoCompartir = generarTextoCompartible(it, context)
-            deudas = calcularDeudas(it, context)
-        }
-    }
-
     fun actualizarIntegrante(original: String, nuevo: String) {
-        reunion?.let { r ->
-            val nuevosIntegrantes = r.integrantes.map { if (it == original) nuevo else it }
-            val nuevosGastos = r.gastos.map { g ->
-                val nuevosAportes = g.aportesIndividuales.mapKeys {
-                    if (it.key == original) nuevo else it.key
-                }
-                val nuevosConsumidores = g.consumidoPor.mapKeys {
-                    if (it.key == original) nuevo else it.key
-                }
-                g.copy(
-                    aportesIndividuales = nuevosAportes,
-                    consumidoPor = nuevosConsumidores
-                )
-            }
-            val actualizada = r.copy(integrantes = nuevosIntegrantes, gastos = nuevosGastos)
-            scope.launch {
-                ReunionesRepository.actualizarReunion(context, actualizada)
-                reunion = actualizada
-                integranteAEditar = null
-                deudas = calcularDeudas(actualizada, context)
-            }
-        }
+        vm.actualizarIntegrante(original, nuevo)
+        integranteAEditar = null
     }
 
     Scaffold(topBar = { TopBarReusable(stringResource(R.string.meeting_details_screen), onBack, { showInfo = true }) })
@@ -183,14 +151,7 @@ fun DetallesReunionScreen(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(formatter.format(totalGasto))
                                 IconButton(onClick = {
-                                    reunion?.let {
-                                        val nueva = it.copy(gastos = it.gastos.filterNot { g -> g.id == gasto.id })
-                                        scope.launch {
-                                            ReunionesRepository.actualizarReunion(context, nueva)
-                                            reunion = nueva
-                                            deudas = calcularDeudas(reunion!!, context)
-                                        }
-                                    }
+                                    vm.eliminarGasto(gasto.id)
                                 }) {
                                     Icon(
                                         Icons.Default.Delete,
@@ -309,18 +270,16 @@ fun DetallesReunionScreen(
                     Button(
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            scope.launch {
-                                val sendIntent = Intent().apply {
-                                    action = Intent.ACTION_SEND
-                                    putExtra(Intent.EXTRA_TEXT, textoCompartir)
-                                    type = "text/plain"
-                                }
-                                val shareIntent = Intent.createChooser(
-                                    sendIntent,
-                                    context.resources.getString(R.string.expenses_share_summary_button)
-                                )
-                                context.startActivity(shareIntent)
+                            val sendIntent = Intent().apply {
+                                action = Intent.ACTION_SEND
+                                putExtra(Intent.EXTRA_TEXT, textoCompartir)
+                                type = "text/plain"
                             }
+                            val shareIntent = Intent.createChooser(
+                                sendIntent,
+                                context.resources.getString(R.string.expenses_share_summary_button)
+                            )
+                            context.startActivity(shareIntent)
                         },
                         colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondaryContainer)
                     ) {
@@ -366,29 +325,11 @@ fun DetallesReunionScreen(
                     }
 
                     if (integranteAnterior.isNotBlank()) {
-                        actualizarIntegrante(integranteAnterior, nuevoNombre)
-                        return@TextButton
+                        vm.actualizarIntegrante(integranteAnterior, nuevoNombre)
                     } else {
-                        val integrantesActualizados = reunion!!.integrantes + nuevoNombre
-
-                        val gastosActualizados = reunion!!.gastos.map { gasto ->
-                            val consumidoPor = gasto.consumidoPor.toMutableMap()
-                            consumidoPor[nuevoNombre] = 1
-                            gasto.copy(consumidoPor = consumidoPor)
-                        }
-
-                        reunion = reunion!!.copy(
-                            integrantes = integrantesActualizados,
-                            gastos = gastosActualizados
-                        )
-
-                        scope.launch {
-                            ReunionesRepository.actualizarReunion(context, reunion!!)
-                        }
-
-                        integranteAEditar = null
-                        deudas = calcularDeudas(reunion!!, context)
+                        vm.agregarIntegrante(nuevoNombre)
                     }
+                    integranteAEditar = null
                 }) {
                     Text(stringResource(R.string.save))
                 }
@@ -417,23 +358,8 @@ fun DetallesReunionScreen(
             confirmButton = {
                 TextButton(onClick = {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    reunion?.let {
-                        val actualizada = it.copy(
-                            integrantes = it.integrantes - i,
-                            gastos = it.gastos.map { gasto ->
-                                gasto.copy(
-                                    aportesIndividuales = gasto.aportesIndividuales - i,
-                                    consumidoPor = gasto.consumidoPor - i
-                                )
-                            }
-                        )
-                        scope.launch {
-                            ReunionesRepository.actualizarReunion(context, actualizada)
-                            reunion = actualizada
-                            deudas = calcularDeudas(reunion!!, context)
-                            integranteAEliminar = null
-                        }
-                    }
+                    vm.eliminarIntegrante(i)
+                    integranteAEliminar = null
                 }) {
                     Text(stringResource(R.string.delete))
                 }

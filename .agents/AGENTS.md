@@ -58,6 +58,16 @@ Solo se manejan métricas agregadas sin identificadores de dispositivo. Si una m
 
 Los identificadores de métricas son un contrato estricto. Renombrar una clave rompe la serie en dos. El contrato compartido vive en `metrics-fixtures/keys.json`. Esta restricción está detallada en `DECISIONS.md` §4.
 
+### Arquitectura MVVM y Cobertura de Tests Unitarios
+
+El objetivo del proyecto como portfolio técnico es converger progresivamente a la arquitectura canónica **MVVM (Model-View-ViewModel)** recomendada por Google, con cobertura completa de pruebas unitarias sobre toda la app.
+Al diseñar nuevas herramientas o refactorizar las existentes:
+1. Extraer el estado de UI y la lógica a `ViewModel` (usando `StateFlow`, `SavedStateHandle` y eventos de canal de un solo disparo).
+2. Consumir el estado en Compose mediante `collectAsStateWithLifecycle()`.
+3. Mantener los repositorios y fuentes de datos reactivos (evitando snapshots con `firstOrNull()` y usando mutaciones atómicas en `edit {}`).
+4. Proveer siempre la suite correspondiente de tests unitarios (`RobolectricTestRunner` para componentes con persistencia/DataStore y `kotlinx-coroutines-test` para ViewModels y cálculos puros).
+
+
 ### Formato del SCRATCHPAD
 
 El SCRATCHPAD.md usa un formato máquina optimizado para agentes. Cada ítem tiene:
