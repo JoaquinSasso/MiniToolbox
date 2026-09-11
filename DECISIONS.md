@@ -5,6 +5,9 @@ Este documento registra las decisiones arquitectónicas fundamentales de **MiniT
 ## 1. Arquitectura Base y Modularidad
 * **Módulo Único:** La aplicación se mantiene deliberadamente como un módulo único en Android. No proponer modularización prematura.
 * **Stack de UI:** Interfaz construida exclusivamente de forma nativa con Kotlin y Jetpack Compose.
+* **Arquitectura de Presentación (MVVM Progresivo):** La aplicación está en un proceso de migración progresiva hacia el patrón canónico **MVVM (Model-View-ViewModel)** según las directrices oficiales de Google. MiniToolbox es el proyecto insignia del portfolio del autor; por ello, la lógica de negocio, validaciones y estado de pantalla deben residir en `ViewModel` (exponiendo `StateFlow` y consumidos en Compose con `collectAsStateWithLifecycle()`), manteniendo la UI desacoplada y declarativa.
+* **Cultura de Testing y Cobertura:** Todo componente arquitectónico (ViewModels, repositorios, motores puros de cálculo) debe contar con tests unitarios automatizados (`Robolectric` para DataStore/Context y `kotlinx-coroutines-test` para corrutinas/StateFlow), con el objetivo de alcanzar cobertura completa sobre toda la aplicación. Los agentes deben diseñar y refactorizar siempre teniendo en mente la testabilidad y proponer los tests correspondientes.
+
 
 ## 2. Sistema de Métricas (Pipeline de Datos)
 El sistema de telemetría es propietario y su flujo es innegociable:

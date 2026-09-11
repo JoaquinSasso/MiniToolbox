@@ -30,35 +30,27 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.joasasso.minitoolbox.R
-import com.joasasso.minitoolbox.data.Gasto
-import com.joasasso.minitoolbox.data.Reunion
-import com.joasasso.minitoolbox.data.ReunionesRepository
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.launch
 import java.text.NumberFormat
-import java.util.Locale
-import java.util.UUID
-import androidx.compose.ui.platform.LocalLocale
 
 @Composable
 fun AgregarGastoScreen(
     reunionId: String,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    vm: GastoFormViewModel = viewModel()
 ) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
 
     val locale = LocalLocale.current.platformLocale
@@ -69,24 +61,31 @@ fun AgregarGastoScreen(
 
     var showInfo by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
+    val uiState by vm.uiState.collectAsStateWithLifecycle()
 
     val msgNombreOblig = stringResource(R.string.expense_name_required)
     val msgSinAporte = stringResource(R.string.expense_amount_required)
     val msgSinConsumidores = stringResource(R.string.expense_consumers_required)
 
-    var reunion by remember { mutableStateOf<Reunion?>(null) }
-    var descripcion by remember { mutableStateOf("") }
-    var aportes by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
-    var consumidores by remember { mutableStateOf<Map<String, Int>>(emptyMap()) }
-
     LaunchedEffect(Unit) {
-        val reuniones = ReunionesRepository.flujoReuniones(context).firstOrNull().orEmpty()
-        reunion = reuniones.find { it.id == reunionId }
-        consumidores = reunion?.integrantes?.associate { it to 1 } ?: emptyMap()
+        vm.events.collect { event ->
+            when (event) {
+                is GastoFormEvent.SaveSuccess -> {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onBack()
+                }
+                is GastoFormEvent.ShowError -> {
+                    val msg = when (event.messageResId) {
+                        R.string.expense_name_required -> msgNombreOblig
+                        R.string.expense_amount_required -> msgSinAporte
+                        R.string.expense_consumers_required -> msgSinConsumidores
+                        else -> ""
+                    }
+                    snackbarHostState.showSnackbar(msg)
+                }
+            }
+        }
     }
-
-    val montoTotalCentavos = aportes.values.sumOf { DebtEngine.parseTextToCents(it) ?: 0L }
-    val montoTotal = montoTotalCentavos / 100.0
 
     Scaffold(
         topBar = {
@@ -107,8 +106,8 @@ fun AgregarGastoScreen(
         ) {
             item {
                 OutlinedTextField(
-                    value = descripcion,
-                    onValueChange = { descripcion = it },
+                    value = uiState.descripcion,
+                    onValueChange = vm::onDescripcionChange,
                     label = { Text(stringResource(R.string.expense_description_label)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
@@ -117,7 +116,7 @@ fun AgregarGastoScreen(
 
             item {
                 Text(
-                    stringResource(R.string.total_amount_label, formatter.format(montoTotal)),
+                    stringResource(R.string.total_amount_label, formatter.format(uiState.montoTotal)),
                     style = MaterialTheme.typography.titleMedium
                 )
             }
@@ -129,7 +128,7 @@ fun AgregarGastoScreen(
                 )
             }
 
-            items(reunion?.integrantes.orEmpty()) { nombre ->
+            items(uiState.integrantes) { nombre ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
@@ -143,7 +142,7 @@ fun AgregarGastoScreen(
                     ) {
                         Text(nombre, modifier = Modifier.weight(1f))
                         OutlinedTextField(
-                            value = aportes[nombre] ?: "",
+                            value = uiState.aportes[nombre] ?: "",
                             onValueChange = { nuevo ->
                                 var filtrado = nuevo.replace(',', '.')
                                 filtrado = filtrado.replace(Regex("[^0-9.]"), "")
@@ -159,9 +158,7 @@ fun AgregarGastoScreen(
                                     filtrado = if (decimales.isEmpty()) "$enteros." else "$enteros.$decimales"
                                 }
 
-                                aportes = aportes.toMutableMap().apply {
-                                    if (filtrado.isNotBlank()) put(nombre, filtrado) else remove(nombre)
-                                }
+                                vm.onAporteChange(nombre, filtrado)
                             },
                             modifier = Modifier.width(120.dp),
                             placeholder = { Text("0") },
@@ -181,8 +178,8 @@ fun AgregarGastoScreen(
                 )
             }
 
-            items(reunion?.integrantes.orEmpty()) { nombre ->
-                val actual = (consumidores[nombre] ?: 1) > 0
+            items(uiState.integrantes) { nombre ->
+                val actual = (uiState.consumidores[nombre] ?: 1) > 0
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
@@ -199,9 +196,7 @@ fun AgregarGastoScreen(
                             Switch(
                                 checked = actual,
                                 onCheckedChange = { isChecked ->
-                                    consumidores = consumidores.toMutableMap().apply {
-                                        put(nombre, if (isChecked) 1 else 0)
-                                    }
+                                    vm.onConsumidorToggle(nombre, isChecked)
                                 }
                             )
                             Spacer(Modifier.width(8.dp))
@@ -215,45 +210,9 @@ fun AgregarGastoScreen(
             item {
                 Button(
                     onClick = {
-                        scope.launch {
-                            if (descripcion.isBlank()) {
-                                snackbarHostState.showSnackbar(msgNombreOblig)
-                                return@launch
-                            }
-
-                            val aportesCentavosValidos = aportes
-                                .mapValues { DebtEngine.parseTextToCents(it.value) }
-                                .filterValues { it != null && it > 0L }
-                                .mapValues { it.value!! }
-
-                            if (aportesCentavosValidos.values.sum() <= 0L) {
-                                snackbarHostState.showSnackbar(msgSinAporte)
-                                return@launch
-                            }
-
-                            val consumidoresFinales = consumidores.filterValues { it > 0 }
-                            if (consumidoresFinales.isEmpty()) {
-                                snackbarHostState.showSnackbar(msgSinConsumidores)
-                                return@launch
-                            }
-
-                            val nuevoGasto = Gasto(
-                                id = UUID.randomUUID().toString(),
-                                descripcion = descripcion.trim(),
-                                aportesIndividuales = aportesCentavosValidos.mapValues { it.value / 100.0 },
-                                aportesCentavos = aportesCentavosValidos,
-                                consumidoPor = consumidoresFinales
-                            )
-
-                            reunion?.let { r ->
-                                val actualizada = r.copy(gastos = r.gastos + nuevoGasto)
-                                ReunionesRepository.actualizarReunion(context, actualizada)
-                            }
-
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            onBack()
-                        }
+                        vm.guardarGasto()
                     },
+                    enabled = !uiState.isSubmitting,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(stringResource(R.string.save))

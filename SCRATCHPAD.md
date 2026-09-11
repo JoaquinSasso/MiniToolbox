@@ -24,7 +24,7 @@
 ### Divisor de gastos
 
 - [x] `calcular-deudas-untestable` — `DebtEngine.kt`, `ReunionDetailScreen.kt` — Lógica de deudas extraída a `DebtEngine` puro sin dependencias de `Context`/Android, cubierto con `DebtEngineTest`.
-- [ ] `flow-snapshots` — `ReunionDetailScreen.kt:97`, `AgregarGastoScreen.kt:92`, `EditarGastoScreen.kt:91` — Snapshots con `firstOrNull()` sobre Flows reactivos. Pierde reactividad, puede mostrar datos stale.
+- [x] `flow-snapshots` — `ReunionDetailScreen.kt`, `AgregarGastoScreen.kt`, `EditarGastoScreen.kt`, `ReunionesScreen.kt`, `ExpensesDataStore.kt` — Migrado a MVVM con `ReunionesViewModel`, `ReunionDetailViewModel`, `GastoFormViewModel` y operaciones transaccionales atómicas en DataStore dentro de `edit {}`. Cero `firstOrNull()`, flujos `StateFlow` con `collectAsStateWithLifecycle()`, canales de eventos de un solo disparo y 100% de cobertura de tests unitarios (Robolectric + CoroutinesTest).
 
 ### AR Ruler
 
@@ -56,4 +56,5 @@
 
 ## Siguiente paso sugerido
  
-**`flow-snapshots`** (P1) — `ReunionDetailScreen.kt:97`, `AgregarGastoScreen.kt:92`, `EditarGastoScreen.kt:91` — Snapshots con `firstOrNull()` sobre Flows reactivos. Pierde reactividad, puede mostrar datos stale.
+**`ar-ruler-vm`** (P1) — `ArRulerSceneViewScreen.kt` (1.078 líneas) — Extraer un `ViewModel` real y funciones puras (`dist3()`, `commitDraft()`, `chooseTickStep()`) para hacer testeable el clúster AR, alineado con el nuevo mandato de MVVM.
+

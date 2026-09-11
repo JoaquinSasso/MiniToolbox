@@ -51,19 +51,22 @@ val Context.reunionesDataStore by preferencesDataStore("reuniones")
 object ReunionesRepository {
     private val json = Json { ignoreUnknownKeys = true; prettyPrint = false }
 
+    private fun deserializar(raw: String?): List<Reunion> {
+        if (raw == null) return emptyList()
+        return try {
+            json.decodeFromString<List<Reunion>>(raw)
+        } catch (e: SerializationException) {
+            Log.w("ReunionesRepo", "JSON de reuniones corrupto", e)
+            emptyList()
+        } catch (e: IllegalArgumentException) {
+            Log.w("ReunionesRepo", "Error de argumento al deserializar reuniones", e)
+            emptyList()
+        }
+    }
+
     fun flujoReuniones(context: Context): Flow<List<Reunion>> =
         context.reunionesDataStore.data.map { prefs ->
-            prefs[REUNIONES_KEY]?.let {
-                try {
-                    json.decodeFromString<List<Reunion>>(it)
-                } catch (e: SerializationException) {
-                    Log.w("ReunionesRepo", "JSON de reuniones corrupto", e)
-                    emptyList()
-                } catch (e: IllegalArgumentException) {
-                    Log.w("ReunionesRepo", "Error de argumento al deserializar reuniones", e)
-                    emptyList()
-                }
-            } ?: emptyList()
+            deserializar(prefs[REUNIONES_KEY])
         }
 
     suspend fun guardarReuniones(context: Context, reuniones: List<Reunion>) {
@@ -72,18 +75,129 @@ object ReunionesRepository {
     }
 
     suspend fun agregarReunion(context: Context, reunion: Reunion) {
-        val reuniones = flujoReuniones(context).firstOrNull().orEmpty().toMutableList()
-        reuniones.add(reunion)
-        guardarReuniones(context, reuniones)
+        context.reunionesDataStore.edit { prefs ->
+            val actuales = deserializar(prefs[REUNIONES_KEY]).toMutableList()
+            actuales.add(reunion)
+            prefs[REUNIONES_KEY] = json.encodeToString(actuales)
+        }
     }
 
     suspend fun actualizarReunion(context: Context, actualizada: Reunion) {
-        val actuales = flujoReuniones(context).firstOrNull() ?: emptyList()
-        guardarReuniones(context, actuales.map { if (it.id == actualizada.id) actualizada else it })
+        context.reunionesDataStore.edit { prefs ->
+            val actuales = deserializar(prefs[REUNIONES_KEY])
+            val nuevas = actuales.map { if (it.id == actualizada.id) actualizada else it }
+            prefs[REUNIONES_KEY] = json.encodeToString(nuevas)
+        }
     }
 
     suspend fun eliminarReunion(context: Context, id: String) {
-        val actuales = flujoReuniones(context).firstOrNull() ?: emptyList()
-        guardarReuniones(context, actuales.filterNot { it.id == id })
+        context.reunionesDataStore.edit { prefs ->
+            val actuales = deserializar(prefs[REUNIONES_KEY])
+            val nuevas = actuales.filterNot { it.id == id }
+            prefs[REUNIONES_KEY] = json.encodeToString(nuevas)
+        }
+    }
+
+    suspend fun guardarGasto(context: Context, reunionId: String, gasto: Gasto) {
+        context.reunionesDataStore.edit { prefs ->
+            val actuales = deserializar(prefs[REUNIONES_KEY])
+            val nuevas = actuales.map { reunion ->
+                if (reunion.id == reunionId) {
+                    val gastosActualizados = if (reunion.gastos.any { it.id == gasto.id }) {
+                        reunion.gastos.map { if (it.id == gasto.id) gasto else it }
+                    } else {
+                        reunion.gastos + gasto
+                    }
+                    reunion.copy(gastos = gastosActualizados)
+                } else {
+                    reunion
+                }
+            }
+            prefs[REUNIONES_KEY] = json.encodeToString(nuevas)
+        }
+    }
+
+    suspend fun eliminarGasto(context: Context, reunionId: String, gastoId: String) {
+        context.reunionesDataStore.edit { prefs ->
+            val actuales = deserializar(prefs[REUNIONES_KEY])
+            val nuevas = actuales.map { reunion ->
+                if (reunion.id == reunionId) {
+                    reunion.copy(gastos = reunion.gastos.filterNot { it.id == gastoId })
+                } else {
+                    reunion
+                }
+            }
+            prefs[REUNIONES_KEY] = json.encodeToString(nuevas)
+        }
+    }
+
+    suspend fun actualizarIntegrante(context: Context, reunionId: String, original: String, nuevo: String) {
+        context.reunionesDataStore.edit { prefs ->
+            val actuales = deserializar(prefs[REUNIONES_KEY])
+            val nuevas = actuales.map { reunion ->
+                if (reunion.id == reunionId) {
+                    val nuevosIntegrantes = reunion.integrantes.map { if (it == original) nuevo else it }
+                    val nuevosGastos = reunion.gastos.map { g ->
+                        val nuevosAportesInd = g.aportesIndividuales.mapKeys { if (it.key == original) nuevo else it.key }
+                        val nuevosAportesCent = g.aportesCentavos.mapKeys { if (it.key == original) nuevo else it.key }
+                        val nuevosConsumidores = g.consumidoPor.mapKeys { if (it.key == original) nuevo else it.key }
+                        g.copy(
+                            aportesIndividuales = nuevosAportesInd,
+                            aportesCentavos = nuevosAportesCent,
+                            consumidoPor = nuevosConsumidores
+                        )
+                    }
+                    reunion.copy(integrantes = nuevosIntegrantes, gastos = nuevosGastos)
+                } else {
+                    reunion
+                }
+            }
+            prefs[REUNIONES_KEY] = json.encodeToString(nuevas)
+        }
+    }
+
+    suspend fun eliminarIntegrante(context: Context, reunionId: String, nombre: String) {
+        context.reunionesDataStore.edit { prefs ->
+            val actuales = deserializar(prefs[REUNIONES_KEY])
+            val nuevas = actuales.map { reunion ->
+                if (reunion.id == reunionId) {
+                    val nuevosIntegrantes = reunion.integrantes.filterNot { it == nombre }
+                    val nuevosGastos = reunion.gastos.map { g ->
+                        val nuevosAportesInd = g.aportesIndividuales.filterKeys { it != nombre }
+                        val nuevosAportesCent = g.aportesCentavos.filterKeys { it != nombre }
+                        val nuevosConsumidores = g.consumidoPor.filterKeys { it != nombre }
+                        g.copy(
+                            aportesIndividuales = nuevosAportesInd,
+                            aportesCentavos = nuevosAportesCent,
+                            consumidoPor = nuevosConsumidores
+                        )
+                    }
+                    reunion.copy(integrantes = nuevosIntegrantes, gastos = nuevosGastos)
+                } else {
+                    reunion
+                }
+            }
+            prefs[REUNIONES_KEY] = json.encodeToString(nuevas)
+        }
+    }
+
+    suspend fun agregarIntegrante(context: Context, reunionId: String, nuevoNombre: String) {
+        context.reunionesDataStore.edit { prefs ->
+            val actuales = deserializar(prefs[REUNIONES_KEY])
+            val nuevas = actuales.map { reunion ->
+                if (reunion.id == reunionId && !reunion.integrantes.contains(nuevoNombre)) {
+                    val nuevosIntegrantes = reunion.integrantes + nuevoNombre
+                    val nuevosGastos = reunion.gastos.map { gasto ->
+                        val consumidoPor = gasto.consumidoPor.toMutableMap()
+                        consumidoPor[nuevoNombre] = 1
+                        gasto.copy(consumidoPor = consumidoPor)
+                    }
+                    reunion.copy(integrantes = nuevosIntegrantes, gastos = nuevosGastos)
+                } else {
+                    reunion
+                }
+            }
+            prefs[REUNIONES_KEY] = json.encodeToString(nuevas)
+        }
     }
 }
