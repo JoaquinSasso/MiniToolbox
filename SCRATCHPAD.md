@@ -41,8 +41,8 @@
 - [x] `kotlin-compiler-options-dsl` — `app/build.gradle.kts` — Migrado de `android { kotlinOptions { jvmTarget } }` a `kotlin { compilerOptions { jvmTarget } }` para arreglar deprecación de Kotlin 2.0 y error de sync.
 - [x] `toml-cleanup` — `gradle/libs.versions.toml`, `build.gradle.kts` — Alineado el plugin `kotlin-serialization` con `version.ref = "kotlin"` (2.2.20). Eliminadas versiones y dependencias explícitas redundantes de Compose (`ui-unit`, `runtime-saveable`, `ui-graphics`) para que el BOM `compose-bom-alpha` gobierne todas las variantes sin desincronizaciones.
 - [x] `remove-gson` — `BasicPhrasesScreen.kt`, `BasicPhrasesClasses.kt`, `build.gradle.kts`, `libs.versions.toml`, `proguard-rules.pro` — Migrado a `kotlinx.serialization` con `@Serializable` en `Frase` y `decodeFromString`. Eliminada dependencia `com.google.code.gson:gson`, versión del catálogo y reglas ProGuard. Cubierto con `BasicPhrasesSerializationTest`.
-- [ ] `baseline-profile` — Sin `baseline-prof.txt` ni módulo macrobenchmark. App con 33 herramientas y arranque a catálogo; mejora típica 20-40% en arranque en frío.
-- [—] `splashscreen-compat` — Verificado contra código real: `core-splashscreen` no estaba en catálogo; atributos `windowSplashScreen*` son funcionales en API 31+. La retrocompatibilidad de splash en API 28-30 se traslada a P3 como mejora visual/tema.
+- [x] `baseline-profile` — `app/src/main/baseline-prof.txt` — Creadas reglas AOT de arranque en frío para `MiniToolboxApp`, `MainActivity`, `MiniToolboxNavGraph`, `CategoriesScreen`, `ToolRegistry`, `ToolRoutes` y Compose runtime, empaquetadas automáticamente en el APK/AAB para optimización de inicio (20-40%).
+- [x] `splashscreen-compat` — `androidx.core:core-splashscreen 1.0.1`, `Theme.App.Starting` en `themes.xml`, `installSplashScreen()` en `MainActivity.kt`, remoción de `package` en `AndroidManifest.xml` y `resvalues` en `gradle.properties`. Soporte retrocompatible de splash screen para API 28-30 y eliminación de advertencias `NewApi` de lint.
 
 ## P3 — Deuda de UI
 

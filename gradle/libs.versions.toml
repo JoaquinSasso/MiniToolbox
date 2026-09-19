@@ -5,6 +5,7 @@ datastorePreferences = "1.2.1"
 kotlin = "2.4.20"
 kotlinxCoroutinesTest = "1.11.0"
 coreKtx = "1.19.0"
+coreSplashscreen = "1.2.0"
 junit = "4.13.2"
 json = "20260814"
 robolectric = "4.17"
@@ -52,6 +53,7 @@ firebaseBom = "34.19.0"
 [libraries]
 androidx-activity = { module = "androidx.activity:activity", version.ref = "activityCompose" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleRuntimeKtx" }
 androidx-media3-exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "media3Session" }

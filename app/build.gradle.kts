@@ -81,10 +81,11 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+        resValues = true
     }
 
     sourceSets {
-        // Las fixtures del contrato de claves viven en la raíz del repo y las comparten
+        // Los fixtures del contrato de claves viven en la raíz del repo y las comparten
         // los tests de Kotlin y los del backend en TypeScript. Se exponen como recurso
         // de test en lugar de duplicarlas, para que no puedan desincronizarse.
         getByName("test") {
@@ -136,6 +137,7 @@ dependencies {
     // 6) Core Android
     implementation(libs.androidx.activity)
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.lifecycle.runtime.compose)

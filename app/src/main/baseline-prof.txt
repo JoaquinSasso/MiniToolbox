@@ -1,0 +1,42 @@
+# Baseline profile rules for MiniToolbox startup path
+# Optimizes cold startup and initial screen composition
+
+# Application & Activity Startup
+Lcom/joasasso/minitoolbox/utils/MiniToolboxApp;
+Lcom/joasasso/minitoolbox/MainActivity;
+HSPLcom/joasasso/minitoolbox/utils/MiniToolboxApp;->onCreate()V
+HSPLcom/joasasso/minitoolbox/MainActivity;->onCreate(Landroid/os/Bundle;)V
+
+# Pro State & Consent Initialization
+Lcom/joasasso/minitoolbox/utils/pro/ProSilentInitializer;
+Lcom/joasasso/minitoolbox/utils/ads/ConsentGateProviderKt;
+Lcom/joasasso/minitoolbox/ui/theme/MiniToolboxThemeKt;
+Lcom/joasasso/minitoolbox/ui/theme/ColorKt;
+Lcom/joasasso/minitoolbox/ui/theme/TypeKt;
+
+# Navigation & Type-Safe Routes
+Lcom/joasasso/minitoolbox/NavGraphKt;
+HSPLcom/joasasso/minitoolbox/NavGraphKt;->MiniToolboxNavGraph(Landroidx/navigation/NavHostController;ZLjava/lang/String;Ljava/lang/String;Landroidx/compose/runtime/Composer;I)V
+Lcom/joasasso/minitoolbox/nav/Screen;
+Lcom/joasasso/minitoolbox/nav/Screen$Companion;
+Lcom/joasasso/minitoolbox/nav/Screen$Categories;
+
+# Tool Registry & Route Resolution
+Lcom/joasasso/minitoolbox/tools/ToolRegistry;
+Lcom/joasasso/minitoolbox/tools/Tool;
+Lcom/joasasso/minitoolbox/metrics/ToolRoutes;
+HSPLcom/joasasso/minitoolbox/tools/ToolRegistry;->getTools()Ljava/util/List;
+
+# Home Categories Screen
+Lcom/joasasso/minitoolbox/CategoriesScreenKt;
+HSPLcom/joasasso/minitoolbox/CategoriesScreenKt;->CategoriesScreen(Landroidx/navigation/NavHostController;Landroidx/compose/runtime/Composer;I)V
+Lcom/joasasso/minitoolbox/data/CategoriesKt;
+Lcom/joasasso/minitoolbox/data/Category;
+Lcom/joasasso/minitoolbox/ui/components/TopBarReusableKt;
+
+# Telemetry on Launch
+Lcom/joasasso/minitoolbox/metrics/MetricsKt;
+Lcom/joasasso/minitoolbox/metrics/MetricsConfig;
+Lcom/joasasso/minitoolbox/metrics/uploader/UploadScheduler;
+HSPLcom/joasasso/minitoolbox/metrics/MetricsKt;->appOpen(Landroid/content/Context;)V
+HSPLcom/joasasso/minitoolbox/metrics/MetricsKt;->dailyOpenOnce(Landroid/content/Context;)V
