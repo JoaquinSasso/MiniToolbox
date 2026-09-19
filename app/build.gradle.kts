@@ -11,6 +11,13 @@ plugins {
     alias(libs.plugins.google.services)
 }
 
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+        freeCompilerArgs.addAll("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
+    }
+}
+
 android {
     namespace = "com.joasasso.minitoolbox"
     compileSdk = 37
@@ -69,11 +76,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
-    }
-
-    kotlinOptions {
-        jvmTarget = "11"
-        freeCompilerArgs = listOf("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
     }
 
     buildFeatures {
@@ -144,10 +146,6 @@ dependencies {
     //Librerias para manejar datasets
     implementation(libs.protobuf.java)
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.gson)
-    implementation(libs.androidx.ui.unit)
-    implementation(libs.androidx.runtime.saveable)
-    implementation(libs.androidx.ui.graphics)
 
     // 7) Testing
     testImplementation(libs.junit)
