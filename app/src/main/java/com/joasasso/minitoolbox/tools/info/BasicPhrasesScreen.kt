@@ -43,8 +43,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import kotlinx.serialization.json.Json
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.data.Categoria
 import com.joasasso.minitoolbox.data.Frase
@@ -245,14 +244,15 @@ fun BasicPhrasesScreen(onBack: () -> Unit) {
     }
 }
 
+private val phrasesJson = Json { ignoreUnknownKeys = true }
+
 fun cargarFrasesDesdeJson(context: Context): List<Frase> {
     return try {
         val input = context.assets.open("basic_phrases.json")
         val json = input.bufferedReader().use { it.readText() }
         Log.d("BasicPhrasesScreen", "Contenido JSON: ${json.take(300)}")
 
-        val tipo = object : TypeToken<List<Frase>>() {}.type
-        val frases = Gson().fromJson<List<Frase>>(json, tipo)
+        val frases = phrasesJson.decodeFromString<List<Frase>>(json)
         Log.d("BasicPhrasesScreen", "Cantidad de frases cargadas: ${frases.size}")
         frases
     } catch (e: Exception) {

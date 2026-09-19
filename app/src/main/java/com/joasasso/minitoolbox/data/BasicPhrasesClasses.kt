@@ -2,8 +2,10 @@ package com.joasasso.minitoolbox.data
 
 import androidx.annotation.StringRes
 import com.joasasso.minitoolbox.R
+import kotlinx.serialization.Serializable
 import java.util.Locale
 
+@Serializable
 data class Frase(
     val categoria: String,
     val traducciones: Map<String, String>
