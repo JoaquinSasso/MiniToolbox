@@ -37,6 +37,7 @@
 
 ## P2 — Deuda de build y dependencias
 
+- [x] `compileSdk-preview` — `app/build.gradle.kts` — Fix error de compilación por dependencias alpha de Compose requiriendo `compileSdk` 37.1. Se migró de `compileSdk = 37` a `compileSdkVersion("android-37.1")` ya que la propiedad `compileSdk` en Kotlin DSL solo acepta enteros.
 - [x] `kotlin-compiler-options-dsl` — `app/build.gradle.kts` — Migrado de `android { kotlinOptions { jvmTarget } }` a `kotlin { compilerOptions { jvmTarget } }` para arreglar deprecación de Kotlin 2.0 y error de sync.
 - [x] `toml-cleanup` — `gradle/libs.versions.toml`, `build.gradle.kts` — Alineado el plugin `kotlin-serialization` con `version.ref = "kotlin"` (2.2.20). Eliminadas versiones y dependencias explícitas redundantes de Compose (`ui-unit`, `runtime-saveable`, `ui-graphics`) para que el BOM `compose-bom-alpha` gobierne todas las variantes sin desincronizaciones.
 - [x] `remove-gson` — `BasicPhrasesScreen.kt`, `BasicPhrasesClasses.kt`, `build.gradle.kts`, `libs.versions.toml`, `proguard-rules.pro` — Migrado a `kotlinx.serialization` con `@Serializable` en `Frase` y `decodeFromString`. Eliminada dependencia `com.google.code.gson:gson`, versión del catálogo y reglas ProGuard. Cubierto con `BasicPhrasesSerializationTest`.

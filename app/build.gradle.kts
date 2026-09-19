@@ -20,7 +20,7 @@ kotlin {
 
 android {
     namespace = "com.joasasso.minitoolbox"
-    compileSdk = 37
+    compileSdkVersion("android-37.1")
 
     val keystoreProps = Properties()
     val keystoreFile = project.layout.projectDirectory.file("keystore.properties").asFile
