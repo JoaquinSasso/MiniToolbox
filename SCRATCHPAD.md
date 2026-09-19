@@ -37,10 +37,12 @@
 
 ## P2 — Deuda de build y dependencias
 
-- [ ] `toml-cleanup` — `gradle/libs.versions.toml` — Aliases redundantes de Compose. Tres `version.ref` explícitos (`ui-unit` 1.9.1, `runtime-saveable` 1.9.1, `ui-graphics` 1.9.3) que el BOM debería fijar. Plugin `kotlin-serialization` con versión `2.2.10` hardcodeada en vez de `version.ref = "kotlin"` (2.2.20).
-- [ ] `remove-gson` — `BasicPhrasesScreen.kt` — Único consumidor de Gson. El resto usa `kotlinx.serialization`. Migrar elimina dependencia + reglas ProGuard.
+- [x] `compileSdk-preview` — `app/build.gradle.kts` — Fix error de compilación por dependencias alpha de Compose requiriendo `compileSdk` 37.1. Se migró de `compileSdk = 37` a `compileSdkVersion("android-37.1")` ya que la propiedad `compileSdk` en Kotlin DSL solo acepta enteros.
+- [x] `kotlin-compiler-options-dsl` — `app/build.gradle.kts` — Migrado de `android { kotlinOptions { jvmTarget } }` a `kotlin { compilerOptions { jvmTarget } }` para arreglar deprecación de Kotlin 2.0 y error de sync.
+- [x] `toml-cleanup` — `gradle/libs.versions.toml`, `build.gradle.kts` — Alineado el plugin `kotlin-serialization` con `version.ref = "kotlin"` (2.2.20). Eliminadas versiones y dependencias explícitas redundantes de Compose (`ui-unit`, `runtime-saveable`, `ui-graphics`) para que el BOM `compose-bom-alpha` gobierne todas las variantes sin desincronizaciones.
+- [x] `remove-gson` — `BasicPhrasesScreen.kt`, `BasicPhrasesClasses.kt`, `build.gradle.kts`, `libs.versions.toml`, `proguard-rules.pro` — Migrado a `kotlinx.serialization` con `@Serializable` en `Frase` y `decodeFromString`. Eliminada dependencia `com.google.code.gson:gson`, versión del catálogo y reglas ProGuard. Cubierto con `BasicPhrasesSerializationTest`.
 - [ ] `baseline-profile` — Sin `baseline-prof.txt` ni módulo macrobenchmark. App con 33 herramientas y arranque a catálogo; mejora típica 20-40% en arranque en frío.
-- [ ] `splashscreen-compat` — `core-splashscreen` en catálogo pero no en `build.gradle.kts`. `installSplashScreen()` no se llama. Atributos `windowSplashScreen*` son API 31 nativa, no funcionan en API 28-30 (minSdk=28). Warnings suprimidos en lint-baseline.
+- [—] `splashscreen-compat` — Verificado contra código real: `core-splashscreen` no estaba en catálogo; atributos `windowSplashScreen*` son funcionales en API 31+. La retrocompatibilidad de splash en API 28-30 se traslada a P3 como mejora visual/tema.
 
 ## P3 — Deuda de UI
 
@@ -56,5 +58,5 @@
 
 ## Siguiente paso sugerido
  
-**`remove-gson`** (P2) — `BasicPhrasesScreen.kt` — Eliminar la última dependencia de Google Gson migrando la carga de frases a `kotlinx.serialization.json.Json`, lo que permitirá remover `com.google.code.gson:gson` del catálogo de versiones, `build.gradle.kts` y las reglas ProGuard asociadas.
+**`lazy-keys`** (P3) — Agregar `key = { ... }` en las ~15 llamadas a `items(...)` de Compose que aún carecen de clave estable (listas de favoritos, tareas pendientes, timers de pomodoro, gastos y participantes), evitando que Compose reasigne estado incorrectamente o regenere ítems de lista al modificar, reordenar o eliminar elementos.
 
