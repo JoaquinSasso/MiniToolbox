@@ -1,16 +1,16 @@
-package com.joasasso.minitoolbox.tools.herramientas.instrumentos
+package com.joasasso.minitoolbox.tools.herramientas.instrumentos.arruler
 
-import android.graphics.Paint
-import android.graphics.Rect
-import android.graphics.Typeface
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import android.graphics.Paint
+import android.graphics.Rect
+import android.graphics.Typeface
 import android.view.WindowManager
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,7 +29,7 @@ import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Straighten
 import androidx.compose.material.icons.rounded.Timeline
-import androidx.compose.material.icons.rounded.Undo
+import androidx.compose.material.icons.automirrored.rounded.Undo
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.BottomAppBar
@@ -45,8 +45,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -69,6 +71,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.ar.core.Anchor
 import com.google.ar.core.Config
 import com.google.ar.core.DepthPoint
@@ -86,231 +90,31 @@ import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberModelLoader
 import java.util.Locale
 import kotlin.math.abs
-import kotlin.math.floor
 import kotlin.math.hypot
 import kotlin.math.roundToInt
-import kotlin.math.sqrt
 
 /* ═══════════════════════════════════════════════════════════════════
- *  CONSTANTES DE CALIDAD
- *  Más allá de ~5 m la triangulación de ARCore pierde precisión de
- *  forma abrupta. Cortamos ahí en vez de mostrar números inventados.
+ *  CONSTANTES DE CALIDAD Y TRACKING
  * ═══════════════════════════════════════════════════════════════════ */
 
 private const val MAX_HIT_DISTANCE_M = 5.0f
-
-// Por debajo de ~20 cm el teléfono conmuta a la ultra gran angular para
-// enfocar. ARCore NO actualiza sus intrínsecas cuando eso pasa: sigue
-// creyendo que mira por la principal, y la escala de la sesión se rompe.
-// La única defensa fiable es no dejar que ocurra.
 private const val MIN_HIT_DISTANCE_M = 0.20f
-
-// Un salto de cámara mayor a esto en un solo frame no es físico. Suele ser
-// el síntoma de la conmutación de lente vista desde el VIO.
 private const val CAMERA_JUMP_M = 0.35f
-
-// El hit en vivo se filtra con la mediana de las últimas muestras. Si la
-// dispersión supera este valor, el rayo está rebotando entre superficies
-// distintas y capturar ahí produce un ancla a profundidad equivocada.
 private const val LIVE_BUFFER = 6
 private const val LIVE_STABLE_M = 0.04f
-
-// Coseno del ángulo entre el segmento y el eje de visión. Por encima de
-// esto los dos puntos están casi uno detrás del otro: todo el largo se
-// juega en el eje donde la profundidad es menos precisa.
 private const val ILL_CONDITIONED_COS = 0.94f
 private const val ILL_MIN_LEN_M = 0.05f
-
-// Distancia máxima a la que un punto de profundidad se aplana contra un
-// plano detectado. Sube y capturás más pared; baja y respetás mejor los
-// objetos que sobresalen de ella.
 private const val PLANE_SNAP_MAX_M = 0.08f
-private const val NO_SURFACE_FRAMES_FOR_HINT = 90   // ~3 s a 30 fps
-
-// Muestreo del disparo: en vez de tomar UN frame, promediamos varios.
-// Ataca directamente la dispersión medida en superficies verticales.
-private const val SAMPLE_TARGET = 8       // muestras buenas que buscamos
-private const val SAMPLE_MIN = 4          // mínimo aceptable
+private const val NO_SURFACE_FRAMES_FOR_HINT = 90
+private const val SAMPLE_TARGET = 8
+private const val SAMPLE_MIN = 4
 private const val SAMPLE_TIMEOUT_FRAMES = 25
-private const val SAMPLE_OUTLIER_M = 0.03f  // descarte a >3 cm de la mediana
-
-// El Pixel (y otros) conmuta a la ultra gran angular para enfocar de cerca.
-// Eso cambia la focal y con ella la escala de la sesión: si pasa entre dos
-// puntos de la misma medición, el resultado es basura.
+private const val SAMPLE_OUTLIER_M = 0.03f
 private const val FOCAL_CHANGE_TOLERANCE = 0.02f
 private const val LENS_WARN_FRAMES = 90
 
 /* ═══════════════════════════════════════════════════════════════════
- *  UNIDADES Y FORMATO
- *  El redondeo NO es cosmético: comunicar "24,3 cm" implica una
- *  precisión milimétrica que ARCore no entrega. Redondeamos según la
- *  escala para que el número mostrado sea defendible.
- * ═══════════════════════════════════════════════════════════════════ */
-
-private enum class Units { METRIC, IMPERIAL; fun toggle() = if (this == METRIC) IMPERIAL else METRIC }
-
-private object UnitFormat {
-
-    private fun snap(value: Double, step: Double): Double = (value / step).roundToInt() * step
-
-    fun format(meters: Double, units: Units): String = when (units) {
-        Units.METRIC -> when {
-            // < 30 cm  -> resolución 0,5 cm
-            meters < 0.30 -> String.format(Locale.getDefault(), "%.1f cm", snap(meters * 100.0, 0.5))
-            // 30 cm a 1 m -> resolución 1 cm
-            meters < 1.00 -> String.format(Locale.getDefault(), "%.0f cm", snap(meters * 100.0, 1.0))
-            // 1 m a 2 m -> resolución 1 cm
-            meters < 2.00 -> String.format(Locale.getDefault(), "%.2f m", snap(meters, 0.01))
-            // > 2 m -> resolución 5 cm
-            else -> String.format(Locale.getDefault(), "%.2f m", snap(meters, 0.05))
-        }
-
-        Units.IMPERIAL -> {
-            val totalIn = snap(meters / 0.0254, 0.25)   // resolución 1/4"
-            if (totalIn >= 12.0) {
-                val ft = floor(totalIn / 12.0).toInt()
-                val inch = totalIn - ft * 12.0
-                String.format(Locale.getDefault(), "%d' %.2f\"", ft, inch)
-            } else {
-                String.format(Locale.getDefault(), "%.2f\"", totalIn)
-            }
-        }
-    }
-}
-
-/* ═══════════════════════════════════════════════════════════════════
- *  MODELO
- *
- *  Clave del rediseño: UN SOLO ANCLA POR MEDICIÓN.
- *  Los puntos siguientes se guardan como offsets en el espacio local
- *  de ese ancla. Cuando ARCore re-localiza el mapa, el ancla se mueve
- *  y arrastra todos los puntos con ella: la geometría es RÍGIDA y las
- *  distancias son invariantes por construcción.
- * ═══════════════════════════════════════════════════════════════════ */
-
-private enum class MeasureMode { SEGMENT, POLYLINE }
-
-private class Measurement(
-    val id: Int,
-    val anchor: Anchor,
-    val locals: List<FloatArray>,   // puntos en el espacio local del ancla
-    val segments: List<Float>,      // longitud de cada tramo, en metros
-    val total: Float
-)
-
-private enum class ArStatus { INIT, TOO_DARK, TOO_FAST, NO_FEATURES, CAMERA_OFF, NO_SURFACE, TOO_FAR, TOO_CLOSE, UNSTABLE, ILL_CONDITIONED, READY, SAMPLING, LENS_CHANGED }
-
-/**
- * Mediana móvil del hit bajo la retícula. Cumple dos funciones: estabiliza
- * el preview (que antes parpadeaba entre superficies) y mide la dispersión,
- * que es lo que nos dice si es seguro capturar.
- */
-private class LiveHitFilter {
-    private val buf = ArrayDeque<FloatArray>()
-    val value = FloatArray(3)
-    var spread = Float.MAX_VALUE; private set
-    var stable = false; private set
-
-    fun push(p: FloatArray) {
-        buf.addLast(p)
-        while (buf.size > LIVE_BUFFER) buf.removeFirst()
-        for (axis in 0..2) {
-            val sorted = buf.map { it[axis] }.sorted()
-            value[axis] = sorted[sorted.size / 2]
-        }
-        spread = buf.maxOf { dist3(it, value) }
-        stable = buf.size >= 4 && spread <= LIVE_STABLE_M
-    }
-
-    fun reset() { buf.clear(); spread = Float.MAX_VALUE; stable = false }
-}
-
-/**
- * Acumula las posiciones del hit durante varios frames para promediarlas.
- * Antes cada punto era una sola muestra de un solo frame; el ruido de esa
- * muestra iba directo a la medición.
- */
-private class HitSampler {
-    var active = false
-    var frames = 0
-    val samples = mutableListOf<FloatArray>()
-
-    fun start() { active = true; frames = 0; samples.clear() }
-    fun stop() { active = false; frames = 0; samples.clear() }
-}
-
-/**
- * Aplana un punto contra la ecuación INFINITA de un plano detectado.
- * ARCore trackea las paredes en parches chicos, pero el plano matemático
- * se extiende más allá de su polígono: eso es lo que aprovechamos.
- * Devuelve null si el punto está demasiado lejos del plano.
- */
-private fun snapToPlane(world: FloatArray, plane: Plane): FloatArray? {
-    if (plane.trackingState != TrackingState.TRACKING) return null
-    val pose = plane.centerPose
-    val n = pose.yAxis              // en ARCore el eje Y del plano es su normal
-    val p0 = pose.translation
-    val d = (world[0] - p0[0]) * n[0] + (world[1] - p0[1]) * n[1] + (world[2] - p0[2]) * n[2]
-    if (abs(d) > PLANE_SNAP_MAX_M) return null
-    return floatArrayOf(world[0] - n[0] * d, world[1] - n[1] * d, world[2] - n[2] * d)
-}
-
-/**
- * Elige el plano contra el cual proyectar. `preferred` es el plano que ya
- * usó el primer punto de esta medición: mantenerlo evita que un extremo
- * quede sobre plano y el otro sobre profundidad, que es donde aparecían
- * los errores grandes.
- */
-private fun bestPlaneFor(session: Session, world: FloatArray, preferred: Plane?): Plane? {
-    if (preferred != null && snapToPlane(world, preferred) != null) return preferred
-
-    var best: Plane? = null
-    var bestDist = PLANE_SNAP_MAX_M
-    runCatching {
-        session.getAllTrackables(Plane::class.java).forEach { plane ->
-            if (plane.trackingState != TrackingState.TRACKING) return@forEach
-            if (plane.subsumedBy != null) return@forEach   // plano absorbido por otro mayor
-            val pose = plane.centerPose
-            val n = pose.yAxis
-            val p0 = pose.translation
-            val d = abs(
-                (world[0] - p0[0]) * n[0] + (world[1] - p0[1]) * n[1] + (world[2] - p0[2]) * n[2]
-            )
-            if (d < bestDist) { bestDist = d; best = plane }
-        }
-    }
-    return best
-}
-
-/** Mediana por eje, luego media de las muestras cercanas a esa mediana. */
-private fun robustCentroid(samples: List<FloatArray>): FloatArray {
-    val median = FloatArray(3)
-    for (axis in 0..2) {
-        val sorted = samples.map { it[axis] }.sorted()
-        median[axis] = sorted[sorted.size / 2]
-    }
-    val kept = samples.filter { dist3(it, median) <= SAMPLE_OUTLIER_M }
-    val base = if (kept.size >= 2) kept else samples
-    val out = FloatArray(3)
-    base.forEach { out[0] += it[0]; out[1] += it[1]; out[2] += it[2] }
-    out[0] /= base.size; out[1] /= base.size; out[2] /= base.size
-    return out
-}
-
-private fun dist3(a: FloatArray, b: FloatArray): Float {
-    val dx = b[0] - a[0]; val dy = b[1] - a[1]; val dz = b[2] - a[2]
-    return sqrt(dx * dx + dy * dy + dz * dz)
-}
-
-/* ═══════════════════════════════════════════════════════════════════
- *  ESTADO DE RENDER
- *
- *  Las matrices se copian en arrays propios dentro de onSessionUpdated.
- *  Nunca guardamos la referencia al Frame: ARCore REUTILIZA ese objeto
- *  entre updates, así que leerlo más tarde puede darte otro instante.
- *
- *  `tick` es lo único observable. Se lee dentro del DrawScope, así que
- *  invalida solo la fase de dibujo — no recompone el árbol.
+ *  ESTADO DE RENDER AR
  * ═══════════════════════════════════════════════════════════════════ */
 
 private class ArOverlay {
@@ -327,130 +131,17 @@ private class ArOverlay {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
- *  VIEWMODEL (máquina de estados única)
- *
- *  Antes había dos estados paralelos (firstAnchor/secondAnchor en la
- *  pantalla + pendingStartAnchor en el VM) sincronizados a mano. Esa
- *  duplicación era la causa del bug de "la medida se recalcula".
- * ═══════════════════════════════════════════════════════════════════ */
-
-private class ARulerVM {
-
-    var unitSystem by mutableStateOf(Units.METRIC);            private set
-    var mode by mutableStateOf(MeasureMode.SEGMENT);           private set
-    var measurements by mutableStateOf(listOf<Measurement>()); private set
-
-    // Medición en construcción
-    var draftAnchor by mutableStateOf<Anchor?>(null);          private set
-    var draftLocals by mutableStateOf(listOf<FloatArray>());   private set
-
-    private var counter = 0
-
-    fun toggleUnits() { unitSystem = unitSystem.toggle() }
-
-    // OJO: no llamar a esta función `setMode`. La propiedad `var mode`
-    // ya genera un setMode() en la JVM y las firmas colisionan.
-    fun changeMode(newMode: MeasureMode) {
-        if (newMode == mode) return
-        cancelDraft()
-        mode = newMode
-    }
-
-    /** Focal al momento de marcar el primer punto, para detectar cambio de lente. */
-    var draftFocalPx: Float = 0f
-
-    /** Plano sobre el que se resolvió el primer punto. Fija la superficie
-     *  para toda la medición: sin esto, un extremo puede caer sobre plano
-     *  y el otro sobre profundidad, y la diferencia entre ambas fuentes se
-     *  suma entera al resultado. */
-    var draftPlane: Plane? = null
-
-    /**
-     * @param world posición promediada del punto, en coordenadas de mundo.
-     * @param hitForAnchor hit FRESCO del frame actual, solo para crear el ancla.
-     *
-     * El punto A ya no coincide con el origen del ancla: el ancla es apenas el
-     * sistema de referencia compartido. Lo que da rigidez es que todos los
-     * puntos vivan en el MISMO espacio local, no que uno esté en el origen.
-     */
-    fun addPointAt(world: FloatArray, hitForAnchor: HitResult, plane: Plane?): Boolean {
-        var anchor = draftAnchor
-
-        if (anchor == null) {
-            anchor = runCatching { hitForAnchor.createAnchor() }.getOrNull() ?: return false
-            draftAnchor = anchor
-            draftPlane = plane
-            draftLocals = listOf(anchor.pose.inverse().transformPoint(world))
-            return true
-        }
-
-        if (anchor.trackingState != TrackingState.TRACKING) return false
-
-        draftLocals = draftLocals + listOf(anchor.pose.inverse().transformPoint(world))
-        if (mode == MeasureMode.SEGMENT && draftLocals.size >= 2) commitDraft()
-        return true
-    }
-
-    fun commitDraft(): Boolean {
-        val anchor = draftAnchor ?: return false
-        if (draftLocals.size < 2) return false
-        val segs = draftLocals.zipWithNext { p, q -> dist3(p, q) }
-        // La propiedad del ancla pasa a la Measurement: no se detachea acá.
-        measurements = measurements + Measurement(++counter, anchor, draftLocals, segs, segs.sum())
-        draftAnchor = null
-        draftLocals = emptyList()
-        draftFocalPx = 0f
-        draftPlane = null
-        return true
-    }
-
-    fun cancelDraft() {
-        draftAnchor?.detach()
-        draftAnchor = null
-        draftLocals = emptyList()
-        draftFocalPx = 0f
-        draftPlane = null
-    }
-
-    fun undo(): Boolean {
-        if (draftLocals.isNotEmpty()) {
-            if (draftLocals.size <= 1) { cancelDraft(); return true }
-            draftLocals = draftLocals.dropLast(1)
-            return true
-        }
-        val last = measurements.lastOrNull() ?: return false
-        last.anchor.detach()
-        measurements = measurements.dropLast(1)
-        return true
-    }
-
-    fun remove(id: Int) {
-        val m = measurements.firstOrNull { it.id == id } ?: return
-        m.anchor.detach()
-        measurements = measurements.filterNot { it.id == id }
-    }
-
-    fun clearAll() {
-        measurements.forEach { it.anchor.detach() }
-        measurements = emptyList()
-        cancelDraft()
-    }
-
-    fun format(meters: Float): String = UnitFormat.format(meters.toDouble(), unitSystem)
-
-    val canUndo: Boolean get() = draftLocals.isNotEmpty() || measurements.isNotEmpty()
-    val canFinish: Boolean get() = mode == MeasureMode.POLYLINE && draftLocals.size >= 2
-}
-
-/* ═══════════════════════════════════════════════════════════════════
  *  PANTALLA
  * ═══════════════════════════════════════════════════════════════════ */
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ArRulerSceneViewScreen(onBack: () -> Unit) {
+fun ArRulerSceneViewScreen(
+    onBack: () -> Unit,
+    vm: ArRulerViewModel = viewModel()
+) {
+    val uiState by vm.uiState.collectAsStateWithLifecycle()
 
-    val vm = remember { ARulerVM() }
     val overlay = remember { ArOverlay() }
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
@@ -462,34 +153,54 @@ fun ArRulerSceneViewScreen(onBack: () -> Unit) {
     val engine = rememberEngine()
     val modelLoader = rememberModelLoader(engine)
 
-    // Estos se leen DENTRO del callback de frame. Los guardamos como
-    // objetos State (no con `by`) para que el callback siempre vea el
-    // valor actual aunque SceneView conserve una lambda vieja.
+    // Gestión de anclajes nativos en el ciclo de vida de la vista
+    val measurementAnchors = remember { mutableMapOf<Int, Anchor>() }
+    var draftAnchor by remember { mutableStateOf<Anchor?>(null) }
+    var draftPlane by remember { mutableStateOf<Plane?>(null) }
+    var draftFocalPx by remember { mutableFloatStateOf(0f) }
+
+    // Reconciliación declarativa: desvincular anclas removidas
+    LaunchedEffect(uiState.measurements) {
+        val activeIds = uiState.measurements.map { it.id }.toSet()
+        val removedIds = measurementAnchors.keys - activeIds
+        removedIds.forEach { id ->
+            measurementAnchors.remove(id)?.detach()
+        }
+    }
+
+    // Si el borrador se cancela o vacía, desvincular el ancla provisional
+    LaunchedEffect(uiState.draftLocals.isEmpty()) {
+        if (uiState.draftLocals.isEmpty() && draftAnchor != null) {
+            draftAnchor?.detach()
+            draftAnchor = null
+            draftPlane = null
+            draftFocalPx = 0f
+        }
+    }
+
+    // Callbacks de frame
     val viewportState = remember { mutableStateOf(IntSize.Zero) }
     val statusState = remember { mutableStateOf(ArStatus.INIT) }
     val depthHintState = remember { mutableStateOf(false) }
     val status by statusState
     val showDepthHint by depthHintState
 
-    // Bandera de captura: el tap NO crea el ancla directo.
-    // El HitResult es válido solo dentro del frame que lo generó, así que
-    // pedimos la captura y la ejecutamos en el próximo onSessionUpdated.
     val captureRequested = remember { mutableStateOf(false) }
     val noSurfaceFrames = remember { intArrayOf(0) }
     val lensWarnFrames = remember { intArrayOf(0) }
     val debugTickCounter = remember { intArrayOf(0) }
-    val sampler = remember { HitSampler() }
-    val liveFilter = remember { LiveHitFilter() }
+    val sampler = remember { HitSampler(SAMPLE_TARGET, SAMPLE_MIN, SAMPLE_TIMEOUT_FRAMES) }
+    val liveFilter = remember { LiveHitFilter(LIVE_BUFFER, LIVE_STABLE_M) }
 
-    // HUD de diagnóstico: se activa tocando el banner de estado.
+    // HUD de diagnóstico
     val debugEnabled = remember { mutableStateOf(false) }
     val debugText = remember { mutableStateOf("") }
 
     // Paleta
-    val activeColor = Color(0xFFFFC107)   // ámbar: medición en curso
-    val historyColor = Color(0xFF40C4FF)  // celeste: mediciones confirmadas
+    val activeColor = Color(0xFFFFC107)
+    val historyColor = Color(0xFF40C4FF)
 
-    // Métricas de dibujo, calculadas una vez
+    // Métricas de dibujo
     val lineWidthPx = with(density) { 3.dp.toPx() }
     val haloWidthPx = with(density) { 6.dp.toPx() }
     val capLenPx = with(density) { 9.dp.toPx() }
@@ -500,18 +211,22 @@ fun ArRulerSceneViewScreen(onBack: () -> Unit) {
     val activeLabel = remember(labelTextPx) { LabelPainter(labelTextPx, labelPadPx, 0xF0000000.toInt()) }
     val historyLabel = remember(labelTextPx) { LabelPainter(labelTextPx * 0.92f, labelPadPx, 0xB3000000.toInt()) }
 
-    // Pantalla encendida durante la sesión + liberación de anclajes al salir
+    // Pantalla encendida + limpieza integral de anclas nativas al salir
     DisposableEffect(Unit) {
         val activity = runCatching { context.findActivity() }.getOrNull()
         activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         onDispose {
             activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            draftAnchor?.detach()
+            draftAnchor = null
+            draftPlane = null
+            measurementAnchors.values.forEach { it.detach() }
+            measurementAnchors.clear()
             vm.clearAll()
         }
     }
 
     Scaffold(
-        // ── TopBar sin tocar: es un componente compartido entre tools ──
         topBar = {
             TopBarReusable(
                 title = stringResource(R.string.tool_ar_ruler),
@@ -525,37 +240,37 @@ fun ArRulerSceneViewScreen(onBack: () -> Unit) {
 
                     AssistChip(
                         onClick = {
-                            vm.changeMode(if (vm.mode == MeasureMode.SEGMENT) MeasureMode.POLYLINE else MeasureMode.SEGMENT)
+                            vm.changeMode(if (uiState.mode == MeasureMode.SEGMENT) MeasureMode.POLYLINE else MeasureMode.SEGMENT)
                             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         },
                         label = {
                             Text(
-                                if (vm.mode == MeasureMode.SEGMENT) stringResource(R.string.aruler_mode_segment)
+                                if (uiState.mode == MeasureMode.SEGMENT) stringResource(R.string.aruler_mode_segment)
                                 else stringResource(R.string.aruler_mode_polyline)
                             )
                         },
                         leadingIcon = {
                             Icon(
-                                if (vm.mode == MeasureMode.SEGMENT) Icons.Rounded.Straighten else Icons.Rounded.Timeline,
+                                if (uiState.mode == MeasureMode.SEGMENT) Icons.Rounded.Straighten else Icons.Rounded.Timeline,
                                 contentDescription = null
                             )
                         }
                     )
 
                     AssistChip(
-                        enabled = vm.canUndo,
+                        enabled = uiState.canUndo,
                         onClick = {
                             if (vm.undo()) haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         },
                         label = { Text(stringResource(R.string.aruler_undo)) },
-                        leadingIcon = { Icon(Icons.Rounded.Undo, contentDescription = null) }
+                        leadingIcon = { Icon(Icons.AutoMirrored.Rounded.Undo, contentDescription = null) }
                     )
 
                     AssistChip(
                         onClick = { vm.toggleUnits() },
                         label = {
                             Text(
-                                if (vm.unitSystem == Units.METRIC) stringResource(R.string.aruler_units_metric)
+                                if (uiState.unitSystem == Units.METRIC) stringResource(R.string.aruler_units_metric)
                                 else stringResource(R.string.aruler_units_imperial)
                             )
                         },
@@ -568,10 +283,7 @@ fun ArRulerSceneViewScreen(onBack: () -> Unit) {
         floatingActionButton = {
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
 
-                // "Borrar todo" solo aparece si hay algo que borrar y no hay
-                // ninguna medición a medio hacer (ahí el botón correcto es Deshacer).
-                // Es mutuamente excluyente con "Finalizar": nunca hay 3 botones apilados.
-                AnimatedVisibility(visible = vm.measurements.isNotEmpty() && vm.draftLocals.isEmpty()) {
+                AnimatedVisibility(visible = uiState.measurements.isNotEmpty() && uiState.draftLocals.isEmpty()) {
                     SmallFloatingActionButton(
                         onClick = {
                             showClearConfirm = true
@@ -584,11 +296,17 @@ fun ArRulerSceneViewScreen(onBack: () -> Unit) {
                     }
                 }
 
-                // Botón "Finalizar" solo en modo recorrido y con al menos 2 puntos
-                AnimatedVisibility(visible = vm.canFinish) {
+                AnimatedVisibility(visible = uiState.canFinish) {
                     SmallFloatingActionButton(
                         onClick = {
-                            if (vm.commitDraft()) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            val committedId = vm.commitDraft()
+                            if (committedId != null) {
+                                draftAnchor?.let { measurementAnchors[committedId] = it }
+                                draftAnchor = null
+                                draftPlane = null
+                                draftFocalPx = 0f
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            }
                         },
                         containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                         contentColor = MaterialTheme.colorScheme.onTertiaryContainer
@@ -627,28 +345,18 @@ fun ArRulerSceneViewScreen(onBack: () -> Unit) {
                 .onSizeChanged { viewportState.value = it }
         ) {
 
-            /* ───── Cámara / sesión AR ───── */
             ARScene(
                 modifier = Modifier.fillMaxSize(),
                 engine = engine,
                 modelLoader = modelLoader,
                 sessionConfiguration = { session: Session, config: Config ->
-                    // Planos verticales: SIN esto las paredes no se buscan nunca.
                     config.planeFindingMode = Config.PlaneFindingMode.HORIZONTAL_AND_VERTICAL
-
-                    // Depth API: habilita DepthPoint en el hit test, que da
-                    // profundidad donde no hay plano ni feature point.
                     config.depthMode =
                         if (session.isDepthModeSupported(Config.DepthMode.AUTOMATIC)) Config.DepthMode.AUTOMATIC
                         else Config.DepthMode.DISABLED
-
-                    // Sin autofoco, los objetos a menos de 50 cm salen borrosos
-                    // y el tracking se degrada.
                     config.focusMode = Config.FocusMode.AUTO
                     config.updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
                     config.instantPlacementMode = Config.InstantPlacementMode.DISABLED
-
-                    // No renderizamos objetos con iluminación: apagarla ahorra CPU.
                     config.lightEstimationMode = Config.LightEstimationMode.DISABLED
                 },
                 onSessionUpdated = { session, frame ->
@@ -657,7 +365,15 @@ fun ArRulerSceneViewScreen(onBack: () -> Unit) {
                         frame = frame,
                         viewportState = viewportState,
                         overlay = overlay,
+                        uiState = uiState,
                         vm = vm,
+                        getDraftAnchor = { draftAnchor },
+                        setDraftAnchor = { draftAnchor = it },
+                        getDraftPlane = { draftPlane },
+                        setDraftPlane = { draftPlane = it },
+                        getDraftFocalPx = { draftFocalPx },
+                        setDraftFocalPx = { draftFocalPx = it },
+                        onMeasurementCommitted = { id, anchor -> measurementAnchors[id] = anchor },
                         sampler = sampler,
                         liveFilter = liveFilter,
                         captureRequested = captureRequested,
@@ -672,22 +388,17 @@ fun ArRulerSceneViewScreen(onBack: () -> Unit) {
                 }
             )
 
-            /* ───── Overlay 2D unificado ─────
-               Todo (líneas, marcas, extremos y etiquetas) se dibuja en un
-               único Canvas. Antes las etiquetas eran composables Box/Text
-               recreados 60 veces por segundo. */
             Canvas(Modifier.fillMaxSize()) {
-                // Leer `tick` acá dentro suscribe SOLO la fase de dibujo:
-                // el árbol de composables no se recompone por frame.
                 val frameTick = overlay.tick
                 if (frameTick < 0 || !overlay.ready || size.width < 1f) return@Canvas
 
                 val vp = IntSize(size.width.roundToInt(), size.height.roundToInt())
 
                 // Mediciones confirmadas
-                vm.measurements.forEach { m ->
-                    if (m.anchor.trackingState != TrackingState.TRACKING) return@forEach
-                    val pose = m.anchor.pose
+                uiState.measurements.forEach { m ->
+                    val anchor = measurementAnchors[m.id] ?: return@forEach
+                    if (anchor.trackingState != TrackingState.TRACKING) return@forEach
+                    val pose = anchor.pose
                     val pts = m.locals.map { local ->
                         projectToScreen(overlay.view, overlay.proj, pose.transformPoint(local), vp)
                     }
@@ -705,17 +416,16 @@ fun ArRulerSceneViewScreen(onBack: () -> Unit) {
                     )
                 }
 
-                // Medición en curso + preview vivo hacia la retícula
-                val draftAnchor = vm.draftAnchor
-                val locals = vm.draftLocals
-                if (draftAnchor != null && locals.isNotEmpty() &&
-                    draftAnchor.trackingState == TrackingState.TRACKING
+                // Medición en curso + preview vivo
+                val currentAnchor = draftAnchor
+                val locals = uiState.draftLocals
+                if (currentAnchor != null && locals.isNotEmpty() &&
+                    currentAnchor.trackingState == TrackingState.TRACKING
                 ) {
-                    val pose = draftAnchor.pose
+                    val pose = currentAnchor.pose
                     val worlds = locals.map { pose.transformPoint(it) }.toMutableList()
                     val segs = worlds.zipWithNext { a, b -> dist3(a, b) }.toMutableList()
 
-                    // Tramo en vivo: del último punto colocado a donde apunta la mira
                     if (overlay.liveValid) {
                         val live = floatArrayOf(overlay.liveHit[0], overlay.liveHit[1], overlay.liveHit[2])
                         segs.add(dist3(worlds.last(), live))
@@ -737,11 +447,9 @@ fun ArRulerSceneViewScreen(onBack: () -> Unit) {
                     )
                 }
 
-                // Retícula central (ámbar mientras promedia muestras)
                 drawCrosshair(valid = status == ArStatus.READY || overlay.sampling, sampling = overlay.sampling)
             }
 
-            /* ───── Estado de tracking + HUD de diagnóstico ───── */
             Column(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
@@ -752,8 +460,8 @@ fun ArRulerSceneViewScreen(onBack: () -> Unit) {
                 StatusBanner(
                     status = status,
                     showDepthHint = showDepthHint,
-                    pointsPlaced = vm.draftLocals.size,
-                    mode = vm.mode,
+                    pointsPlaced = uiState.draftLocals.size,
+                    mode = uiState.mode,
                     modifier = Modifier.clickable { debugEnabled.value = !debugEnabled.value }
                 )
 
@@ -772,7 +480,6 @@ fun ArRulerSceneViewScreen(onBack: () -> Unit) {
                     }
                 }
             }
-
         }
     }
 
@@ -832,7 +539,6 @@ fun ArRulerSceneViewScreen(onBack: () -> Unit) {
 
 /* ═══════════════════════════════════════════════════════════════════
  *  LOOP DE FRAME
- *  Todo lo caro pasa acá, fuera de la composición.
  * ═══════════════════════════════════════════════════════════════════ */
 
 private fun onFrame(
@@ -840,7 +546,15 @@ private fun onFrame(
     frame: Frame,
     viewportState: MutableState<IntSize>,
     overlay: ArOverlay,
-    vm: ARulerVM,
+    uiState: ArRulerUiState,
+    vm: ArRulerViewModel,
+    getDraftAnchor: () -> Anchor?,
+    setDraftAnchor: (Anchor?) -> Unit,
+    getDraftPlane: () -> Plane?,
+    setDraftPlane: (Plane?) -> Unit,
+    getDraftFocalPx: () -> Float,
+    setDraftFocalPx: (Float) -> Unit,
+    onMeasurementCommitted: (Int, Anchor) -> Unit,
     sampler: HitSampler,
     liveFilter: LiveHitFilter,
     captureRequested: MutableState<Boolean>,
@@ -856,8 +570,6 @@ private fun onFrame(
     if (viewport == IntSize.Zero) return
 
     fun publish(newStatus: ArStatus, hint: Boolean) {
-        // El aviso de cambio de lente es pegajoso ~3 s: si no, el frame
-        // siguiente lo pisa con READY y el usuario nunca lo lee.
         val effective = if (lensWarnFrames[0] > 0) ArStatus.LENS_CHANGED else newStatus
         if (statusState.value != effective) statusState.value = effective
         if (depthHintState.value != hint) depthHintState.value = hint
@@ -890,28 +602,26 @@ private fun onFrame(
         return
     }
 
-    // Snapshot de matrices: nunca guardamos el Frame, que ARCore reutiliza.
     camera.getViewMatrix(overlay.view, 0)
     camera.getProjectionMatrix(overlay.proj, 0, 0.01f, 100f)
     overlay.ready = true
 
-    /* ── Guardia de conmutación de lente ──
-       ARCore NO actualiza sus intrínsecas cuando el teléfono cambia de
-       lente, así que comparar la focal no alcanza (en un Pixel 8 el valor
-       ni se mueve). Lo que sí se ve es el efecto: el VIO interpreta el
-       cambio de campo de visión como un desplazamiento enorme de cámara.
-       Un salto así en un frame no es físico. */
     val camPos = camera.pose.translation
     if (overlay.prevCamValid) camJump = dist3(overlay.prevCam, camPos)
     overlay.prevCam[0] = camPos[0]; overlay.prevCam[1] = camPos[1]; overlay.prevCam[2] = camPos[2]
     overlay.prevCamValid = true
 
     val focalPx = runCatching { camera.imageIntrinsics.focalLength[0] }.getOrDefault(0f)
-    val focalChanged = vm.draftFocalPx > 0f && focalPx > 0f &&
-            abs(focalPx - vm.draftFocalPx) / vm.draftFocalPx > FOCAL_CHANGE_TOLERANCE
+    val draftFocal = getDraftFocalPx()
+    val focalChanged = draftFocal > 0f && focalPx > 0f &&
+            abs(focalPx - draftFocal) / draftFocal > FOCAL_CHANGE_TOLERANCE
 
-    if (vm.draftLocals.isNotEmpty() && (camJump > CAMERA_JUMP_M || focalChanged)) {
+    if (uiState.draftLocals.isNotEmpty() && (camJump > CAMERA_JUMP_M || focalChanged)) {
         vm.cancelDraft()
+        getDraftAnchor()?.detach()
+        setDraftAnchor(null)
+        setDraftPlane(null)
+        setDraftFocalPx(0f)
         sampler.stop()
         overlay.sampling = false
         captureRequested.value = false
@@ -922,9 +632,10 @@ private fun onFrame(
     }
 
     val depthOn = runCatching { session.config.depthMode != Config.DepthMode.DISABLED }.getOrDefault(false)
+    val currentDraftPlane = getDraftPlane()
     val hit = bestHit(
         frame, viewport.width / 2f, viewport.height / 2f,
-        preferredPlane = vm.draftPlane,
+        preferredPlane = currentDraftPlane,
         allowFeaturePoints = !depthOn
     )
 
@@ -937,8 +648,6 @@ private fun onFrame(
 
     if (geomStatus == ArStatus.NO_SURFACE) noSurfaceFrames[0]++ else noSurfaceFrames[0] = 0
 
-    // Mediana móvil: el preview deja de parpadear y sabemos si el rayo
-    // está rebotando entre dos superficies a profundidades distintas.
     if (geomStatus == ArStatus.READY && hit != null) {
         liveFilter.push(hit.hitPose.translation)
         overlay.liveHit[0] = liveFilter.value[0]
@@ -950,17 +659,12 @@ private fun onFrame(
         overlay.liveValid = false
     }
 
-    /* ── Geometría mal condicionada ──
-       Si el segmento apunta casi en la dirección de la mirada, los dos
-       puntos quedan uno detrás del otro: en pantalla se superponen y todo
-       el largo se juega en el eje de profundidad, que es el peor estimado.
-       Es el caso donde dos puntos coincidentes marcaban 69 cm. */
     var illConditioned = false
-    val anchorForGeom = vm.draftAnchor
-    if (overlay.liveValid && anchorForGeom != null && vm.draftLocals.isNotEmpty() &&
+    val anchorForGeom = getDraftAnchor()
+    if (overlay.liveValid && anchorForGeom != null && uiState.draftLocals.isNotEmpty() &&
         anchorForGeom.trackingState == TrackingState.TRACKING
     ) {
-        val a = anchorForGeom.pose.transformPoint(vm.draftLocals.last())
+        val a = anchorForGeom.pose.transformPoint(uiState.draftLocals.last())
         val len = dist3(a, overlay.liveHit)
         if (len > ILL_MIN_LEN_M) {
             val fwd = camera.pose.zAxis
@@ -981,33 +685,42 @@ private fun onFrame(
     }
     val usable = baseStatus == ArStatus.READY && hit != null
 
-    /* ── Muestreo del disparo ──
-       Tocar + no coloca el punto: abre una ventana de ~8 frames, junta
-       posiciones, descarta outliers y usa el promedio robusto. */
     if (captureRequested.value && !sampler.active) {
         captureRequested.value = false
         sampler.start()
     }
 
     if (sampler.active) {
-        sampler.frames++
-        if (usable) sampler.samples.add(hit!!.hitPose.translation)
+        sampler.advanceFrame()
+        if (usable) sampler.addSample(hit!!.hitPose.translation)
 
-        val done = sampler.samples.size >= SAMPLE_TARGET || sampler.frames >= SAMPLE_TIMEOUT_FRAMES
-        if (done) {
-            if (sampler.samples.size >= SAMPLE_MIN && usable) {
-                val raw = robustCentroid(sampler.samples)
-
-                // Proyección sobre plano extendido: el parche chico que
-                // ARCore detectó en la pared gobierna toda la pared.
-                val plane = bestPlaneFor(session, raw, vm.draftPlane)
+        if (sampler.isComplete) {
+            if (sampler.hasEnoughSamples && usable) {
+                val raw = robustCentroid(sampler.samples, SAMPLE_OUTLIER_M)
+                val plane = bestPlaneFor(session, raw, currentDraftPlane)
                 val world = plane?.let { snapToPlane(raw, it) } ?: raw
                 lastSnapInfo[0] = if (plane == null) "no"
                 else if (plane.type == Plane.Type.VERTICAL) "VERT" else "HORIZ"
 
-                val wasEmpty = vm.draftLocals.isEmpty()
-                if (vm.addPointAt(world, hit!!, plane) && wasEmpty) {
-                    vm.draftFocalPx = focalPx
+                var currentAnchor = getDraftAnchor()
+                if (currentAnchor == null) {
+                    currentAnchor = runCatching { hit!!.createAnchor() }.getOrNull()
+                    if (currentAnchor != null) {
+                        setDraftAnchor(currentAnchor)
+                        setDraftPlane(plane)
+                        setDraftFocalPx(focalPx)
+                        val local = currentAnchor.pose.inverse().transformPoint(world)
+                        vm.addPoint(local)
+                    }
+                } else if (currentAnchor.trackingState == TrackingState.TRACKING) {
+                    val local = currentAnchor.pose.inverse().transformPoint(world)
+                    val committedId = vm.addPoint(local)
+                    if (committedId != null) {
+                        onMeasurementCommitted(committedId, currentAnchor)
+                        setDraftAnchor(null)
+                        setDraftPlane(null)
+                        setDraftFocalPx(0f)
+                    }
                 }
             }
             sampler.stop()
@@ -1020,21 +733,43 @@ private fun onFrame(
         noSurfaceFrames[0] > NO_SURFACE_FRAMES_FOR_HINT
     )
 
-    /* ── HUD de diagnóstico ── */
     if (debugEnabled.value) {
         debugTickCounter[0]++
         if (debugTickCounter[0] % 15 == 0) {
-            debugText.value = buildDebugText(session, hit, focalPx, camJump, vm.draftPlane != null, liveFilter.spread)
+            debugText.value = buildDebugText(session, hit, focalPx, camJump, currentDraftPlane != null, liveFilter.spread)
         }
     }
 
     overlay.bump()
 }
 
-/**
- * Lee la configuración REAL de la sesión, no la que pedimos. Si SceneView
- * pisa nuestro lambda, acá se ve.
- */
+private fun snapToPlane(world: FloatArray, plane: Plane): FloatArray? {
+    if (plane.trackingState != TrackingState.TRACKING) return null
+    val pose = plane.centerPose
+    return snapToPlaneEquation(world, pose.yAxis, pose.translation, PLANE_SNAP_MAX_M)
+}
+
+private fun bestPlaneFor(session: Session, world: FloatArray, preferred: Plane?): Plane? {
+    if (preferred != null && snapToPlane(world, preferred) != null) return preferred
+
+    var best: Plane? = null
+    var bestDist = PLANE_SNAP_MAX_M
+    runCatching {
+        session.getAllTrackables(Plane::class.java).forEach { plane ->
+            if (plane.trackingState != TrackingState.TRACKING) return@forEach
+            if (plane.subsumedBy != null) return@forEach
+            val pose = plane.centerPose
+            val n = pose.yAxis
+            val p0 = pose.translation
+            val d = abs(
+                (world[0] - p0[0]) * n[0] + (world[1] - p0[1]) * n[1] + (world[2] - p0[2]) * n[2]
+            )
+            if (d < bestDist) { bestDist = d; best = plane }
+        }
+    }
+    return best
+}
+
 private val lastSnapInfo = arrayOf("-")
 
 private fun buildDebugText(
@@ -1080,16 +815,6 @@ private fun buildDebugText(
     }
 }
 
-/* ═══════════════════════════════════════════════════════════════════
- *  HIT TEST
- *  El orden importa: hitTest() devuelve los resultados por distancia,
- *  no por calidad. Un feature point suelto puede quedar delante del
- *  plano real y arruinar la medición.
- *    1. Plane      -> el más estable (promedia cientos de puntos)
- *    2. DepthPoint -> denso, funciona donde no hay plano detectado
- *    3. Point      -> último recurso
- * ═══════════════════════════════════════════════════════════════════ */
-
 private fun bestHit(
     frame: Frame,
     x: Float,
@@ -1100,8 +825,6 @@ private fun bestHit(
     val hits = runCatching { frame.hitTest(x, y) }.getOrNull() ?: return null
     if (hits.isEmpty()) return null
 
-    // Si la medición ya fijó una superficie, un hit sobre ESA superficie
-    // gana a cualquier otro.
     if (preferredPlane != null) {
         hits.firstOrNull { it.trackable === preferredPlane }?.let { return it }
     }
@@ -1113,11 +836,6 @@ private fun bestHit(
 
     hits.firstOrNull { it.trackable is DepthPoint }?.let { return it }
 
-    // Un ancla atada a un feature point HEREDA su inestabilidad: ARCore
-    // re-estima la profundidad de ese punto frame a frame y el ancla lo
-    // sigue, deslizándose por la pantalla en sentido contrario al
-    // movimiento del teléfono. Solo lo aceptamos si el dispositivo no
-    // tiene Depth API y por lo tanto no hay nada mejor.
     if (!allowFeaturePoints) return null
 
     return hits.firstOrNull { h ->
@@ -1125,10 +843,6 @@ private fun bestHit(
         t is Point && t.orientationMode == Point.OrientationMode.ESTIMATED_SURFACE_NORMAL
     }
 }
-
-/* ═══════════════════════════════════════════════════════════════════
- *  PROYECCIÓN MUNDO -> PANTALLA
- * ═══════════════════════════════════════════════════════════════════ */
 
 private fun projectToScreen(
     view: FloatArray,
@@ -1148,10 +862,8 @@ private fun projectToScreen(
     val cz = proj[2] * vx + proj[6] * vy + proj[10] * vz + proj[14] * vw
     val cw = proj[3] * vx + proj[7] * vy + proj[11] * vz + proj[15] * vw
 
-    // cw <= 0 significa DETRÁS de la cámara. El código anterior sólo
-    // chequeaba cw == 0f, así que esos puntos se proyectaban espejados.
     if (cw <= 1e-6f) return null
-    if (cz > cw) return null   // más allá del plano lejano
+    if (cz > cw) return null
 
     val ndcX = cx / cw
     val ndcY = cy / cw
@@ -1160,10 +872,6 @@ private fun projectToScreen(
         (1f - (ndcY * 0.5f + 0.5f)) * viewport.height
     )
 }
-
-/* ═══════════════════════════════════════════════════════════════════
- *  DIBUJO
- * ═══════════════════════════════════════════════════════════════════ */
 
 private class LabelPainter(textSizePx: Float, val pad: Float, bgColor: Int) {
     val text = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -1190,11 +898,6 @@ private class LabelPainter(textSizePx: Float, val pad: Float, bgColor: Int) {
 
 private val HALO = Color(0x99000000)
 
-/**
- * Dibuja una medición completa: halo + línea + graduaciones + extremos
- * en T + etiqueta por tramo. Las graduaciones son las que convierten
- * "una línea con un número" en algo que se lee como cinta métrica.
- */
 private fun DrawScope.drawMeasure(
     pts: List<Offset?>,
     segMeters: List<Float>,
@@ -1221,14 +924,12 @@ private fun DrawScope.drawMeasure(
 
         val ux = dx / pxLen
         val uy = dy / pxLen
-        val px = -uy   // perpendicular
+        val px = -uy
         val py = ux
 
-        // Halo oscuro debajo: legible sobre paredes claras
         drawLine(HALO, a, b, strokeWidth = haloWidth, cap = StrokeCap.Round)
         drawLine(color, a, b, strokeWidth = lineWidth, cap = StrokeCap.Round)
 
-        // Graduaciones
         val step = chooseTickStep(meters, pxLen)
         if (step != null) {
             var d = step
@@ -1246,11 +947,9 @@ private fun DrawScope.drawMeasure(
             }
         }
 
-        // Extremos en T (marcan el punto exacto mejor que un disco)
         drawTCap(a, px, py, capLen, color, lineWidth, haloWidth)
         drawTCap(b, px, py, capLen, color, lineWidth, haloWidth)
 
-        // Etiqueta del tramo, desplazada al lado "de arriba" de la línea
         if (pxLen > 46f) {
             val mx = (a.x + b.x) / 2f + px * (capLen + 6f) * (if (py < 0) 1f else -1f)
             val my = (a.y + b.y) / 2f + py * (capLen + 6f) * (if (py < 0) 1f else -1f)
@@ -1258,7 +957,6 @@ private fun DrawScope.drawMeasure(
         }
     }
 
-    // Total del recorrido, junto al último punto
     val last = pts.lastOrNull { it != null }
     if (totalLabel != null && last != null) {
         painter.draw(canvas, last.x, last.y - capLen * 2.6f, "Σ $totalLabel")
@@ -1275,22 +973,12 @@ private fun DrawScope.drawTCap(
     drawLine(color, s, e, strokeWidth = lineWidth)
 }
 
-/** Elige un paso de graduación legible: no más de ~20 marcas ni menos de 9 px entre ellas. */
-private fun chooseTickStep(meters: Float, pxLen: Float): Float? {
-    if (pxLen < 90f || meters < 0.03f) return null
-    val candidates = floatArrayOf(0.01f, 0.05f, 0.10f, 0.25f, 0.50f, 1.00f)
-    return candidates.firstOrNull { s ->
-        val count = meters / s
-        count in 1.5f..20f && (pxLen / count) >= 9f
-    }
-}
-
 private fun DrawScope.drawCrosshair(valid: Boolean, sampling: Boolean) {
     val cx = size.width / 2f
     val cy = size.height / 2f
     val len = size.minDimension * 0.035f
     val color = when {
-        sampling -> Color(0xFFFFC107)   // ámbar: promediando muestras
+        sampling -> Color(0xFFFFC107)
         valid -> Color(0xFF4CAF50)
         else -> Color(0xFFBDBDBD)
     }
@@ -1308,10 +996,6 @@ private fun DrawScope.drawCrosshair(valid: Boolean, sampling: Boolean) {
     drawCircle(HALO, radius = 5.5f, center = Offset(cx, cy))
     drawCircle(color, radius = 3f, center = Offset(cx, cy))
 }
-
-/* ═══════════════════════════════════════════════════════════════════
- *  UI AUXILIAR
- * ═══════════════════════════════════════════════════════════════════ */
 
 @Composable
 private fun StatusBanner(
