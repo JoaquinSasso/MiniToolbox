@@ -28,7 +28,7 @@
 
 ### AR Ruler
 
-- [ ] `ar-ruler-vm` — `ArRulerSceneViewScreen.kt` (1.078 líneas) — `ARulerVM` es clase privada con `remember {}`, no un `ViewModel` real. Estado no sobrevive recreación de Activity. Funciones puras (`dist3()`, `commitDraft()`, `chooseTickStep()`) intesteables.
+- [x] `ar-ruler-vm` — `ArRulerModels.kt`, `ArRulerMath.kt`, `ArRulerViewModel.kt`, `ArRulerSceneViewScreen.kt` — Migrado a MVVM canónico con `ArRulerViewModel` y `StateFlow` consumido mediante `collectAsStateWithLifecycle()`. Desacoplado de ARCore nativo con reconciliación declarativa de `Anchor` en la vista. Motor matemático puro y filtros extraídos a `ArRulerMath` con 100% de cobertura de tests unitarios (`ArRulerMathTest` y `ArRulerViewModelTest`) en JVM.
 
 ### Navegación
 
@@ -56,5 +56,5 @@
 
 ## Siguiente paso sugerido
  
-**`ar-ruler-vm`** (P1) — `ArRulerSceneViewScreen.kt` (1.078 líneas) — Extraer un `ViewModel` real y funciones puras (`dist3()`, `commitDraft()`, `chooseTickStep()`) para hacer testeable el clúster AR, alineado con el nuevo mandato de MVVM.
+**`type-safe-nav`** (P1) — `NavGraph.kt` (381 líneas, ~45 rutas manuales por string) — Migrar a rutas type-safe con `@Serializable` objects/classes usando Navigation Compose 2.10, eliminando rutas mágicas y unificando el contrato de navegación.
 

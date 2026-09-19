@@ -47,7 +47,7 @@ import com.joasasso.minitoolbox.tools.herramientas.calculadoras.PorcentajeScreen
 import com.joasasso.minitoolbox.tools.herramientas.generadores.GeneradorContrasenaScreen
 import com.joasasso.minitoolbox.tools.herramientas.generadores.GeneradorQrScreen
 import com.joasasso.minitoolbox.tools.herramientas.generadores.GroupSelectorScreen
-import com.joasasso.minitoolbox.tools.herramientas.instrumentos.ArRulerSceneViewScreen
+import com.joasasso.minitoolbox.tools.herramientas.instrumentos.arruler.ArRulerSceneViewScreen
 import com.joasasso.minitoolbox.tools.herramientas.instrumentos.BrujulaScreen
 import com.joasasso.minitoolbox.tools.herramientas.instrumentos.BubbleLevelScreen
 import com.joasasso.minitoolbox.tools.herramientas.instrumentos.FlashScreen
