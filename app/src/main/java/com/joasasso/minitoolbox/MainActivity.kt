@@ -44,7 +44,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportActionBar?.hide()
-        startRouteState = intent?.getStringExtra("startRoute")
+        startRouteState = intent?.getStringExtra(Screen.EXTRA_START_ROUTE_JSON)
+            ?: intent?.getStringExtra("startRoute")
 
         val isMetricsConfigured = MetricsConfig.isConfigured
         Log.d("Metrics", "metrics configured: $isMetricsConfigured")
@@ -122,31 +123,28 @@ class MainActivity : AppCompatActivity() {
                         )
 
                         LaunchedEffect(startRoute) {
-                            val route = startRoute
+                            val raw = startRoute
+                            if (!raw.isNullOrBlank()) {
+                                val targetScreen = Screen.fromJson(raw) ?: Screen.fromRouteString(raw)
+                                if (targetScreen != null && targetScreen != Screen.Categories) {
+                                    try {
+                                        PendingEntrySource.set(
+                                            intent?.getStringExtra(MetricsSource.EXTRA_START_SOURCE)
+                                        )
+                                        widgetUse(applicationContext, "widget_shortcuts")
 
-                            // Validamos que no sea null antes de intentar nada
-                            if (!route.isNullOrBlank() && route != Screen.Categories.route) {
-                                try {
-                                    // El uso NO se registra acá: al navegar, el NavGraph
-                                    // dispara su propio registro y la apertura contaría dos
-                                    // veces. Sólo se deja anotado el origen para que el
-                                    // NavGraph lo atribuya a esa apertura.
-                                    PendingEntrySource.set(
-                                        intent?.getStringExtra(MetricsSource.EXTRA_START_SOURCE)
-                                    )
-                                    widgetUse(applicationContext, "widget_shortcuts")
+                                        navController.popBackStack<Screen.Categories>(inclusive = false)
 
-                                    navController.popBackStack(Screen.Categories.route, inclusive = false)
-
-                                    navController.navigate(route) {
-                                        launchSingleTop = true
-                                        restoreState = false
+                                        navController.navigate(targetScreen) {
+                                            launchSingleTop = true
+                                            restoreState = false
+                                        }
+                                    } catch (e: Exception) {
+                                        Log.e("Navigation", "Error navegando a destino: $raw", e)
+                                    } finally {
+                                        startRoute = null
                                     }
-                                } catch (e: IllegalArgumentException) {
-                                    // Si la ruta enviada por el Intent no existe en el NavGraph, cae aquí sin crashear.
-                                    Log.e("Navigation", "Ruta inválida desde el Intent: $route")
-                                } finally {
-                                    // Siempre limpiamos el estado al final para evitar re-navegaciones infinitas
+                                } else {
                                     startRoute = null
                                 }
                             }
@@ -165,7 +163,8 @@ class MainActivity : AppCompatActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        val newRoute = intent.getStringExtra("startRoute")
+        val newRoute = intent.getStringExtra(Screen.EXTRA_START_ROUTE_JSON)
+            ?: intent.getStringExtra("startRoute")
         // Actualiza Compose state → dispara LaunchedEffect(startRoute)
         pushStartRoute?.invoke(newRoute)
     }

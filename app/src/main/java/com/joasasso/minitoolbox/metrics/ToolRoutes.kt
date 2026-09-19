@@ -1,20 +1,13 @@
 package com.joasasso.minitoolbox.metrics
 
+import com.joasasso.minitoolbox.nav.Screen
 import com.joasasso.minitoolbox.tools.Tool
 import com.joasasso.minitoolbox.tools.ToolRegistry
 
 /**
- * Traduce una ruta de navegación a la herramienta del registry que le corresponde.
- *
- * Existe por un incidente concreto: la ruta cruda se usaba directamente como clave de
- * métrica. Cuando un deep link traía una ruta con argumentos
- * ("pomodoro/detail/2f7a1b3c-…"), esa clave no cumplía el contrato del backend, el lote
- * quedaba congelado y el dispositivo dejaba de reportar métricas de forma permanente.
- *
- * La regla es: **una ruta que no resuelve a una herramienta conocida no genera métrica**.
- * Vale más perder un registro que envenenar la cola de envío. Además, esto elimina las
- * claves fantasma que se generaban desde pantallas que no son herramientas (por ejemplo
- * "pro" al abrir el paywall desde un widget).
+ * Traduce una ruta de navegación o destino Screen a la herramienta del registry que le corresponde.
+ * Unifica subpantallas (como detalle de pomodoro, estadísticas de agua o pantallas del divisor de gastos)
+ * bajo la clave de métrica de su herramienta correspondiente.
  */
 object ToolRoutes {
 
@@ -22,14 +15,36 @@ object ToolRoutes {
         ToolRegistry.tools.associateBy { it.screen.route }
     }
 
-    private val parameterized: List<Pair<Regex, Tool>> by lazy {
-        ToolRegistry.tools
-            .filter { it.screen.route.contains('{') }
-            .map { patternToRegex(it.screen.route) to it }
+    private val pomodoroTool: Tool? by lazy {
+        ToolRegistry.tools.firstOrNull { it.screen == Screen.PomodoroList }
     }
 
-    /** Segmento de ruta válido: lo que puede ocupar el lugar de un {param}. */
-    private const val SEGMENT_REGEX = "[A-Za-z0-9._~+%-]+"
+    private val waterTool: Tool? by lazy {
+        ToolRegistry.tools.firstOrNull { it.screen == Screen.Water }
+    }
+
+    private val meetingsTool: Tool? by lazy {
+        ToolRegistry.tools.firstOrNull { it.screen == Screen.Meetings }
+    }
+
+    private val basicPhrasesTool: Tool? by lazy {
+        ToolRegistry.tools.firstOrNull { it.screen == Screen.BasicPhrases }
+    }
+
+    /**
+     * Resuelve la herramienta correspondiente a partir de un destino Screen.
+     */
+    fun findToolByScreen(screen: Screen?): Tool? {
+        if (screen == null) return null
+        return when (screen) {
+            is Screen.PomodoroList, is Screen.PomodoroDetail -> pomodoroTool
+            is Screen.Water, is Screen.WaterStats -> waterTool
+            is Screen.Meetings, is Screen.MeetingCreate, is Screen.MeetingDetail,
+            is Screen.ExpenseAdd, is Screen.ExpenseEdit -> meetingsTool
+            is Screen.BasicPhrases -> basicPhrasesTool
+            else -> ToolRegistry.tools.firstOrNull { it.screen == screen }
+        }
+    }
 
     /**
      * Herramienta correspondiente a la ruta, o null si la ruta no es una herramienta.
@@ -39,9 +54,13 @@ object ToolRoutes {
         if (route.isNullOrBlank()) return null
         val base = route.substringBefore('?').substringBefore('#')
 
-        byExactRoute[base]?.let { return it }
+        val screen = Screen.fromRouteString(base)
+        if (screen != null) {
+            val tool = findToolByScreen(screen)
+            if (tool != null) return tool
+        }
 
-        return parameterized.firstOrNull { (regex, _) -> regex.matches(base) }?.second
+        return byExactRoute[base]
     }
 
     /**
@@ -49,25 +68,8 @@ object ToolRoutes {
      */
     fun metricsKey(route: String?): String? = findTool(route)?.metricsKey
 
-    /** Convierte "pomodoro/detail/{timerId}" en un Regex que matchea valores reales. */
-    private fun patternToRegex(pattern: String): Regex {
-        val sb = StringBuilder()
-        var i = 0
-        while (i < pattern.length) {
-            val ch = pattern[i]
-            if (ch == '{') {
-                val end = pattern.indexOf('}', startIndex = i + 1)
-                if (end == -1) {
-                    sb.append(Regex.escape(pattern.substring(i)))
-                    break
-                }
-                sb.append(SEGMENT_REGEX)
-                i = end + 1
-            } else {
-                sb.append(Regex.escape(ch.toString()))
-                i++
-            }
-        }
-        return Regex("^$sb$")
-    }
+    /**
+     * Clave de métrica estable para ese destino Screen, o null si no corresponde registrar nada.
+     */
+    fun metricsKey(screen: Screen): String? = findToolByScreen(screen)?.metricsKey
 }

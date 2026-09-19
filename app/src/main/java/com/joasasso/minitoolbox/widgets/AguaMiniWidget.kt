@@ -57,7 +57,7 @@ class AguaMiniWidget : GlanceAppWidget() {
             val progresoColor = Color(0xFF2389DA)
 
             val launchIntent = Intent(context, MainActivity::class.java).apply {
-                putExtra("startRoute", Screen.Water.route)
+                putExtra(Screen.EXTRA_START_ROUTE_JSON, Screen.toJson(Screen.Water))
                 putExtra(MetricsSource.EXTRA_START_SOURCE, MetricsSource.WIDGET)
             }
 

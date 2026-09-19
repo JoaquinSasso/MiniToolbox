@@ -40,7 +40,7 @@ Este documento define la semántica exacta de los contadores utilizados en el si
 - **Qué mide:** Interacciones con herramientas específicas (clic en el menú o apertura).
 - **Estructura:** Mapa de `tool_id` -> `count`.
 - **Nota:** No mide tiempo de permanencia, solo intención de uso.
-- **Clave:** Desde la v1.3.2 proviene de `Tool.metricsKey`, un identificador estable e independiente de la ruta de navegación. Antes se usaba la ruta cruda.
+- **Clave:** Desde la v1.3.2 proviene de `Tool.metricsKey`, un identificador estable e independiente de la ruta de navegación. Con la migración a navegación type-safe, las subpantallas se unifican bajo la clave principal de su herramienta: `pomodoro_list` y `pomodoro/detail` reportan bajo `pomodoro`, `water_stats` bajo `water`, y las subtelas de divisor de gastos bajo `meetings`. La clave `quotes` se unifica a `basic_phrases`.
 - **Limitación histórica:** **[SESGO DETECTADO]** Hasta la v1.3.2, las aperturas por deep link (notificación, widget, acceso directo) se registraban **dos veces**: una en `MainActivity` y otra en el `NavGraph` al navegar. El sesgo afecta sólo a las herramientas con notificaciones o widgets, principalmente `water` y `pomodoro`. La caída visible en esas series a partir de la v1.3.2 es la corrección del sesgo, no una caída de uso.
 - **Limitación histórica:** **[DATOS PERDIDOS]** Los dispositivos que abrían el detalle de un Pomodoro desde una notificación quedaban con el envío bloqueado de forma permanente (ver `metrics-pipeline-blockage-postmortem.md`). Toda la serie previa a agosto de 2026 subrepresenta a los usuarios de esa herramienta.
 

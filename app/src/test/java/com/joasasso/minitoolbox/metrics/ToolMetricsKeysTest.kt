@@ -39,7 +39,7 @@ class ToolMetricsKeysTest {
         "percentage",
         "unit_converter",
         "password_generator",
-        "pomodoro_list",
+        "pomodoro",
         "qr_generator",
         "ruler",
         "light_meter",
@@ -52,7 +52,7 @@ class ToolMetricsKeysTest {
         "meetings",
         "dice",
         "quick_calcs",
-        "quotes",
+        "basic_phrases",
         "multiverse_me",
         "guess_capital",
         "compass",
@@ -111,13 +111,36 @@ class ToolMetricsKeysTest {
     }
 
     @Test
-    fun `una ruta con argumentos no genera metrica`() {
-        val route = Screen.PomodoroDetail.createRoute("2f7a1b3c-4d5e-6f70-8a9b-0c1d2e3f4a5b")
+    fun `subpantallas y rutas con argumentos unifican a la clave de la herramienta principal`() {
+        val pomodoroRoute = Screen.PomodoroDetail.createRoute("2f7a1b3c-4d5e-6f70-8a9b-0c1d2e3f4a5b")
+        assertEquals("pomodoro", ToolRoutes.metricsKey(pomodoroRoute))
+        assertEquals("water", ToolRoutes.metricsKey(Screen.WaterStats.route))
+        assertEquals("meetings", ToolRoutes.metricsKey(Screen.MeetingDetail("123").route))
+        assertEquals("meetings", ToolRoutes.metricsKey(Screen.MeetingCreate.route))
+        assertEquals("meetings", ToolRoutes.metricsKey(Screen.ExpenseAdd("123").route))
+        assertEquals("meetings", ToolRoutes.metricsKey(Screen.ExpenseEdit("123", "456").route))
+    }
 
-        assertNull(
-            "Una ruta con UUID no debe producir clave de métrica",
-            ToolRoutes.metricsKey(route)
-        )
+    @Test
+    fun `rutas con argumentos producen claves validas para el backend`() {
+        val pomodoroRoute = Screen.PomodoroDetail.createRoute("2f7a1b3c-4d5e-6f70-8a9b-0c1d2e3f4a5b")
+        val key = ToolRoutes.metricsKey(pomodoroRoute)
+        assertNotNull(key)
+        assertTrue(MetricsContract.isValidKey(key!!))
+        assertEquals("pomodoro", key)
+    }
+
+    @Test
+    fun `resolucion por Screen resuelve a la clave correspondiente`() {
+        assertEquals("pomodoro", ToolRoutes.metricsKey(Screen.PomodoroList))
+        assertEquals("pomodoro", ToolRoutes.metricsKey(Screen.PomodoroDetail("test-id")))
+        assertEquals("water", ToolRoutes.metricsKey(Screen.Water))
+        assertEquals("water", ToolRoutes.metricsKey(Screen.WaterStats))
+        assertEquals("meetings", ToolRoutes.metricsKey(Screen.Meetings))
+        assertEquals("meetings", ToolRoutes.metricsKey(Screen.MeetingDetail("m-1")))
+        assertEquals("basic_phrases", ToolRoutes.metricsKey(Screen.BasicPhrases))
+        assertNull(ToolRoutes.metricsKey(Screen.Categories))
+        assertNull(ToolRoutes.metricsKey(Screen.Pro))
     }
 
     @Test

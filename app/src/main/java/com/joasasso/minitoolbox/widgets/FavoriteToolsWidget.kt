@@ -2,6 +2,7 @@ package com.joasasso.minitoolbox.widgets
 
 import android.content.Context
 import android.content.Intent
+import com.joasasso.minitoolbox.nav.Screen
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.Preferences
 import androidx.glance.ColorFilter
@@ -11,13 +12,11 @@ import androidx.glance.GlanceTheme
 import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.LocalSize
-import androidx.glance.action.ActionParameters
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.SizeMode
-import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
@@ -115,7 +114,7 @@ class FavoriteToolsWidget : GlanceAppWidget() {
                                         if (tool != null) it.clickable(
                                             actionStartActivity(
                                                 Intent(context, MainActivity::class.java).apply {
-                                                    putExtra("startRoute", tool.screen.route)
+                                                    putExtra(Screen.EXTRA_START_ROUTE_JSON, Screen.toJson(tool.screen))
                                                     putExtra(MetricsSource.EXTRA_START_SOURCE, MetricsSource.WIDGET)
                                                     addFlags(
                                                         Intent.FLAG_ACTIVITY_CLEAR_TOP or
@@ -182,15 +181,6 @@ class FavoriteToolsWidgetReceiver : GlanceAppWidgetReceiver() {
             } finally {
                 pendingResult.finish()
             }
-        }
-    }
-    class OpenPaywallAction : ActionCallback {
-        override suspend fun onAction(
-            context: Context,
-            glanceId: GlanceId,
-            parameters: ActionParameters
-        ) {
-            // No longer needed
         }
     }
 }
