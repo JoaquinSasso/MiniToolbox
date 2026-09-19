@@ -1,100 +1,362 @@
 package com.joasasso.minitoolbox.nav
 
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+
 /**
- * Centraliza todas las rutas de navegación y sus títulos.
+ * Jerarquía sellada de destinos de navegación Type-Safe con soporte de serialización.
  */
-// Rutas normalizadas (en inglés, ASCII, minúsculas con _)
-sealed class Screen(val route: String) {
+@Serializable
+sealed class Screen {
+    abstract val route: String
 
-    // --- Utility / non-measured (si querés ocultarlas en métricas)
-    object Categories  : Screen("categories")
-    object About       : Screen("about")
-    object DevMetrics  : Screen("dev_metrics") // antes: "dev/metrics"
-
-    // --- Tools (normalizadas)
-    object GroupSelector       : Screen("group_selector")
-    object CoinFlip            : Screen("coin_flip")
-    object DecimalBinary       : Screen("decimal_binary")
-    object TrucoScoreboard     : Screen("truco_scoreboard")
-    object AgeCalculator       : Screen("age_calculator")
-    object ZodiacSign          : Screen("zodiac_sign")
-    object PomodoroList        : Screen("pomodoro_list")
-    object PomodoroDetail : Screen("pomodoro/detail/{timerId}") {
-        const val ARG = "timerId"
-        fun createRoute(timerId: String) = "pomodoro/detail/$timerId"
+    // --- Utility / non-measured
+    @Serializable
+    @SerialName("categories")
+    data object Categories : Screen() {
+        override val route: String get() = "categories"
     }
-    object BubbleLevel         : Screen("bubble_level")
-    object Percentage          : Screen("percentage")
-    object UnitConverter       : Screen("unit_converter")
-    object PasswordGenerator   : Screen("password_generator")
-    object QrGenerator         : Screen("qr_generator")
-    object Ruler               : Screen("ruler")
-    object LightMeter          : Screen("light_meter")
-    object Flashlight          : Screen("flashlight")
-    object Water               : Screen("water")
-    object WaterStats          : Screen("water_stats")
-    object Countdown           : Screen("countdown")
-    object CountriesInfo       : Screen("countries_info")
-    object SelectorWheel       : Screen("selector_wheel")
-    object GuessFlag           : Screen("guess_flag")
-    object MeetingCreate       : Screen("meeting_create")
-    object Meetings            : Screen("meetings")
-    object MeetingDetail       : Screen("meeting_detail")
-    object ExpenseEdit         : Screen("expense_edit")
-    object ExpenseAdd          : Screen("expense_add")
-    object Dice                : Screen("dice")
-    object QuickCalcs          : Screen("quick_calcs")
-    object Quotes              : Screen("quotes")
-    object MultiverseMe        : Screen("multiverse_me")
-    object GuessCapital        : Screen("guess_capital")
-    object Compass             : Screen("compass")
-    object Todo                : Screen("todo")
-    object Scoreboard          : Screen("scoreboard")
-    object Magnifier           : Screen("magnifier")
-    object ArRuler             : Screen("ar_ruler")
-    object Pro : Screen("pro")
-    object Minesweeper : Screen("minesweeper")
+
+    @Serializable
+    @SerialName("about")
+    data object About : Screen() {
+        override val route: String get() = "about"
+    }
+
+    @Serializable
+    @SerialName("dev_metrics")
+    data object DevMetrics : Screen() {
+        override val route: String get() = "dev_metrics"
+    }
+
+    @Serializable
+    @SerialName("pro")
+    data object Pro : Screen() {
+        override val route: String get() = "pro"
+    }
+
+    // --- Tools
+    @Serializable
+    @SerialName("group_selector")
+    data object GroupSelector : Screen() {
+        override val route: String get() = "group_selector"
+    }
+
+    @Serializable
+    @SerialName("coin_flip")
+    data object CoinFlip : Screen() {
+        override val route: String get() = "coin_flip"
+    }
+
+    @Serializable
+    @SerialName("decimal_binary")
+    data object DecimalBinary : Screen() {
+        override val route: String get() = "decimal_binary"
+    }
+
+    @Serializable
+    @SerialName("truco_scoreboard")
+    data object TrucoScoreboard : Screen() {
+        override val route: String get() = "truco_scoreboard"
+    }
+
+    @Serializable
+    @SerialName("age_calculator")
+    data object AgeCalculator : Screen() {
+        override val route: String get() = "age_calculator"
+    }
+
+    @Serializable
+    @SerialName("zodiac_sign")
+    data object ZodiacSign : Screen() {
+        override val route: String get() = "zodiac_sign"
+    }
+
+    @Serializable
+    @SerialName("pomodoro_list")
+    data object PomodoroList : Screen() {
+        override val route: String get() = "pomodoro_list"
+    }
+
+    @Serializable
+    @SerialName("pomodoro_detail")
+    data class PomodoroDetail(val timerId: String) : Screen() {
+        override val route: String get() = "pomodoro/detail/$timerId"
+
+        companion object {
+            const val ARG = "timerId"
+            fun createRoute(timerId: String) = "pomodoro/detail/$timerId"
+        }
+    }
+
+    @Serializable
+    @SerialName("bubble_level")
+    data object BubbleLevel : Screen() {
+        override val route: String get() = "bubble_level"
+    }
+
+    @Serializable
+    @SerialName("percentage")
+    data object Percentage : Screen() {
+        override val route: String get() = "percentage"
+    }
+
+    @Serializable
+    @SerialName("unit_converter")
+    data object UnitConverter : Screen() {
+        override val route: String get() = "unit_converter"
+    }
+
+    @Serializable
+    @SerialName("password_generator")
+    data object PasswordGenerator : Screen() {
+        override val route: String get() = "password_generator"
+    }
+
+    @Serializable
+    @SerialName("qr_generator")
+    data object QrGenerator : Screen() {
+        override val route: String get() = "qr_generator"
+    }
+
+    @Serializable
+    @SerialName("ruler")
+    data object Ruler : Screen() {
+        override val route: String get() = "ruler"
+    }
+
+    @Serializable
+    @SerialName("light_meter")
+    data object LightMeter : Screen() {
+        override val route: String get() = "light_meter"
+    }
+
+    @Serializable
+    @SerialName("flashlight")
+    data object Flashlight : Screen() {
+        override val route: String get() = "flashlight"
+    }
+
+    @Serializable
+    @SerialName("water")
+    data object Water : Screen() {
+        override val route: String get() = "water"
+    }
+
+    @Serializable
+    @SerialName("water_stats")
+    data object WaterStats : Screen() {
+        override val route: String get() = "water_stats"
+    }
+
+    @Serializable
+    @SerialName("countdown")
+    data object Countdown : Screen() {
+        override val route: String get() = "countdown"
+    }
+
+    @Serializable
+    @SerialName("countries_info")
+    data object CountriesInfo : Screen() {
+        override val route: String get() = "countries_info"
+    }
+
+    @Serializable
+    @SerialName("selector_wheel")
+    data object SelectorWheel : Screen() {
+        override val route: String get() = "selector_wheel"
+    }
+
+    @Serializable
+    @SerialName("guess_flag")
+    data object GuessFlag : Screen() {
+        override val route: String get() = "guess_flag"
+    }
+
+    @Serializable
+    @SerialName("meetings")
+    data object Meetings : Screen() {
+        override val route: String get() = "meetings"
+    }
+
+    @Serializable
+    @SerialName("meeting_create")
+    data object MeetingCreate : Screen() {
+        override val route: String get() = "meeting_create"
+    }
+
+    @Serializable
+    @SerialName("meeting_detail")
+    data class MeetingDetail(val reunionId: String) : Screen() {
+        override val route: String get() = "meeting_detail/$reunionId"
+    }
+
+    @Serializable
+    @SerialName("expense_edit")
+    data class ExpenseEdit(val reunionId: String, val gastoId: String) : Screen() {
+        override val route: String get() = "expense_edit/$reunionId/$gastoId"
+    }
+
+    @Serializable
+    @SerialName("expense_add")
+    data class ExpenseAdd(val reunionId: String) : Screen() {
+        override val route: String get() = "expense_add/$reunionId"
+    }
+
+    @Serializable
+    @SerialName("dice")
+    data object Dice : Screen() {
+        override val route: String get() = "dice"
+    }
+
+    @Serializable
+    @SerialName("quick_calcs")
+    data object QuickCalcs : Screen() {
+        override val route: String get() = "quick_calcs"
+    }
+
+    @Serializable
+    @SerialName("basic_phrases")
+    data object BasicPhrases : Screen() {
+        override val route: String get() = "basic_phrases"
+    }
+
+    @Serializable
+    @SerialName("multiverse_me")
+    data object MultiverseMe : Screen() {
+        override val route: String get() = "multiverse_me"
+    }
+
+    @Serializable
+    @SerialName("guess_capital")
+    data object GuessCapital : Screen() {
+        override val route: String get() = "guess_capital"
+    }
+
+    @Serializable
+    @SerialName("compass")
+    data object Compass : Screen() {
+        override val route: String get() = "compass"
+    }
+
+    @Serializable
+    @SerialName("todo")
+    data object Todo : Screen() {
+        override val route: String get() = "todo"
+    }
+
+    @Serializable
+    @SerialName("scoreboard")
+    data object Scoreboard : Screen() {
+        override val route: String get() = "scoreboard"
+    }
+
+    @Serializable
+    @SerialName("magnifier")
+    data object Magnifier : Screen() {
+        override val route: String get() = "magnifier"
+    }
+
+    @Serializable
+    @SerialName("ar_ruler")
+    data object ArRuler : Screen() {
+        override val route: String get() = "ar_ruler"
+    }
+
+    @Serializable
+    @SerialName("minesweeper")
+    data object Minesweeper : Screen() {
+        override val route: String get() = "minesweeper"
+    }
 
     companion object {
-        // Convierte patrones con {param} en Regex que matchea valores reales
-        // Acepta: letras, números y símbolos comunes de IDs dentro de un segmento (sin / ? #)
-        private const val SEGMENT_REGEX = "[A-Za-z0-9._~+%-]+"
+        const val EXTRA_START_ROUTE_JSON = "startRouteJson"
 
-        // "pomodoro/detail/{timerId}"  ->  ^pomodoro/detail/[A-Za-z0-9._~+%-]+(?:\\?.*)?$
-        private fun routePatternToRegex(pattern: String): Regex {
-            val sb = StringBuilder()
-            var i = 0
-            while (i < pattern.length) {
-                val ch = pattern[i]
-                if (ch == '{') {
-                    val end = pattern.indexOf('}', startIndex = i + 1)
-                    if (end == -1) {
-                        // Llave sin cerrar: trata tod0 como literal escapado
-                        sb.append(Regex.escape(pattern.substring(i)))
-                        break
-                    } else {
-                        // reemplaza {param} por un segmento de ruta válido
-                        sb.append(SEGMENT_REGEX)
-                        i = end + 1
-                        continue
-                    }
-                } else {
-                    sb.append(Regex.escape(ch.toString()))
-                    i++
-                }
-            }
-            return Regex("^$sb(?:\\?.*)?$")
+        private val json = Json {
+            ignoreUnknownKeys = true
+            encodeDefaults = true
         }
 
-        fun isValidRoute(route: String?): Boolean {
-            if (route.isNullOrBlank()) return false
-            val patterns = Screen::class.sealedSubclasses
-                .mapNotNull { it.objectInstance?.route } // e.g. "pomodoro/detail/{timerId}"
-            // Coincidencia exacta o por patrón con {param}
-            return patterns.any { p ->
-                p == route || routePatternToRegex(p).matches(route)
+        fun toJson(screen: Screen): String = json.encodeToString<Screen>(screen)
+
+        fun fromJson(jsonString: String?): Screen? {
+            if (jsonString.isNullOrBlank()) return null
+            return runCatching { json.decodeFromString<Screen>(jsonString) }.getOrNull()
+        }
+
+        fun fromRouteString(route: String?): Screen? {
+            if (route.isNullOrBlank()) return null
+            val base = route.substringBefore('?').substringBefore('#')
+
+            if (base.startsWith("pomodoro/detail/")) {
+                val timerId = base.removePrefix("pomodoro/detail/")
+                if (timerId.isNotBlank()) return PomodoroDetail(timerId)
+            }
+            if (base.startsWith("pomodoro_detail/")) {
+                val timerId = base.removePrefix("pomodoro_detail/")
+                if (timerId.isNotBlank()) return PomodoroDetail(timerId)
+            }
+            if (base.startsWith("meeting_detail/")) {
+                val id = base.removePrefix("meeting_detail/")
+                if (id.isNotBlank()) return MeetingDetail(id)
+            }
+            if (base.startsWith("expense_add/")) {
+                val id = base.removePrefix("expense_add/")
+                if (id.isNotBlank()) return ExpenseAdd(id)
+            }
+            if (base.startsWith("expense_edit/")) {
+                val parts = base.removePrefix("expense_edit/").split('/')
+                if (parts.size >= 2) return ExpenseEdit(parts[0], parts[1])
+            }
+
+            return when (base) {
+                "categories" -> Categories
+                "about" -> About
+                "dev_metrics", "dev/metrics" -> DevMetrics
+                "pro" -> Pro
+                "group_selector" -> GroupSelector
+                "coin_flip" -> CoinFlip
+                "decimal_binary" -> DecimalBinary
+                "truco_scoreboard" -> TrucoScoreboard
+                "age_calculator" -> AgeCalculator
+                "zodiac_sign" -> ZodiacSign
+                "pomodoro", "pomodoro_list" -> PomodoroList
+                "pomodoro_detail" -> PomodoroDetail("")
+                "bubble_level" -> BubbleLevel
+                "percentage" -> Percentage
+                "unit_converter" -> UnitConverter
+                "password_generator" -> PasswordGenerator
+                "qr_generator" -> QrGenerator
+                "ruler" -> Ruler
+                "light_meter" -> LightMeter
+                "flashlight" -> Flashlight
+                "water" -> Water
+                "water_stats" -> WaterStats
+                "countdown" -> Countdown
+                "countries_info" -> CountriesInfo
+                "selector_wheel" -> SelectorWheel
+                "guess_flag" -> GuessFlag
+                "meetings" -> Meetings
+                "meeting_create" -> MeetingCreate
+                "meeting_detail" -> MeetingDetail("")
+                "expense_add" -> ExpenseAdd("")
+                "expense_edit" -> ExpenseEdit("", "")
+                "dice" -> Dice
+                "quick_calcs" -> QuickCalcs
+                "basic_phrases", "quotes" -> BasicPhrases
+                "multiverse_me" -> MultiverseMe
+                "guess_capital" -> GuessCapital
+                "compass" -> Compass
+                "todo" -> Todo
+                "scoreboard" -> Scoreboard
+                "magnifier" -> Magnifier
+                "ar_ruler" -> ArRuler
+                "minesweeper" -> Minesweeper
+                else -> null
             }
         }
 
+        fun isValidRoute(route: String?): Boolean = fromRouteString(route) != null
     }
 }

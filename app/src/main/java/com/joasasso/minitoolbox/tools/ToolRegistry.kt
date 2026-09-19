@@ -92,7 +92,8 @@ object ToolRegistry {
             category = ToolCategory.Organizacion,
             subCategory = R.string.subcategory_others,
             summary = R.string.sum_tool_pomodoro_timer,
-            svgResId = R.drawable.timer
+            svgResId = R.drawable.timer,
+            metricsKey = "pomodoro"
         ),
         Tool(
             name = R.string.tool_qr_generator,
@@ -192,7 +193,7 @@ object ToolRegistry {
         ),
         Tool(
             name = R.string.tool_basic_phrases,
-            screen = Screen.Quotes,
+            screen = Screen.BasicPhrases,
             category = ToolCategory.Informacion,
             subCategory = R.string.subcategory_general,
             summary = R.string.sum_tool_basic_phrases,

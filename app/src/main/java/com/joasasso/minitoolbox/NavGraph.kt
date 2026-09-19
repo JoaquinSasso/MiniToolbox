@@ -19,14 +19,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.navArgument
+import androidx.navigation.toRoute
 import com.joasasso.minitoolbox.dev.MetricsDiagnosticsScreen
-import com.joasasso.minitoolbox.metrics.TOOL_USAGE_METRIC_COOLDOWN_MS
 import com.joasasso.minitoolbox.metrics.PendingEntrySource
+import com.joasasso.minitoolbox.metrics.TOOL_USAGE_METRIC_COOLDOWN_MS
 import com.joasasso.minitoolbox.metrics.ToolRoutes
 import com.joasasso.minitoolbox.metrics.toolUse
 import com.joasasso.minitoolbox.nav.Screen
@@ -47,13 +46,13 @@ import com.joasasso.minitoolbox.tools.herramientas.calculadoras.PorcentajeScreen
 import com.joasasso.minitoolbox.tools.herramientas.generadores.GeneradorContrasenaScreen
 import com.joasasso.minitoolbox.tools.herramientas.generadores.GeneradorQrScreen
 import com.joasasso.minitoolbox.tools.herramientas.generadores.GroupSelectorScreen
-import com.joasasso.minitoolbox.tools.herramientas.instrumentos.arruler.ArRulerSceneViewScreen
 import com.joasasso.minitoolbox.tools.herramientas.instrumentos.BrujulaScreen
 import com.joasasso.minitoolbox.tools.herramientas.instrumentos.BubbleLevelScreen
 import com.joasasso.minitoolbox.tools.herramientas.instrumentos.FlashScreen
 import com.joasasso.minitoolbox.tools.herramientas.instrumentos.LightSensorScreen
 import com.joasasso.minitoolbox.tools.herramientas.instrumentos.MagnifierScreen
 import com.joasasso.minitoolbox.tools.herramientas.instrumentos.ReglaScreen
+import com.joasasso.minitoolbox.tools.herramientas.instrumentos.arruler.ArRulerSceneViewScreen
 import com.joasasso.minitoolbox.tools.info.AgeCalculatorScreen
 import com.joasasso.minitoolbox.tools.info.BasicPhrasesScreen
 import com.joasasso.minitoolbox.tools.info.CountriesInfoScreen
@@ -88,15 +87,12 @@ fun MiniToolboxNavGraph(
     val activity = context.findActivity()
 
     LaunchedEffect(Unit) {
-        // Inicializar managers una sola vez
         if (activity != null) {
             RewardedManager.init(activity, rewardedAdUnitId)
             InterstitialManager.init(context.applicationContext, interstitialAdUnitId)
         }
     }
 
-
-    // Cooldown para métricas para evitar duplicados por rebotes de navegación
     val metricsDebouncer = remember { ToolDebouncer(cooldownMs = TOOL_USAGE_METRIC_COOLDOWN_MS) }
 
     var lastRoute by remember { mutableStateOf<String?>(null) }
@@ -104,22 +100,14 @@ fun MiniToolboxNavGraph(
 
     LaunchedEffect(backStackEntry?.destination?.route) {
         val route = backStackEntry?.destination?.route ?: return@LaunchedEffect
-        // La clave de métrica se resuelve contra el registry en lugar de usar la ruta
-        // cruda: una ruta desconocida o con argumentos no debe generar métrica.
         val tool = ToolRoutes.findTool(route)
         if (route != lastRoute && tool != null) {
-            // Registrar métrica solo si pasó el cooldown de deduplicación.
-            // El origen lo deja MainActivity al procesar un deep link; si no hay
-            // ninguno pendiente, la apertura se atribuye a la navegación interna.
-            if (metricsDebouncer.canExecute(route)) {
+            if (metricsDebouncer.canExecute(tool.metricsKey)) {
                 toolUse(context, tool.metricsKey, PendingEntrySource.consume())
             }
 
-            // contar solo si pasó el cooldown por herramienta (Tracker de anuncios - 30s)
-            val isNewAccess = ToolUsageTracker.onToolOpened(context, route)
-
+            val isNewAccess = ToolUsageTracker.onToolOpened(context, tool.metricsKey)
             if (isNewAccess && activity != null) {
-                // Realiza conteo global y lleva cooldown de tiempo
                 InterstitialManager.onToolOpened(
                     activity = activity,
                     shouldShowAds = shouldShowAds
@@ -136,8 +124,8 @@ fun MiniToolboxNavGraph(
     }
 
     NavHost(
-        navController    = navController,
-        startDestination = Screen.Categories.route,
+        navController = navController,
+        startDestination = Screen.Categories,
         enterTransition = {
             slideIntoContainer(
                 AnimatedContentTransitionScope.SlideDirection.Start,
@@ -180,177 +168,173 @@ fun MiniToolboxNavGraph(
             )
         }
     ) {
-        composable(Screen.Categories.route) {
+        composable<Screen.Categories> {
             CategoriesScreen(
                 tools = ToolRegistry.tools,
-                onToolClick = { tool -> navController.navigate(tool.screen.route) },
-                onNavigateToPro = { navController.navigate(Screen.Pro.route) },
-                onNavigateToAbout = { navController.navigate(Screen.About.route) }
+                onToolClick = { tool -> navController.navigate(tool.screen) },
+                onNavigateToPro = { navController.navigate(Screen.Pro) },
+                onNavigateToAbout = { navController.navigate(Screen.About) }
             )
         }
 
-        composable(Screen.GroupSelector.route) {
+        composable<Screen.GroupSelector> {
             GroupSelectorScreen(onBack = onBackSmart)
         }
-        composable(Screen.CoinFlip.route) {
+        composable<Screen.CoinFlip> {
             CoinFlipScreen(onBack = onBackSmart)
         }
-        composable(Screen.DecimalBinary.route) {
+        composable<Screen.DecimalBinary> {
             DecimalBinaryConverterScreen(onBack = onBackSmart)
         }
-        composable(Screen.TrucoScoreboard.route) {
+        composable<Screen.TrucoScoreboard> {
             TrucoScoreBoardScreen(onBack = onBackSmart)
         }
-        composable(Screen.AgeCalculator.route) {
+        composable<Screen.AgeCalculator> {
             AgeCalculatorScreen(onBack = onBackSmart)
         }
-        composable(Screen.ZodiacSign.route) {
+        composable<Screen.ZodiacSign> {
             ZodiacSignScreen(onBack = onBackSmart)
         }
-        composable(Screen.PomodoroList.route) {
+        composable<Screen.PomodoroList> {
             PomodoroTimersListScreen(
                 onBack = { navController.popBackStack() },
                 onOpenTimer = { timer ->
-                    navController.navigate("pomodoro/detail/${timer.id}")
+                    navController.navigate(Screen.PomodoroDetail(timerId = timer.id))
                 }
             )
         }
-        composable(
-            route = Screen.PomodoroDetail.route,
-            arguments = listOf(navArgument(Screen.PomodoroDetail.ARG) { type = NavType.StringType })
-        ) { backStackEntry ->
-            val timerId = backStackEntry.arguments?.getString(Screen.PomodoroDetail.ARG).orEmpty()
-            PomodoroScreen(timerId = timerId, onBack = { navController.popBackStack() })
+        composable<Screen.PomodoroDetail> { backStackEntry ->
+            val detail = backStackEntry.toRoute<Screen.PomodoroDetail>()
+            PomodoroScreen(timerId = detail.timerId, onBack = { navController.popBackStack() })
         }
-        composable(Screen.BubbleLevel.route) {
+        composable<Screen.BubbleLevel> {
             BubbleLevelScreen(onBack = onBackSmart)
         }
-        composable(Screen.Percentage.route) {
+        composable<Screen.Percentage> {
             PorcentajeScreen(onBack = onBackSmart)
         }
-        composable(Screen.UnitConverter.route) {
+        composable<Screen.UnitConverter> {
             ConversorUnidadesScreen(onBack = onBackSmart)
         }
-        composable(Screen.PasswordGenerator.route) {
+        composable<Screen.PasswordGenerator> {
             GeneradorContrasenaScreen(onBack = onBackSmart)
         }
-        composable(Screen.QrGenerator.route) {
+        composable<Screen.QrGenerator> {
             GeneradorQrScreen(onBack = onBackSmart)
         }
-        composable(Screen.Ruler.route) {
+        composable<Screen.Ruler> {
             ReglaScreen(onBack = onBackSmart)
         }
-        composable(Screen.LightMeter.route) {
+        composable<Screen.LightMeter> {
             LightSensorScreen(onBack = onBackSmart)
         }
-        composable(Screen.Flashlight.route) {
+        composable<Screen.Flashlight> {
             FlashScreen(onBack = onBackSmart)
         }
-        composable(Screen.Water.route) {
+        composable<Screen.Water> {
             AguaReminderScreen(
                 onBack = onBackSmart,
                 onShowEstadisticas = {
-                    navController.navigate(Screen.WaterStats.route)
+                    navController.navigate(Screen.WaterStats)
                 }
             )
         }
-        composable(Screen.Countdown.route) {
+        composable<Screen.Countdown> {
             RemainingTimeScreen(onBack = onBackSmart)
         }
-        composable(Screen.WaterStats.route) {
+        composable<Screen.WaterStats> {
             AguaStatisticsScreen(onBack = onBackSmart)
         }
-        composable(Screen.CountriesInfo.route) {
+        composable<Screen.CountriesInfo> {
             CountriesInfoScreen(onBack = onBackSmart)
         }
-        composable(Screen.SelectorWheel.route) {
+        composable<Screen.SelectorWheel> {
             OptionSelectorScreen(onBack = onBackSmart)
         }
-        composable(Screen.GuessFlag.route) {
+        composable<Screen.GuessFlag> {
             AdivinaBanderaScreen(onBack = onBackSmart)
         }
-        composable(Screen.Meetings.route) {
+        composable<Screen.Meetings> {
             ReunionesScreen(
                 onBack = onBackSmart,
-                onCrearReunion = { navController.navigate(Screen.MeetingCreate.route) },
+                onCrearReunion = { navController.navigate(Screen.MeetingCreate) },
                 onReunionClick = { reunion ->
-                    navController.navigate(Screen.MeetingDetail.route + "/${reunion.id}")
+                    navController.navigate(Screen.MeetingDetail(reunionId = reunion.id))
                 }
             )
         }
-        composable(Screen.MeetingCreate.route) {
+        composable<Screen.MeetingCreate> {
             CrearReunionScreen(
                 onBack = onBackSmart,
                 onReunionCreada = { reunionId ->
-                    navController.navigate(Screen.MeetingDetail.route + "/$reunionId") {
-                        popUpTo(Screen.Meetings.route)
+                    navController.navigate(Screen.MeetingDetail(reunionId = reunionId)) {
+                        popUpTo<Screen.Meetings> {
+                            inclusive = false
+                        }
                     }
                 }
             )
         }
-        composable(Screen.MeetingDetail.route + "/{reunionId}") {
-            val reunionId = it.arguments?.getString("reunionId") ?: ""
+        composable<Screen.MeetingDetail> { backStackEntry ->
+            val detail = backStackEntry.toRoute<Screen.MeetingDetail>()
             DetallesReunionScreen(
                 onBack = onBackSmart,
-                reunionId = reunionId,
+                reunionId = detail.reunionId,
                 onEditarGasto = { idReunion, idGasto ->
-                    navController.navigate(Screen.ExpenseEdit.route + "/$idReunion/$idGasto")
+                    navController.navigate(Screen.ExpenseEdit(reunionId = idReunion, gastoId = idGasto))
                 },
                 onAgregarGasto = { idReunion ->
-                    navController.navigate(Screen.ExpenseAdd.route + "/$idReunion")
+                    navController.navigate(Screen.ExpenseAdd(reunionId = idReunion))
                 },
-                onNavigateToPro = { navController.navigate(Screen.Pro.route) },
+                onNavigateToPro = { navController.navigate(Screen.Pro) }
             )
         }
-        composable(Screen.ExpenseEdit.route + "/{reunionId}/{gastoId}") {
+        composable<Screen.ExpenseEdit> { backStackEntry ->
+            val edit = backStackEntry.toRoute<Screen.ExpenseEdit>()
             EditarGastoScreen(
-                reunionId = remember {
-                    it.arguments?.getString("reunionId") ?: ""
-                },
-                gastoId = remember {
-                    it.arguments?.getString("gastoId") ?: ""
-                },
+                reunionId = edit.reunionId,
+                gastoId = edit.gastoId,
                 onBack = onBackSmart
             )
         }
-        composable(Screen.ExpenseAdd.route + "/{reunionId}") {
-            val reunionId = it.arguments?.getString("reunionId") ?: ""
+        composable<Screen.ExpenseAdd> { backStackEntry ->
+            val add = backStackEntry.toRoute<Screen.ExpenseAdd>()
             AgregarGastoScreen(
-                reunionId = reunionId,
+                reunionId = add.reunionId,
                 onBack = onBackSmart
             )
         }
-        composable(Screen.Dice.route) {
+        composable<Screen.Dice> {
             LanzadorDadosScreen(onBack = onBackSmart)
         }
-        composable(Screen.QuickCalcs.route) {
+        composable<Screen.QuickCalcs> {
             CalculosRapidosScreen(onBack = onBackSmart)
         }
-        composable(Screen.Quotes.route) {
+        composable<Screen.BasicPhrases> {
             BasicPhrasesScreen(onBack = onBackSmart)
         }
-        composable(Screen.MultiverseMe.route) {
+        composable<Screen.MultiverseMe> {
             InOtherWoldScreen(onBack = onBackSmart)
         }
-        composable(Screen.GuessCapital.route) {
+        composable<Screen.GuessCapital> {
             AdivinaCapitalScreen(onBack = onBackSmart)
         }
-        composable(Screen.Compass.route) {
+        composable<Screen.Compass> {
             BrujulaScreen(onBack = onBackSmart)
         }
-        composable(Screen.Todo.route) {
+        composable<Screen.Todo> {
             ToDoListScreen(onBack = onBackSmart)
         }
-        composable(Screen.Scoreboard.route) {
+        composable<Screen.Scoreboard> {
             MarcadorEquiposScreen(onBack = onBackSmart)
         }
-        composable(Screen.Magnifier.route) {
+        composable<Screen.Magnifier> {
             MagnifierScreen(onBack = onBackSmart)
         }
-        composable(Screen.ArRuler.route) {
+        composable<Screen.ArRuler> {
             ArRulerSceneViewScreen(onBack = onBackSmart)
         }
-        composable(Screen.About.route) {
+        composable<Screen.About> {
             val licensesTitle = stringResource(R.string.about_licenses_button)
             AboutScreen(
                 onBack = onBackSmart,
@@ -362,19 +346,17 @@ fun MiniToolboxNavGraph(
                         android.content.Intent(context, com.google.android.gms.oss.licenses.OssLicensesMenuActivity::class.java)
                     )
                 },
-                onOpenDevTools = { navController.navigate("dev_metrics") },
-                onNavigateToPro = { navController.navigate(Screen.Pro.route) }
+                onOpenDevTools = { navController.navigate(Screen.DevMetrics) },
+                onNavigateToPro = { navController.navigate(Screen.Pro) }
             )
         }
-        composable(Screen.DevMetrics.route) {
-            // Diagnóstico de sólo lectura: disponible en release una vez desbloqueado.
-            // Las herramientas destructivas quedan dentro, condicionadas a BuildConfig.DEBUG.
+        composable<Screen.DevMetrics> {
             MetricsDiagnosticsScreen(onBack = onBackSmart)
         }
-        composable(Screen.Pro.route) {
+        composable<Screen.Pro> {
             ProScreen(onBack = onBackSmart)
         }
-        composable(Screen.Minesweeper.route) {
+        composable<Screen.Minesweeper> {
             MinesweeperScreen(onBack = onBackSmart)
         }
     }

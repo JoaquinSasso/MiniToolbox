@@ -15,12 +15,12 @@ import androidx.core.content.ContextCompat
 import com.joasasso.minitoolbox.MainActivity
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.metrics.MetricsSource
+import com.joasasso.minitoolbox.nav.Screen
 
 const val CHANNEL_RUNNING = "pomodoro_running"
 const val CHANNEL_ALARM   = "pomodoro_alarm_v2"
 const val CHANNEL_ALARM_SILENT = "pomodoro_alarm_silent_v3"
 const val NOTIF_ID_RUNNING = 2001
-const val NOTIFICATION_ID  = 2002 // alarma (legacy)
 const val NOTIF_ID_ALARM_SILENT = 2003
 const val ACTION_POMODORO_ALARM_SILENCE = "POMODORO_ALARM_SILENCE"
 
@@ -93,13 +93,17 @@ fun ensurePomodoroChannels(context: Context) {
 }
 
 internal fun mainPendingIntent(context: Context, startRoute: String?): PendingIntent {
+    val screen = Screen.fromRouteString(startRoute)
     val intent = Intent(context, MainActivity::class.java).apply {
         addFlags(
             Intent.FLAG_ACTIVITY_NEW_TASK or
                     Intent.FLAG_ACTIVITY_CLEAR_TOP or
                     Intent.FLAG_ACTIVITY_SINGLE_TOP
         )
-        if (!startRoute.isNullOrBlank()) {
+        if (screen != null) {
+            putExtra(Screen.EXTRA_START_ROUTE_JSON, Screen.toJson(screen))
+            putExtra(MetricsSource.EXTRA_START_SOURCE, MetricsSource.NOTIFICATION)
+        } else if (!startRoute.isNullOrBlank()) {
             putExtra("startRoute", startRoute)
             putExtra(MetricsSource.EXTRA_START_SOURCE, MetricsSource.NOTIFICATION)
         }

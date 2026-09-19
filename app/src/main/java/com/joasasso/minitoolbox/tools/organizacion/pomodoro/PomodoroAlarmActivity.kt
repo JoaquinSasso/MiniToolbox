@@ -8,7 +8,9 @@ import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import com.joasasso.minitoolbox.nav.Screen
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -118,9 +120,10 @@ class PomodoroAlarmActivity : AppCompatActivity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onStart() {
         super.onStart()
-        registerReceiver(stopReceiver, IntentFilter(ACTION_POMODORO_ALARM_STOP), Context.RECEIVER_NOT_EXPORTED)
+        registerReceiver(stopReceiver, IntentFilter(ACTION_POMODORO_ALARM_STOP), RECEIVER_NOT_EXPORTED)
         // Si la alarma ya se apagó por otra vía (p. ej. tocaron la acción de
         // la notificación mientras esta pantalla todavía cargaba, o venció el
         // auto-silencio de 30s), no dejar esta pantalla mostrando "sonando".
@@ -141,23 +144,19 @@ class PomodoroAlarmActivity : AppCompatActivity() {
         // que despertar el teléfono a mano para verla.
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-            setShowWhenLocked(true)
-            setTurnScreenOn(true)
-        } else {
-            @Suppress("DEPRECATION")
-            window.addFlags(
-                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                        WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
-                        WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
-            )
-        }
+        setShowWhenLocked(true)
+        setTurnScreenOn(true)
     }
 
     private fun openMainActivity(route: String) {
+        val screen = Screen.fromRouteString(route)
         val i = Intent(this, com.joasasso.minitoolbox.MainActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-            putExtra("startRoute", route)
+            if (screen != null) {
+                putExtra(Screen.EXTRA_START_ROUTE_JSON, Screen.toJson(screen))
+            } else {
+                putExtra("startRoute", route)
+            }
             putExtra(MetricsSource.EXTRA_START_SOURCE, MetricsSource.NOTIFICATION)
         }
         startActivity(i)

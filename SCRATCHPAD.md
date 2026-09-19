@@ -33,7 +33,7 @@
 ### Navegación
 
 - [x] `nav-back-animation` — `NavGraph.kt`, `ArRulerSceneViewScreen.kt`, `MagnifierScren.kt` — Animación de retroceso / predictive back sin reducción de escala (no shrinking / scale-to-center). Transición horizontal fluida de ancho completo (100% scale) con curva `FastOutSlowInEasing`, efecto paralaje sutil y eliminación de `BackHandler` incondicionales que interceptaban eventos forzando el fallback de ventana.
-- [ ] `type-safe-nav` — `NavGraph.kt` (478 líneas, ~45 rutas manuales por string) — Sin type-safe navigation. Prerrequisitos cumplidos: Navigation Compose 2.10 + kotlinx.serialization. Migrar elimina limitación conocida #4 (`quotes` != `basic_phrases`).
+- [x] `type-safe-nav` — `Screen.kt`, `NavGraph.kt`, `MainActivity.kt`, `ToolRegistry.kt`, `ToolRoutes.kt`, widgets y notificaciones — Migrado el 100% de la navegación a Type-Safe Navigation con Navigation Compose 2.10 y `@Serializable sealed class Screen`. Eliminadas rutas mágicas concatenadas y deep links con string crudos; intents externos transportan payload tipado (`startRouteJson`) con fallback resiliente `Screen.fromRouteString()`. `Screen.Quotes` renombrado a `Screen.BasicPhrases`. Claves de telemetría de subpantallas unificadas bajo sus herramientas (`pomodoro`, `water`, `meetings`, `basic_phrases`). Cobertura con `ScreenSerializationTest` y `ToolMetricsKeysTest`.
 
 ## P2 — Deuda de build y dependencias
 
@@ -56,5 +56,5 @@
 
 ## Siguiente paso sugerido
  
-**`type-safe-nav`** (P1) — `NavGraph.kt` (381 líneas, ~45 rutas manuales por string) — Migrar a rutas type-safe con `@Serializable` objects/classes usando Navigation Compose 2.10, eliminando rutas mágicas y unificando el contrato de navegación.
+**`remove-gson`** (P2) — `BasicPhrasesScreen.kt` — Eliminar la última dependencia de Google Gson migrando la carga de frases a `kotlinx.serialization.json.Json`, lo que permitirá remover `com.google.code.gson:gson` del catálogo de versiones, `build.gradle.kts` y las reglas ProGuard asociadas.
 
