@@ -13,6 +13,8 @@
 
 - [x] `goAsync-receivers` — `PomodoroAlarmReceiver.kt`, `ResetAguaReceiver.kt`, `AguaNotification.kt`, `PomodoroActionReceiver.kt`, `PomodoroBootReceiver.kt` — Corrutinas en `onReceive()` sin `goAsync()`. Fix: `goAsync()` + `pendingResult.finish()` al completar todas las tareas asíncronas.
 - [x] `double-money` — `ExpensesDataStore.kt`, `DebtEngine.kt` — Dinero modelado y calculado en centavos enteros (`Long`). Residuo distribuido determinísticamente; 0 centavos perdidos.
+- [x] `water-tracker-midnight-rollover` — `AguaDataStore.kt`, `AguaRepository.kt`, `AguaViewModel.kt`, `AguaReminderScreen.kt`, `ResetAguaReceiver.kt`, `MiniToolboxApp.kt` — Contador de agua arrastraba consumo del día anterior al abrir desde notificación/medianoche. Fix: Migrado a arquitectura MVVM reactiva (`AguaViewModel`, `AguaUiState`, `StateFlow`), reactividad a medianoche sobre DataStore, guardado atómico referenciado a la fecha activa y descarte de notificaciones residuales. Cubierto con tests unitarios en `AguaViewModelTest` y `AguaDataStoreTest`.
+- [x] `intent-backstack-accumulation` — `AndroidManifest.xml`, `AguaNotification.kt`, `AguaWidget.kt`, `AguaMiniWidget.kt` — Notificaciones y widgets apilaban instancias de `MainActivity`, impidiendo salir al launcher tras volver atrás desde el menú. Fix: `launchMode="singleTask"` en `MainActivity` con flags `FLAG_ACTIVITY_CLEAR_TOP or FLAG_ACTIVITY_SINGLE_TOP`.
 
 ## P1 — Deuda de arquitectura
 

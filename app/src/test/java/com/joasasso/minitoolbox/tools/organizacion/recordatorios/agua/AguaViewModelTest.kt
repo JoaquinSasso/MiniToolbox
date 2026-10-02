@@ -2,17 +2,25 @@ package com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua
 
 import android.app.Application
 import androidx.datastore.preferences.core.edit
+import androidx.lifecycle.viewModelScope
 import androidx.test.core.app.ApplicationProvider
 import com.joasasso.minitoolbox.TestApplication
 import com.joasasso.minitoolbox.data.DefaultAguaRepository
 import com.joasasso.minitoolbox.data.aguaDataStore
 import com.joasasso.minitoolbox.data.guardarAguaFecha
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -27,147 +35,158 @@ import java.time.LocalDate
 @Config(application = TestApplication::class)
 class AguaViewModelTest {
 
-    private lateinit var application: Application
+    private lateinit var app: Application
+    private val testDispatcher = UnconfinedTestDispatcher()
+    private var vm: AguaViewModel? = null
 
     @Before
     fun setUp() = runTest {
-        application = ApplicationProvider.getApplicationContext()
-        application.aguaDataStore.edit { it.clear() }
+        Dispatchers.setMain(testDispatcher)
+        app = ApplicationProvider.getApplicationContext()
+        app.aguaDataStore.edit { it.clear() }
+    }
+
+    @After
+    fun tearDown() {
+        vm?.viewModelScope?.cancel()
+        Dispatchers.resetMain()
     }
 
     @Test
     fun agregarAgua_incrementaConsumoYEmiteEvento() = runTest {
-        val testDispatcher = UnconfinedTestDispatcher(testScheduler)
-        val viewModel = AguaViewModel(application, DefaultAguaRepository)
+        val dateFlow = MutableStateFlow(LocalDate.of(2026, 10, 2))
+        val model = AguaViewModel(app, DefaultAguaRepository, dateFlowOverride = dateFlow)
+        vm = model
 
-        val collectJob = launch(testDispatcher) { viewModel.uiState.collect {} }
+        model.uiState.first { !it.isLoading }
 
-        // Agregar 250 ml
-        viewModel.agregarAgua(250)
+        val eventDeferred = async(UnconfinedTestDispatcher(testScheduler)) { model.events.first() }
 
-        val state = viewModel.uiState.first { !it.isLoading && it.totalAgua == 250 }
+        model.agregarAgua(250)
+        advanceUntilIdle()
+
+        assertEquals(AguaEvent.WaterAdded(250), eventDeferred.await())
+        val state = model.uiState.first { it.totalAgua == 250 }
         assertEquals(250, state.totalAgua)
-
-        collectJob.cancel()
     }
 
     @Test
     fun agregarAguaNegativa_cuandoEsCero_emiteAvisoCeroYSigueEnCero() = runTest {
-        val testDispatcher = UnconfinedTestDispatcher(testScheduler)
-        val viewModel = AguaViewModel(application, DefaultAguaRepository)
+        val dateFlow = MutableStateFlow(LocalDate.of(2026, 10, 2))
+        val model = AguaViewModel(app, DefaultAguaRepository, dateFlowOverride = dateFlow)
+        vm = model
 
-        var eventReceived: AguaEvent? = null
-        val eventJob = launch(testDispatcher) {
-            viewModel.events.collect { eventReceived = it }
-        }
-        val collectJob = launch(testDispatcher) { viewModel.uiState.collect {} }
+        model.uiState.first { !it.isLoading }
 
-        // Intentar restar cuando el total es 0
-        viewModel.agregarAgua(-250)
+        val eventDeferred = async(UnconfinedTestDispatcher(testScheduler)) { model.events.first() }
 
-        assertEquals(AguaEvent.ShowZeroWarning, eventReceived)
-        assertEquals(0, viewModel.uiState.value.totalAgua)
+        model.agregarAgua(-250)
+        advanceUntilIdle()
 
-        eventJob.cancel()
-        collectJob.cancel()
+        assertEquals(AguaEvent.ShowZeroWarning, eventDeferred.await())
+        assertEquals(0, model.uiState.value.totalAgua)
     }
 
     @Test
     fun resetear_poneContadorEnCeroYEmiteEvento() = runTest {
-        val testDispatcher = UnconfinedTestDispatcher(testScheduler)
-        val viewModel = AguaViewModel(application, DefaultAguaRepository)
+        val dateFlow = MutableStateFlow(LocalDate.of(2026, 10, 2))
+        val model = AguaViewModel(app, DefaultAguaRepository, dateFlowOverride = dateFlow)
+        vm = model
 
-        var eventReceived: AguaEvent? = null
-        val eventJob = launch(testDispatcher) {
-            viewModel.events.collect { eventReceived = it }
-        }
-        val collectJob = launch(testDispatcher) { viewModel.uiState.collect {} }
+        model.uiState.first { !it.isLoading }
 
-        viewModel.agregarAgua(500)
-        viewModel.resetear()
+        app.guardarAguaFecha(dateFlow.value, 500)
+        advanceUntilIdle()
+        assertEquals(500, model.uiState.first { it.totalAgua == 500 }.totalAgua)
 
-        val state = viewModel.uiState.first { !it.isLoading && it.totalAgua == 0 }
+        val eventDeferred = async(UnconfinedTestDispatcher(testScheduler)) { model.events.first() }
+
+        model.resetear()
+        advanceUntilIdle()
+
+        val state = model.uiState.first { it.totalAgua == 0 }
         assertEquals(0, state.totalAgua)
-        assertEquals(AguaEvent.WaterReset, eventReceived)
-
-        eventJob.cancel()
-        collectJob.cancel()
+        assertEquals(AguaEvent.WaterReset, eventDeferred.await())
     }
 
     @Test
     fun rolloverMedianoche_noArrastraConsumoDelDiaAnterior() = runTest {
-        val testDispatcher = UnconfinedTestDispatcher(testScheduler)
         val dia1 = LocalDate.of(2026, 10, 1)
         val dia2 = LocalDate.of(2026, 10, 2)
         val dateFlow = MutableStateFlow(dia1)
 
         // Día 1: El usuario acumuló 1750 ml
-        application.guardarAguaFecha(dia1, 1750)
+        app.guardarAguaFecha(dia1, 1750)
 
-        val viewModel = AguaViewModel(application, DefaultAguaRepository, dateFlowOverride = dateFlow)
-        val collectJob = launch(testDispatcher) { viewModel.uiState.collect {} }
+        val model = AguaViewModel(app, DefaultAguaRepository, dateFlowOverride = dateFlow)
+        vm = model
 
         // Verificar que en día 1 se leen los 1750 ml
-        val stateDia1 = viewModel.uiState.first { !it.isLoading && it.totalAgua == 1750 }
+        val stateDia1 = model.uiState.first { !it.isLoading && it.totalAgua == 1750 }
         assertEquals(1750, stateDia1.totalAgua)
 
         // Medianoche: dateFlow conmuta a día 2
         dateFlow.value = dia2
+        advanceUntilIdle()
 
         // Verificar que pasa reactivamente a 0 ml para el día 2
-        val stateDia2Inicial = viewModel.uiState.first { !it.isLoading && it.totalAgua == 0 }
+        val stateDia2Inicial = model.uiState.first { it.fecha == dia2 && it.totalAgua == 0 }
         assertEquals(0, stateDia2Inicial.totalAgua)
         assertEquals(dia2, stateDia2Inicial.fecha)
 
         // El usuario bebe un vaso (250 ml) en día 2
-        viewModel.agregarAgua(250)
+        val eventDeferred = async(UnconfinedTestDispatcher(testScheduler)) { model.events.first() }
+        model.agregarAgua(250)
+        advanceUntilIdle()
 
-        val stateDia2Final = viewModel.uiState.first { !it.isLoading && it.totalAgua == 250 }
-        // Se valida que tiene 250 ml (NO 1750 + 250 = 2000)
+        assertEquals(AguaEvent.WaterAdded(250), eventDeferred.await())
+        val stateDia2Final = model.uiState.first { it.fecha == dia2 && it.totalAgua == 250 }
         assertEquals(250, stateDia2Final.totalAgua)
 
-        collectJob.cancel()
+        // Comprobar que en DataStore el día 1 sigue teniendo 1750 y día 2 tiene 250
+        assertEquals(1750, DefaultAguaRepository.flujoAguaFecha(app, dia1).first())
+        assertEquals(250, DefaultAguaRepository.flujoAguaFecha(app, dia2).first())
     }
 
     @Test
     fun guardarObjetivoYPorVaso_actualizaValoresEnUiState() = runTest {
-        val testDispatcher = UnconfinedTestDispatcher(testScheduler)
-        val viewModel = AguaViewModel(application, DefaultAguaRepository)
+        val dateFlow = MutableStateFlow(LocalDate.of(2026, 10, 2))
+        val model = AguaViewModel(app, DefaultAguaRepository, dateFlowOverride = dateFlow)
+        vm = model
 
-        val collectJob = launch(testDispatcher) { viewModel.uiState.collect {} }
+        model.uiState.first { !it.isLoading }
 
-        viewModel.guardarObjetivo(3000)
-        viewModel.guardarPorVaso(350)
+        model.guardarObjetivo(3000)
+        model.guardarPorVaso(350)
+        advanceUntilIdle()
 
-        val state = viewModel.uiState.first { !it.isLoading && it.objetivoML == 3000 && it.mlPorVaso == 350 }
+        val state = model.uiState.first { it.objetivoML == 3000 && it.mlPorVaso == 350 }
         assertEquals(3000, state.objetivoML)
         assertEquals(350, state.mlPorVaso)
-
-        collectJob.cancel()
     }
 
     @Test
     fun toggleNotificaciones_actualizaEstadoYEmiteEvento() = runTest {
-        val testDispatcher = UnconfinedTestDispatcher(testScheduler)
-        val viewModel = AguaViewModel(application, DefaultAguaRepository)
+        val dateFlow = MutableStateFlow(LocalDate.of(2026, 10, 2))
+        val model = AguaViewModel(app, DefaultAguaRepository, dateFlowOverride = dateFlow)
+        vm = model
 
-        var lastEvent: AguaEvent? = null
-        val eventJob = launch(testDispatcher) {
-            viewModel.events.collect { lastEvent = it }
-        }
-        val collectJob = launch(testDispatcher) { viewModel.uiState.collect {} }
+        model.uiState.first { !it.isLoading }
 
-        viewModel.toggleNotificaciones(true)
-        val stateActivo = viewModel.uiState.first { !it.isLoading && it.notificacionesActivas }
+        val event1Deferred = async(UnconfinedTestDispatcher(testScheduler)) { model.events.first() }
+        model.toggleNotificaciones(true)
+        advanceUntilIdle()
+        val event1 = event1Deferred.await()
+        assertEquals(AguaEvent.NotifEnabled, event1)
+        val stateActivo = model.uiState.first { it.notificacionesActivas }
         assertTrue(stateActivo.notificacionesActivas)
-        assertEquals(AguaEvent.NotifEnabled, lastEvent)
 
-        viewModel.toggleNotificaciones(false)
-        val stateInactivo = viewModel.uiState.first { !it.isLoading && !it.notificacionesActivas }
+        val event2Deferred = async(UnconfinedTestDispatcher(testScheduler)) { model.events.first() }
+        model.toggleNotificaciones(false)
+        advanceUntilIdle()
+        val event2 = event2Deferred.await()
+        assertEquals(AguaEvent.NotifDisabled, event2)
+        val stateInactivo = model.uiState.first { !it.notificacionesActivas }
         assertTrue(!stateInactivo.notificacionesActivas)
-        assertEquals(AguaEvent.NotifDisabled, lastEvent)
-
-        eventJob.cancel()
-        collectJob.cancel()
     }
 }

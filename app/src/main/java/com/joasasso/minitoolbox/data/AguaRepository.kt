@@ -12,6 +12,8 @@ interface AguaRepository {
     fun flujoNotificacionesActivas(context: Context): Flow<Boolean>
     fun flujoFrecuenciaMinutos(context: Context): Flow<Int>
 
+    fun flujoAguaPreferences(context: Context): Flow<androidx.datastore.preferences.core.Preferences>
+
     suspend fun guardarAguaHoy(context: Context, valor: Int)
     suspend fun guardarAguaFecha(context: Context, fecha: LocalDate, valor: Int)
     suspend fun guardarObjetivo(context: Context, valor: Int)
@@ -38,6 +40,9 @@ object DefaultAguaRepository : AguaRepository {
 
     override fun flujoFrecuenciaMinutos(context: Context): Flow<Int> =
         context.flujoFrecuenciaMinutos()
+
+    override fun flujoAguaPreferences(context: Context): Flow<androidx.datastore.preferences.core.Preferences> =
+        context.aguaDataStore.data
 
     override suspend fun guardarAguaHoy(context: Context, valor: Int) =
         context.guardarAguaHoy(valor)

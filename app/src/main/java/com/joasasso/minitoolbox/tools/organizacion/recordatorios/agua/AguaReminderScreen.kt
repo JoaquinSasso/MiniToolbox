@@ -186,6 +186,7 @@ fun AguaReminderScreen(
     LaunchedEffect(Unit) {
         createWaterReminderChannel(context)
         programarResetAguaDiario(context)
+        viewModel.scheduleMidnightCheck()
     }
 
     Scaffold(

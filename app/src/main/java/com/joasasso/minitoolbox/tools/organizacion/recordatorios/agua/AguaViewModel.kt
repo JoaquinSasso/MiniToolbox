@@ -5,8 +5,13 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.joasasso.minitoolbox.data.AguaRepository
 import com.joasasso.minitoolbox.data.DefaultAguaRepository
-import com.joasasso.minitoolbox.data.flujoFechaActual
+import com.joasasso.minitoolbox.data.KEY_FRECUENCIA_MIN
+import com.joasasso.minitoolbox.data.KEY_NOTIF_ACTIVAS
+import com.joasasso.minitoolbox.data.KEY_OBJETIVO
+import com.joasasso.minitoolbox.data.KEY_POR_VASO
+import com.joasasso.minitoolbox.data.keyFecha
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -15,7 +20,9 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.Duration
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 data class AguaUiState(
     val totalAgua: Int = 0,
@@ -46,35 +53,29 @@ class AguaViewModel @JvmOverloads constructor(
     val events = _eventChannel.receiveAsFlow()
 
     private val _currentDateFlow = MutableStateFlow(LocalDate.now())
-    private val activeDateFlow: Flow<LocalDate> = dateFlowOverride ?: combine(
-        _currentDateFlow,
-        flujoFechaActual()
-    ) { manual, timer ->
-        if (manual >= timer) manual else timer
+    private val activeDateFlow: Flow<LocalDate> = dateFlowOverride ?: _currentDateFlow
+
+    fun scheduleMidnightCheck() {
+        viewModelScope.launch {
+            val now = LocalDateTime.now()
+            val midnight = now.toLocalDate().plusDays(1).atStartOfDay()
+            val delayMs = Duration.between(now, midnight).toMillis().coerceAtLeast(500L) + 50L
+            delay(delayMs)
+            verificarFecha()
+            scheduleMidnightCheck()
+        }
     }
 
     val uiState: StateFlow<AguaUiState> = combine(
-        combine(
-            repository.flujoAguaHoy(application, activeDateFlow),
-            repository.flujoObjetivo(application),
-            repository.flujoPorVaso(application)
-        ) { agua, objetivo, porVaso ->
-            Triple(agua, objetivo, porVaso)
-        },
-        combine(
-            repository.flujoNotificacionesActivas(application),
-            repository.flujoFrecuenciaMinutos(application),
-            activeDateFlow
-        ) { notif, freq, fecha ->
-            Triple(notif, freq, fecha)
-        }
-    ) { (agua, objetivo, porVaso), (notif, freq, fecha) ->
+        activeDateFlow,
+        repository.flujoAguaPreferences(application)
+    ) { fecha, prefs ->
         AguaUiState(
-            totalAgua = agua,
-            objetivoML = objetivo,
-            mlPorVaso = porVaso,
-            notificacionesActivas = notif,
-            frecuenciaMinutos = freq,
+            totalAgua = prefs[keyFecha(fecha)] ?: 0,
+            objetivoML = prefs[KEY_OBJETIVO] ?: 2000,
+            mlPorVaso = prefs[KEY_POR_VASO] ?: 250,
+            notificacionesActivas = prefs[KEY_NOTIF_ACTIVAS] == 1,
+            frecuenciaMinutos = prefs[KEY_FRECUENCIA_MIN] ?: 30,
             fecha = fecha,
             isLoading = false
         )
@@ -101,9 +102,10 @@ class AguaViewModel @JvmOverloads constructor(
         }
 
         val nuevo = (currentTotal + cantidad).coerceAtLeast(0)
+        val fecha = uiState.value.fecha
         viewModelScope.launch {
-            repository.guardarAguaHoy(getApplication(), nuevo)
-            actualizarWidgetAguaSuspend(getApplication())
+            repository.guardarAguaFecha(getApplication(), fecha, nuevo)
+            actualizarWidgetAgua(getApplication())
 
             val event = if (cantidad > 0) {
                 AguaEvent.WaterAdded(cantidad)
@@ -124,9 +126,10 @@ class AguaViewModel @JvmOverloads constructor(
     }
 
     fun resetear() {
+        val fecha = uiState.value.fecha
         viewModelScope.launch {
-            repository.guardarAguaHoy(getApplication(), 0)
-            actualizarWidgetAguaSuspend(getApplication())
+            repository.guardarAguaFecha(getApplication(), fecha, 0)
+            actualizarWidgetAgua(getApplication())
             _eventChannel.send(AguaEvent.WaterReset)
 
             if (uiState.value.notificacionesActivas) {
@@ -144,7 +147,7 @@ class AguaViewModel @JvmOverloads constructor(
         if (objetivo == uiState.value.objetivoML) return
         viewModelScope.launch {
             repository.guardarObjetivo(getApplication(), objetivo)
-            actualizarWidgetAguaSuspend(getApplication())
+            actualizarWidgetAgua(getApplication())
             if (uiState.value.notificacionesActivas) {
                 programarRecordatorioAgua(
                     getApplication(),
@@ -160,7 +163,7 @@ class AguaViewModel @JvmOverloads constructor(
         if (ml == uiState.value.mlPorVaso) return
         viewModelScope.launch {
             repository.guardarPorVaso(getApplication(), ml)
-            actualizarWidgetAguaSuspend(getApplication())
+            actualizarWidgetAgua(getApplication())
         }
     }
 

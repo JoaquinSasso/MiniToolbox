@@ -18,32 +18,19 @@ import kotlin.time.Duration.Companion.milliseconds
 
 val Context.aguaDataStore by preferencesDataStore(name = "agua")
 
-private val KEY_OBJETIVO = intPreferencesKey("agua_objetivo_ml")
-private val KEY_POR_VASO = intPreferencesKey("agua_ml_por_vaso")
-private val KEY_NOTIF_ACTIVAS = intPreferencesKey("agua_notif_activas")
-private val KEY_FRECUENCIA_MIN = intPreferencesKey("agua_notif_frecuencia_min")
+internal val KEY_OBJETIVO = intPreferencesKey("agua_objetivo_ml")
+internal val KEY_POR_VASO = intPreferencesKey("agua_ml_por_vaso")
+internal val KEY_NOTIF_ACTIVAS = intPreferencesKey("agua_notif_activas")
+internal val KEY_FRECUENCIA_MIN = intPreferencesKey("agua_notif_frecuencia_min")
 
 fun keyFecha(fecha: LocalDate): Preferences.Key<Int> =
     intPreferencesKey("agua_ml_$fecha")
 
 /**
- * Emite la fecha local actual y emite reactivamente la nueva fecha en cuanto el reloj
- * cruza la medianoche (00:00:00).
+ * Emite la fecha local actual.
  */
 fun flujoFechaActual(): Flow<LocalDate> = flow {
-    var currentDate = LocalDate.now()
-    emit(currentDate)
-    while (true) {
-        val now = LocalDateTime.now()
-        val midnight = now.toLocalDate().plusDays(1).atStartOfDay()
-        val delayMs = Duration.between(now, midnight).toMillis().coerceAtLeast(200L) + 50L
-        delay(delayMs.milliseconds)
-        val newDate = LocalDate.now()
-        if (newDate != currentDate) {
-            currentDate = newDate
-            emit(currentDate)
-        }
-    }
+    emit(LocalDate.now())
 }
 
 fun Context.flujoAguaFecha(fecha: LocalDate): Flow<Int> =
