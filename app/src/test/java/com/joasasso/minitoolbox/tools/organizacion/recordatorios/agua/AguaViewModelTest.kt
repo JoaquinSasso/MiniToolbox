@@ -68,6 +68,8 @@ class AguaViewModelTest {
         assertEquals(AguaEvent.WaterAdded(250), eventDeferred.await())
         val state = model.uiState.first { it.totalAgua == 250 }
         assertEquals(250, state.totalAgua)
+
+        model.viewModelScope.cancel()
     }
 
     @Test
@@ -85,6 +87,8 @@ class AguaViewModelTest {
 
         assertEquals(AguaEvent.ShowZeroWarning, eventDeferred.await())
         assertEquals(0, model.uiState.value.totalAgua)
+
+        model.viewModelScope.cancel()
     }
 
     @Test
@@ -107,6 +111,8 @@ class AguaViewModelTest {
         val state = model.uiState.first { it.totalAgua == 0 }
         assertEquals(0, state.totalAgua)
         assertEquals(AguaEvent.WaterReset, eventDeferred.await())
+
+        model.viewModelScope.cancel()
     }
 
     @Test
@@ -146,6 +152,8 @@ class AguaViewModelTest {
         // Comprobar que en DataStore el día 1 sigue teniendo 1750 y día 2 tiene 250
         assertEquals(1750, DefaultAguaRepository.flujoAguaFecha(app, dia1).first())
         assertEquals(250, DefaultAguaRepository.flujoAguaFecha(app, dia2).first())
+
+        model.viewModelScope.cancel()
     }
 
     @Test
@@ -163,6 +171,8 @@ class AguaViewModelTest {
         val state = model.uiState.first { it.objetivoML == 3000 && it.mlPorVaso == 350 }
         assertEquals(3000, state.objetivoML)
         assertEquals(350, state.mlPorVaso)
+
+        model.viewModelScope.cancel()
     }
 
     @Test
@@ -188,5 +198,7 @@ class AguaViewModelTest {
         assertEquals(AguaEvent.NotifDisabled, event2)
         val stateInactivo = model.uiState.first { !it.notificacionesActivas }
         assertTrue(!stateInactivo.notificacionesActivas)
+
+        model.viewModelScope.cancel()
     }
 }

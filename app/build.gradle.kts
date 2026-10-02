@@ -97,6 +97,9 @@ android {
         unitTests {
             // Robolectric necesita los recursos empaquetados para levantar un Context real.
             isIncludeAndroidResources = true
+            all {
+                it.maxHeapSize = "1536m"
+            }
         }
     }
 

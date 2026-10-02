@@ -15,6 +15,48 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: wrapper
+
+      # Cachea las sombras de Android SDK descargadas por Robolectric (~150MB)
+      # evitando descargas recurrentes en cada ejecución de tests.
+      - name: Cache Robolectric jars
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository/org/robolectric
+          key: ${{ runner.os }}-robolectric-${{ hashFiles('app/src/test/resources/robolectric.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-robolectric-
+
+      # Ejecución aislada de tests unitarios: no requiere empaquetar APK ni correr Lint,
+      # logrando un ciclo de feedback veloz (~1m).
+      - name: Run Unit Tests
+        run: ./gradlew testDebugUnitTest --build-cache
+
+      - name: Upload Test Reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: app/build/reports/tests/
+
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -32,21 +74,11 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          # Configuration cache is enabled in gradle.properties.
-          # If it causes issues in CI, it should be investigated rather than disabled.
           gradle-version: wrapper
 
-      # Una sola invocación: el daemon arranca y la configuración se evalúa una vez
-      # en lugar de tres. Gradle resuelve el orden de las tareas por sí mismo.
-      - name: Build, test and lint
-        run: ./gradlew assembleDebug testDebugUnitTest lintDebug --build-cache
-
-      - name: Upload Test Reports
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-reports
-          path: app/build/reports/tests/
+      # Ensamble del APK de debug y análisis estático de Lint ejecutados en paralelo con los tests.
+      - name: Build APK and Lint
+        run: ./gradlew assembleDebug lintDebug --build-cache
 
       - name: Upload Lint Report
         if: failure()

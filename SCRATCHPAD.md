@@ -45,6 +45,7 @@
 - [x] `remove-gson` — `BasicPhrasesScreen.kt`, `BasicPhrasesClasses.kt`, `build.gradle.kts`, `libs.versions.toml`, `proguard-rules.pro` — Migrado a `kotlinx.serialization` con `@Serializable` en `Frase` y `decodeFromString`. Eliminada dependencia `com.google.code.gson:gson`, versión del catálogo y reglas ProGuard. Cubierto con `BasicPhrasesSerializationTest`.
 - [x] `baseline-profile` — `app/src/main/baseline-prof.txt` — Creadas reglas AOT de arranque en frío para `MiniToolboxApp`, `MainActivity`, `MiniToolboxNavGraph`, `CategoriesScreen`, `ToolRegistry`, `ToolRoutes` y Compose runtime, empaquetadas automáticamente en el APK/AAB para optimización de inicio (20-40%).
 - [x] `splashscreen-compat` — `androidx.core:core-splashscreen 1.0.1`, `Theme.App.Starting` en `themes.xml`, `installSplashScreen()` en `MainActivity.kt`, remoción de `package` en `AndroidManifest.xml` y `resvalues` en `gradle.properties`. Soporte retrocompatible de splash screen para API 28-30 y eliminación de advertencias `NewApi` de lint.
+- [x] `ci-test-parallelization` — `.github/workflows/android.yml`, `gradle.properties`, `app/build.gradle.kts` — Paralelización de jobs de CI (`Unit Tests` aislado de `Build & Lint`), caché para artefactos de Robolectric (`~/.m2/repository/org/robolectric`), habilitación de `org.gradle.parallel=true`, optimización de memoria JVM a 3072 MB con `UseParallelGC` y `maxHeapSize = 1536m` para el proceso de test unitarios. Disminuye el tiempo de feedback de tests en GitHub Actions a ~1 minuto.
 
 ## P3 — Deuda de UI
 
