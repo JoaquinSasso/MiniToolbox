@@ -308,7 +308,7 @@ private fun BoardGrid(
             userScrollEnabled = false,
             contentPadding = PaddingValues(bottom = vSpacing) // leve margen para no cortar la última fila
         ) {
-            items(b.totalCells) { index ->
+            items(b.totalCells, key = { it }) { index ->
                 Cell(
                     index = index,
                     revealed = b.revealed[index],
@@ -319,7 +319,6 @@ private fun BoardGrid(
                     onTap = onTap,
                     onLongPress = onLongPress,
                     onChord = onChord,
-                    board = b,
                     modifier = Modifier.size(cellSize)
                 )
             }
@@ -339,7 +338,6 @@ private fun Cell(
     onTap: (Int) -> Unit,
     onLongPress: (Int) -> Unit,
     onChord: (Int) -> Unit,
-    board: MinesEngine.Board,
     modifier: Modifier
 ) {
     val shape = MaterialTheme.shapes.large

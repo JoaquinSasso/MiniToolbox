@@ -47,8 +47,6 @@ import java.text.NumberFormat
 
 @Composable
 fun EditarGastoScreen(
-    reunionId: String,
-    gastoId: String,
     onBack: () -> Unit,
     vm: GastoFormViewModel = viewModel()
 ) {
@@ -129,7 +127,7 @@ fun EditarGastoScreen(
                 )
             }
 
-            items(uiState.integrantes) { nombre ->
+            items(uiState.integrantes, key = { "pagador_$it" }) { nombre ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
@@ -179,7 +177,7 @@ fun EditarGastoScreen(
                 )
             }
 
-            items(uiState.integrantes) { nombre ->
+            items(uiState.integrantes, key = { "consumidor_$it" }) { nombre ->
                 val actual = (uiState.consumidores[nombre] ?: 1) > 0
                 Card(
                     modifier = Modifier.fillMaxWidth(),

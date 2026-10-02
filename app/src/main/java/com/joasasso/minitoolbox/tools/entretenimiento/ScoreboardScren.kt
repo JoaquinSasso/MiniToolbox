@@ -50,6 +50,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -152,7 +153,7 @@ fun MarcadorEquiposScreen(onBack: () -> Unit) {
                     }
                 }
             }
-            itemsIndexed(equipos) { index, equipo ->
+            itemsIndexed(equipos, key = { _, equipo -> equipo.id }) { index, equipo ->
                 val textColor = getContrastingTextColor(equipo.color)
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -260,7 +261,7 @@ fun MarcadorEquiposScreen(onBack: () -> Unit) {
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier.height(48.dp)
                     ) {
-                        items(colorOptions) { color ->
+                        items(colorOptions, key = { it.toArgb() }) { color ->
                             Box(
                                 modifier = Modifier
                                     .size( if (color == editedColor) 36.dp else 30.dp)

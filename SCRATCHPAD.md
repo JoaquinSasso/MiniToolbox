@@ -46,8 +46,8 @@
 
 ## P3 — Deuda de UI
 
-- [ ] `remember-saveable` — ~300+ `remember {}` vs ~22 `rememberSaveable`. En herramientas donde el usuario acumula trabajo (divisor de gastos, pomodoro, marcador de truco, QR, selector de grupos), el estado se pierde si el sistema mata el proceso. Priorizar: generador de equipos (58 usos), generador de QR (41 usos).
-- [ ] `lazy-keys` — ~5 de 20 llamadas a `items(...)` con `key =`. Sin clave, estado se reasigna por posición en listas editables (favoritos, gastos, tareas, timers).
+- [x] `remember-saveable` — `QRCodeGeneratorScreen.kt`, `GroupSelectorScreen.kt`, `PasswordGeneratorScreen.kt` — Migrado el estado mutable de entrada y configuración a `rememberSaveable` (texto de QR, tamaño de grupo en selector, longitud/toggles/contraseña en generador de contraseñas con control en `LaunchedEffect`), preservando los datos generados ante rotación de pantalla y muerte de proceso.
+- [x] `lazy-keys` — `ScoreboardScren.kt`, `ReunionesScreen.kt`, `ReunionDetailScreen.kt`, `AgregarGastoScreen.kt`, `EditarGastoScreen.kt`, `BasicPhrasesScreen.kt`, `DiceSimulatorScreen.kt`, `PomodoroTimersListScreen.kt`, `GuessFlagScreen.kt`, `GuessCapitalScreen.kt`, `MinesweeperScreen.kt` — Asignadas claves estables (`key = { ... }`) al 100% de las 15 llamadas a `items`/`itemsIndexed` en listas dinámicas, editables o grillas. En listas multisección (`AgregarGastoScreen`, `EditarGastoScreen`, `ReunionDetailScreen`) se emplearon prefijos de contexto (`pagador_`, `consumidor_`, `gasto_`, `integrante_`, `deuda_`) previniendo colisiones de claves en runtime. Incorporado `id` único retrocompatible en `Equipo` cubierto con `ScoreboardDataStoreTest`.
 
 ## Proceso
 
@@ -58,5 +58,5 @@
 
 ## Siguiente paso sugerido
  
-**`lazy-keys`** (P3) — Agregar `key = { ... }` en las ~15 llamadas a `items(...)` de Compose que aún carecen de clave estable (listas de favoritos, tareas pendientes, timers de pomodoro, gastos y participantes), evitando que Compose reasigne estado incorrectamente o regenere ítems de lista al modificar, reordenar o eliminar elementos.
+**`branch-protection` / `rate-limiting`** (Proceso) o evaluación de features en `PRODUCT_BACKLOG.md` — Con P0, P1, P2 y P3 completados al 100%, la base de código ha saldado toda la deuda técnica activa de arquitectura, bugs, build y UI.
 

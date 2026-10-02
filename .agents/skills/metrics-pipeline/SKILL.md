@@ -38,6 +38,7 @@ Estas vienen de `DECISIONS.md` y no se negocian:
 2. **Claves inmutables.** Renombrar una clave de métrica rompe la serie histórica. El contrato vive en `metrics-fixtures/keys.json` y es consumido por tests de Kotlin y TypeScript. Si cambiás el regex o `normalizeKey` en un lado, el test del otro falla.
 3. **Backend estrictamente en TypeScript.** Cloud Functions en TypeScript, almacenamiento en Firestore, dashboard estático en Firebase Hosting.
 4. **Almacenamiento local en DataStore.** La orquestación de envíos usa WorkManager.
+5. **Unificación de subpantallas y flujos secundarios.** Las subpantallas, diálogos o configuraciones que formen parte del flujo de una herramienta ya existente (por ejemplo, lista de timers en Pomodoro, detalle de reunión o carga de gasto en Divisor de Gastos) **no deben registrar claves de telemetría separadas**. Deben unificarse bajo la clave canónica de la herramienta (`pomodoro`, `meetings`, `water`), preservando la continuidad histórica y evitando dispersión en el dashboard de métricas.
 
 ## Archivos clave
 

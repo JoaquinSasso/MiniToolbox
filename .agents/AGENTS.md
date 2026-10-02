@@ -68,6 +68,15 @@ Al diseñar nuevas herramientas o refactorizar las existentes:
 4. Proveer siempre la suite correspondiente de tests unitarios (`RobolectricTestRunner` para componentes con persistencia/DataStore y `kotlinx-coroutines-test` para ViewModels y cálculos puros).
 
 
+### Buenas Prácticas de UI y Compose
+
+1. **Claves únicas en LazyLists (`LazyColumn` / `LazyRow`):**
+   - Todo bloque `items()` o `itemsIndexed()` dinámico o editable debe especificar `key = { ... }`.
+   - Si un mismo contenedor `LazyColumn`/`LazyRow` contiene múltiples bloques `items()` que comparten identificadores o nombres (e.g. listas de pagadores y consumidores), las claves **deben prefijarse con su contexto** (e.g. `key = { "pagador_$it" }`) para evitar la excepción `IllegalArgumentException: Key was already used`.
+2. **Contraste de Splash Screen y Drawables:**
+   - Al configurar o modificar el splash screen (`Theme.App.Starting`), verificar que el color de relleno del ícono vectorial (`android:fillColor`) contraste nítidamente con `windowSplashScreenBackground`.
+
+
 ### Formato del SCRATCHPAD
 
 El SCRATCHPAD.md usa un formato máquina optimizado para agentes. Cada ítem tiene:
