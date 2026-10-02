@@ -34,6 +34,10 @@ class MiniToolboxApp : Application(), CameraXConfig.Provider {
             MetricsSanitizer.runIfNeeded(this@MiniToolboxApp)
         }
 
+        // Inicializar canal de recordatorio de agua y programar reset diario a medianoche
+        com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.createWaterReminderChannel(this)
+        com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.programarResetAguaDiario(this)
+
         // --- AdMob: test devices ---
         val admobTestIds = listOf(
             "9B8C765995C4CA74CAA5FB846DED2F1A",

@@ -57,6 +57,7 @@ class AguaWidget : GlanceAppWidget() {
             val porVaso = prefs[KEY_POR_VASO] ?: 250
 
             val launchIntent = Intent(context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
                 putExtra(Screen.EXTRA_START_ROUTE_JSON, Screen.toJson(Screen.Water))
                 putExtra(MetricsSource.EXTRA_START_SOURCE, MetricsSource.WIDGET)
             }

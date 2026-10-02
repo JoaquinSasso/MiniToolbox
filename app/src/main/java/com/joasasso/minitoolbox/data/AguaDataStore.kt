@@ -5,28 +5,47 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import java.time.Duration
 import java.time.LocalDate
+import java.time.LocalDateTime
+import kotlin.time.Duration.Companion.milliseconds
 
 val Context.aguaDataStore by preferencesDataStore(name = "agua")
 
-private val KEY_OBJETIVO = intPreferencesKey("agua_objetivo_ml")
-private val KEY_POR_VASO = intPreferencesKey("agua_ml_por_vaso")
-private val KEY_NOTIF_ACTIVAS = intPreferencesKey("agua_notif_activas")
-private val KEY_FRECUENCIA_MIN = intPreferencesKey("agua_notif_frecuencia_min")
+internal val KEY_OBJETIVO = intPreferencesKey("agua_objetivo_ml")
+internal val KEY_POR_VASO = intPreferencesKey("agua_ml_por_vaso")
+internal val KEY_NOTIF_ACTIVAS = intPreferencesKey("agua_notif_activas")
+internal val KEY_FRECUENCIA_MIN = intPreferencesKey("agua_notif_frecuencia_min")
 
 fun keyFecha(fecha: LocalDate): Preferences.Key<Int> =
     intPreferencesKey("agua_ml_$fecha")
 
-private fun keyHoy(): Preferences.Key<Int> =
-    keyFecha(LocalDate.now())
+/**
+ * Emite la fecha local actual.
+ */
+fun flujoFechaActual(): Flow<LocalDate> = flow {
+    emit(LocalDate.now())
+}
 
 fun Context.flujoAguaFecha(fecha: LocalDate): Flow<Int> =
     aguaDataStore.data.map { it[keyFecha(fecha)] ?: 0 }
 
-fun Context.flujoAguaHoy(): Flow<Int> =
-    aguaDataStore.data.map { it[keyHoy()] ?: 0 }
+/**
+ * Flujo reactivo del consumo de agua del día actual.
+ * Responde tanto a cambios en DataStore como al rollover de medianoche a través de [dateFlow],
+ * conmutando automáticamente al nuevo día con 0 sin arrastrar el día anterior.
+ */
+@OptIn(ExperimentalCoroutinesApi::class)
+fun Context.flujoAguaHoy(dateFlow: Flow<LocalDate> = flujoFechaActual()): Flow<Int> =
+    dateFlow.flatMapLatest { fecha ->
+        aguaDataStore.data.map { it[keyFecha(fecha)] ?: 0 }
+    }
 
 fun Context.flujoObjetivo(): Flow<Int> =
     aguaDataStore.data.map { it[KEY_OBJETIVO] ?: 2000 }

@@ -30,7 +30,8 @@ class PomodoroBootReceiver : BroadcastReceiver() {
             "android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" -> Unit
             else -> return
         }
-        Log.d(TAG, "onReceive: action=${intent.action}, reprogramando si hay pomodoro pendiente")
+        Log.d(TAG, "onReceive: action=${intent.action}, reprogramando alarmas pendientes")
+        com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.programarResetAguaDiario(context.applicationContext)
         val pendingResult = goAsync()
         PomodoroAlarmReceiver.rescheduleFromPersisted(context.applicationContext, pendingResult)
     }
