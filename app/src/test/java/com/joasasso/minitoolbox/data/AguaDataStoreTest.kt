@@ -1,4 +1,4 @@
-﻿package com.joasasso.minitoolbox.data
+package com.joasasso.minitoolbox.data
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit
@@ -53,5 +53,30 @@ class AguaDataStoreTest {
 
         context.guardarAguaFecha(fecha, 2250)
         assertEquals(2250, context.flujoAguaFecha(fecha).first())
+    }
+
+    @Test
+    fun flujoAguaHoy_alCambiarDeDia_reiniciaEnCeroSinArrastrarConsumoAnterior() = runTest {
+        val dia1 = LocalDate.of(2026, 10, 1)
+        val dia2 = LocalDate.of(2026, 10, 2)
+        val fakeDateFlow = kotlinx.coroutines.flow.MutableStateFlow(dia1)
+
+        context.guardarAguaFecha(dia1, 1800)
+
+        val flujo = context.flujoAguaHoy(fakeDateFlow)
+        assertEquals(1800, flujo.first())
+
+        // Rollover de medianoche: cambia el día
+        fakeDateFlow.value = dia2
+
+        // Debe emitir 0 para el nuevo día en lugar de arrastrar 1800
+        assertEquals(0, flujo.first())
+
+        // Al registrar consumo en el nuevo día, solo tiene lo nuevo
+        context.guardarAguaFecha(dia2, 250)
+        assertEquals(250, flujo.first())
+
+        // El registro del día anterior se mantiene intacto
+        assertEquals(1800, context.flujoAguaFecha(dia1).first())
     }
 }

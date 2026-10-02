@@ -43,8 +43,8 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -63,21 +63,19 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.appwidget.updateAll
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.data.flujoAguaHoy
-import com.joasasso.minitoolbox.data.flujoFrecuenciaMinutos
-import com.joasasso.minitoolbox.data.flujoNotificacionesActivas
 import com.joasasso.minitoolbox.data.flujoObjetivo
 import com.joasasso.minitoolbox.data.flujoPorVaso
-import com.joasasso.minitoolbox.data.guardarAguaHoy
-import com.joasasso.minitoolbox.data.guardarFrecuenciaMinutos
-import com.joasasso.minitoolbox.data.guardarNotificacionesActivas
-import com.joasasso.minitoolbox.data.guardarObjetivo
-import com.joasasso.minitoolbox.data.guardarPorVaso
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import com.joasasso.minitoolbox.widgets.AguaMiniWidget
 import com.joasasso.minitoolbox.widgets.AguaWidget
@@ -96,23 +94,16 @@ import kotlin.math.roundToInt
 @Composable
 fun AguaReminderScreen(
     onBack: () -> Unit,
-    onShowEstadisticas: () -> Unit
+    onShowEstadisticas: () -> Unit,
+    viewModel: AguaViewModel = viewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    val lifecycleOwner = LocalLifecycleOwner.current
 
-    // -------- DataStore: cargar estados iniciales --------
-    val aguaHoy by context.flujoAguaHoy().collectAsState(initial = 0)
-    val objetivoDS by context.flujoObjetivo().collectAsState(initial = 2000)
-    val porVasoDS by context.flujoPorVaso().collectAsState(initial = 250)
-    val notifDS by context.flujoNotificacionesActivas().collectAsState(initial = false)
-    val freqMinDS by context.flujoFrecuenciaMinutos().collectAsState(initial = 180)
-
-    var totalAgua by remember { mutableIntStateOf(aguaHoy) }
-    var objetivoML by remember { mutableIntStateOf(objetivoDS) }
-    var mlPorVaso by remember { mutableIntStateOf(porVasoDS) }
     var showInfo by remember { mutableStateOf(false) }
     var showDialogVaso by remember { mutableStateOf(false) }
 
@@ -123,10 +114,9 @@ fun AguaReminderScreen(
     fun closestIndex(values: List<Int>, target: Int): Int =
         values.withIndex().minByOrNull { kotlin.math.abs(it.value - target) }?.index ?: 0
 
-    // Inicializa el índice según el valor actual del DS (o el más cercano)
-    var sliderIndex by remember {
-        val exact = minutosList.indexOf(freqMinDS)
-        mutableIntStateOf(if (exact >= 0) exact else closestIndex(minutosList, freqMinDS))
+    var sliderIndex by remember(uiState.frecuenciaMinutos) {
+        val exact = minutosList.indexOf(uiState.frecuenciaMinutos)
+        mutableIntStateOf(if (exact >= 0) exact else closestIndex(minutosList, uiState.frecuenciaMinutos))
     }
 
     // Strings para el snackbar
@@ -147,98 +137,59 @@ fun AguaReminderScreen(
         }
     }
 
-    // --- Sincronizar estados locales con DataStore ---
-    LaunchedEffect(aguaHoy) { totalAgua = aguaHoy }
-    LaunchedEffect(objetivoDS) { objetivoML = objetivoDS }
-    LaunchedEffect(porVasoDS) { mlPorVaso = porVasoDS }
-    LaunchedEffect(notifDS) { }
-    LaunchedEffect(freqMinDS) { }
-
-    // -- Lógica agregar agua --
-    fun agregarAgua(
-        cantidad: Int,
-        zeroWarning: String,
-        addedText: String,
-        removedText: String
-    ) {
-        if (totalAgua == 0 && cantidad < 0) {
-            scope.launch {
-                snackbarHostState.currentSnackbarData?.dismiss()
-                snackbarHostState.showSnackbar(zeroWarning)
+    // Al volver a primer plano, verificar reactivamente si cambió de fecha (medianoche)
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.verificarFecha()
             }
-            return
         }
-        totalAgua += cantidad
-        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-        val text = if (cantidad > 0) addedText.format(cantidad) else removedText.format(kotlin.math.abs(cantidad))
-        scope.launch {
-            context.guardarAguaHoy(totalAgua.coerceAtLeast(0))
-            actualizarWidgetAgua(context)
-            snackbarHostState.currentSnackbarData?.dismiss()
-            snackbarHostState.showSnackbar(text)
-        }
-        if (notifDS) {
-            programarRecordatorioAgua(context, freqMinDS, totalAgua, objetivoML)
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
 
-    // -- Reset de consumo --
-    fun resetear(resetText: String) {
-        totalAgua = 0
-        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-        scope.launch {
-            context.guardarAguaHoy(0)
-            actualizarWidgetAgua(context)
-            snackbarHostState.currentSnackbarData?.dismiss()
-            snackbarHostState.showSnackbar(resetText)
-        }
-        if (notifDS) {
-            programarRecordatorioAgua(context, freqMinDS, totalAgua, objetivoML)
-        }
-    }
-    //Actualizar widget y DataStore si cambia el objetivo
-    LaunchedEffect(objetivoML) {
-        if (objetivoML != objetivoDS) {
-            scope.launch {
-                context.guardarObjetivo(objetivoML)
-                actualizarWidgetAgua(context)
-            }
-            if (notifDS) {
-                programarRecordatorioAgua(context, freqMinDS, totalAgua, objetivoML)
-            }
-        }
-    }
-    //Actualizar widget y DataStore si cambia la cantidad del vaso
-    LaunchedEffect(mlPorVaso) {
-        if (mlPorVaso != porVasoDS) {
-            scope.launch {
-                context.guardarPorVaso(mlPorVaso)
-                actualizarWidgetAgua(context)
+    // Observar eventos de un solo disparo emitidos por el ViewModel
+    LaunchedEffect(viewModel) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is AguaEvent.ShowZeroWarning -> {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(zeroWarning)
+                }
+                is AguaEvent.WaterAdded -> {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(addedText.format(event.cantidad))
+                }
+                is AguaEvent.WaterRemoved -> {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(removedText.format(event.cantidad))
+                }
+                is AguaEvent.WaterReset -> {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(resetText)
+                }
+                is AguaEvent.NotifEnabled -> {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(context.getString(R.string.notif_enabled_snackbar))
+                }
+                is AguaEvent.NotifDisabled -> {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(context.getString(R.string.notif_disabled_snackbar))
+                }
             }
         }
     }
 
-    //Crear canal de notificaciones y programar actualizacion diaria del widget
+    // Crear canal de notificaciones y programar actualización diaria del widget
     LaunchedEffect(Unit) {
         createWaterReminderChannel(context)
         programarResetAguaDiario(context)
     }
 
-    //Reprogramar recordatorio si se activa las notificaciones
-    LaunchedEffect(freqMinDS) {
-        // Sincroniza el knob con el valor persistido
-        val exact = minutosList.indexOf(freqMinDS)
-        sliderIndex = if (exact >= 0) exact else closestIndex(minutosList, freqMinDS)
-
-        // Si las notificaciones están activas, reprogramá con el valor persistido
-        if (notifDS) {
-            programarRecordatorioAgua(context, freqMinDS, totalAgua, objetivoML)
-        }
-    }
-
-
     Scaffold(
-        topBar = {TopBarReusable(stringResource(R.string.tool_water_reminder), onBack, {showInfo = true})},
+        topBar = { TopBarReusable(stringResource(R.string.tool_water_reminder), onBack, { showInfo = true }) },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
 
@@ -251,15 +202,15 @@ fun AguaReminderScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(Modifier.height(16.dp))
-            val glassesConsumed = (totalAgua / mlPorVaso.coerceAtLeast(1).toFloat()).toInt()
-            val glassesGoal = (objetivoML / mlPorVaso.coerceAtLeast(1).toFloat()).toInt()
+            val glassesConsumed = (uiState.totalAgua / uiState.mlPorVaso.coerceAtLeast(1).toFloat()).toInt()
+            val glassesGoal = (uiState.objetivoML / uiState.mlPorVaso.coerceAtLeast(1).toFloat()).toInt()
             val glassesText = stringResource(R.string.water_glasses_display, glassesConsumed, glassesGoal)
             Text(
-                "${(totalAgua / 1000f).let { "%.2f".format(it) }} L / ${(objetivoML / 1000f).let { "%.2f".format(it) }} L $glassesText",
+                "${(uiState.totalAgua / 1000f).let { "%.2f".format(it) }} L / ${(uiState.objetivoML / 1000f).let { "%.2f".format(it) }} L $glassesText",
                 fontSize = 20.sp
             )
             // --- Visual de progreso ---
-            AguaLevelBar(totalAgua, objetivoML)
+            AguaLevelBar(uiState.totalAgua, uiState.objetivoML)
 
             // --- Selector de objetivo ---
             Row(
@@ -267,20 +218,23 @@ fun AguaReminderScreen(
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("${context.getString(R.string.water_goal_label)} ${(objetivoML / 1000f).let { "%.2f".format(it) }}L", fontSize = 16.sp)
+                Text("${context.getString(R.string.water_goal_label)} ${(uiState.objetivoML / 1000f).let { "%.2f".format(it) }}L", fontSize = 16.sp)
                 Spacer(Modifier.width(6.dp))
 
-                var lastSliderValue by remember { mutableFloatStateOf(objetivoML.toFloat()) }
+                var lastSliderValue by remember(uiState.objetivoML) { mutableFloatStateOf(uiState.objetivoML.toFloat()) }
                 Slider(
-                    value = objetivoML / 1000f,
+                    value = (lastSliderValue / 1000f),
                     onValueChange = { valor ->
                         val step = 0.25f
                         val newValue = (valor / step).roundToInt() * step
-                        objetivoML = (newValue * 1000).roundToInt()
-                        if (newValue != lastSliderValue) {
+                        val newObjetivo = (newValue * 1000).roundToInt()
+                        if (newObjetivo.toFloat() != lastSliderValue) {
                             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            lastSliderValue = newValue
+                            lastSliderValue = newObjetivo.toFloat()
                         }
+                    },
+                    onValueChangeFinished = {
+                        viewModel.guardarObjetivo(lastSliderValue.roundToInt())
                     },
                     valueRange = 1.5f..3f,
                     steps = ((3f - 1.5f) / 0.25f).toInt() - 1,
@@ -294,7 +248,10 @@ fun AguaReminderScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Button(
-                    onClick = { agregarAgua(-mlPorVaso, zeroWarning, addedText, removedText) }
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        viewModel.agregarAgua(-uiState.mlPorVaso)
+                    }
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.water_loss),
@@ -302,11 +259,14 @@ fun AguaReminderScreen(
                         Modifier.size(18.dp)
                     )
                     Spacer(Modifier.width(6.dp))
-                    Text("-$mlPorVaso ml", fontSize = 18.sp)
+                    Text("-${uiState.mlPorVaso} ml", fontSize = 18.sp)
                 }
                 Spacer(Modifier.width(32.dp))
                 Button(
-                    onClick = { agregarAgua(mlPorVaso, zeroWarning, addedText, removedText) }
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        viewModel.agregarAgua(uiState.mlPorVaso)
+                    }
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.water_full),
@@ -314,7 +274,7 @@ fun AguaReminderScreen(
                         Modifier.size(18.dp)
                     )
                     Spacer(Modifier.width(6.dp))
-                    Text("+$mlPorVaso ml", fontSize = 18.sp)
+                    Text("+${uiState.mlPorVaso} ml", fontSize = 18.sp)
                 }
             }
             Row(
@@ -342,39 +302,26 @@ fun AguaReminderScreen(
             ) {
                 Text(stringResource(R.string.water_notif_enabled), fontSize = 16.sp)
                 Switch(
-                    checked = notifDS,
+                    checked = uiState.notificacionesActivas,
                     onCheckedChange = { checked ->
-                        // Si el usuario activa el switch, pedir permiso en Android 13+
-                        if (ContextCompat.checkSelfPermission(
+                        if (checked && ContextCompat.checkSelfPermission(
                                 context, Manifest.permission.POST_NOTIFICATIONS
                             ) != PackageManager.PERMISSION_GRANTED
                         ) {
                             notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                         }
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        scope.launch {
-                            context.guardarNotificacionesActivas(checked)
-                            if (checked) {
-                                programarRecordatorioAgua(context, freqMinDS, totalAgua, objetivoML)
-                                snackbarHostState.currentSnackbarData?.dismiss()
-                                snackbarHostState.showSnackbar(context.getString(R.string.notif_enabled_snackbar))
-                            } else {
-                                cancelarRecordatorioAgua(context)
-                                snackbarHostState.currentSnackbarData?.dismiss()
-                                snackbarHostState.showSnackbar(context.getString(R.string.notif_disabled_snackbar))
-                            }
-                        }
+                        viewModel.toggleNotificaciones(checked)
                     }
                 )
             }
-            //Si el usuario activa las notificaciones se le pregunta la frecuencia de estas
-            if (notifDS) {
+            if (uiState.notificacionesActivas) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(stringResource(R.string.water_notif_freq, freqMinDS / 60f), fontSize = 16.sp)
+                    Text(stringResource(R.string.water_notif_freq, uiState.frecuenciaMinutos / 60f), fontSize = 16.sp)
                     Slider(
                         value = sliderIndex.toFloat(),
                         onValueChange = { value ->
@@ -383,11 +330,10 @@ fun AguaReminderScreen(
                         },
                         onValueChangeFinished = {
                             val minutosSeleccionados = minutosList[sliderIndex]
-                            scope.launch { context.guardarFrecuenciaMinutos(minutosSeleccionados) }
-                            programarRecordatorioAgua(context, minutosSeleccionados, totalAgua, objetivoML)
+                            viewModel.guardarFrecuenciaMinutos(minutosSeleccionados)
                         },
                         valueRange = 0f..(minutosList.size - 1).toFloat(),
-                        steps = minutosList.size - 2, // Para 6 valores: 4 pasos intermedios
+                        steps = minutosList.size - 2,
                         modifier = Modifier.width(200.dp)
                     )
                 }
@@ -402,8 +348,7 @@ fun AguaReminderScreen(
             ) {
                 Button(
                     onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        resetear(resetText)
+                        viewModel.resetear()
                     }
                 ) {
                     Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.reset_content_desc))
@@ -427,8 +372,7 @@ fun AguaReminderScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
-            )
-            {
+            ) {
                 Text(stringResource(R.string.water_widget_hint))
             }
         }
@@ -436,7 +380,7 @@ fun AguaReminderScreen(
 
     // --- Cambiar cantidad del vaso (diálogo simple) ---
     if (showDialogVaso) {
-        var tempMl by remember { mutableStateOf(mlPorVaso.toString()) }
+        var tempMl by remember(uiState.mlPorVaso) { mutableStateOf(uiState.mlPorVaso.toString()) }
         AlertDialog(
             onDismissRequest = { showDialogVaso = false },
             title = { Text(stringResource(R.string.glass_amount_title)) },
@@ -451,7 +395,7 @@ fun AguaReminderScreen(
             confirmButton = {
                 TextButton(onClick = {
                     tempMl.toIntOrNull()?.let { newValue ->
-                        mlPorVaso = newValue.coerceIn(50, 1500)
+                        viewModel.guardarPorVaso(newValue.coerceIn(50, 1500))
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         showDialogVaso = false
                     }
