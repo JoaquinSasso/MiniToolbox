@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -51,20 +52,6 @@ import com.joasasso.minitoolbox.data.idiomasDisponibles
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import java.util.Locale
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
-
-
-@Composable
-fun rememberTts(): TextToSpeech {
-    val context = LocalContext.current
-    val ttsHolder = remember { arrayOfNulls<TextToSpeech>(1) }
-
-    DisposableEffect(Unit) {
-        val tts = TextToSpeech(context) { /* status -> */ }
-        ttsHolder[0] = tts
-        onDispose { tts.stop(); tts.shutdown() }
-    }
-    return ttsHolder[0]!!
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -180,7 +167,7 @@ fun BasicPhrasesScreen(onBack: () -> Unit) {
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(filteredPhrases) { frase ->
+                items(filteredPhrases, key = { "${it.categoria}_${it.traducciones["es"] ?: it.traducciones.values.firstOrNull() ?: it.hashCode()}" }) { frase ->
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
@@ -211,7 +198,7 @@ fun BasicPhrasesScreen(onBack: () -> Unit) {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 }
                             }) {
-                                Icon(Icons.Default.VolumeUp, contentDescription = stringResource(R.string.frases_play))
+                                Icon(Icons.AutoMirrored.Filled.VolumeUp, contentDescription = stringResource(R.string.frases_play))
                             }
                         }
                     }

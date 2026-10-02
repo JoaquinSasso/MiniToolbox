@@ -6,10 +6,13 @@ import androidx.core.content.edit
 import org.json.JSONArray
 import org.json.JSONObject
 
+import java.util.UUID
+
 data class Equipo(
     val nombre: String,
     val puntos: Int,
-    val color: Color
+    val color: Color,
+    val id: String = UUID.randomUUID().toString()
 )
 
 
@@ -22,10 +25,12 @@ object MarcadorPrefs {
         val arr = JSONArray(raw)
         return List(arr.length()) { i ->
             val o = arr.getJSONObject(i)
+            val id = if (o.has("id")) o.getString("id") else UUID.randomUUID().toString()
             Equipo(
                 nombre = o.getString("nombre"),
                 puntos = o.getInt("puntos"),
-                color = Color(o.getInt("color"))
+                color = Color(o.getInt("color")),
+                id = id
             )
         }
     }
@@ -38,6 +43,7 @@ object MarcadorPrefs {
                     put("nombre", it.nombre)
                     put("puntos", it.puntos)
                     put("color", it.color.toArgb())
+                    put("id", it.id)
                 }
             )
         }

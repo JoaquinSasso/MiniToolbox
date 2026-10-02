@@ -289,18 +289,13 @@ fun MiniToolboxNavGraph(
                 onNavigateToPro = { navController.navigate(Screen.Pro) }
             )
         }
-        composable<Screen.ExpenseEdit> { backStackEntry ->
-            val edit = backStackEntry.toRoute<Screen.ExpenseEdit>()
+        composable<Screen.ExpenseEdit> { _ ->
             EditarGastoScreen(
-                reunionId = edit.reunionId,
-                gastoId = edit.gastoId,
                 onBack = onBackSmart
             )
         }
-        composable<Screen.ExpenseAdd> { backStackEntry ->
-            val add = backStackEntry.toRoute<Screen.ExpenseAdd>()
+        composable<Screen.ExpenseAdd> { _ ->
             AgregarGastoScreen(
-                reunionId = add.reunionId,
                 onBack = onBackSmart
             )
         }

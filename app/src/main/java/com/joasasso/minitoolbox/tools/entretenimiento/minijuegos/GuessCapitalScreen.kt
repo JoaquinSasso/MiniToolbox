@@ -55,6 +55,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Locale
 import kotlin.math.abs
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun AdivinaCapitalScreen(onBack: () -> Unit) {
@@ -103,7 +104,7 @@ fun AdivinaCapitalScreen(onBack: () -> Unit) {
     LaunchedEffect(timerRunning) {
         if (timerRunning) {
             while (timeLeft > 0) {
-                delay(100)
+                delay(100.milliseconds)
                 timeLeft--
                 progress = (timeLeft / 100f).coerceIn(0f, 1f)
             }
@@ -116,7 +117,7 @@ fun AdivinaCapitalScreen(onBack: () -> Unit) {
                 timerRunning = false
 
                 scope.launch {
-                    delay(1000)
+                    delay(1000.milliseconds)
                     bgFlashColor = defaultBg
                     selectedOption = null
                     correctOption = null
@@ -193,7 +194,7 @@ fun AdivinaCapitalScreen(onBack: () -> Unit) {
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    items(shuffledOptions) { option ->
+                    items(shuffledOptions, key = { it.name }) { option ->
                         val bgColor = when {
                             selectedOption == null -> MaterialTheme.colorScheme.primaryContainer
                             option.capital == correctOption -> Color(0xFF4CAF50)
@@ -233,7 +234,7 @@ fun AdivinaCapitalScreen(onBack: () -> Unit) {
 
                                 scope.launch {
                                     timerRunning = false
-                                    delay(1000)
+                                    delay(1000.milliseconds)
                                     bgFlashColor = defaultBg
                                     selectedOption = null
                                     correctOption = null
@@ -344,7 +345,7 @@ object CapitalGameDataStore {
     private val Context.dataStore by preferencesDataStore("capital_game_prefs")
     private val BEST_SCORE = intPreferencesKey("capital_best_score")
 
-    suspend fun getBestScore(context: Context): Flow<Int> =
+    fun getBestScore(context: Context): Flow<Int> =
         context.dataStore.data.map { it[BEST_SCORE] ?: 0 }
 
     suspend fun setBestScore(context: Context, score: Int) {

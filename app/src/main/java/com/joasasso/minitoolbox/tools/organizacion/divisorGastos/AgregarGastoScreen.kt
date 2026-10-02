@@ -47,7 +47,6 @@ import java.text.NumberFormat
 
 @Composable
 fun AgregarGastoScreen(
-    reunionId: String,
     onBack: () -> Unit,
     vm: GastoFormViewModel = viewModel()
 ) {
@@ -128,7 +127,7 @@ fun AgregarGastoScreen(
                 )
             }
 
-            items(uiState.integrantes) { nombre ->
+            items(uiState.integrantes, key = { "pagador_$it" }) { nombre ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
@@ -178,7 +177,7 @@ fun AgregarGastoScreen(
                 )
             }
 
-            items(uiState.integrantes) { nombre ->
+            items(uiState.integrantes, key = { "consumidor_$it" }) { nombre ->
                 val actual = (uiState.consumidores[nombre] ?: 1) > 0
                 Card(
                     modifier = Modifier.fillMaxWidth(),

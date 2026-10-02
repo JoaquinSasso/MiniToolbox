@@ -221,7 +221,7 @@ fun LanzadorDadosScreen(
 
                 1 -> {
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        items(historial.take(30)) { tirada ->
+                        items(historial.take(30), key = { "${it.timestamp}_${it.tipo}" }) { tirada ->
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
