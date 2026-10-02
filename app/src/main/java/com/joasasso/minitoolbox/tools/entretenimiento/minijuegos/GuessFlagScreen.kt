@@ -52,13 +52,15 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Locale
 import kotlin.math.abs
+import androidx.compose.ui.platform.LocalLocale
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdivinaBanderaScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
-    val locale = Locale.getDefault()
+    val locale = LocalLocale.current.platformLocale
     val espanol = locale.language == "es"
     val scope = rememberCoroutineScope()
 
@@ -100,7 +102,7 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
     LaunchedEffect(timerRunning) {
         if (timerRunning) {
             while (timeLeft > 0) {
-                delay(100)
+                delay(100.milliseconds)
                 timeLeft--
                 progress = (timeLeft / 100f).coerceIn(0f, 1f)
             }
@@ -113,7 +115,7 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
                 timerRunning = false
 
                 scope.launch {
-                    delay(1000)
+                    delay(1000.milliseconds)
                     bgFlashColor = defaultBg
                     selectedOption = null
                     correctOption = null
@@ -170,7 +172,7 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    items(shuffledOptions) { option ->
+                    items(shuffledOptions, key = { it.name }) { option ->
                         val bgColor = when {
                             selectedOption == null -> MaterialTheme.colorScheme.primaryContainer
                             option.name == correctOption -> Color(0xFF4CAF50)
@@ -202,7 +204,7 @@ fun AdivinaBanderaScreen(onBack: () -> Unit) {
 
                                 scope.launch {
                                     timerRunning = false
-                                    delay(1000)
+                                    delay(1000.milliseconds)
                                     bgFlashColor = defaultBg
                                     selectedOption = null
                                     correctOption = null

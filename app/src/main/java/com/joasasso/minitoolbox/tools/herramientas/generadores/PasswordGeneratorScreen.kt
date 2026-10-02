@@ -31,6 +31,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,14 +50,14 @@ import kotlin.random.Random
 @Composable
 fun GeneradorContrasenaScreen(onBack: () -> Unit) {
     var showInfo by remember { mutableStateOf(false) }
-    var longitud by remember { mutableIntStateOf(12) }
-    var incluirMayusculas by remember { mutableStateOf(true) }
-    var incluirMinusculas by remember { mutableStateOf(true) }
-    var incluirNumeros by remember { mutableStateOf(true) }
-    var incluirSimbolos by remember { mutableStateOf(true) }
-    var contrasena by remember { mutableStateOf("") }
-    var sliderValue by remember { mutableFloatStateOf(longitud.toFloat()) }
-    var lastCantidad by remember { mutableIntStateOf(longitud) }
+    var longitud by rememberSaveable { mutableIntStateOf(12) }
+    var incluirMayusculas by rememberSaveable { mutableStateOf(true) }
+    var incluirMinusculas by rememberSaveable { mutableStateOf(true) }
+    var incluirNumeros by rememberSaveable { mutableStateOf(true) }
+    var incluirSimbolos by rememberSaveable { mutableStateOf(true) }
+    var contrasena by rememberSaveable { mutableStateOf("") }
+    var sliderValue by rememberSaveable { mutableFloatStateOf(longitud.toFloat()) }
+    var lastCantidad by rememberSaveable { mutableIntStateOf(longitud) }
 
     val clipboardManager = LocalClipboardManager.current
     val haptic = LocalHapticFeedback.current
@@ -79,8 +80,12 @@ fun GeneradorContrasenaScreen(onBack: () -> Unit) {
         } else ""
     }
 
-    // Generar una contraseña al inicio
-    LaunchedEffect(Unit) { generar() }
+    // Generar una contraseña al inicio si aún no se generó o restauró
+    LaunchedEffect(Unit) {
+        if (contrasena.isEmpty()) {
+            generar()
+        }
+    }
 
     Scaffold(
         topBar = {TopBarReusable(stringResource(R.string.tool_password_generator), onBack, {showInfo = true})}

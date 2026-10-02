@@ -56,6 +56,7 @@ import java.text.DateFormat.getDateInstance
 import java.text.NumberFormat
 import java.util.Date
 import java.util.Locale
+import androidx.compose.ui.platform.LocalLocale
 
 @Composable
 fun DetallesReunionScreen(
@@ -80,19 +81,10 @@ fun DetallesReunionScreen(
     var nombreEditado by remember { mutableStateOf("") }
     var integranteAEliminar by remember { mutableStateOf<String?>(null) }
 
-    val locale = Locale.getDefault()
+    val locale = LocalLocale.current.platformLocale
     val formatter = NumberFormat.getCurrencyInstance(locale).apply {
         maximumFractionDigits = 2
         minimumFractionDigits = 0
-    }
-
-    val isPro = LocalProState.current.isPro
-    var showPaywallDialog by remember { mutableStateOf(false) }
-    var hasActivePass by remember { mutableStateOf(CreditAccessManager.hasActivePass(context)) }
-
-    fun actualizarIntegrante(original: String, nuevo: String) {
-        vm.actualizarIntegrante(original, nuevo)
-        integranteAEditar = null
     }
 
     Scaffold(topBar = { TopBarReusable(stringResource(R.string.meeting_details_screen), onBack, { showInfo = true }) })
@@ -120,7 +112,7 @@ fun DetallesReunionScreen(
 
             item { Text(stringResource(R.string.expenses_section), style = MaterialTheme.typography.titleSmall) }
 
-            items(reunion?.gastos ?: emptyList()) { gasto ->
+            items(reunion?.gastos ?: emptyList(), key = { "gasto_${it.id}" }) { gasto ->
                 val totalGasto = gasto.totalEnCentavos() / 100.0
                 val totalPersonas = gasto.consumidoPor.values.sum()
                 val porPersona = if (totalPersonas > 0) totalGasto / totalPersonas else 0.0
@@ -201,7 +193,7 @@ fun DetallesReunionScreen(
                 Text(stringResource(R.string.members_section), style = MaterialTheme.typography.titleSmall)
             }
 
-            items(reunion?.integrantes ?: emptyList()) { integrante ->
+            items(reunion?.integrantes ?: emptyList(), key = { "integrante_$it" }) { integrante ->
                 val totalPagado = (reunion?.gastos?.sumOf { it.aporteEnCentavos(integrante) } ?: 0L) / 100.0
 
                 Card(
@@ -254,7 +246,7 @@ fun DetallesReunionScreen(
                 Spacer(Modifier.height(8.dp))
                 Text(stringResource(R.string.debts_section), style = MaterialTheme.typography.titleSmall)
             }
-            items(deudas) { deuda ->
+            items(deudas, key = { "deuda_$it" }) { deuda ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surfaceVariant)
@@ -370,41 +362,6 @@ fun DetallesReunionScreen(
                 }
             }
         )
-    }
-
-    if(showPaywallDialog)
-    {
-        ProToolPaywallDialog(
-            onDismiss = { showPaywallDialog = false },
-            onGoToPro = { onNavigateToPro },
-            onWatchAd = { showPaywallDialog = false
-                if (activity != null) {
-                    RewardedManager.show(
-                        activity = activity,
-                        onReward = {
-                            CreditAccessManager.startTimedPassForAd(activity)
-                            hasActivePass = true
-
-                            Toast
-                                .makeText(activity, R.string.pro_unlocked_toast, android.widget.Toast.LENGTH_SHORT)
-                                .show()
-                        },
-                        onUnavailable = {
-                            val used = CreditAccessManager.consumeGrace(activity)
-                            if (used) {
-                                hasActivePass = true
-                                Toast
-                                    .makeText(activity, R.string.free_pass_used_toast, android.widget.Toast.LENGTH_SHORT)
-                                    .show()
-                            } else {
-                                Toast
-                                    .makeText(activity, R.string.paywall_no_ad_try_later, android.widget.Toast.LENGTH_SHORT)
-                                    .show()
-                            }
-                        }
-                    )
-                }
-            })
     }
 
     if (showInfo) {

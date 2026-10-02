@@ -27,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,11 +42,12 @@ import androidx.compose.ui.unit.dp
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupSelectorScreen(onBack: () -> Unit) {
-    var selectedSize by remember { mutableIntStateOf(2) }
+    var selectedSize by rememberSaveable { mutableIntStateOf(2) }
     var fingerPositions by remember { mutableStateOf<Map<PointerId, Offset>>(emptyMap()) }
     var showError by remember { mutableStateOf(false) }
     var teams by remember { mutableStateOf<Map<PointerId, Int>>(emptyMap()) }
@@ -73,7 +75,7 @@ fun GroupSelectorScreen(onBack: () -> Unit) {
             if (count % selectedSize == 0) {
                 showError = false
                 hasVibrated = false // Reseteamos la vibración cuando el error ya no es necesario
-                delay(1000)
+                delay(1000.milliseconds)
                 if (fingerPositions.keys.toSet() == fingerIds.toSet()) {
                     val shuffledIds = fingerIds.shuffled()
                     val newTeams = mutableMapOf<PointerId, Int>()
@@ -86,7 +88,7 @@ fun GroupSelectorScreen(onBack: () -> Unit) {
             } else {
                 // Espera medio segundo antes de mostrar el error
                 showError = false
-                delay(500)
+                delay(500.milliseconds)
                 // Si la situación sigue siendo inválida, muestra el error
                 if (
                     fingerPositions.size == count &&

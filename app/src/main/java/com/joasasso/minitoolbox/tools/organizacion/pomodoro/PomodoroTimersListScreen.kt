@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -360,7 +361,7 @@ fun PomodoroTimersListScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier.height(48.dp)
                     ) {
-                        items(colorOptions) { c ->
+                        items(colorOptions, key = { it.toArgb() }) { c ->
                             Box(
                                 modifier = Modifier
                                     .size(if (c == color) 36.dp else 30.dp)
