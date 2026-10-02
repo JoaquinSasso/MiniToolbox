@@ -58,7 +58,6 @@ jobs:
           path: app/build/reports/tests/
 
   build:
-    name: Build & Lint
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
