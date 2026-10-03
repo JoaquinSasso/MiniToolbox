@@ -10,4 +10,5 @@
     <string name="ruler_help_line3">• El botón de la esquina permite alternar entre centímetros y pulgadas.</string>
     <string name="ruler_help_line4">• La precisión depende del tamaño físico reportado por tu dispositivo, por lo que puede variar ligeramente entre modelos.</string>
 
+    <string name="ruler_onboarding_hint">Alineá el objeto contra el borde izquierdo de la pantalla para medirlo.</string>
 </resources>

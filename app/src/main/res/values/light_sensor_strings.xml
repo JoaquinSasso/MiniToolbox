@@ -16,4 +16,5 @@
     <string name="lightmeter_help_line6">    • 1,000+ lux: near window or outside. / 10,000+ lux: direct sunlight.</string>
     <string name="lightmeter_help_line7">• If the sensor shows 0 or doesn\'t change, your device might not have a light sensor or it may be covered. Sudden value jumps are normal.</string>
 
+    <string name="light_sensor_onboarding_hint">The ambient light sensor is usually near the top front edge. Point it at the light source.</string>
 </resources>

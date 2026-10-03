@@ -57,6 +57,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.joasasso.minitoolbox.R
+import com.joasasso.minitoolbox.data.ToolOnboardingKeys
+import com.joasasso.minitoolbox.ui.components.ToolOnboardingCard
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlinx.coroutines.delay
 import kotlin.math.abs
@@ -250,9 +252,18 @@ fun BubbleLevelScreen(onBack: () -> Unit) {
         topBar = { TopBarReusable(stringResource(R.string.tool_bubble_level), onBack, { showInfo = true }) }
     ) { padding ->
         Column(
-            Modifier.fillMaxSize().padding(padding),
+            Modifier
+                .fillMaxSize()
+                .padding(padding),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            ToolOnboardingCard(
+                toolKey = ToolOnboardingKeys.BUBBLE_LEVEL,
+                message = stringResource(R.string.bubble_onboarding_hint),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            )
             Spacer(Modifier.height(8.dp))
             Row(
                 Modifier.fillMaxWidth(),
@@ -273,13 +284,8 @@ fun BubbleLevelScreen(onBack: () -> Unit) {
                     )
                 }
             }
-        }
             Spacer(Modifier.height(8.dp))
-            Column(
-                Modifier.fillMaxSize().padding(padding),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Canvas(
+            Canvas(
                     Modifier
                         .fillMaxWidth()
                         .weight(1f)

@@ -34,8 +34,12 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.ui.unit.dp
 import com.joasasso.minitoolbox.R
+import com.joasasso.minitoolbox.data.ToolOnboardingKeys
+import com.joasasso.minitoolbox.ui.components.ToolOnboardingCard
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -117,34 +121,33 @@ fun ReglaScreen(onBack: () -> Unit) {
                         }
                     }
                 }
-                // Botones alineados arriba a la derecha
-                Box(
+                // Botones y sugerencia alineados a la derecha
+                Column(
                     modifier = Modifier
                         .fillMaxSize()
+                        .padding(top = 8.dp, start = 8.dp, end = 8.dp),
+                    horizontalAlignment = Alignment.End
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp, end = 8.dp)
-                            .align(Alignment.TopEnd),
-                        horizontalArrangement = Arrangement.End,
-                        verticalAlignment = Alignment.Top
+                    Button(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            unidad = if (unidad == "cm") "inch" else "cm"
+                        },
+                        shape = MaterialTheme.shapes.medium
                     ) {
-                        Button(
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                unidad = if (unidad == "cm") "inch" else "cm"
-                            },
-                            shape = MaterialTheme.shapes.medium
-                        ) {
-                            Text(
-                                stringResource(
-                                    if (unidad == "cm") R.string.ruler_switch_to_inches
-                                    else R.string.ruler_switch_to_cm
-                                )
+                        Text(
+                            stringResource(
+                                if (unidad == "cm") R.string.ruler_switch_to_inches
+                                else R.string.ruler_switch_to_cm
                             )
-                        }
+                        )
                     }
+                    Spacer(Modifier.height(12.dp))
+                    ToolOnboardingCard(
+                        toolKey = ToolOnboardingKeys.RULER,
+                        message = stringResource(R.string.ruler_onboarding_hint),
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
         }
