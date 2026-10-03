@@ -29,4 +29,5 @@
     <string name="compass_mode_magnetic">Magnetico</string>
     <string name="compass_mode_gps">GPS</string>
 
+    <string name="compass_onboarding_hint">Calibrá la brújula moviendo el dispositivo en forma de 8 en el aire si la orientación no es precisa.</string>
 </resources>

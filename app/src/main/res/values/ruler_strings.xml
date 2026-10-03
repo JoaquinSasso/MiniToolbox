@@ -9,4 +9,6 @@
     <string name="ruler_help_line2">• You can measure small objects by placing them on the screen along the left edge.</string>
     <string name="ruler_help_line3">• Use the corner button to toggle between centimeters and inches.</string>
     <string name="ruler_help_line4">• Accuracy depends on your device’s reported physical size and may vary slightly between models.</string>
+
+    <string name="ruler_onboarding_hint">Align the object along the left edge of the screen to measure it.</string>
 </resources>

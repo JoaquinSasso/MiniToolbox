@@ -20,4 +20,6 @@
     <string name="color">Color</string>
     <string name="edit">Editar</string>
     <string name="information">Información</string>
+    <string name="onboarding_dismiss">Cerrar sugerencia</string>
+    <string name="onboarding_got_it">Entendido</string>
 </resources>

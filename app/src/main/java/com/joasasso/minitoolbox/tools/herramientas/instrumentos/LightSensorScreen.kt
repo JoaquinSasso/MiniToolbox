@@ -41,6 +41,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.joasasso.minitoolbox.R
+import com.joasasso.minitoolbox.data.ToolOnboardingKeys
+import com.joasasso.minitoolbox.ui.components.ToolOnboardingCard
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -85,14 +87,27 @@ fun LightSensorScreen(onBack: () -> Unit) {
             )
         }
     ) { padding ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
                 .padding(padding),
-            contentAlignment = Alignment.Center
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
+            ToolOnboardingCard(
+                toolKey = ToolOnboardingKeys.LIGHT_SENSOR,
+                message = stringResource(R.string.light_sensor_onboarding_hint),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(28.dp),
@@ -145,6 +160,7 @@ fun LightSensorScreen(onBack: () -> Unit) {
             }
         }
     }
+}
 
     if (showInfo) {
         AlertDialog(

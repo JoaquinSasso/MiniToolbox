@@ -22,7 +22,7 @@
 
 ## UI/UX
 
-- [ ] **Onboarding por herramienta.** AnimatedVisibility con tarjeta de primera vez en herramientas de sensores (brújula: calibración en ocho, nivel: superficie de referencia, AR: mover para detectar planos). Persistir en DataStore. El patrón ya existe en AR Ruler con StatusBanner. Fuente: auditoria_opus.md D1.
+- [x] **Onboarding por herramienta.** AnimatedVisibility con tarjeta de primera vez en herramientas de sensores (brújula: calibración en ocho, nivel: superficie de referencia, sensor de luz: orientación hacia la fuente, regla: borde de referencia). Persistido en DataStore atómico con ToolOnboardingBanner/ToolOnboardingCard y cubierto con tests unitarios. Fuente: auditoria_opus.md D1.
 - [ ] **Compartir resultado desde más herramientas.** Candidatos por uso: regla AR (captura con mediciones → `graphicsLayer().toImageBitmap()`), marcador de truco (resultado final), generador de contraseñas (con `EXTRA_IS_SENSITIVE`). Hoy solo 3 herramientas tienen ACTION_SEND. Fuente: auditoria_opus.md D3.
 - [ ] **Landscape en regla AR y nivel de burbuja.** El mecanismo `LockScreenOrientationIfAllowed` ya está preparado para hacerlo por pantalla. No para las 33 herramientas, solo para las dos donde el usuario naturalmente gira el teléfono. Fuente: auditoria_opus.md D6.
 - [ ] **GIFs del README.** Pendiente por decisión. Depende de cerrar cambios de UI/UX. Fuente: auditoria_opus.md §0.

@@ -11,4 +11,5 @@
     <string name="bubble_help_line6">   – Flat detects level in both axes.</string>
     <string name="bubble_help_line7">   – Portrait and Landscape measure a single direction. Use the pause button to freeze the bubble.</string>
 
+    <string name="bubble_onboarding_hint">Place the device flat on the surface you want to level or align.</string>
 </resources>

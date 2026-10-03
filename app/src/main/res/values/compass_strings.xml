@@ -29,5 +29,5 @@
     <string name="compass_mode_magnetic">Magnetic</string>
     <string name="compass_mode_gps">GPS</string>
 
-
+    <string name="compass_onboarding_hint">Calibrate by waving your device in a figure-8 motion if the heading seems inaccurate.</string>
 </resources>

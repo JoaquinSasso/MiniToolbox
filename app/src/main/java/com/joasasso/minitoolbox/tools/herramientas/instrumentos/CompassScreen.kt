@@ -49,6 +49,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
 import com.joasasso.minitoolbox.R
+import com.joasasso.minitoolbox.data.ToolOnboardingKeys
+import com.joasasso.minitoolbox.ui.components.ToolOnboardingCard
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlin.math.abs
 import kotlin.math.cos
@@ -200,27 +202,40 @@ fun BrujulaScreen(onBack: () -> Unit) {
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (hasMagnetometer) {
-                BoxWithConstraints(Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center) {
-                    val side = min(maxWidth, maxHeight) * 0.9f
-                    CompassDial(
-                        diameterDp = side,
-                        ringRotationDeg = -animated,   // el anillo gira opuesto al heading
-                        northColor = red,          // color para el norte y el triangulo
-                        tickColor = onSurface,
-                        ringColor = onSurface.copy(alpha = 0.25f)
+            ToolOnboardingCard(
+                toolKey = ToolOnboardingKeys.COMPASS,
+                message = stringResource(R.string.compass_onboarding_hint),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                if (hasMagnetometer) {
+                    BoxWithConstraints(Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center) {
+                        val side = min(maxWidth, maxHeight) * 0.9f
+                        CompassDial(
+                            diameterDp = side,
+                            ringRotationDeg = -animated,   // el anillo gira opuesto al heading
+                            northColor = red,          // color para el norte y el triangulo
+                            tickColor = onSurface,
+                            ringColor = onSurface.copy(alpha = 0.25f)
+                        )
+                    }
+                } else {
+                    // Fallback simple cuando no hay magnetómetro
+                    Text(
+                        text = "Brújula no soportada en este dispositivo",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-            } else {
-                // Fallback simple cuando no hay magnetómetro
-                Text(
-                    text = "Brújula no soportada en este dispositivo",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
             }
         }
     }

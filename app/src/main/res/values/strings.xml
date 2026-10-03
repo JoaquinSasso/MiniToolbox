@@ -20,5 +20,6 @@
     <string name="color">Color</string>
     <string name="edit">Edit</string>
     <string name="information">Information</string>
-
+    <string name="onboarding_dismiss">Dismiss hint</string>
+    <string name="onboarding_got_it">Got it</string>
 </resources>
