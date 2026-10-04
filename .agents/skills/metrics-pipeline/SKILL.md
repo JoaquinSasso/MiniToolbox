@@ -1,113 +1,64 @@
 ---
 name: metrics-pipeline
-description: Reglas y flujo del sistema de métricas/telemetría propietario de MiniToolbox. Leer antes de tocar cualquier código de métricas en cliente, backend, dashboard o fixtures compartidas.
+description: >-
+  Mapa, contratos y trampas del sistema de telemetría propio de MiniToolbox (cliente Kotlin,
+  Cloud Functions en TypeScript, Firestore y dashboard). Usar antes de modificar cualquier
+  archivo en app/.../metrics/, backend/functions/, dashboard/, metrics-fixtures/ o
+  docs/metrics-glossary.md, y antes de interpretar datos exportados del dashboard.
 ---
 
-# Pipeline de Métricas — MiniToolbox
+# Pipeline de métricas
 
-## Flujo del dato (extremo a extremo)
+## Flujo del dato
 
-```
-App (Kotlin)                  Backend (TypeScript)           Almacenamiento
-─────────────                 ────────────────────           ──────────────
-Metrics.kt (fachada)
-  → AggregatesRepository      
-    → MetricsDataStore         
-      (DataStore: agregados    
-       diarios acumulados)     
-        → UploadMetricsWorker  
-          (WorkManager: envío  
-           periódico con       
-           constraints de red) 
-            → MetricsUploader  
-              (HTTP + App Check)
-                ─────────────→ index.ts (Cloud Function)
-                               validate.ts (validación)
-                               → Firestore (documento diario)
-                                                              → dashboard/
-                                                                (HTML estático
-                                                                 en Firebase
-                                                                 Hosting)
-```
+1. **Eventos.** `metrics/Metrics.kt` es la fachada: `appOpen`, `dailyOpenOnce`, `toolUse`, `widgetUse` y `adImpression`. Cada evento corre fire-and-forget en `Dispatchers.IO` y respeta el opt-out (`isMetricsEnabled`).
+2. **Persistencia.** `metrics/storage/AggregatesRepository.kt` acumula contadores por día en `metricsDataStore` (`storage/MetricsDataStore.kt`), como mapas JSON dentro de Preferences.
+3. **Agendado.** `metrics/uploader/UploadScheduler.kt` encola `OneTimeWorkRequest` únicos (`maybeSchedule`, `enqueueNowExpedited` en `ON_STOP`, `maybeFlushOnThreshold`). No es un trabajo periódico.
+4. **Envío.** `metrics/uploader/UploadMetricsWorker.kt` arma el payload (`PAYLOAD_SCHEMA_VERSION = 3`), lo congela como lote pendiente con un `batch_id` y lo envía con `MetricsUploader.kt`, que agrega el header `X-Firebase-AppCheck`. La respuesta se clasifica en `UploadOutcome`: Success, PermanentReject, AuthError o Transient.
+5. **Ingesta.** `backend/functions/src/index.ts`, función `ingest`. Valida y sanea con `validate.ts`, deduplica por `batch_id` (`metrics_ingest_batches`) e incrementa `metrics_daily/{mes}/days/{día}`. Registra cada lote en `metrics_ingest_logs` y el método de autenticación en `metrics_auth`.
+6. **Lectura.** Las funciones `metricsDaily`, `metricsSummary` y `metricsAuth` requieren el header `X-API-Key`. El dashboard (`dashboard/public/index.html`) las consume y guarda la URL y la clave en `localStorage`. Sin clave, muestra datos de demostración.
 
-## Restricciones innegociables
+## Contratos (romperlos corrompe datos de forma irreversible)
 
-Estas vienen de `DECISIONS.md` y no se negocian:
+1. **Formato de clave.** `MetricsContract.KEY_RE` (Kotlin) y `KEY_RE` en `validate.ts` (TS) deben coincidir. Los casos compartidos están en `metrics-fixtures/keys.json`, pero **hoy solo los consume el lado Kotlin** (`MetricsContractTest`): el backend no tiene tests.
+2. **Clave de herramienta.** `Tool.metricsKey` (`tools/Tool.kt`), que por defecto es `screen.route`. Nunca se cambia una clave existente: si cambia la ruta, se fija `metricsKey` con el valor anterior. `ToolMetricsKeysTest.expectedKeys` congela el conjunto. Solo se edita al **agregar** una herramienta.
+3. **Lista de herramientas del backend.** `KNOWN_TOOLS` en `index.ts` se arma con los valores de `TOOL_ROUTE_MAP` más `EXTRA_KNOWN_TOOLS`. Una clave que no figure ahí se guarda como `other` (y se loguea `ingest_unknown_tools`). **Toda herramienta nueva se agrega en los dos lados en el mismo PR.**
+4. **Subpantallas.** Las subpantallas reportan bajo la clave de su herramienta. El mapeo está en `ToolRoutes.findToolByScreen`: `PomodoroDetail` va a `pomodoro`, `WaterStats` a `water` y las pantallas de gastos a `meetings`.
+5. **Orígenes.** Los valores de `MetricsSource` (`nav`, `notification`, `widget`, `shortcut`, `unknown`) deben coincidir con `KNOWN_SOURCES` en `index.ts`.
+6. **Retención.** Las categorías de `RetentionBuckets` deben coincidir con `KNOWN_AGE` y `KNOWN_INTENSITY` en `index.ts`.
+7. **Versión de esquema.** Cambiar la semántica de un campo exige subir `PAYLOAD_SCHEMA_VERSION` y documentarlo en `docs/metrics-glossary.md` (sección "Metadatos del lote").
+8. **Privacidad.** Ningún identificador persistente en el payload. Ver `DECISIONS.md` §3.
 
-1. **Cero identificadores de dispositivo.** Solo viajan agregados. Si una métrica propuesta requiere seguir un individuo, se descarta.
-2. **Claves inmutables.** Renombrar una clave de métrica rompe la serie histórica. El contrato vive en `metrics-fixtures/keys.json` y es consumido por tests de Kotlin y TypeScript. Si cambiás el regex o `normalizeKey` en un lado, el test del otro falla.
-3. **Backend estrictamente en TypeScript.** Cloud Functions en TypeScript, almacenamiento en Firestore, dashboard estático en Firebase Hosting.
-4. **Almacenamiento local en DataStore.** La orquestación de envíos usa WorkManager.
-5. **Unificación de subpantallas y flujos secundarios.** Las subpantallas, diálogos o configuraciones que formen parte del flujo de una herramienta ya existente (por ejemplo, lista de timers en Pomodoro, detalle de reunión o carga de gasto en Divisor de Gastos) **no deben registrar claves de telemetría separadas**. Deben unificarse bajo la clave canónica de la herramienta (`pomodoro`, `meetings`, `water`), preservando la continuidad histórica y evitando dispersión en el dashboard de métricas.
+## Sesgos conocidos (no los empeores; si los corregís, actualizá el glosario)
 
-## Archivos clave
+- `MainActivity.kt` llama `widgetUse("widget_shortcuts")` para **cualquier** deep link, incluidas las notificaciones.
+- `NavGraph.kt` compara la ruta y no la herramienta: navegar entre subpantallas de una misma herramienta vuelve a contar `toolUse` (si pasaron más de 5 s).
+- `about` está en `ToolRegistry` y cuenta como herramienta.
+- Las builds debug envían al endpoint de producción y el payload no lleva `build_type`. `dev/DevInspector.kt` genera claves de prueba (`metricTest`, `metricsTest`).
+- El dashboard rotula `versions_first_seen` como "Instalaciones nuevas", y eso contradice el glosario.
+- Detalle y estado de cada uno: `docs/backlog.md`.
 
-### Cliente (Kotlin)
+## Interpretar datos exportados
 
-| Archivo | Responsabilidad |
-|---|---|
-| `app/.../metrics/Metrics.kt` | Fachada pública. Funciones `appOpen()`, `dailyOpenOnce()`, `toolUse()`. Tiene costuras de test: `metricsRepoFactory`, `metricsTestScheduleHook`, `metricsDispatcher`. |
-| `app/.../metrics/MetricsContract.kt` | Definición del contrato de claves y esquema de versiones. |
-| `app/.../metrics/MetricsConfig.kt` | Configuración (endpoint, intervalos). Se carga de `BuildConfig`. |
-| `app/.../metrics/MetricsSource.kt` | Tracking de fuente de entrada (widget, shortcut, catálogo). |
-| `app/.../metrics/ToolRoutes.kt` | Normalización de rutas de navegación a claves de métricas. |
-| `app/.../metrics/RetentionBuckets.kt` | Buckets de retención privacy-preserving. |
-| `app/.../metrics/storage/AggregatesRepository.kt` | Repositorio de agregados diarios sobre DataStore. |
-| `app/.../metrics/storage/MetricsDataStore.kt` | Claves de DataStore y helpers. |
-| `app/.../metrics/storage/MetricsSanitizer.kt` | Sanitización de datos antes del envío. |
-| `app/.../metrics/storage/JsonUtils.kt` | Serialización JSON de agregados. |
-| `app/.../metrics/uploader/MetricsUploader.kt` | HTTP client con App Check token. |
-| `app/.../metrics/uploader/UploadMetricsWorker.kt` | CoroutineWorker para WorkManager. |
-| `app/.../metrics/uploader/UploadScheduler.kt` | Programación de trabajo periódico. |
-
-### Backend (TypeScript)
-
-| Archivo | Responsabilidad |
-|---|---|
-| `backend/functions/src/index.ts` | Cloud Function `receiveMetrics`. Verifica App Check, valida, agrega, escribe a Firestore. |
-| `backend/functions/src/validate.ts` | Validación de payload y claves contra el contrato. |
-
-### Contrato compartido
-
-| Archivo | Responsabilidad |
-|---|---|
-| `metrics-fixtures/keys.json` | Casos de test compartidos entre Kotlin y TypeScript. Define claves válidas, normalizaciones esperadas, y formatos de fecha. |
-
-### Dashboard
-
-| Archivo | Responsabilidad |
-|---|---|
-| `dashboard/index.html` | HTML estático con JS inline. Lee Firestore y renderiza gráficos. Hosted en Firebase Hosting. |
-
-### Tests
-
-| Archivo | Qué verifica |
-|---|---|
-| `app/.../test/metrics/MetricsTest.kt` | Que `appOpen()` y `dailyOpenOnce()` llaman a los métodos correctos del repo. |
-| `app/.../test/metrics/MetricsContractTest.kt` | Que las claves del contrato compartido pasan la validación del cliente. |
-| `app/.../test/metrics/ToolMetricsKeysTest.kt` | Que todas las herramientas del catálogo tienen claves de métricas válidas. |
-| `app/.../test/metrics/RetentionBucketsTest.kt` | Que los buckets de retención son correctos y privacy-preserving. |
+Leé `docs/metrics-glossary.md` antes de sacar conclusiones:
+- `versions` es DAU por versión (1 por dispositivo y por día), no aperturas.
+- `versions_first_seen` suma una unidad por cada versión que pasa por un dispositivo, así que **no** mide instalaciones.
+- `app_open` está inflado hasta el 17/08/2026.
+- Las claves históricas que ya no existen en `ToolRegistry` (`quotes`, `pomodoro_list`, `pomodoro_detail`, `pro`, `other`, claves de prueba) se normalizan o excluyen explícitamente, y se dice cómo.
+- Con pocos usuarios, avisá siempre del bajo poder estadístico.
 
 ## Verificación
 
-Después de tocar métricas, ejecutar **ambos**:
-
 ```powershell
-# Cliente (desde la raíz del proyecto)
+# Cliente
 .\gradlew.bat testDebugUnitTest --tests "*.metrics.*"
-
-# Backend (desde backend/functions/)
-cd backend/functions && npm test
+# Backend (no hay tests: solo lint y build)
+cd backend/functions; npm ci; npm run lint; npm run build
 ```
 
-## Trampas conocidas
-
-1. **`metricsDispatcher` en tests.** Siempre inyectar `StandardTestDispatcher` y llamar `advanceUntilIdle()`. El dispatcher de producción es `Dispatchers.IO` fire-and-forget; sin inyección, los tests son flaky.
-2. **BOM de Compose alpha.** El proyecto usa `compose-bom-alpha` porque Material3 1.5.x trae la API expresiva usada en el Pomodoro. Mezclar material3 alpha con foundation estable produce `AbstractMethodError` en runtime.
-3. **`metrics-fixtures/keys.json` es un contrato bilateral.** Editarlo requiere verificar que los tests de **ambos** lados (Kotlin y TypeScript) sigan pasando.
+Si tocaste el backend, aclarale al autor que el deploy (`npm run deploy`) es manual y que no lo ejecutaste.
 
 ## Documentación relacionada
 
-- `docs/metrics-glossary.md` — semántica de cada contador
-- `docs/metrics-double-count-postmortem.md` — postmortem de conteo doble
-- `docs/metrics-pipeline-blockage-postmortem.md` — postmortem de bloqueo del pipeline
+- `docs/metrics-glossary.md`: semántica de cada contador y sus sesgos.
+- `docs/metrics-double-count-postmortem.md` y `docs/metrics-pipeline-blockage-postmortem.md`.
