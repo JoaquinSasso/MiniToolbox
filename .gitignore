@@ -27,3 +27,5 @@ desktop.ini
 build-and-install.ps1
 .stignore
 .artifacts/
+# Auditorías e informes locales (se verifican y se pasan a docs/backlog.md; no se versionan)
+AUDITORIA_*.md

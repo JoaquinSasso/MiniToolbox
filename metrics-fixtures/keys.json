@@ -1,5 +1,5 @@
 {
-  "_comment": "Contrato de claves de métricas. Consumido por MetricsContractTest.kt (Kotlin) y validate.test.ts (backend). Si cambia el regex o normalizeKey en un lado, el test del otro falla.",
+  "_comment": "Contrato de claves de métricas. Lo consume MetricsContractTest.kt (Kotlin). backend/functions/src/validate.ts debe cumplir los mismos casos, pero todavía no tiene tests que lo verifiquen (ver docs/backlog.md, backend-tests).",
   "valid": [
     "water",
     "ar_ruler",
