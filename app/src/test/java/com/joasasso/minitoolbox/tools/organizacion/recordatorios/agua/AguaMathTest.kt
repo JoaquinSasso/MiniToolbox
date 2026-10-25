@@ -2,8 +2,10 @@ package com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.time.LocalDate
 
 class AguaMathTest {
 
@@ -62,5 +64,38 @@ class AguaMathTest {
         assertEquals(7, AguaMath.calcularVasosConsumidos(consumidoML = 2002, mlPorVaso = 286))
         assertEquals(7, AguaMath.calcularVasosConsumidos(consumidoML = 2000, mlPorVaso = 286))
         assertEquals(0, AguaMath.calcularVasosConsumidos(consumidoML = 0, mlPorVaso = 285))
+    }
+
+    @Test
+    fun extraerHistoricoOrdenado_filtraClavesInvalidasYOrdenaPorFecha() {
+        val raw = mapOf(
+            "agua_ml_2026-10-05" to 2100,
+            "agua_ml_2026-10-01" to 1800,
+            "agua_objetivo_ml" to 2000,
+            "agua_ml_fecha_invalida" to 500,
+            "agua_ml_2026-10-03" to "no_es_int"
+        )
+        val result = AguaMath.extraerHistoricoOrdenado(raw)
+        assertEquals(
+            listOf(
+                LocalDate.of(2026, 10, 1) to 1800,
+                LocalDate.of(2026, 10, 5) to 2100
+            ),
+            result
+        )
+    }
+
+    @Test
+    fun calcularPromedioYMejorDia_conVacioYConMasDeSieteRegistros() {
+        assertEquals(0, AguaMath.calcularPromedioUltimos7Dias(emptyList()))
+        assertNull(AguaMath.encontrarMejorDia(emptyList()))
+
+        val base = LocalDate.of(2026, 10, 1)
+        // 8 días: el día 0 tiene 100 ml y no debe entrar en los últimos 7 (todos de 2000 ml)
+        val historico = listOf(base to 100) + (1..7).map { base.plusDays(it.toLong()) to 2000 }
+        assertEquals(2000, AguaMath.calcularPromedioUltimos7Dias(historico))
+
+        val conPico = historico + (base.plusDays(8) to 2750)
+        assertEquals(base.plusDays(8) to 2750, AguaMath.encontrarMejorDia(conPico))
     }
 }

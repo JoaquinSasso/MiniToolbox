@@ -30,89 +30,49 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.joasasso.minitoolbox.R
-import com.joasasso.minitoolbox.data.aguaDataStore
-import com.joasasso.minitoolbox.data.flujoObjetivo
-import com.joasasso.minitoolbox.data.flujoPorVaso
-import com.joasasso.minitoolbox.data.guardarAguaFecha
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
-import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeParseException
-import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AguaStatisticsScreen(
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    viewModel: AguaStatisticsViewModel = viewModel()
 ) {
-    val context = LocalContext.current
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val haptic = LocalHapticFeedback.current
-    val scope = rememberCoroutineScope()
-    var showInfo by remember { mutableStateOf(false) }
-    var historico by remember { mutableStateOf<List<Pair<LocalDate, Int>>>(emptyList()) }
-    var promedioSemana by remember { mutableIntStateOf(0) }
-    var objetivoML by remember { mutableIntStateOf(2000) }
-    var mlPorVaso by remember { mutableIntStateOf(250) }
-    var itemParaEditar by remember { mutableStateOf<Pair<LocalDate, Int>?>(null) }
+
+    var showInfo by rememberSaveable { mutableStateOf(false) }
+    var fechaEditandoStr by rememberSaveable { mutableStateOf<String?>(null) }
+    var tempMl by rememberSaveable { mutableStateOf("") }
 
     val verdeSuave = Color(0xFF81C784)
     val rojoSuave = Color(0xFFE57373)
-    // Cargar datos reactivos de DataStore
-    LaunchedEffect(Unit) {
-        context.aguaDataStore.data.collect { prefs ->
-            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-            val lista = prefs.asMap()
-                .filter { (k, _) -> k.name.startsWith("agua_ml_") }
-                .mapNotNull { (k, v) ->
-                    val fechaStr = k.name.removePrefix("agua_ml_")
-                    try {
-                        val fecha = LocalDate.parse(fechaStr, formatter)
-                        (v as? Int)?.let { fecha to it }
-                    } catch (_: DateTimeParseException) { null }
-                }
-                .sortedBy { it.first }
-            historico = lista
 
-            // Promedio últimos 7 días (pueden no ser consecutivos)
-            val ultimos7 = lista.takeLast(7)
-            promedioSemana = if (ultimos7.isNotEmpty()) ultimos7.map { it.second }.average().roundToInt() else 0
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        context.flujoObjetivo().collect { objetivo ->
-            objetivoML = objetivo
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        context.flujoPorVaso().collect { porVaso ->
-            mlPorVaso = porVaso
-        }
-    }
+    val historico = uiState.historico
+    val objetivoML = uiState.objetivoML
+    val mlPorVaso = uiState.mlPorVaso
 
     Scaffold(
-        topBar = {TopBarReusable(stringResource(R.string.water_statistics_screen), onBack, {showInfo = true})},
+        topBar = { TopBarReusable(stringResource(R.string.water_statistics_screen), onBack, { showInfo = true }) },
     ) { padding ->
         Column(
             modifier = Modifier
@@ -136,7 +96,7 @@ fun AguaStatisticsScreen(
                 Text(stringResource(R.string.water_statistics_sin_registros), color = MaterialTheme.colorScheme.error)
             } else {
                 Text(
-                    stringResource(R.string.water_statistics_promedio, promedioSemana / 1000f),
+                    stringResource(R.string.water_statistics_promedio, uiState.promedioSemana / 1000f),
                     fontSize = 18.sp,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -144,7 +104,7 @@ fun AguaStatisticsScreen(
                 Text(
                     stringResource(
                         R.string.water_statistics_mejor_dia,
-                        historico.maxByOrNull { it.second }?.let {
+                        uiState.mejorDia?.let {
                             "${it.first.dayOfMonth}/${it.first.monthValue} - ${(it.second / 1000f).let { f -> "%.2f".format(f) }}L"
                         }.orEmpty()
                     ),
@@ -160,49 +120,51 @@ fun AguaStatisticsScreen(
                 Text(stringResource(R.string.water_statistics_historial_vacio))
             } else {
                 historico.sortedByDescending { it.first }.forEach { (fecha, ml) ->
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                itemParaEditar = fecha to ml
-                            }
-                            .padding(vertical = 8.dp, horizontal = 14.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column {
-                            Text(
-                                "${fecha.dayOfMonth}/${fecha.monthValue}/${fecha.year}",
-                                fontSize = 15.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Text(
-                                stringResource(R.string.water_edit_hint),
-                                fontSize = 11.sp,
-                                color = MaterialTheme.colorScheme.outline
-                            )
-                        }
+                    key(fecha.toString()) {
                         Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    fechaEditandoStr = fecha.toString()
+                                    tempMl = ml.toString()
+                                }
+                                .padding(vertical = 8.dp, horizontal = 14.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                "${(ml / 1000f).let { "%.2f".format(it) }}L",
-                                fontSize = 18.sp,
-                                color = if (AguaMath.objetivoAlcanzado(ml, objetivoML, mlPorVaso)) verdeSuave else rojoSuave
-                            )
-                            Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = stringResource(R.string.water_edit_hint),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                                modifier = Modifier.size(18.dp)
-                            )
+                            Column {
+                                Text(
+                                    "${fecha.dayOfMonth}/${fecha.monthValue}/${fecha.year}",
+                                    fontSize = 15.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Text(
+                                    stringResource(R.string.water_edit_hint),
+                                    fontSize = 11.sp,
+                                    color = MaterialTheme.colorScheme.outline
+                                )
+                            }
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Text(
+                                    "${(ml / 1000f).let { "%.2f".format(it) }}L",
+                                    fontSize = 18.sp,
+                                    color = if (AguaMath.objetivoAlcanzado(ml, objetivoML, mlPorVaso)) verdeSuave else rojoSuave
+                                )
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = stringResource(R.string.water_edit_hint),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
                         }
+                        HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
                     }
-                    HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
                 }
-
             }
             Spacer(Modifier.height(24.dp))
         }
@@ -232,8 +194,8 @@ fun AguaStatisticsScreen(
         )
     }
 
-    itemParaEditar?.let { (fecha, mlActual) ->
-        var tempMl by remember(itemParaEditar) { mutableStateOf(mlActual.toString()) }
+    val fechaEditando = fechaEditandoStr?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+    if (fechaEditando != null) {
         val currentMl = tempMl.toIntOrNull() ?: 0
         val cantLitros = currentMl / 1000f
         val objetivoLitros = objetivoML / 1000f
@@ -242,9 +204,9 @@ fun AguaStatisticsScreen(
         val glassesText = stringResource(R.string.water_glasses_display, glassesConsumed, glassesGoal)
 
         AlertDialog(
-            onDismissRequest = { itemParaEditar = null },
+            onDismissRequest = { fechaEditandoStr = null },
             title = {
-                Text("${stringResource(R.string.water_edit_dialog_title)} (${fecha.dayOfMonth}/${fecha.monthValue}/${fecha.year})")
+                Text("${stringResource(R.string.water_edit_dialog_title)} (${fechaEditando.dayOfMonth}/${fechaEditando.monthValue}/${fechaEditando.year})")
             },
             text = {
                 Column(
@@ -313,20 +275,15 @@ fun AguaStatisticsScreen(
                 TextButton(onClick = {
                     val nuevoValor = tempMl.toIntOrNull()?.coerceAtLeast(0) ?: 0
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    scope.launch {
-                        context.guardarAguaFecha(fecha, nuevoValor)
-                        if (fecha == LocalDate.now()) {
-                            actualizarWidgetAgua(context)
-                        }
-                    }
-                    itemParaEditar = null
+                    viewModel.editarConsumoFecha(fechaEditando, nuevoValor)
+                    fechaEditandoStr = null
                 }) {
                     Text(stringResource(R.string.water_edit_save))
                 }
             },
             dismissButton = {
                 TextButton(onClick = {
-                    itemParaEditar = null
+                    fechaEditandoStr = null
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 }) {
                     Text(stringResource(R.string.cancel))

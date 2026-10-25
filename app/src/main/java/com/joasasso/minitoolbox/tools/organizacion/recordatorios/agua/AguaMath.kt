@@ -1,14 +1,18 @@
 package com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 import kotlin.math.roundToInt
 
 /**
- * Funciones puras para cálculos de vasos, conversión y cumplimiento del objetivo diario de agua.
+ * Funciones puras para cálculos de vasos, conversión, estadísticas y cumplimiento del objetivo diario de agua.
  */
 object AguaMath {
 
     const val MIN_ML_POR_VASO = 50
     const val MAX_ML_POR_VASO = 1500
+    private val DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
     /**
      * Calcula los mililitros por vaso necesarios para cubrir [objetivoML] en [vasos] tomas,
@@ -68,5 +72,43 @@ object AguaMath {
         }
 
         return false
+    }
+
+    /**
+     * Convierte un mapa de claves/valores crudos (ej. provenientes de Preferences) en el historial
+     * ordenado ascendentemente por fecha, ignorando claves ajenas o malformadas.
+     */
+    fun extraerHistoricoOrdenado(entries: Map<String, Any?>): List<Pair<LocalDate, Int>> {
+        return entries
+            .mapNotNull { (keyName, value) ->
+                if (!keyName.startsWith("agua_ml_")) return@mapNotNull null
+                val fechaStr = keyName.removePrefix("agua_ml_")
+                try {
+                    val fecha = LocalDate.parse(fechaStr, DATE_FORMATTER)
+                    (value as? Int)?.let { fecha to it }
+                } catch (_: DateTimeParseException) {
+                    null
+                }
+            }
+            .sortedBy { it.first }
+    }
+
+    /**
+     * Calcula el promedio en ml de los últimos 7 registros del historial ordenado por fecha.
+     */
+    fun calcularPromedioUltimos7Dias(historicoOrdenado: List<Pair<LocalDate, Int>>): Int {
+        val ultimos7 = historicoOrdenado.takeLast(7)
+        return if (ultimos7.isNotEmpty()) {
+            ultimos7.map { it.second }.average().roundToInt()
+        } else {
+            0
+        }
+    }
+
+    /**
+     * Devuelve el registro con mayor consumo de agua, o null si el historial está vacío.
+     */
+    fun encontrarMejorDia(historico: List<Pair<LocalDate, Int>>): Pair<LocalDate, Int>? {
+        return historico.maxByOrNull { it.second }
     }
 }
