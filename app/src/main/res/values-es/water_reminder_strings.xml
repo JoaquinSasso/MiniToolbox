@@ -22,6 +22,7 @@
 
     <string name="glass_amount_title">Cantidad por vaso</string>
     <string name="glass_amount_label">ml</string>
+    <string name="glasses_per_day_label">Vasos por día</string>
 
     <string name="water_help_title">Sobre el recordatorio de agua</string>
     <string name="water_help_line1">• Lleva el control de la cantidad de agua que consumes a diario.</string>
