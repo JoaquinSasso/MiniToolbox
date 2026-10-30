@@ -56,6 +56,23 @@ class AguaDataStoreTest {
     }
 
     @Test
+    fun incrementarAguaFecha_acumulaIncrementosConsecutivosYNoBajaDeCero() = runTest {
+        val fecha = LocalDate.of(2026, 10, 2)
+
+        // Cuando está en 0 y se intenta restar, devuelve (0, 0)
+        assertEquals(0 to 0, context.incrementarAguaFecha(fecha, -250))
+        assertEquals(0, context.flujoAguaFecha(fecha).first())
+
+        // 8:00 AM: +250 ml -> 250 ml
+        assertEquals(0 to 250, context.incrementarAguaFecha(fecha, 250))
+        // 8:25 AM: dos incrementos consecutivos de +250 ml -> 500 ml -> 750 ml
+        assertEquals(250 to 500, context.incrementarAguaFecha(fecha, 250))
+        assertEquals(500 to 750, context.incrementarAguaFecha(fecha, 250))
+
+        assertEquals(750, context.flujoAguaFecha(fecha).first())
+    }
+
+    @Test
     fun flujoAguaHoy_alCambiarDeDia_reiniciaEnCeroSinArrastrarConsumoAnterior() = runTest {
         val dia1 = LocalDate.of(2026, 10, 1)
         val dia2 = LocalDate.of(2026, 10, 2)

@@ -6,46 +6,55 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.joasasso.minitoolbox.MainActivity
 import com.joasasso.minitoolbox.R
-import com.joasasso.minitoolbox.data.flujoAguaHoy
-import com.joasasso.minitoolbox.data.flujoObjetivo
+import com.joasasso.minitoolbox.data.KEY_NOTIF_ACTIVAS
+import com.joasasso.minitoolbox.data.KEY_OBJETIVO
+import com.joasasso.minitoolbox.data.aguaDataStore
+import com.joasasso.minitoolbox.data.keyFecha
 import com.joasasso.minitoolbox.metrics.MetricsSource
 import com.joasasso.minitoolbox.nav.Screen
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+
+const val WATER_REMINDER_NOTIFICATION_ID = 101
+const val WATER_REMINDER_CHANNEL_ID = "water_reminder_channel"
 
 class WaterReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val pendingResult = goAsync()
         CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
             try {
-                val consumidoML = context.flujoAguaHoy().first()
-                val objetivoML = context.flujoObjetivo().first()
-                showNotification(context, consumidoML, objetivoML)
+                handleReminder(context)
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                Log.e("WaterReminderReceiver", "Error al procesar recordatorio de agua", e)
             } finally {
                 pendingResult.finish()
             }
         }
     }
 
-    private fun showNotification(context: Context, consumido: Int, objetivo: Int) {
-        val channelId = WATER_REMINDER_CHANNEL_ID
-        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    internal suspend fun handleReminder(context: Context, today: LocalDate = LocalDate.now()) {
+        val prefs = context.aguaDataStore.data.first()
+        if (prefs[KEY_NOTIF_ACTIVAS] != 1) return
 
-        val channel = NotificationChannel(
-            channelId,
-            context.getString(R.string.water_reminder_channel_name),
-            NotificationManager.IMPORTANCE_DEFAULT
-        ).apply {
-            description = context.getString(R.string.water_reminder_channel_description)
-        }
-        manager.createNotificationChannel(channel)
+        val consumidoML = prefs[keyFecha(today)] ?: 0
+        val objetivoML = prefs[KEY_OBJETIVO] ?: 2000
+        showNotification(context, consumidoML, objetivoML)
+    }
+
+    internal fun showNotification(context: Context, consumido: Int, objetivo: Int) {
+        createWaterReminderChannel(context)
+        val manager = ContextCompat.getSystemService(context, NotificationManager::class.java) ?: return
 
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or
@@ -60,7 +69,7 @@ class WaterReminderReceiver : BroadcastReceiver() {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        val notification = NotificationCompat.Builder(context, channelId)
+        val notification = NotificationCompat.Builder(context, WATER_REMINDER_CHANNEL_ID)
             .setContentTitle(context.getString(R.string.water_reminder_title))
             .setContentText(
                 context.getString(
@@ -74,12 +83,15 @@ class WaterReminderReceiver : BroadcastReceiver() {
             .setAutoCancel(true)
             .build()
 
-        manager.notify(101, notification)
+        manager.notify(WATER_REMINDER_NOTIFICATION_ID, notification)
     }
 }
 
-
-const val WATER_REMINDER_CHANNEL_ID = "water_reminder_channel"
+/** Cancela cualquier notificación activa del recordatorio de agua en la barra de estado */
+fun cancelarNotificacionAguaActiva(context: Context) {
+    val mgr = ContextCompat.getSystemService(context, NotificationManager::class.java)
+    mgr?.cancel(WATER_REMINDER_NOTIFICATION_ID)
+}
 
 /** Crea el canal de notificación para el recordatorio de agua */
 fun createWaterReminderChannel(context: Context) {

@@ -1,9 +1,13 @@
 package com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua
 
 import android.app.Application
+import android.app.Notification
+import android.app.NotificationManager
+import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.viewModelScope
 import androidx.test.core.app.ApplicationProvider
+import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.TestApplication
 import com.joasasso.minitoolbox.data.DefaultAguaRepository
 import com.joasasso.minitoolbox.data.aguaDataStore
@@ -14,7 +18,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -22,11 +25,14 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import java.time.LocalDate
 
@@ -44,6 +50,8 @@ class AguaViewModelTest {
         Dispatchers.setMain(testDispatcher)
         app = ApplicationProvider.getApplicationContext()
         app.aguaDataStore.edit { it.clear() }
+        val notificationManager = app.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancelAll()
     }
 
     @After
@@ -70,6 +78,67 @@ class AguaViewModelTest {
         assertEquals(250, state.totalAgua)
 
         model.viewModelScope.cancel()
+    }
+
+    @Test
+    fun agregarAgua_toquesRapidosActualizanNotificacionConTotalReal() = runTest {
+        val fecha = LocalDate.of(2026, 10, 2)
+        val dateFlow = MutableStateFlow(fecha)
+        val model = AguaViewModel(app, DefaultAguaRepository, dateFlowOverride = dateFlow)
+        vm = model
+
+        try {
+            model.uiState.first { !it.isLoading }
+
+            val notificationManager = app.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val shadowNotificationManager = shadowOf(notificationManager)
+            val receiver = WaterReminderReceiver()
+
+            // Activar notificaciones (objetivo por defecto 2000 ml)
+            val notifEnabledDeferred = async(UnconfinedTestDispatcher(testScheduler)) { model.events.first() }
+            model.toggleNotificaciones(true)
+            assertEquals(AguaEvent.NotifEnabled, notifEnabledDeferred.await())
+
+            // 8:00 AM: El usuario toma 0.25L (250 ml)
+            val addOchoAmDeferred = async(UnconfinedTestDispatcher(testScheduler)) { model.events.first() }
+            model.agregarAgua(250)
+            assertEquals(AguaEvent.WaterAdded(250), addOchoAmDeferred.await())
+
+            // Supongamos que había una notificación previa mostrando 0.25L
+            receiver.handleReminder(app, today = fecha)
+            val notifOchoAm = shadowNotificationManager.getNotification(WATER_REMINDER_NOTIFICATION_ID)
+            assertNotNull(notifOchoAm)
+            assertEquals(
+                app.getString(R.string.water_reminder_content, 0.25f, 2.0f),
+                notifOchoAm.extras.getCharSequence(Notification.EXTRA_TEXT)?.toString()
+            )
+
+            // 8:25 AM: El usuario suma 0.50L mediante dos toques rápidos de +250 ml sin esperar recomposición de UI
+            model.agregarAgua(250)
+            model.agregarAgua(250)
+
+            // Esperar los dos eventos de agregado
+            assertEquals(AguaEvent.WaterAdded(250), model.events.first())
+            assertEquals(AguaEvent.WaterAdded(250), model.events.first())
+
+            // La notificación obsoleta de 0.25L debe haberse cancelado al registrar nuevo consumo
+            assertNull(shadowNotificationManager.getNotification(WATER_REMINDER_NOTIFICATION_ID))
+
+            // El estado y DataStore deben reflejar 750 ml (0.75L), no 500 ml ni 250 ml
+            val state = model.uiState.first { it.totalAgua == 750 }
+            assertEquals(750, state.totalAgua)
+
+            // 10:00 AM: Se dispara el recordatorio reprogramado y debe mostrar 0.75L de 2.00L
+            receiver.handleReminder(app, today = fecha)
+            val notifDiezAm = shadowNotificationManager.getNotification(WATER_REMINDER_NOTIFICATION_ID)
+            assertNotNull(notifDiezAm)
+            assertEquals(
+                app.getString(R.string.water_reminder_content, 0.75f, 2.0f),
+                notifDiezAm.extras.getCharSequence(Notification.EXTRA_TEXT)?.toString()
+            )
+        } finally {
+            model.viewModelScope.cancel()
+        }
     }
 
     @Test

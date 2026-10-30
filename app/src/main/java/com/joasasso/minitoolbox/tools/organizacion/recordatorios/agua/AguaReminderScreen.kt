@@ -520,15 +520,11 @@ fun AguaReminderScreen(
 /**Funcion para re/programar el recordatorio de agua cada vez que cambia el progreso de consumo de agua*/
 fun programarRecordatorioAgua(
     context: Context,
-    frecuenciaMinutos: Int,
-    consumidoML: Int,
-    objetivoML: Int
+    frecuenciaMinutos: Int
 ) {
     val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
     val intent = Intent(context, WaterReminderReceiver::class.java).apply {
-        putExtra("agua_consumida_ml", consumidoML)
-        putExtra("agua_objetivo_ml", objetivoML)
         putExtra("frecuencia_minutos", frecuenciaMinutos)
     }
 
@@ -539,7 +535,7 @@ fun programarRecordatorioAgua(
 
     val triggerTime = System.currentTimeMillis() + frecuenciaMinutos * 60 * 1000L
 
-    alarmManager.cancel(pendingIntent)  // Cancela cualquier alarma previa
+    alarmManager.cancel(pendingIntent) // Cancela cualquier alarma previa
     alarmManager.setInexactRepeating(
         AlarmManager.RTC_WAKEUP,
         triggerTime,
@@ -558,6 +554,7 @@ fun cancelarRecordatorioAgua(context: Context) {
         intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
     alarmManager.cancel(pendingIntent)
+    cancelarNotificacionAguaActiva(context)
 }
 
 /**Funcion suspendida para actualizar el progreso del consumo de agua en el widget desde la app*/

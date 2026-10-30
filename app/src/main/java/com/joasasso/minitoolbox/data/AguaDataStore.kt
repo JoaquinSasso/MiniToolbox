@@ -6,15 +6,11 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import java.time.Duration
 import java.time.LocalDate
-import java.time.LocalDateTime
-import kotlin.time.Duration.Companion.milliseconds
 
 val Context.aguaDataStore by preferencesDataStore(name = "agua")
 
@@ -66,6 +62,28 @@ suspend fun Context.guardarAguaFecha(fecha: LocalDate, valor: Int) {
 suspend fun Context.guardarAguaHoy(valor: Int) {
     guardarAguaFecha(LocalDate.now(), valor)
 }
+
+/**
+ * Incrementa (o decrementa si [delta] es negativo) de forma atómica el consumo de [fecha]
+ * dentro de una única transacción de DataStore.
+ * Devuelve el par `(valorAnterior, valorNuevo)`.
+ */
+suspend fun Context.incrementarAguaFecha(fecha: LocalDate, delta: Int): Pair<Int, Int> {
+    var anterior = 0
+    var nuevo = 0
+    aguaDataStore.edit { prefs ->
+        val key = keyFecha(fecha)
+        anterior = prefs[key] ?: 0
+        nuevo = (anterior + delta).coerceAtLeast(0)
+        if (nuevo != anterior || prefs.contains(key)) {
+            prefs[key] = nuevo
+        }
+    }
+    return anterior to nuevo
+}
+
+suspend fun Context.incrementarAguaHoy(delta: Int): Pair<Int, Int> =
+    incrementarAguaFecha(LocalDate.now(), delta)
 
 suspend fun Context.guardarObjetivo(valor: Int) {
     aguaDataStore.edit { it[KEY_OBJETIVO] = valor }

@@ -4,11 +4,10 @@ import android.content.Context
 import androidx.glance.GlanceId
 import androidx.glance.action.ActionParameters
 import androidx.glance.appwidget.action.ActionCallback
-import com.joasasso.minitoolbox.data.flujoAguaHoy
 import com.joasasso.minitoolbox.data.flujoFrecuenciaMinutos
-import com.joasasso.minitoolbox.data.flujoObjetivo
+import com.joasasso.minitoolbox.data.flujoNotificacionesActivas
 import com.joasasso.minitoolbox.data.flujoPorVaso
-import com.joasasso.minitoolbox.data.guardarAguaHoy
+import com.joasasso.minitoolbox.data.incrementarAguaHoy
 import com.joasasso.minitoolbox.metrics.storage.AggregatesRepository
 import com.joasasso.minitoolbox.metrics.widgetUse
 import com.joasasso.minitoolbox.widgets.WidgetWaterKindResolver
@@ -16,45 +15,40 @@ import kotlinx.coroutines.flow.first
 
 class AgregarAguaCallback : ActionCallback {
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
-        //Obtener el valor actual de agua desde el dataStore
         val porVaso = context.flujoPorVaso().first()
-        val actual = context.flujoAguaHoy().first()
-        val nuevo = actual + porVaso
-        context.guardarAguaHoy(nuevo)
+        context.incrementarAguaHoy(porVaso)
 
+        cancelarNotificacionAguaActiva(context)
         actualizarWidgetAguaSuspend(context)
 
-        //Agregar uso a las metricas
-        val kind = WidgetWaterKindResolver.resolve(context, glanceId) // ← mini vs normal por Receiver
-        widgetUse(context,kind)
+        // Agregar uso a las métricas
+        val kind = WidgetWaterKindResolver.resolve(context, glanceId)
+        widgetUse(context, kind)
 
-
-        //Reprogramar la notificacion para beber agua
-        val frecuenciaMinutos = context.flujoFrecuenciaMinutos().first()
-        val objetivo = context.flujoObjetivo().first()
-        programarRecordatorioAgua(context, frecuenciaMinutos, nuevo, objetivo)
+        // Reprogramar el recordatorio de agua solo si las notificaciones están activas
+        if (context.flujoNotificacionesActivas().first()) {
+            val frecuenciaMinutos = context.flujoFrecuenciaMinutos().first()
+            programarRecordatorioAgua(context, frecuenciaMinutos)
+        }
     }
 }
 
 class QuitarAguaCallback : ActionCallback {
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
-        //Obtener el valor actual de agua desde el dataStore
         val porVaso = context.flujoPorVaso().first()
-        val actual = context.flujoAguaHoy().first()
-        val nuevo = (actual - porVaso).coerceAtLeast(0)
-        context.guardarAguaHoy(nuevo)
+        context.incrementarAguaHoy(-porVaso)
 
+        cancelarNotificacionAguaActiva(context)
         actualizarWidgetAguaSuspend(context)
 
-        //Agregar uso a las metricas
-        val kind = WidgetWaterKindResolver.resolve(context, glanceId) // ← mini vs normal por Receiver
+        // Agregar uso a las métricas
+        val kind = WidgetWaterKindResolver.resolve(context, glanceId)
         AggregatesRepository(context).incrementWidgetUse(kind)
 
-
-        //Reprogramar la notificacion para beber agua
-        val frecuenciaMinutos = context.flujoFrecuenciaMinutos().first()
-        val objetivo = context.flujoObjetivo().first()
-        programarRecordatorioAgua(context, frecuenciaMinutos, nuevo, objetivo)
+        // Reprogramar el recordatorio de agua solo si las notificaciones están activas
+        if (context.flujoNotificacionesActivas().first()) {
+            val frecuenciaMinutos = context.flujoFrecuenciaMinutos().first()
+            programarRecordatorioAgua(context, frecuenciaMinutos)
+        }
     }
 }
-
