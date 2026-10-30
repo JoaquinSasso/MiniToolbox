@@ -16,6 +16,7 @@ interface AguaRepository {
 
     suspend fun guardarAguaHoy(context: Context, valor: Int)
     suspend fun guardarAguaFecha(context: Context, fecha: LocalDate, valor: Int)
+    suspend fun incrementarAguaFecha(context: Context, fecha: LocalDate, delta: Int): Pair<Int, Int>
     suspend fun guardarObjetivo(context: Context, valor: Int)
     suspend fun guardarPorVaso(context: Context, valor: Int)
     suspend fun guardarNotificacionesActivas(context: Context, activo: Boolean)
@@ -49,6 +50,9 @@ object DefaultAguaRepository : AguaRepository {
 
     override suspend fun guardarAguaFecha(context: Context, fecha: LocalDate, valor: Int) =
         context.guardarAguaFecha(fecha, valor)
+
+    override suspend fun incrementarAguaFecha(context: Context, fecha: LocalDate, delta: Int): Pair<Int, Int> =
+        context.incrementarAguaFecha(fecha, delta)
 
     override suspend fun guardarObjetivo(context: Context, valor: Int) =
         context.guardarObjetivo(valor)

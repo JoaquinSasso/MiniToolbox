@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -29,7 +30,7 @@ data class AguaUiState(
     val objetivoML: Int = 2000,
     val mlPorVaso: Int = 250,
     val notificacionesActivas: Boolean = false,
-    val frecuenciaMinutos: Int = 180,
+    val frecuenciaMinutos: Int = 30,
     val fecha: LocalDate = LocalDate.now(),
     val isLoading: Boolean = false
 )
@@ -46,7 +47,7 @@ sealed interface AguaEvent {
 class AguaViewModel @JvmOverloads constructor(
     application: Application,
     private val repository: AguaRepository = DefaultAguaRepository,
-    dateFlowOverride: Flow<LocalDate>? = null
+    private val dateFlowOverride: Flow<LocalDate>? = null
 ) : AndroidViewModel(application) {
 
     private val _eventChannel = Channel<AguaEvent>(Channel.BUFFERED)
@@ -92,20 +93,32 @@ class AguaViewModel @JvmOverloads constructor(
         }
     }
 
-    fun agregarAgua(cantidad: Int) {
-        val currentTotal = uiState.value.totalAgua
-        if (currentTotal == 0 && cantidad < 0) {
-            viewModelScope.launch {
-                _eventChannel.send(AguaEvent.ShowZeroWarning)
-            }
-            return
+    private suspend fun obtenerFechaActiva(): LocalDate {
+        return if (dateFlowOverride != null) {
+            activeDateFlow.first()
+        } else {
+            verificarFecha()
+            _currentDateFlow.value
         }
+    }
 
-        val nuevo = (currentTotal + cantidad).coerceAtLeast(0)
-        val fecha = uiState.value.fecha
+    fun agregarAgua(cantidad: Int) {
         viewModelScope.launch {
-            repository.guardarAguaFecha(getApplication(), fecha, nuevo)
+            val fecha = obtenerFechaActiva()
+            val (anterior, _) = repository.incrementarAguaFecha(getApplication(), fecha, cantidad)
+            if (anterior == 0 && cantidad < 0) {
+                _eventChannel.send(AguaEvent.ShowZeroWarning)
+                return@launch
+            }
+
+            cancelarNotificacionAguaActiva(getApplication())
             actualizarWidgetAgua(getApplication())
+
+            val prefs = repository.flujoAguaPreferences(getApplication()).first()
+            if (prefs[KEY_NOTIF_ACTIVAS] == 1) {
+                val frecuencia = prefs[KEY_FRECUENCIA_MIN] ?: 30
+                programarRecordatorioAgua(getApplication(), frecuencia)
+            }
 
             val event = if (cantidad > 0) {
                 AguaEvent.WaterAdded(cantidad)
@@ -113,33 +126,23 @@ class AguaViewModel @JvmOverloads constructor(
                 AguaEvent.WaterRemoved(kotlin.math.abs(cantidad))
             }
             _eventChannel.send(event)
-
-            if (uiState.value.notificacionesActivas) {
-                programarRecordatorioAgua(
-                    getApplication(),
-                    uiState.value.frecuenciaMinutos,
-                    nuevo,
-                    uiState.value.objetivoML
-                )
-            }
         }
     }
 
     fun resetear() {
-        val fecha = uiState.value.fecha
         viewModelScope.launch {
+            val fecha = obtenerFechaActiva()
             repository.guardarAguaFecha(getApplication(), fecha, 0)
+            cancelarNotificacionAguaActiva(getApplication())
             actualizarWidgetAgua(getApplication())
-            _eventChannel.send(AguaEvent.WaterReset)
 
-            if (uiState.value.notificacionesActivas) {
-                programarRecordatorioAgua(
-                    getApplication(),
-                    uiState.value.frecuenciaMinutos,
-                    0,
-                    uiState.value.objetivoML
-                )
+            val prefs = repository.flujoAguaPreferences(getApplication()).first()
+            if (prefs[KEY_NOTIF_ACTIVAS] == 1) {
+                val frecuencia = prefs[KEY_FRECUENCIA_MIN] ?: 30
+                programarRecordatorioAgua(getApplication(), frecuencia)
             }
+
+            _eventChannel.send(AguaEvent.WaterReset)
         }
     }
 
@@ -147,14 +150,12 @@ class AguaViewModel @JvmOverloads constructor(
         if (objetivo == uiState.value.objetivoML) return
         viewModelScope.launch {
             repository.guardarObjetivo(getApplication(), objetivo)
+            cancelarNotificacionAguaActiva(getApplication())
             actualizarWidgetAgua(getApplication())
-            if (uiState.value.notificacionesActivas) {
-                programarRecordatorioAgua(
-                    getApplication(),
-                    uiState.value.frecuenciaMinutos,
-                    uiState.value.totalAgua,
-                    objetivo
-                )
+            val prefs = repository.flujoAguaPreferences(getApplication()).first()
+            if (prefs[KEY_NOTIF_ACTIVAS] == 1) {
+                val frecuencia = prefs[KEY_FRECUENCIA_MIN] ?: 30
+                programarRecordatorioAgua(getApplication(), frecuencia)
             }
         }
     }
@@ -171,12 +172,9 @@ class AguaViewModel @JvmOverloads constructor(
         viewModelScope.launch {
             repository.guardarNotificacionesActivas(getApplication(), activas)
             if (activas) {
-                programarRecordatorioAgua(
-                    getApplication(),
-                    uiState.value.frecuenciaMinutos,
-                    uiState.value.totalAgua,
-                    uiState.value.objetivoML
-                )
+                val prefs = repository.flujoAguaPreferences(getApplication()).first()
+                val frecuencia = prefs[KEY_FRECUENCIA_MIN] ?: 30
+                programarRecordatorioAgua(getApplication(), frecuencia)
                 _eventChannel.send(AguaEvent.NotifEnabled)
             } else {
                 cancelarRecordatorioAgua(getApplication())
@@ -189,13 +187,9 @@ class AguaViewModel @JvmOverloads constructor(
         if (minutos == uiState.value.frecuenciaMinutos) return
         viewModelScope.launch {
             repository.guardarFrecuenciaMinutos(getApplication(), minutos)
-            if (uiState.value.notificacionesActivas) {
-                programarRecordatorioAgua(
-                    getApplication(),
-                    minutos,
-                    uiState.value.totalAgua,
-                    uiState.value.objetivoML
-                )
+            val prefs = repository.flujoAguaPreferences(getApplication()).first()
+            if (prefs[KEY_NOTIF_ACTIVAS] == 1) {
+                programarRecordatorioAgua(getApplication(), minutos)
             }
         }
     }
