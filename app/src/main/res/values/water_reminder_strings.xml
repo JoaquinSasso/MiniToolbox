@@ -22,6 +22,7 @@
 
     <string name="glass_amount_title">Glass amount</string>
     <string name="glass_amount_label">ml</string>
+    <string name="glasses_per_day_label">Glasses per day</string>
 
     <string name="water_help_title">About the water reminder</string>
     <string name="water_help_line1">• Track the amount of water you drink daily.</string>

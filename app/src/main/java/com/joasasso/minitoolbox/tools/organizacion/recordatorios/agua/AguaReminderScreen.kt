@@ -203,8 +203,8 @@ fun AguaReminderScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(Modifier.height(16.dp))
-            val glassesConsumed = (uiState.totalAgua / uiState.mlPorVaso.coerceAtLeast(1).toFloat()).toInt()
-            val glassesGoal = (uiState.objetivoML / uiState.mlPorVaso.coerceAtLeast(1).toFloat()).toInt()
+            val glassesConsumed = AguaMath.calcularVasosConsumidos(uiState.totalAgua, uiState.mlPorVaso)
+            val glassesGoal = AguaMath.calcularVasosObjetivo(uiState.objetivoML, uiState.mlPorVaso)
             val glassesText = stringResource(R.string.water_glasses_display, glassesConsumed, glassesGoal)
             Text(
                 "${(uiState.totalAgua / 1000f).let { "%.2f".format(it) }} L / ${(uiState.objetivoML / 1000f).let { "%.2f".format(it) }} L $glassesText",
@@ -379,24 +379,55 @@ fun AguaReminderScreen(
         }
     }
 
-    // --- Cambiar cantidad del vaso (diálogo simple) ---
+    // --- Cambiar cantidad del vaso (por ml o por vasos diarios) ---
     if (showDialogVaso) {
         var tempMl by remember(uiState.mlPorVaso) { mutableStateOf(uiState.mlPorVaso.toString()) }
+        var tempVasos by remember(uiState.mlPorVaso, uiState.objetivoML) {
+            mutableStateOf(
+                AguaMath.calcularVasosObjetivo(uiState.objetivoML, uiState.mlPorVaso).toString()
+            )
+        }
         AlertDialog(
             onDismissRequest = { showDialogVaso = false },
             title = { Text(stringResource(R.string.glass_amount_title)) },
             text = {
-                OutlinedTextField(
-                    value = tempMl,
-                    onValueChange = { tempMl = it.filter { c -> c.isDigit() } },
-                    label = { Text(stringResource(R.string.glass_amount_label)) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                )
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    OutlinedTextField(
+                        value = tempMl,
+                        onValueChange = { input ->
+                            val digits = input.filter { c -> c.isDigit() }
+                            tempMl = digits
+                            digits.toIntOrNull()?.takeIf { it > 0 }?.let { mlVal ->
+                                tempVasos = AguaMath.calcularVasosObjetivo(uiState.objetivoML, mlVal).toString()
+                            }
+                        },
+                        label = { Text(stringResource(R.string.glass_amount_label)) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    )
+                    OutlinedTextField(
+                        value = tempVasos,
+                        onValueChange = { input ->
+                            val digits = input.filter { c -> c.isDigit() }
+                            tempVasos = digits
+                            digits.toIntOrNull()?.takeIf { it > 0 }?.let { vasosVal ->
+                                tempMl = AguaMath.calcularMlPorVasoSegunVasos(uiState.objetivoML, vasosVal).toString()
+                            }
+                        },
+                        label = { Text(stringResource(R.string.glasses_per_day_label)) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    )
+                }
             },
             confirmButton = {
                 TextButton(onClick = {
-                    tempMl.toIntOrNull()?.let { newValue ->
-                        viewModel.guardarPorVaso(newValue.coerceIn(50, 1500))
+                    val newValue = tempMl.toIntOrNull()
+                        ?: tempVasos.toIntOrNull()?.takeIf { it > 0 }?.let {
+                            AguaMath.calcularMlPorVasoSegunVasos(uiState.objetivoML, it)
+                        }
+                    newValue?.let { ml ->
+                        viewModel.guardarPorVaso(ml.coerceIn(AguaMath.MIN_ML_POR_VASO, AguaMath.MAX_ML_POR_VASO))
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         showDialogVaso = false
                     }

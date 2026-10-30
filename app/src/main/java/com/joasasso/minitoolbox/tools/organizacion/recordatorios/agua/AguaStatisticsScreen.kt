@@ -127,7 +127,8 @@ fun AguaStatisticsScreen(
             // --- Barra semanal ---
             BarChartAguaSemana(
                 historico.takeLast(7),
-                objetivoML
+                objetivoML,
+                mlPorVaso
             )
             Spacer(Modifier.height(16.dp))
             // --- Datos ---
@@ -189,7 +190,7 @@ fun AguaStatisticsScreen(
                             Text(
                                 "${(ml / 1000f).let { "%.2f".format(it) }}L",
                                 fontSize = 18.sp,
-                                color = if (ml >= objetivoML) verdeSuave else rojoSuave
+                                color = if (AguaMath.objetivoAlcanzado(ml, objetivoML, mlPorVaso)) verdeSuave else rojoSuave
                             )
                             Icon(
                                 imageVector = Icons.Default.Edit,
@@ -236,8 +237,8 @@ fun AguaStatisticsScreen(
         val currentMl = tempMl.toIntOrNull() ?: 0
         val cantLitros = currentMl / 1000f
         val objetivoLitros = objetivoML / 1000f
-        val glassesConsumed = (currentMl / mlPorVaso.coerceAtLeast(1).toFloat()).toInt()
-        val glassesGoal = (objetivoML / mlPorVaso.coerceAtLeast(1).toFloat()).toInt()
+        val glassesConsumed = AguaMath.calcularVasosConsumidos(currentMl, mlPorVaso)
+        val glassesGoal = AguaMath.calcularVasosObjetivo(objetivoML, mlPorVaso)
         val glassesText = stringResource(R.string.water_glasses_display, glassesConsumed, glassesGoal)
 
         AlertDialog(
@@ -339,7 +340,8 @@ fun AguaStatisticsScreen(
 @Composable
 fun BarChartAguaSemana(
     datos: List<Pair<LocalDate, Int>>,
-    objetivoML: Int
+    objetivoML: Int,
+    mlPorVaso: Int = 250
 ) {
     val verdeSuave = Color(0xFF81C784)
     val rojoSuave = Color(0xFFE57373)
@@ -360,6 +362,7 @@ fun BarChartAguaSemana(
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         for ((fecha, ml) in datos) {
+            val alcanzado = AguaMath.objetivoAlcanzado(ml, objetivoML, mlPorVaso)
             val frac = (ml / maxY.toFloat()).coerceIn(0f, 1f)
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -380,7 +383,7 @@ fun BarChartAguaSemana(
                     ) {
                         val barHeight = size.height * frac
                         drawRoundRect(
-                            color = if (ml >= objetivoML) verdeSuave else rojoSuave,
+                            color = if (alcanzado) verdeSuave else rojoSuave,
                             topLeft = androidx.compose.ui.geometry.Offset(0f, size.height - barHeight),
                             size = androidx.compose.ui.geometry.Size(size.width, barHeight),
                             cornerRadius = androidx.compose.ui.geometry.CornerRadius(8f, 8f)
