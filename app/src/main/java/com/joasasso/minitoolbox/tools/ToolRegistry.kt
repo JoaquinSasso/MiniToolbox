@@ -23,14 +23,6 @@ object ToolRegistry {
             svgResId = R.drawable.teamselector
         ),
         Tool(
-            name = R.string.tool_coin_flip,
-            screen = Screen.CoinFlip,
-            category = ToolCategory.Entretenimiento,
-            subCategory = R.string.subcategory_random,
-            summary = R.string.sum_tool_coin_flip,
-            svgResId = R.drawable.coin
-        ),
-        Tool(
             name = R.string.tool_decimal_binary,
             screen = Screen.DecimalBinary,
             category = ToolCategory.Herramientas,
@@ -53,14 +45,6 @@ object ToolRegistry {
             subCategory = R.string.subcategory_dates,
             summary = R.string.sum_tool_age_calculator,
             svgResId = R.drawable.age_calculator
-        ),
-        Tool(
-            name = R.string.tool_percentage,
-            screen = Screen.Percentage,
-            category = ToolCategory.Herramientas,
-            subCategory = R.string.subcategory_calculator,
-            summary = R.string.sum_tool_percentage,
-            svgResId = R.drawable.percentage
         ),
         Tool(
             name = R.string.tool_unit_converter,
@@ -134,14 +118,6 @@ object ToolRegistry {
             subCategory = R.string.subcategory_dates,
             summary = R.string.sum_tool_day_countdown,
             svgResId = R.drawable.countdown
-        ),
-        Tool(
-            name = R.string.tool_country_info,
-            screen = Screen.CountriesInfo,
-            category = ToolCategory.Informacion,
-            subCategory = R.string.subcategory_general,
-            summary = R.string.sum_tool_country_info,
-            svgResId = R.drawable.countries_info
         ),
         Tool(
             name = R.string.tool_option_selector,

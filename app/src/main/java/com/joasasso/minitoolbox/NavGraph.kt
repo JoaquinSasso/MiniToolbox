@@ -31,7 +31,6 @@ import com.joasasso.minitoolbox.nav.Screen
 import com.joasasso.minitoolbox.tools.ToolRegistry
 import com.joasasso.minitoolbox.tools.entretenimiento.MarcadorEquiposScreen
 import com.joasasso.minitoolbox.tools.entretenimiento.TrucoScoreBoardScreen
-import com.joasasso.minitoolbox.tools.entretenimiento.aleatorio.CoinFlipScreen
 import com.joasasso.minitoolbox.tools.entretenimiento.aleatorio.LanzadorDadosScreen
 import com.joasasso.minitoolbox.tools.entretenimiento.aleatorio.OptionSelectorScreen
 import com.joasasso.minitoolbox.tools.entretenimiento.minijuegos.AdivinaBanderaScreen
@@ -39,7 +38,6 @@ import com.joasasso.minitoolbox.tools.entretenimiento.minijuegos.AdivinaCapitalS
 import com.joasasso.minitoolbox.tools.entretenimiento.minijuegos.minesweeper.MinesweeperScreen
 import com.joasasso.minitoolbox.tools.herramientas.calculadoras.ConversorUnidadesScreen
 import com.joasasso.minitoolbox.tools.herramientas.calculadoras.DecimalBinaryConverterScreen
-import com.joasasso.minitoolbox.tools.herramientas.calculadoras.PorcentajeScreen
 import com.joasasso.minitoolbox.tools.herramientas.generadores.GeneradorContrasenaScreen
 import com.joasasso.minitoolbox.tools.herramientas.generadores.GeneradorQrScreen
 import com.joasasso.minitoolbox.tools.herramientas.generadores.GroupSelectorScreen
@@ -51,7 +49,6 @@ import com.joasasso.minitoolbox.tools.herramientas.instrumentos.MagnifierScreen
 import com.joasasso.minitoolbox.tools.herramientas.instrumentos.ReglaScreen
 import com.joasasso.minitoolbox.tools.herramientas.instrumentos.arruler.ArRulerSceneViewScreen
 import com.joasasso.minitoolbox.tools.info.AgeCalculatorScreen
-import com.joasasso.minitoolbox.tools.info.CountriesInfoScreen
 import com.joasasso.minitoolbox.tools.info.RemainingTimeScreen
 import com.joasasso.minitoolbox.tools.organizacion.divisorGastos.AgregarGastoScreen
 import com.joasasso.minitoolbox.tools.organizacion.divisorGastos.CrearReunionScreen
@@ -176,9 +173,6 @@ fun MiniToolboxNavGraph(
         composable<Screen.GroupSelector> {
             GroupSelectorScreen(onBack = onBackSmart)
         }
-        composable<Screen.CoinFlip> {
-            CoinFlipScreen(onBack = onBackSmart)
-        }
         composable<Screen.DecimalBinary> {
             DecimalBinaryConverterScreen(onBack = onBackSmart)
         }
@@ -202,9 +196,6 @@ fun MiniToolboxNavGraph(
         }
         composable<Screen.BubbleLevel> {
             BubbleLevelScreen(onBack = onBackSmart)
-        }
-        composable<Screen.Percentage> {
-            PorcentajeScreen(onBack = onBackSmart)
         }
         composable<Screen.UnitConverter> {
             ConversorUnidadesScreen(onBack = onBackSmart)
@@ -237,9 +228,6 @@ fun MiniToolboxNavGraph(
         }
         composable<Screen.WaterStats> {
             AguaStatisticsScreen(onBack = onBackSmart)
-        }
-        composable<Screen.CountriesInfo> {
-            CountriesInfoScreen(onBack = onBackSmart)
         }
         composable<Screen.SelectorWheel> {
             OptionSelectorScreen(onBack = onBackSmart)

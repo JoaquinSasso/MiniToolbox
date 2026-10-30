@@ -44,12 +44,6 @@ sealed class Screen {
     }
 
     @Serializable
-    @SerialName("coin_flip")
-    data object CoinFlip : Screen() {
-        override val route: String get() = "coin_flip"
-    }
-
-    @Serializable
     @SerialName("decimal_binary")
     data object DecimalBinary : Screen() {
         override val route: String get() = "decimal_binary"
@@ -88,12 +82,6 @@ sealed class Screen {
     @SerialName("bubble_level")
     data object BubbleLevel : Screen() {
         override val route: String get() = "bubble_level"
-    }
-
-    @Serializable
-    @SerialName("percentage")
-    data object Percentage : Screen() {
-        override val route: String get() = "percentage"
     }
 
     @Serializable
@@ -148,12 +136,6 @@ sealed class Screen {
     @SerialName("countdown")
     data object Countdown : Screen() {
         override val route: String get() = "countdown"
-    }
-
-    @Serializable
-    @SerialName("countries_info")
-    data object CountriesInfo : Screen() {
-        override val route: String get() = "countries_info"
     }
 
     @Serializable
@@ -292,14 +274,12 @@ sealed class Screen {
                 "dev_metrics", "dev/metrics" -> DevMetrics
                 "pro" -> Pro
                 "group_selector" -> GroupSelector
-                "coin_flip" -> CoinFlip
                 "decimal_binary" -> DecimalBinary
                 "truco_scoreboard" -> TrucoScoreboard
                 "age_calculator" -> AgeCalculator
                 "pomodoro", "pomodoro_list" -> PomodoroList
                 "pomodoro_detail" -> PomodoroDetail("")
                 "bubble_level" -> BubbleLevel
-                "percentage" -> Percentage
                 "unit_converter" -> UnitConverter
                 "password_generator" -> PasswordGenerator
                 "qr_generator" -> QrGenerator
@@ -309,7 +289,6 @@ sealed class Screen {
                 "water" -> Water
                 "water_stats" -> WaterStats
                 "countdown" -> Countdown
-                "countries_info" -> CountriesInfo
                 "selector_wheel" -> SelectorWheel
                 "guess_flag" -> GuessFlag
                 "meetings" -> Meetings

@@ -1,11 +1,9 @@
 <resources>
     <string name="tool_team_generator">Team Generator</string>
-    <string name="tool_coin_flip">Heads or Tails</string>
     <string name="tool_decimal_binary">Decimal / Binary Converter</string>
     <string name="tool_truco_score">Truco Scoreboard</string>
     <string name="tool_age_calculator">Age Calculator</string>
     <string name="tool_bubble_level">Bubble Level</string>
-    <string name="tool_percentage">Percentage Calculator</string>
     <string name="tool_unit_converter">Unit Converter</string>
     <string name="tool_password_generator">Password Generator</string>
     <string name="tool_pomodoro_timer">Pomodoro Timer</string>
@@ -15,7 +13,6 @@
     <string name="tool_flashlight">Flashlight</string>
     <string name="tool_water_reminder">Drink Water Reminder</string>
     <string name="tool_day_countdown">Day Countdown</string>
-    <string name="tool_country_info">Country Info</string>
     <string name="tool_option_selector">Option Selector</string>
     <string name="tool_guess_flag">Guess the Flag</string>
     <string name="tool_expense_splitter">Expense Splitter</string>

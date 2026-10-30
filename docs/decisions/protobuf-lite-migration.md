@@ -16,7 +16,6 @@
 *   **Puntos de Uso Identificados:**
     *   [`GuessCapitalScreen.kt`](../../app/src/main/java/com/joasasso/minitoolbox/tools/entretenimiento/minijuegos/GuessCapitalScreen.kt#L314)
     *   [`GuessFlagScreen.kt`](../../app/src/main/java/com/joasasso/minitoolbox/tools/entretenimiento/minijuegos/GuessFlagScreen.kt#L274)
-    *   [`CountriesInfoScreen.kt`](../../app/src/main/java/com/joasasso/minitoolbox/tools/info/CountriesInfoScreen.kt#L62)
 *   **Dataset:** Validar que `countries.proto.bin` se deserializa correctamente con el nuevo `CountryList.parseFrom(bytes)`.
 
 ## Plan de Acción

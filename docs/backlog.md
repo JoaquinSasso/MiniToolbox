@@ -24,7 +24,7 @@ Las líneas citan el estado de `master @ 58105f5` (2026-10-02). Antes de trabaja
 ## P1: calidad de código, build y CI
 
 - [ ] `lint-hidden-errors`: el baseline oculta 25 errores (20 `LocalContextGetResourceValueCall` y 5 `NonObservableLocale`) y tiene unas 67 entradas obsoletas. Evidencia: `app/lint-baseline.xml`; se ve con lint sin baseline. Hecho: errores corregidos y baseline regenerado.
-- [ ] `countries-main-thread`: el dataset de países se lee y parsea en el main thread, y hay tres loaders duplicados que no cierran el stream. Evidencia: `CountriesInfoScreen.kt:60-62`, `GuessCapitalScreen.kt:314`, `GuessFlagScreen.kt:275`. Hecho: un `CountriesRepository` con `Dispatchers.IO` y caché.
+- [ ] `countries-main-thread`: el dataset de países se lee y parsea en el main thread en `GuessFlagScreen`, y hay dos loaders duplicados que no cierran el stream. Evidencia: `GuessCapitalScreen.kt:314`, `GuessFlagScreen.kt:275`. Hecho: un `CountriesRepository` con `Dispatchers.IO` y caché.
 - [ ] `baseline-profile-invalid`: el profile está escrito a mano y referencia clases inexistentes. Evidencia: `app/src/main/baseline-prof.txt:12-13,32-34`. Hecho: módulo `:baselineprofile` generado con Macrobenchmark y un número de arranque en frío medido.
 - [ ] `backend-tests`: el backend no tiene tests, aunque `metrics-fixtures/keys.json:2` dice que los hay. Evidencia: `backend/functions/package.json` (sin script `test`). Hecho: vitest sobre `validate.ts` consumiendo `keys.json`, ejecutado en `backend.yml`.
 - [ ] `ci-release-build`: CI no compila release con R8. Evidencia: `.github/workflows/android.yml`. Hecho: un job `assembleRelease`.
@@ -48,7 +48,7 @@ Las líneas citan el estado de `master @ 58105f5` (2026-10-02). Antes de trabaja
 
 ## Producto (requiere decisión del autor)
 
-- [ ] **Recorte del catálogo.** Candidatas a fusionar: Azar (`coin_flip`, `dice`, `selector_wheel`, `group_selector`), Calculadoras (`percentage`, `decimal_binary`, `unit_converter`) y Países (`countries_info`, `guess_flag`, `guess_capital`). Rompe la continuidad de métricas: usar la skill `tool-catalog-change`.
+- [ ] **Recorte del catálogo.** Candidatas a fusionar: Azar (`dice`, `selector_wheel`, `group_selector`), Calculadoras (`decimal_binary`, `unit_converter`) y Países (`guess_flag`, `guess_capital`). Rompe la continuidad de métricas: usar la skill `tool-catalog-change`.
 - [ ] **Escáner QR y códigos de barras** (CameraX + ML Kit). Complementa el generador de QR y reutiliza CameraX.
 - [ ] **Sonómetro** (`AudioRecord`, dBFS). Completa el grupo de instrumentos; requiere `RECORD_AUDIO` y documentar que no está calibrado.
 - [ ] **Accesos directos de la app** (`ShortcutManagerCompat`) para Agua y Pomodoro. La fuente `MetricsSource.SHORTCUT` ya existe y nunca se emite.

@@ -1,11 +1,9 @@
 <resources>
     <string name="tool_team_generator">Generador de equipos</string>
-    <string name="tool_coin_flip">Cara o Cruz</string>
     <string name="tool_decimal_binary">Conversor Decimal / Binario</string>
     <string name="tool_truco_score">Anotador Truco</string>
     <string name="tool_age_calculator">Calculadora de Edad</string>
     <string name="tool_bubble_level">Nivel Burbuja</string>
-    <string name="tool_percentage">Calculadora de Porcentaje</string>
     <string name="tool_unit_converter">Conversor de Unidades</string>
     <string name="tool_password_generator">Generador de Contraseñas</string>
     <string name="tool_pomodoro_timer">Temporizador Pomodoro</string>
@@ -15,7 +13,6 @@
     <string name="tool_flashlight">Linterna</string>
     <string name="tool_water_reminder">Recordatorio de Beber Agua</string>
     <string name="tool_day_countdown">Cuenta regresiva de días</string>
-    <string name="tool_country_info">Información de Países</string>
     <string name="tool_option_selector">Selector de Opciones</string>
     <string name="tool_guess_flag">Adivina la Bandera</string>
     <string name="tool_expense_splitter">Divisor de Gastos</string>
