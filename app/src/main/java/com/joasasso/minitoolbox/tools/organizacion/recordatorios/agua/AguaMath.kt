@@ -73,7 +73,6 @@ object AguaMath {
 
         return false
     }
-
     /**
      * Convierte un mapa de claves/valores crudos (ej. provenientes de Preferences) en el historial
      * ordenado ascendentemente por fecha, ignorando claves ajenas o malformadas.

@@ -65,7 +65,6 @@ class AguaMathTest {
         assertEquals(7, AguaMath.calcularVasosConsumidos(consumidoML = 2000, mlPorVaso = 286))
         assertEquals(0, AguaMath.calcularVasosConsumidos(consumidoML = 0, mlPorVaso = 285))
     }
-
     @Test
     fun extraerHistoricoOrdenado_filtraClavesInvalidasYOrdenaPorFecha() {
         val raw = mapOf(
