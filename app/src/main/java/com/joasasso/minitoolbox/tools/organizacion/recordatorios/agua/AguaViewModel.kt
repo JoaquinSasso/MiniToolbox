@@ -112,7 +112,7 @@ class AguaViewModel @JvmOverloads constructor(
             }
 
             cancelarNotificacionAguaActiva(getApplication())
-            actualizarWidgetAgua(getApplication())
+            actualizarWidgetAguaSuspend(getApplication())
 
             val prefs = repository.flujoAguaPreferences(getApplication()).first()
             if (prefs[KEY_NOTIF_ACTIVAS] == 1) {
@@ -134,7 +134,7 @@ class AguaViewModel @JvmOverloads constructor(
             val fecha = obtenerFechaActiva()
             repository.guardarAguaFecha(getApplication(), fecha, 0)
             cancelarNotificacionAguaActiva(getApplication())
-            actualizarWidgetAgua(getApplication())
+            actualizarWidgetAguaSuspend(getApplication())
 
             val prefs = repository.flujoAguaPreferences(getApplication()).first()
             if (prefs[KEY_NOTIF_ACTIVAS] == 1) {
@@ -151,7 +151,7 @@ class AguaViewModel @JvmOverloads constructor(
         viewModelScope.launch {
             repository.guardarObjetivo(getApplication(), objetivo)
             cancelarNotificacionAguaActiva(getApplication())
-            actualizarWidgetAgua(getApplication())
+            actualizarWidgetAguaSuspend(getApplication())
             val prefs = repository.flujoAguaPreferences(getApplication()).first()
             if (prefs[KEY_NOTIF_ACTIVAS] == 1) {
                 val frecuencia = prefs[KEY_FRECUENCIA_MIN] ?: 30
@@ -164,7 +164,7 @@ class AguaViewModel @JvmOverloads constructor(
         if (ml == uiState.value.mlPorVaso) return
         viewModelScope.launch {
             repository.guardarPorVaso(getApplication(), ml)
-            actualizarWidgetAgua(getApplication())
+            actualizarWidgetAguaSuspend(getApplication())
         }
     }
 
