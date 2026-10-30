@@ -35,7 +35,6 @@ class ToolMetricsKeysTest {
         "decimal_binary",
         "truco_scoreboard",
         "age_calculator",
-        "zodiac_sign",
         "percentage",
         "unit_converter",
         "password_generator",
@@ -51,9 +50,6 @@ class ToolMetricsKeysTest {
         "guess_flag",
         "meetings",
         "dice",
-        "quick_calcs",
-        "basic_phrases",
-        "multiverse_me",
         "guess_capital",
         "compass",
         "todo",
@@ -138,7 +134,6 @@ class ToolMetricsKeysTest {
         assertEquals("water", ToolRoutes.metricsKey(Screen.WaterStats))
         assertEquals("meetings", ToolRoutes.metricsKey(Screen.Meetings))
         assertEquals("meetings", ToolRoutes.metricsKey(Screen.MeetingDetail("m-1")))
-        assertEquals("basic_phrases", ToolRoutes.metricsKey(Screen.BasicPhrases))
         assertNull(ToolRoutes.metricsKey(Screen.Categories))
         assertNull(ToolRoutes.metricsKey(Screen.Pro))
     }

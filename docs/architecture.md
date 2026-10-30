@@ -189,7 +189,7 @@ app/src/main/java/com/joasasso/minitoolbox/
 El sistema utiliza **19 instancias de `preferencesDataStore`**. 
 - 16 están centralizadas en archivos dentro del paquete `data/`.
 - 1 está en `metrics/storage/` (MetricsDataStore.kt), aislada a propósito por pertenecer al subsistema de telemetría.
-- 2 están embebidas directamente en los archivos de Screen (`GuessCapitalScreen.kt` y `QuickMathScreen.kt`) por acoplamiento histórico.
+- 1 está embebida directamente en el archivo de Screen (`GuessCapitalScreen.kt`) por acoplamiento histórico.
 
 **Nota sobre duplicidad:** Algunos archivos en `data/` declaran más de un DataStore (ej. `ExpensesDataStore.kt` y `PomodoroDataStore.kt`). Esto suele indicar una transición incompleta de esquemas o una separación de responsabilidades (estado vs. configuración) pendiente de unificar.
 
@@ -200,9 +200,8 @@ El sistema utiliza **19 instancias de `preferencesDataStore`**.
 1.  **Módulo Único**: Toda la aplicación reside en `:app`, lo que ralentiza tiempos de compilación y dificulta la encapsulación.
 2.  **Estado en Composables**: ~90% de las herramientas gestionan su estado interno (`remember/mutableStateOf`) sin un ViewModel, dificultando el testing unitario de la lógica de negocio.
 3.  **Ausencia de DI**: No se utiliza inyección de dependencias (Hilt/Koin); las dependencias se pasan manualmente o se acceden vía Singleton/Context.
-4.  **Desincronización Taxonómica**: La ruta `"quotes"` está vinculada a `BasicPhrasesScreen`. Las métricas reportadas bajo este ID corresponden en realidad a la herramienta de frases, no a citas.
-5.  **Shadowing de Protobuf**: `CategoriesScreen.kt` importa accidentalmente `com.google.protobuf.LazyStringArrayList.emptyList`, sombreando la función estándar de Kotlin.
-6.  **DataStores Remanentes**: Existen instancias como `reuniones_gastos` (en `ExpensesDataStore.kt`) y `pomodoro_settings` (en `PomodoroDataStore.kt`) que son remanentes de migraciones o estructuras antiguas y no deberían usarse para nuevos desarrollos.
+4.  **Shadowing de Protobuf**: `CategoriesScreen.kt` importa accidentalmente `com.google.protobuf.LazyStringArrayList.emptyList`, sombreando la función estándar de Kotlin.
+5.  **DataStores Remanentes**: Existen instancias como `reuniones_gastos` (en `ExpensesDataStore.kt`) y `pomodoro_settings` (en `PomodoroDataStore.kt`) que son remanentes de migraciones o estructuras antiguas y no deberían usarse para nuevos desarrollos.
 
 ---
 

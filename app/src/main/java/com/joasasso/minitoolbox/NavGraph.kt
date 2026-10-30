@@ -1,7 +1,6 @@
 // app/src/main/java/com/example/minitoolbox/NavGraph.kt
 package com.joasasso.minitoolbox
 
-import ZodiacSignScreen
 import android.app.Activity
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -37,8 +36,6 @@ import com.joasasso.minitoolbox.tools.entretenimiento.aleatorio.LanzadorDadosScr
 import com.joasasso.minitoolbox.tools.entretenimiento.aleatorio.OptionSelectorScreen
 import com.joasasso.minitoolbox.tools.entretenimiento.minijuegos.AdivinaBanderaScreen
 import com.joasasso.minitoolbox.tools.entretenimiento.minijuegos.AdivinaCapitalScreen
-import com.joasasso.minitoolbox.tools.entretenimiento.minijuegos.CalculosRapidosScreen
-import com.joasasso.minitoolbox.tools.entretenimiento.minijuegos.InOtherWoldScreen
 import com.joasasso.minitoolbox.tools.entretenimiento.minijuegos.minesweeper.MinesweeperScreen
 import com.joasasso.minitoolbox.tools.herramientas.calculadoras.ConversorUnidadesScreen
 import com.joasasso.minitoolbox.tools.herramientas.calculadoras.DecimalBinaryConverterScreen
@@ -54,7 +51,6 @@ import com.joasasso.minitoolbox.tools.herramientas.instrumentos.MagnifierScreen
 import com.joasasso.minitoolbox.tools.herramientas.instrumentos.ReglaScreen
 import com.joasasso.minitoolbox.tools.herramientas.instrumentos.arruler.ArRulerSceneViewScreen
 import com.joasasso.minitoolbox.tools.info.AgeCalculatorScreen
-import com.joasasso.minitoolbox.tools.info.BasicPhrasesScreen
 import com.joasasso.minitoolbox.tools.info.CountriesInfoScreen
 import com.joasasso.minitoolbox.tools.info.RemainingTimeScreen
 import com.joasasso.minitoolbox.tools.organizacion.divisorGastos.AgregarGastoScreen
@@ -192,9 +188,6 @@ fun MiniToolboxNavGraph(
         composable<Screen.AgeCalculator> {
             AgeCalculatorScreen(onBack = onBackSmart)
         }
-        composable<Screen.ZodiacSign> {
-            ZodiacSignScreen(onBack = onBackSmart)
-        }
         composable<Screen.PomodoroList> {
             PomodoroTimersListScreen(
                 onBack = { navController.popBackStack() },
@@ -301,15 +294,6 @@ fun MiniToolboxNavGraph(
         }
         composable<Screen.Dice> {
             LanzadorDadosScreen(onBack = onBackSmart)
-        }
-        composable<Screen.QuickCalcs> {
-            CalculosRapidosScreen(onBack = onBackSmart)
-        }
-        composable<Screen.BasicPhrases> {
-            BasicPhrasesScreen(onBack = onBackSmart)
-        }
-        composable<Screen.MultiverseMe> {
-            InOtherWoldScreen(onBack = onBackSmart)
         }
         composable<Screen.GuessCapital> {
             AdivinaCapitalScreen(onBack = onBackSmart)

@@ -4,7 +4,6 @@
     <string name="tool_decimal_binary">Conversor Decimal / Binario</string>
     <string name="tool_truco_score">Anotador Truco</string>
     <string name="tool_age_calculator">Calculadora de Edad</string>
-    <string name="tool_zodiac_sign">Signo del Zodíaco</string>
     <string name="tool_bubble_level">Nivel Burbuja</string>
     <string name="tool_percentage">Calculadora de Porcentaje</string>
     <string name="tool_unit_converter">Conversor de Unidades</string>
@@ -21,9 +20,6 @@
     <string name="tool_guess_flag">Adivina la Bandera</string>
     <string name="tool_expense_splitter">Divisor de Gastos</string>
     <string name="tool_dice">Dados (D&amp;D)</string>
-    <string name="tool_quick_math">Calculos rápidos</string>
-    <string name="tool_basic_phrases">Frases básicas</string>
-    <string name="tool_multiverse_me">En otro mundo</string>
     <string name="tool_guess_capital">Adivina la Capital</string>
     <string name="tool_compass">Brújula</string>
     <string name="tool_todo_list">ToDo List</string>

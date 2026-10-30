@@ -68,12 +68,6 @@ sealed class Screen {
     }
 
     @Serializable
-    @SerialName("zodiac_sign")
-    data object ZodiacSign : Screen() {
-        override val route: String get() = "zodiac_sign"
-    }
-
-    @Serializable
     @SerialName("pomodoro_list")
     data object PomodoroList : Screen() {
         override val route: String get() = "pomodoro_list"
@@ -211,24 +205,6 @@ sealed class Screen {
     }
 
     @Serializable
-    @SerialName("quick_calcs")
-    data object QuickCalcs : Screen() {
-        override val route: String get() = "quick_calcs"
-    }
-
-    @Serializable
-    @SerialName("basic_phrases")
-    data object BasicPhrases : Screen() {
-        override val route: String get() = "basic_phrases"
-    }
-
-    @Serializable
-    @SerialName("multiverse_me")
-    data object MultiverseMe : Screen() {
-        override val route: String get() = "multiverse_me"
-    }
-
-    @Serializable
     @SerialName("guess_capital")
     data object GuessCapital : Screen() {
         override val route: String get() = "guess_capital"
@@ -320,7 +296,6 @@ sealed class Screen {
                 "decimal_binary" -> DecimalBinary
                 "truco_scoreboard" -> TrucoScoreboard
                 "age_calculator" -> AgeCalculator
-                "zodiac_sign" -> ZodiacSign
                 "pomodoro", "pomodoro_list" -> PomodoroList
                 "pomodoro_detail" -> PomodoroDetail("")
                 "bubble_level" -> BubbleLevel
@@ -343,9 +318,6 @@ sealed class Screen {
                 "expense_add" -> ExpenseAdd("")
                 "expense_edit" -> ExpenseEdit("", "")
                 "dice" -> Dice
-                "quick_calcs" -> QuickCalcs
-                "basic_phrases", "quotes" -> BasicPhrases
-                "multiverse_me" -> MultiverseMe
                 "guess_capital" -> GuessCapital
                 "compass" -> Compass
                 "todo" -> Todo

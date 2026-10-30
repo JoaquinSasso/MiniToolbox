@@ -5,7 +5,6 @@
     <string name="sum_tool_decimal_binary">Calculate binary numbers</string>
     <string name="sum_tool_truco_score">Argentine truco score</string>
     <string name="sum_tool_age_calculator">Age-related facts</string>
-    <string name="sum_tool_zodiac_sign">Sign by birthdate</string>
     <string name="sum_tool_bubble_level">Measure tilt</string>
     <string name="sum_tool_percentage">Calculate percentages</string>
     <string name="sum_tool_unit_converter">Distance, weight, time</string>
@@ -22,9 +21,6 @@
     <string name="sum_tool_guess_flag">Geography minigame</string>
     <string name="sum_tool_expense_splitter">Split expenses with friends</string>
     <string name="sum_tool_dice">Roll dice</string>
-    <string name="sum_tool_quick_math">Timed math game</string>
-    <string name="sum_tool_basic_phrases">Travel phrases</string>
-    <string name="sum_tool_multiverse_me">Absurd phrases</string>
     <string name="sum_tool_guess_capital">Geography minigame</string>
     <string name="sum_tool_compass">Useful for navigation</string>
     <string name="sum_tool_todo_list">Task manager</string>

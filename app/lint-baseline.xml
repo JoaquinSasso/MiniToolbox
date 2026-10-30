@@ -216,28 +216,6 @@
         errorLine1="    android:width=&quot;512dp&quot;"
         errorLine2="                   ~~~~~">
         <location
-            file="src/main/res/drawable/phrases.xml"
-            line="2"
-            column="20"/>
-    </issue>
-
-    <issue
-        id="VectorRaster"
-        message="Limit vector icons sizes to 200×200 to keep icon drawing fast; see https://developer.android.com/studio/write/vector-asset-studio#when for more"
-        errorLine1="    android:width=&quot;512dp&quot;"
-        errorLine2="                   ~~~~~">
-        <location
-            file="src/main/res/drawable/planet_ringed.xml"
-            line="2"
-            column="20"/>
-    </issue>
-
-    <issue
-        id="VectorRaster"
-        message="Limit vector icons sizes to 200×200 to keep icon drawing fast; see https://developer.android.com/studio/write/vector-asset-studio#when for more"
-        errorLine1="    android:width=&quot;512dp&quot;"
-        errorLine2="                   ~~~~~">
-        <location
             file="src/main/res/drawable/ruler_triangle.xml"
             line="2"
             column="20"/>

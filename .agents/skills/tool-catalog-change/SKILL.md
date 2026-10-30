@@ -14,7 +14,7 @@ Una herramienta está definida en ocho lugares que no se validan entre sí en ti
 ## Antes de empezar
 
 - **Quitar, fusionar o renombrar rompe la continuidad de métricas** (`DECISIONS.md` §4). Hace falta la aprobación explícita del autor antes de tocar código. Pedila y esperá.
-- **Leé una herramienta existente como referencia.** `ZodiacSign` es la más simple; `Water` tiene subpantallas.
+- **Leé una herramienta existente como referencia.** `CoinFlip` o `AgeCalculator` son simples; `Water` tiene subpantallas.
 
 ## Puntos de contacto (en este orden)
 

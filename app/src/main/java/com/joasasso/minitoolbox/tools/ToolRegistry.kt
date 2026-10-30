@@ -55,14 +55,6 @@ object ToolRegistry {
             svgResId = R.drawable.age_calculator
         ),
         Tool(
-            name = R.string.tool_zodiac_sign,
-            screen = Screen.ZodiacSign,
-            category = ToolCategory.Informacion,
-            subCategory = R.string.subcategory_dates,
-            summary = R.string.sum_tool_zodiac_sign,
-            svgResId = R.drawable.zodiac_sign
-        ),
-        Tool(
             name = R.string.tool_percentage,
             screen = Screen.Percentage,
             category = ToolCategory.Herramientas,
@@ -182,30 +174,6 @@ object ToolRegistry {
             subCategory = R.string.subcategory_random,
             summary = R.string.sum_tool_dice,
             svgResId = R.drawable.dice
-        ),
-        Tool(
-            name = R.string.tool_quick_math,
-            screen = Screen.QuickCalcs,
-            category = ToolCategory.Entretenimiento,
-            subCategory = R.string.subcategory_minigames,
-            summary = R.string.sum_tool_quick_math,
-            svgResId = R.drawable.quick_math
-        ),
-        Tool(
-            name = R.string.tool_basic_phrases,
-            screen = Screen.BasicPhrases,
-            category = ToolCategory.Informacion,
-            subCategory = R.string.subcategory_general,
-            summary = R.string.sum_tool_basic_phrases,
-            svgResId = R.drawable.phrases
-        ),
-        Tool(
-            name = R.string.tool_multiverse_me,
-            screen = Screen.MultiverseMe,
-            category = ToolCategory.Entretenimiento,
-            subCategory = R.string.subcategory_minigames,
-            summary = R.string.sum_tool_multiverse_me,
-            svgResId = R.drawable.planet_ringed
         ),
         Tool(
             name = R.string.tool_guess_capital,
