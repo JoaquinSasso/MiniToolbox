@@ -8,14 +8,14 @@ Las líneas citan el estado de `master @ 58105f5` (2026-10-02). Antes de trabaja
 ## P0: corregir antes del próximo release
 
 - [ ] `backend-read-credential`: los endpoints de lectura aceptan también la credencial de escritura. Evidencia: `index.ts:847-853,900-901,959-960`. Hecho: la lectura solo acepta `READ_METRICS_API_KEY`, la clave de lectura se rotó y hay rate limiting en `ingest`.
-- [ ] `requiresapi-notifications`: `@RequiresApi(TIRAMISU)` silencia el lint de API para toda la navegación (minSdk 28). Además, en API 28-32 se pide `POST_NOTIFICATIONS` (probablemente muestra "denegado" en Agua). Evidencia: `MainActivity.kt:44`, `NavGraph.kt:77`, `PomodoroScreen.kt:82,113-117`, `AguaReminderScreen.kt:92,307-313`, `PomodoroAlarmActivity.kt:123`. Hecho: sin esas anotaciones, el permiso se pide solo con `SDK_INT >= 33` y `lintDebug` pasa.
+- [ ] `requiresapi-notifications`: `@RequiresApi(TIRAMISU)` silencia el lint de API para toda la navegación (minSdk 28). Además, en API 28-32 se pide `POST_NOTIFICATIONS` (probablemente muestra "denegado" en Agua). Evidencia: `MainActivity.kt:44`, `NavGraph.kt:70`, `PomodoroScreen.kt:82,113-117`, `AguaReminderScreen.kt:92,307-313`, `PomodoroAlarmActivity.kt:123`. Hecho: sin esas anotaciones, el permiso se pide solo con `SDK_INT >= 33` y `lintDebug` pasa.
 - [ ] `receiver-uncaught-exceptions`: hay `try/finally` sin `catch` en scopes ad-hoc dentro de receivers; una excepción mata el proceso. Evidencia: `PomodoroAlarmReceiver.kt:149-155`, `ResetAguaReceiver.kt:16-24`, `AguaNotification.kt:26-33`. Hecho: `catch` con log que re-lanza `CancellationException`.
 
 ## P1: calidad de datos de telemetría
 
 - [ ] `widget-shortcuts-mislabel`: se cuenta `widget_shortcuts` para cualquier deep link, incluidas las notificaciones. Evidencia: `MainActivity.kt:136`. Hecho: solo se cuenta si el origen es `MetricsSource.WIDGET` desde el widget de favoritos, y queda documentado en el glosario.
-- [ ] `tool-count-per-route`: navegar entre subpantallas de una herramienta vuelve a contarla. Evidencia: `NavGraph.kt:101-117` compara `route`, no la herramienta. Hecho: se cuenta solo cuando cambia la herramienta, con un test.
-- [ ] `about-as-tool`: `About` está registrada como herramienta y cuenta en `tools`. Evidencia: `ToolRegistry.kt:258-263`. Hecho: requiere decisión del autor (DECISIONS §4).
+- [ ] `tool-count-per-route`: navegar entre subpantallas de una herramienta vuelve a contarla. Evidencia: `NavGraph.kt:94-112` compara `route`, no la herramienta. Hecho: se cuenta solo cuando cambia la herramienta, con un test.
+- [ ] `about-as-tool`: `About` está registrada como herramienta y cuenta en `tools`. Evidencia: `ToolRegistry.kt:147-152`. Hecho: requiere decisión del autor (DECISIONS §4).
 - [ ] `debug-traffic-in-prod`: las builds debug envían al endpoint de producción y el payload no lleva `build_type`. Evidencia: `MetricsConfig.kt`, `UploadMetricsWorker.kt:196-203`, `dev/DevInspector.kt:173-176`. Hecho: `build_type` en el payload y el backend descarta o separa `debug`.
 - [ ] `uploader-transient-resend`: tras `MAX_ATTEMPTS` se limpia el lote sin `commitSent`, así que se reenvía con un `batch_id` nuevo (posible doble conteo) y `dropped_batches` reporta una pérdida que no ocurrió. Evidencia: `UploadMetricsWorker.kt:148-153`. Hecho: comportamiento definido y testeado en `UploadWorkerTest`.
 - [ ] `dashboard-export`: el export Markdown omite `daily_active`, `tools_dau`, `tool_entry` y `retention`, y rotula `versions_first_seen` como "Instalaciones nuevas". Evidencia: `dashboard/public/index.html:271,622,1011-1032`. Hecho: export completo, con rótulos alineados al glosario.
@@ -23,8 +23,8 @@ Las líneas citan el estado de `master @ 58105f5` (2026-10-02). Antes de trabaja
 
 ## P1: calidad de código, build y CI
 
-- [ ] `lint-hidden-errors`: el baseline oculta 25 errores (20 `LocalContextGetResourceValueCall` y 5 `NonObservableLocale`) y tiene unas 67 entradas obsoletas. Evidencia: `app/lint-baseline.xml`; se ve con lint sin baseline. Hecho: errores corregidos y baseline regenerado.
-- [ ] `countries-main-thread`: el dataset de países se lee y parsea en el main thread en `GuessFlagScreen`, y hay dos loaders duplicados que no cierran el stream. Evidencia: `GuessCapitalScreen.kt:314`, `GuessFlagScreen.kt:275`. Hecho: un `CountriesRepository` con `Dispatchers.IO` y caché.
+- [ ] `lint-hidden-errors`: el baseline oculta errores (`LocalContextGetResourceValueCall` y `NonObservableLocale`) y tiene entradas obsoletas. Evidencia: `app/lint-baseline.xml`; se ve con lint sin baseline. Hecho: errores corregidos y baseline regenerado.
+- [ ] `countries-main-thread`: el loader del dataset de países en `GuessFlagScreen` no cierra el `InputStream` ni cachea el resultado. Evidencia: `GuessFlagScreen.kt:275`. Hecho: un `CountriesRepository` con `Dispatchers.IO`, `.use {}` y caché.
 - [ ] `baseline-profile-invalid`: el profile está escrito a mano y referencia clases inexistentes. Evidencia: `app/src/main/baseline-prof.txt:12-13,32-34`. Hecho: módulo `:baselineprofile` generado con Macrobenchmark y un número de arranque en frío medido.
 - [ ] `backend-tests`: el backend no tiene tests, aunque `metrics-fixtures/keys.json:2` dice que los hay. Evidencia: `backend/functions/package.json` (sin script `test`). Hecho: vitest sobre `validate.ts` consumiendo `keys.json`, ejecutado en `backend.yml`.
 - [ ] `ci-release-build`: CI no compila release con R8. Evidencia: `.github/workflows/android.yml`. Hecho: un job `assembleRelease`.
@@ -43,12 +43,12 @@ Las líneas citan el estado de `master @ 58105f5` (2026-10-02). Antes de trabaja
 ## P2: documentación
 
 - [ ] `readme-refresh`: el README está desactualizado o es inexacto. Evidencia: badge de Kotlin 2.2.20 (línea 8) contra 2.4.20 en `libs.versions.toml:5`, `METRICS_API_KEY` (línea 74) eliminado en `a95191b`, cifras de Play (líneas 96-97), "faltan tests" (línea 116), "hilos persistentes" del Pomodoro (línea 38), y la tabla de Protobuf medida con Lite sin benchmark en el repo (líneas 20-28). Hecho: README en inglés con cifras verificables y versión en español aparte.
-- [ ] `architecture-doc`: `docs/architecture.md` se verificó por última vez el 23/08/2026. Lista ViewModels y limitaciones que ya cambiaron (líneas 28, 194, 201, 203, 206). Hecho: diagramas y conteos al día, con fecha y commit de verificación.
+- [ ] `architecture-doc`: `docs/architecture.md` se verificó por última vez el 23/08/2026. Hecho: diagramas y conteos al día, con fecha y commit de verificación actualizados.
 - [ ] `performance-doc`: `docs/performance_tests.md` atribuye las mediciones a Protobuf Lite, pero la app usa `protobuf-java`. Hecho: benchmark reproducible en el repo y documento regenerado.
 
 ## Producto (requiere decisión del autor)
 
-- [ ] **Recorte del catálogo.** Candidatas a fusionar: Azar (`dice`, `selector_wheel`, `group_selector`), Calculadoras (`decimal_binary`, `unit_converter`) y Países (`guess_flag`, `guess_capital`). Rompe la continuidad de métricas: usar la skill `tool-catalog-change`.
+- [ ] **Recorte del catálogo.** Candidatas a fusionar: Azar (`selector_wheel`, `group_selector`). Rompe la continuidad de métricas: usar la skill `tool-catalog-change`.
 - [ ] **Escáner QR y códigos de barras** (CameraX + ML Kit). Complementa el generador de QR y reutiliza CameraX.
 - [ ] **Sonómetro** (`AudioRecord`, dBFS). Completa el grupo de instrumentos; requiere `RECORD_AUDIO` y documentar que no está calibrado.
 - [ ] **Accesos directos de la app** (`ShortcutManagerCompat`) para Agua y Pomodoro. La fuente `MetricsSource.SHORTCUT` ya existe y nunca se emite.

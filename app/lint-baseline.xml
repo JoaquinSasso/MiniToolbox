@@ -136,33 +136,11 @@
     <issue
         id="NonObservableLocale"
         message="Reading locale in a non-observable way in a composable function"
-        errorLine1="                                    text = &quot;Total: ${tirada.resultados.sum()} • ${SimpleDateFormat(&quot;dd/MM/yyyy HH:mm&quot;, Locale.getDefault()).format(Date(tirada.timestamp))}&quot;,"
-        errorLine2="                                                                                                                       ~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/joasasso/minitoolbox/tools/entretenimiento/aleatorio/DiceSimulatorScreen.kt"
-            line="239"
-            column="120"/>
-    </issue>
-
-    <issue
-        id="NonObservableLocale"
-        message="Reading locale in a non-observable way in a composable function"
         errorLine1="    val locale = Locale.getDefault()"
         errorLine2="                 ~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/joasasso/minitoolbox/tools/organizacion/divisorGastos/EditarGastoScreen.kt"
             line="63"
-            column="18"/>
-    </issue>
-
-    <issue
-        id="NonObservableLocale"
-        message="Reading locale in a non-observable way in a composable function"
-        errorLine1="    val locale = Locale.getDefault()"
-        errorLine2="                 ~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/joasasso/minitoolbox/tools/entretenimiento/minijuegos/GuessCapitalScreen.kt"
-            line="65"
             column="18"/>
     </issue>
 
@@ -750,17 +728,6 @@
     </issue>
 
     <issue
-        id="ConfigurationScreenWidthHeight"
-        message="Using Configuration.screenWidthDp instead of LocalWindowInfo.current.containerSize"
-        errorLine1="                    val screenWidth = LocalConfiguration.current.screenWidthDp.dp"
-        errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/joasasso/minitoolbox/tools/organizacion/recordatorios/ToDoListScreen.kt"
-            line="142"
-            column="39"/>
-    </issue>
-
-    <issue
         id="LocalContextGetResourceValueCall"
         message="Querying resource values using LocalContext.current"
         errorLine1="                Text(&quot;${context.getString(R.string.water_goal_label)} ${(objetivoML / 1000f).let { &quot;%.2f&quot;.format(it) }}L&quot;, fontSize = 16.sp)"
@@ -791,28 +758,6 @@
             file="src/main/java/com/joasasso/minitoolbox/tools/organizacion/recordatorios/agua/AguaReminderScreen.kt"
             line="361"
             column="64"/>
-    </issue>
-
-    <issue
-        id="LocalContextGetResourceValueCall"
-        message="Querying resource values using LocalContext.current"
-        errorLine1="                                        lastResult = context.getString(R.string.result_new_record)"
-        errorLine2="                                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/joasasso/minitoolbox/tools/entretenimiento/minijuegos/GuessCapitalScreen.kt"
-            line="223"
-            column="54"/>
-    </issue>
-
-    <issue
-        id="LocalContextGetResourceValueCall"
-        message="Querying resource values using LocalContext.current"
-        errorLine1="                                    lastResult = context.getString(R.string.result_wrong)"
-        errorLine2="                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/joasasso/minitoolbox/tools/entretenimiento/minijuegos/GuessCapitalScreen.kt"
-            line="230"
-            column="50"/>
     </issue>
 
     <issue
@@ -917,39 +862,6 @@
     <issue
         id="LocalContextGetResourceValueCall"
         message="Querying resource values using LocalContext.current"
-        errorLine1="                                    dateError = context.getString(R.string.countdown_error_future)"
-        errorLine2="                                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/joasasso/minitoolbox/tools/info/RemainingTimeScreen.kt"
-            line="105"
-            column="49"/>
-    </issue>
-
-    <issue
-        id="LocalContextGetResourceValueCall"
-        message="Querying resource values using LocalContext.current"
-        errorLine1="                                dateError = context.getString(R.string.countdown_error_day, maxDay)"
-        errorLine2="                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/joasasso/minitoolbox/tools/info/RemainingTimeScreen.kt"
-            line="110"
-            column="45"/>
-    </issue>
-
-    <issue
-        id="LocalContextGetResourceValueCall"
-        message="Querying resource values using LocalContext.current"
-        errorLine1="                            dateError = context.getString(R.string.countdown_error_month)"
-        errorLine2="                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/joasasso/minitoolbox/tools/info/RemainingTimeScreen.kt"
-            line="113"
-            column="41"/>
-    </issue>
-
-    <issue
-        id="LocalContextGetResourceValueCall"
-        message="Querying resource values using LocalContext.current"
         errorLine1="                    equipos = equipos + Equipo(nombre = &quot;${context.getString(R.string.marcador_equipo)} ${equipos.size + 1}&quot;, puntos = 0, color = colorOptions.random())"
         errorLine2="                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
@@ -989,17 +901,6 @@
             file="src/main/java/com/joasasso/minitoolbox/tools/entretenimiento/aleatorio/OptionSelectorScreen.kt"
             line="57"
             column="9"/>
-    </issue>
-
-    <issue
-        id="PluralsCandidate"
-        message="Formatting %d followed by words (&quot;years&quot;): This should probably be a plural rather than a string"
-        errorLine1="    &lt;string name=&quot;age_result_message&quot;>You are %1$d years, %2$d months and %3$d days old&lt;/string>"
-        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/age_calculator_strings.xml"
-            line="8"
-            column="5"/>
     </issue>
 
     <issue
@@ -1455,28 +1356,6 @@
 
     <issue
         id="UnusedResources"
-        message="The resource `R.string.dice_total` appears to be unused"
-        errorLine1="    &lt;string name=&quot;dice_total&quot;>Total: %1$d&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/dice_strings.xml"
-            line="8"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.dice_total_y_fecha` appears to be unused"
-        errorLine1="    &lt;string name=&quot;dice_total_y_fecha&quot;>Total: %1$d • %2$s&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/dice_strings.xml"
-            line="10"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
         message="The resource `R.drawable.disabled_by_default` appears to be unused"
         errorLine1="&lt;vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
         errorLine2="^">
@@ -1769,17 +1648,6 @@
         <location
             file="src/main/res/values/noise_generator_strings.xml"
             line="6"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.password_generator_generar` appears to be unused"
-        errorLine1="    &lt;string name=&quot;password_generator_generar&quot;>Generate another&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/password_generator_strings.xml"
-            line="4"
             column="13"/>
     </issue>
 

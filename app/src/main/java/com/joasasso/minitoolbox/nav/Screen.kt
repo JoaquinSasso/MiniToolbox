@@ -44,21 +44,9 @@ sealed class Screen {
     }
 
     @Serializable
-    @SerialName("decimal_binary")
-    data object DecimalBinary : Screen() {
-        override val route: String get() = "decimal_binary"
-    }
-
-    @Serializable
     @SerialName("truco_scoreboard")
     data object TrucoScoreboard : Screen() {
         override val route: String get() = "truco_scoreboard"
-    }
-
-    @Serializable
-    @SerialName("age_calculator")
-    data object AgeCalculator : Screen() {
-        override val route: String get() = "age_calculator"
     }
 
     @Serializable
@@ -88,12 +76,6 @@ sealed class Screen {
     @SerialName("unit_converter")
     data object UnitConverter : Screen() {
         override val route: String get() = "unit_converter"
-    }
-
-    @Serializable
-    @SerialName("password_generator")
-    data object PasswordGenerator : Screen() {
-        override val route: String get() = "password_generator"
     }
 
     @Serializable
@@ -130,12 +112,6 @@ sealed class Screen {
     @SerialName("water_stats")
     data object WaterStats : Screen() {
         override val route: String get() = "water_stats"
-    }
-
-    @Serializable
-    @SerialName("countdown")
-    data object Countdown : Screen() {
-        override val route: String get() = "countdown"
     }
 
     @Serializable
@@ -181,27 +157,9 @@ sealed class Screen {
     }
 
     @Serializable
-    @SerialName("dice")
-    data object Dice : Screen() {
-        override val route: String get() = "dice"
-    }
-
-    @Serializable
-    @SerialName("guess_capital")
-    data object GuessCapital : Screen() {
-        override val route: String get() = "guess_capital"
-    }
-
-    @Serializable
     @SerialName("compass")
     data object Compass : Screen() {
         override val route: String get() = "compass"
-    }
-
-    @Serializable
-    @SerialName("todo")
-    data object Todo : Screen() {
-        override val route: String get() = "todo"
     }
 
     @Serializable
@@ -274,21 +232,17 @@ sealed class Screen {
                 "dev_metrics", "dev/metrics" -> DevMetrics
                 "pro" -> Pro
                 "group_selector" -> GroupSelector
-                "decimal_binary" -> DecimalBinary
                 "truco_scoreboard" -> TrucoScoreboard
-                "age_calculator" -> AgeCalculator
                 "pomodoro", "pomodoro_list" -> PomodoroList
                 "pomodoro_detail" -> PomodoroDetail("")
                 "bubble_level" -> BubbleLevel
                 "unit_converter" -> UnitConverter
-                "password_generator" -> PasswordGenerator
                 "qr_generator" -> QrGenerator
                 "ruler" -> Ruler
                 "light_meter" -> LightMeter
                 "flashlight" -> Flashlight
                 "water" -> Water
                 "water_stats" -> WaterStats
-                "countdown" -> Countdown
                 "selector_wheel" -> SelectorWheel
                 "guess_flag" -> GuessFlag
                 "meetings" -> Meetings
@@ -296,10 +250,7 @@ sealed class Screen {
                 "meeting_detail" -> MeetingDetail("")
                 "expense_add" -> ExpenseAdd("")
                 "expense_edit" -> ExpenseEdit("", "")
-                "dice" -> Dice
-                "guess_capital" -> GuessCapital
                 "compass" -> Compass
-                "todo" -> Todo
                 "scoreboard" -> Scoreboard
                 "magnifier" -> Magnifier
                 "ar_ruler" -> ArRuler

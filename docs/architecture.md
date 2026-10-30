@@ -25,8 +25,8 @@ flowchart TD
         
         subgraph Screens [Pantallas / Tools]
             direction TB
-            VM_Screens["Screens con ViewModel<br/>(Categories, Minesweeper)"]
-            State_Screens["Screens con Local State<br/>(Pomodoro, Agua, Calculadoras...)"]
+            VM_Screens["Screens con ViewModel<br/>(Categories, Minesweeper, Agua...)"]
+            State_Screens["Screens con Local State<br/>(Pomodoro, Conversor, Instrumentos...)"]
             style VM_Screens fill:#e1f5fe,stroke:#01579b,color:#000
             style State_Screens fill:#fff9c4,stroke:#fbc02d,color:#000
         end
@@ -52,7 +52,7 @@ flowchart TD
     end
 
     subgraph Data_Layer [Capa de Datos]
-        DS[(19 DataStores Preferences)]
+        DS[(16 DataStores Preferences)]
         PB[Protobuf - Countries Data]
     end
 
@@ -118,9 +118,9 @@ flowchart TD
     Entry["Entry Points:<br/>Launcher, Widgets, Shortcuts"] --> MA[MainActivity]
     
     subgraph Navigation_System [Sistema de Navegación]
-        S["Screen.kt (42 Rutas)"]
-        TR["ToolRegistry.kt (33 Herramientas)"]
-        NG["NavGraph.kt (42 Destinos)"]
+        S["Screen.kt (28 Rutas)"]
+        TR["ToolRegistry.kt (19 Entradas)"]
+        NG["NavGraph.kt (28 Destinos)"]
     end
 
     MA --> NG
@@ -163,7 +163,7 @@ app/src/main/java/com/joasasso/minitoolbox/
 ├── data/               # Repositorios y DataStores globales (Pro, Favoritos, etc.)
 ├── metrics/            # Pipeline de telemetría (storage, uploader)
 ├── nav/                # Definiciones de Screen y rutas
-├── tools/              # Lógica de herramientas dividida por categoría
+├── tools/              # Lógica de herramientas
 │   ├── entretenimiento/
 │   │   ├── minijuegos/ # Incluye 'minesweeper'
 │   │   └── aleatorio/
@@ -171,7 +171,6 @@ app/src/main/java/com/joasasso/minitoolbox/
 │   │   ├── calculadoras/
 │   │   ├── generadores/
 │   │   └── instrumentos/
-│   ├── info/
 │   └── organizacion/
 │       ├── divisorGastos/
 │       ├── pomodoro/
@@ -186,22 +185,22 @@ app/src/main/java/com/joasasso/minitoolbox/
 
 ## 6. Modelo de Persistencia
 
-El sistema utiliza **19 instancias de `preferencesDataStore`**. 
-- 16 están centralizadas en archivos dentro del paquete `data/`.
-- 1 está en `metrics/storage/` (MetricsDataStore.kt), aislada a propósito por pertenecer al subsistema de telemetría.
-- 1 está embebida directamente en el archivo de Screen (`GuessCapitalScreen.kt`) por acoplamiento histórico.
+El sistema utiliza **16 instancias de `preferencesDataStore`**. 
+- 14 están centralizadas en archivos dentro del paquete `data/`.
+- 1 está en `metrics/storage/` (`MetricsDataStore.kt`), aislada a propósito por pertenecer al subsistema de telemetría.
+- 1 está en `utils/pro/` (`ProRepository.kt`) para el estado en caché de la compra Pro.
 
-**Nota sobre duplicidad:** Algunos archivos en `data/` declaran más de un DataStore (ej. `ExpensesDataStore.kt` y `PomodoroDataStore.kt`). Esto suele indicar una transición incompleta de esquemas o una separación de responsabilidades (estado vs. configuración) pendiente de unificar.
+**Nota sobre duplicidad:** Algunos archivos en `data/` declaran más de un DataStore (ej. `PomodoroDataStore.kt`). Esto suele indicar una transición incompleta de esquemas o una separación de responsabilidades (estado vs. configuración) pendiente de unificar.
 
 ---
 
 ## 7. Limitaciones Conocidas de la Arquitectura Actual
 
 1.  **Módulo Único**: Toda la aplicación reside en `:app`, lo que ralentiza tiempos de compilación y dificulta la encapsulación.
-2.  **Estado en Composables**: ~90% de las herramientas gestionan su estado interno (`remember/mutableStateOf`) sin un ViewModel, dificultando el testing unitario de la lógica de negocio.
+2.  **Estado en Composables**: Varias herramientas gestionan su estado interno (`remember/mutableStateOf`) sin un ViewModel, dificultando el testing unitario de la lógica de negocio.
 3.  **Ausencia de DI**: No se utiliza inyección de dependencias (Hilt/Koin); las dependencias se pasan manualmente o se acceden vía Singleton/Context.
 4.  **Shadowing de Protobuf**: `CategoriesScreen.kt` importa accidentalmente `com.google.protobuf.LazyStringArrayList.emptyList`, sombreando la función estándar de Kotlin.
-5.  **DataStores Remanentes**: Existen instancias como `reuniones_gastos` (en `ExpensesDataStore.kt`) y `pomodoro_settings` (en `PomodoroDataStore.kt`) que son remanentes de migraciones o estructuras antiguas y no deberían usarse para nuevos desarrollos.
+5.  **DataStores Remanentes**: Existen instancias como `pomodoro_settings` (en `PomodoroDataStore.kt`) que son remanentes de migraciones o estructuras antiguas y no deberían usarse para nuevos desarrollos.
 
 ---
 

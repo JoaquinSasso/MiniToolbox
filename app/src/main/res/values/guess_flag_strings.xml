@@ -6,6 +6,10 @@
     <string name="flag_info_line2">• How to play: A flag appears, and you must choose the correct country. If you’re right, you score points. If wrong, your score resets.</string>
     <string name="flag_info_line3">• There’s a 10-second time limit per round.</string>
     <string name="flag_info_line4">• Credits to Santiago Garcia for the idea</string>
+    <string name="capital_remaining_time">Time left: %1$s seconds</string>
+    <string name="score">Score: %1$d</string>
+    <string name="record">High Score: %1$d</string>
+    <string name="result_wrong">Incorrect! Your score has been reset.</string>
+    <string name="result_new_record">New high score!</string>
     <string name="result_timeout">Time’s up! Your score has been reset.</string>
-
 </resources>
