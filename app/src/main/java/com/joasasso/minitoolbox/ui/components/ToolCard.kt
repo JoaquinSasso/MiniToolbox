@@ -55,7 +55,8 @@ fun ToolCard(
     overrideElevation: Dp? = null,
     isDragging: Boolean = false,
     showSubcategoryBadge: Boolean = false,
-    showDragHandle: Boolean = false
+    showDragHandle: Boolean = false,
+    dragHandleModifier: Modifier = Modifier
 ) {
     val swatch = swatchForSubcategory(tool.subCategory) ?: swatchForCategory(tool.category)
     val containerColor = if (isDragging) {
@@ -85,14 +86,19 @@ fun ToolCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (showDragHandle) {
-                Icon(
-                    imageVector = Icons.Default.DragIndicator,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier
-                        .padding(end = 10.dp)
-                        .size(20.dp)
-                )
+                Box(
+                    modifier = dragHandleModifier
+                        .padding(end = 6.dp)
+                        .size(36.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.DragIndicator,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
             }
 
             tool.svgResId?.let { resId ->

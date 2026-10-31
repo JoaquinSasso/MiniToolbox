@@ -153,7 +153,7 @@ class CategoryViewModelTest {
     @Test
     fun viewModel_puedeSerInstanciadoPorAndroidViewModelFactory() {
         val factory = ViewModelProvider.AndroidViewModelFactory.getInstance(app)
-        val created = factory.create(CategoryViewModel::class.java)
+        val created = factory.create(CategoryViewModel::class.java).also { vm = it }
         assertNotNull(created)
     }
 }

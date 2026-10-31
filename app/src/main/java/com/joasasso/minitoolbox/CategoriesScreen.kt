@@ -1057,7 +1057,7 @@ private fun ReorderableFavoritesContent(
                         label = "fav-drag-elev"
                     )
 
-                    val dragMod = with(this) {
+                    val cardLongPressDragMod = with(this) {
                         Modifier.longPressDraggableHandle(
                             onDragStarted = {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -1068,7 +1068,18 @@ private fun ReorderableFavoritesContent(
                         )
                     }
 
-                    Box(modifier = dragMod) {
+                    val handleImmediateDragMod = with(this) {
+                        Modifier.draggableHandle(
+                            onDragStarted = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            },
+                            onDragStopped = {
+                                onCommitOrder(favRoutes.toList())
+                            }
+                        )
+                    }
+
+                    Box(modifier = cardLongPressDragMod) {
                         ToolCard(
                             tool = tool,
                             isFavorito = true,
@@ -1083,7 +1094,8 @@ private fun ReorderableFavoritesContent(
                             overrideElevation = elev,
                             isDragging = isDragging,
                             showSubcategoryBadge = true,
-                            showDragHandle = true
+                            showDragHandle = true,
+                            dragHandleModifier = handleImmediateDragMod
                         )
                     }
                 }
