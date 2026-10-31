@@ -30,6 +30,18 @@
     <string name="unit_hour">Hora</string>
     <string name="unit_day">Día</string>
 
+    <!-- M3 Conversor strings -->
+    <string name="conversor_de_label">De</string>
+    <string name="conversor_a_label">A</string>
+    <string name="conversor_intercambiar">Intercambiar unidades</string>
+    <string name="conversor_todas_conversiones">Todas las conversiones</string>
+    <string name="conversor_toca_para_seleccionar">Tocá para elegir como destino</string>
+    <string name="conversor_limpiar">Limpiar valor</string>
+    <string name="conversor_unidad_origen_cd">Seleccionar unidad de origen</string>
+    <string name="conversor_unidad_destino_cd">Seleccionar unidad de destino</string>
+    <string name="conversor_equivalencia_referencia">Equivalencias de referencia para 1 %1$s:</string>
+    <string name="conversor_copiar">Copiar</string>
+
     <!-- Tipos de unidad -->
     <string name="unidad_tipo_longitud">Longitud</string>
     <string name="unidad_tipo_peso">Peso</string>
