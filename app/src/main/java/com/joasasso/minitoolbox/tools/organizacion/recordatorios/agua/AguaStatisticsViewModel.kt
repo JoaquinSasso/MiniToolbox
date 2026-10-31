@@ -55,7 +55,7 @@ class AguaStatisticsViewModel @JvmOverloads constructor(
             repository.guardarAguaFecha(getApplication(), fecha, sanitized)
             if (fecha == todayProvider()) {
                 cancelarNotificacionAguaActiva(getApplication())
-                actualizarWidgetAgua(getApplication())
+                actualizarWidgetAguaSuspend(getApplication())
             }
         }
     }
