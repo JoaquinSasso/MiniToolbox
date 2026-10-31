@@ -2,98 +2,97 @@ package com.joasasso.minitoolbox
 
 import android.app.Activity
 import android.widget.Toast
-import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridScope
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.clearText
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.WorkspacePremium
+import androidx.compose.material.icons.outlined.Apps
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.material.icons.outlined.StarOutline
+import androidx.compose.material3.AppBarWithSearch
+import androidx.compose.material3.ExpandedFullScreenSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.NavigationRail
-import androidx.compose.material3.NavigationRailItem
-import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
+import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.SearchBarState
+import androidx.compose.material3.SearchBarValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.joasasso.minitoolbox.tools.Tool
 import com.joasasso.minitoolbox.tools.ToolCategory
+import com.joasasso.minitoolbox.ui.components.CatalogEmptyState
+import com.joasasso.minitoolbox.ui.components.CategoryGlyph
+import com.joasasso.minitoolbox.ui.components.FavoriteTile
 import com.joasasso.minitoolbox.ui.components.ProPassBadge
 import com.joasasso.minitoolbox.ui.components.ProToolPaywallDialog
-import com.joasasso.minitoolbox.ui.components.ToolCard
-import com.joasasso.minitoolbox.ui.components.groupDecorBySubcategory
-import com.joasasso.minitoolbox.ui.theme.swatchForCategory
+import com.joasasso.minitoolbox.ui.components.ToolSearchResult
+import com.joasasso.minitoolbox.ui.components.ToolTile
+import com.joasasso.minitoolbox.ui.theme.rememberCategoryColors
 import com.joasasso.minitoolbox.utils.ads.RewardedManager
 import com.joasasso.minitoolbox.utils.buildSearchIndexForAllTools
 import com.joasasso.minitoolbox.utils.isCatalogTool
@@ -105,9 +104,13 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import java.util.Locale
+
+/** Ancho máximo del contenido en ventanas grandes (MD3: 840–1040dp). */
+private val MaxContentWidth = 1040.dp
 
 @OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
 @Composable
@@ -122,13 +125,11 @@ fun CategoriesScreen(
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
     val activity = context as? Activity
-    val focusManager = LocalFocusManager.current
-    val density = LocalDensity.current
     val configuration = LocalConfiguration.current
+    val scope = rememberCoroutineScope()
 
-    val screenWidthDp = configuration.screenWidthDp
-    val useNavigationRail = screenWidthDp >= 600
-    val horizontalMargin: Dp = if (screenWidthDp >= 600) 24.dp else 16.dp
+    val windowWidth = with(LocalDensity.current) { LocalWindowInfo.current.containerSize.width.toDp() }
+    val horizontalMargin: Dp = if (windowWidth >= 600.dp) 24.dp else 16.dp
 
     val proState = LocalProState.current
     var showPaywallDialog by remember { mutableStateOf(false) }
@@ -145,8 +146,17 @@ fun CategoriesScreen(
 
     val catalogTools = remember(tools) { tools.filter(::isCatalogTool) }
 
-    val categoryTools = remember(uiState.selectedCategory, catalogTools) {
-        catalogTools.filter { it.category == uiState.selectedCategory }
+    // Búsqueda: el campo de texto es la fuente y el ViewModel guarda la consulta.
+    // Al colapsar la barra se limpia, para que la próxima búsqueda arranque de cero.
+    val searchBarState = rememberSearchBarState()
+    val textFieldState = rememberTextFieldState(initialText = uiState.searchQuery)
+    LaunchedEffect(textFieldState) {
+        snapshotFlow { textFieldState.text.toString() }.collectLatest(vm::onSearchQueryChange)
+    }
+    LaunchedEffect(searchBarState) {
+        snapshotFlow { searchBarState.currentValue }
+            .distinctUntilChanged()
+            .collectLatest { if (it == SearchBarValue.Collapsed) textFieldState.clearText() }
     }
 
     val locale = configuration.locales.get(0) ?: Locale.getDefault()
@@ -155,7 +165,7 @@ fun CategoriesScreen(
     }
 
     var debouncedQuery by remember { mutableStateOf("") }
-    LaunchedEffect(uiState.searchQuery) {
+    LaunchedEffect(Unit) {
         snapshotFlow { uiState.searchQuery.trim() }
             .distinctUntilChanged()
             .debounce(80)
@@ -174,138 +184,103 @@ fun CategoriesScreen(
         }
     }
 
-    val listStateKey = remember(uiState.selectedCategory) {
-        "cat_${uiState.selectedCategory.titleRes}"
-    }
-    val listState = rememberSaveable(listStateKey, saver = LazyListState.Saver) {
-        LazyListState(firstVisibleItemIndex = 0, firstVisibleItemScrollOffset = 0)
-    }
-    val searchListState = rememberSaveable("search_list", saver = LazyListState.Saver) {
-        LazyListState(firstVisibleItemIndex = 0, firstVisibleItemScrollOffset = 0)
+    val onToggleFavorite: (Tool) -> Unit = { tool ->
+        val adding = tool.screen.route !in uiState.favoriteRoutes
+        haptic.performHapticFeedback(
+            if (adding) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff
+        )
+        vm.toggleFavorite(tool.screen.route)
     }
 
-    val isKeyboardOpen = WindowInsets.ime.getBottom(density) > 0
+    val searchScrollBehavior = SearchBarDefaults.enterAlwaysSearchBarScrollBehavior()
 
-    BackHandler(enabled = isKeyboardOpen) {
-        focusManager.clearFocus()
+    val inputField: @Composable () -> Unit = {
+        CatalogSearchField(
+            textFieldState = textFieldState,
+            searchBarState = searchBarState,
+            onCollapse = { scope.launch { searchBarState.animateToCollapsed() } }
+        )
     }
-
-    BackHandler(enabled = !isKeyboardOpen && uiState.isSearchActive) {
-        vm.closeSearch()
-    }
-
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = Modifier.nestedScroll(searchScrollBehavior.nestedScrollConnection),
         containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
-            CatalogTopAppBar(
-                selectedCategory = uiState.selectedCategory,
-                isSearchActive = uiState.isSearchActive,
-                searchQuery = uiState.searchQuery,
-                isPro = proState.isPro,
-                scrollBehavior = scrollBehavior,
-                onOpenSearch = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    vm.openSearch()
-                },
-                onCloseSearch = {
-                    focusManager.clearFocus()
-                    vm.closeSearch()
-                },
-                onQueryChange = vm::onSearchQueryChange,
-                onClearQuery = vm::clearSearch,
-                onSearchSubmit = { focusManager.clearFocus() },
-                onNavigateToPro = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    onNavigateToPro()
-                },
-                onNavigateToAbout = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    onNavigateToAbout()
+            AppBarWithSearch(
+                state = searchBarState,
+                inputField = inputField,
+                scrollBehavior = searchScrollBehavior,
+                actions = {
+                    ProPassBadge(
+                        modifier = Modifier.padding(start = 4.dp),
+                        onClick = onNavigateToPro
+                    )
+                    if (!proState.isPro) {
+                        IconButton(onClick = onNavigateToPro) {
+                            Icon(
+                                imageVector = Icons.Filled.WorkspacePremium,
+                                contentDescription = stringResource(R.string.pro_screen_title),
+                                tint = MaterialTheme.colorScheme.tertiary
+                            )
+                        }
+                    }
+                    IconButton(onClick = onNavigateToAbout) {
+                        Icon(
+                            imageVector = Icons.Outlined.Info,
+                            contentDescription = stringResource(R.string.information)
+                        )
+                    }
                 }
             )
-        },
-        bottomBar = {
-            if (!useNavigationRail && !uiState.isSearchActive) {
-                CategoryBottomBar(
-                    selectedCategory = uiState.selectedCategory,
-                    onSelectCategory = { category ->
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        vm.selectCategory(category)
-                    }
+            ExpandedFullScreenSearchBar(
+                state = searchBarState,
+                inputField = inputField
+            ) {
+                SearchResultsContent(
+                    query = debouncedQuery,
+                    results = searchResults,
+                    catalogTools = catalogTools,
+                    onResultClick = { tool ->
+                        scope.launch { searchBarState.animateToCollapsed() }
+                        handleToolClick(tool)
+                    },
+                    onClearQuery = { textFieldState.clearText() }
                 )
             }
         }
     ) { innerPadding ->
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.TopCenter
         ) {
-            if (useNavigationRail && !uiState.isSearchActive) {
-                CategorySideRail(
-                    selectedCategory = uiState.selectedCategory,
-                    onSelectCategory = { category ->
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        vm.selectCategory(category)
-                    }
-                )
-            }
-
+            CatalogGrid(
+                catalogTools = catalogTools,
+                selectedCategory = uiState.selectedCategory,
+                favoriteRoutes = uiState.favoriteRoutes,
+                isLoading = uiState.isLoading,
+                contentPadding = PaddingValues(
+                    start = horizontalMargin,
+                    end = horizontalMargin,
+                    top = innerPadding.calculateTopPadding() + 8.dp,
+                    bottom = innerPadding.calculateBottomPadding() + 24.dp
+                ),
+                horizontalMargin = horizontalMargin,
+                onSelectCategory = { category ->
+                    haptic.performHapticFeedback(HapticFeedbackType.SegmentTick)
+                    vm.selectCategory(category)
+                },
+                onToolClick = handleToolClick,
+                onToggleFavorite = onToggleFavorite,
+                onCommitFavoritesOrder = vm::updateFavoritesOrder
+            )
+            // Con la barra de búsqueda oculta por el scroll, la grilla pasaría debajo de la
+            // barra de estado: esta franja la protege.
             Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.TopCenter
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .widthIn(max = 760.dp)
-                ) {
-                    if (uiState.isSearchActive) {
-                        SearchResultsList(
-                            query = debouncedQuery,
-                            results = searchResults,
-                            catalogTools = catalogTools,
-                            favoriteRoutes = uiState.favoriteRoutes,
-                            listState = searchListState,
-                            horizontalMargin = horizontalMargin,
-                            onToolClick = handleToolClick,
-                            onToggleFavorite = { tool ->
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                vm.toggleFavorite(tool.screen.route)
-                            },
-                            onClearSearch = vm::clearSearch
-                        )
-                    } else if (uiState.selectedCategory == ToolCategory.Favoritos) {
-                        ReorderableFavoritesContent(
-                            favoriteRoutes = uiState.favoriteRoutes,
-                            catalogTools = catalogTools,
-                            listState = listState,
-                            horizontalMargin = horizontalMargin,
-                            onToolClick = handleToolClick,
-                            onToggleFavorite = { route ->
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                vm.toggleFavorite(route)
-                            },
-                            onCommitOrder = vm::updateFavoritesOrder
-                        )
-                    } else {
-                        SingleCategoryList(
-                            categoryTools = categoryTools,
-                            favoriteRoutes = uiState.favoriteRoutes,
-                            listState = listState,
-                            horizontalMargin = horizontalMargin,
-                            onToolClick = handleToolClick,
-                            onToggleFavorite = { tool ->
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                vm.toggleFavorite(tool.screen.route)
-                            }
-                        )
-                    }
-                }
-            }
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .windowInsetsTopHeight(WindowInsets.statusBars)
+                    .background(MaterialTheme.colorScheme.surface)
+            )
         }
     }
 
@@ -350,124 +325,37 @@ fun CategoriesScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun CatalogTopAppBar(
-    selectedCategory: ToolCategory,
-    isSearchActive: Boolean,
-    searchQuery: String,
-    isPro: Boolean,
-    scrollBehavior: TopAppBarScrollBehavior,
-    onOpenSearch: () -> Unit,
-    onCloseSearch: () -> Unit,
-    onQueryChange: (String) -> Unit,
-    onClearQuery: () -> Unit,
-    onSearchSubmit: () -> Unit,
-    onNavigateToPro: () -> Unit,
-    onNavigateToAbout: () -> Unit
+private fun CatalogSearchField(
+    textFieldState: TextFieldState,
+    searchBarState: SearchBarState,
+    onCollapse: () -> Unit
 ) {
-    val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val isExpanded = searchBarState.currentValue == SearchBarValue.Expanded
 
-    LaunchedEffect(isSearchActive) {
-        if (isSearchActive) {
-            focusRequester.requestFocus()
-        }
-    }
-
-    TopAppBar(
-        scrollBehavior = scrollBehavior,
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-            titleContentColor = MaterialTheme.colorScheme.onSurface,
-            actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-        ),
-        navigationIcon = {
-            if (isSearchActive) {
-                IconButton(onClick = onCloseSearch) {
+    SearchBarDefaults.InputField(
+        textFieldState = textFieldState,
+        searchBarState = searchBarState,
+        onSearch = { keyboardController?.hide() },
+        placeholder = { Text(stringResource(R.string.categories_search_hint)) },
+        leadingIcon = {
+            if (isExpanded) {
+                IconButton(onClick = onCollapse) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = stringResource(R.string.close)
                     )
                 }
+            } else {
+                Icon(imageVector = Icons.Outlined.Search, contentDescription = null)
             }
         },
-        title = {
-            if (isSearchActive) {
-                TextField(
-                    value = searchQuery,
-                    onValueChange = onQueryChange,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .focusRequester(focusRequester),
-                    placeholder = {
-                        Text(
-                            text = stringResource(R.string.categories_search_hint),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        imeAction = ImeAction.Search
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onSearch = { onSearchSubmit() }
-                    ),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        disabledContainerColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        disabledIndicatorColor = Color.Transparent
-                    )
-                )
-            } else {
-                Text(
-                    text = stringResource(selectedCategory.titleRes),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-        },
-        actions = {
-            if (isSearchActive) {
-                AnimatedVisibility(
-                    visible = searchQuery.isNotBlank(),
-                    enter = fadeIn(),
-                    exit = fadeOut()
-                ) {
-                    IconButton(onClick = onClearQuery) {
-                        Icon(
-                            imageVector = Icons.Filled.Close,
-                            contentDescription = stringResource(R.string.categories_search_clear_cd)
-                        )
-                    }
-                }
-            } else {
-                IconButton(onClick = onOpenSearch) {
+        trailingIcon = {
+            if (isExpanded && textFieldState.text.isNotEmpty()) {
+                IconButton(onClick = { textFieldState.clearText() }) {
                     Icon(
-                        imageVector = Icons.Outlined.Search,
-                        contentDescription = stringResource(R.string.categories_search_hint)
-                    )
-                }
-                ProPassBadge(
-                    modifier = Modifier.padding(end = 2.dp),
-                    onClick = onNavigateToPro
-                )
-                if (!isPro) {
-                    IconButton(onClick = onNavigateToPro) {
-                        Icon(
-                            imageVector = Icons.Default.WorkspacePremium,
-                            contentDescription = stringResource(R.string.pro_screen_title),
-                            tint = MaterialTheme.colorScheme.tertiary
-                        )
-                    }
-                }
-                IconButton(onClick = onNavigateToAbout) {
-                    Icon(
-                        imageVector = Icons.Outlined.Info,
-                        contentDescription = stringResource(R.string.information)
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = stringResource(R.string.categories_search_clear_cd)
                     )
                 }
             }
@@ -476,351 +364,402 @@ private fun CatalogTopAppBar(
 }
 
 @Composable
-private fun CategoryBottomBar(
-    selectedCategory: ToolCategory,
-    onSelectCategory: (ToolCategory) -> Unit
-) {
-    NavigationBar(
-        containerColor = MaterialTheme.colorScheme.surfaceContainer
-    ) {
-        ToolCategory.all.forEach { category ->
-            val isSelected = category == selectedCategory
-            val swatch = swatchForCategory(category)
-            NavigationBarItem(
-                selected = isSelected,
-                onClick = { onSelectCategory(category) },
-                icon = {
-                    Icon(
-                        imageVector = if (isSelected) category.filledIcon else category.outlinedIcon,
-                        contentDescription = stringResource(category.titleRes)
-                    )
-                },
-                label = {
-                    Text(
-                        text = stringResource(category.titleRes),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = swatch.onContainer,
-                    selectedTextColor = MaterialTheme.colorScheme.onSurface,
-                    indicatorColor = swatch.container,
-                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            )
-        }
-    }
-}
-
-@Composable
-private fun CategorySideRail(
-    selectedCategory: ToolCategory,
-    onSelectCategory: (ToolCategory) -> Unit
-) {
-    NavigationRail(
-        modifier = Modifier.fillMaxHeight(),
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-    ) {
-        Spacer(Modifier.height(8.dp))
-        ToolCategory.all.forEach { category ->
-            val isSelected = category == selectedCategory
-            val swatch = swatchForCategory(category)
-            NavigationRailItem(
-                selected = isSelected,
-                onClick = { onSelectCategory(category) },
-                icon = {
-                    Icon(
-                        imageVector = if (isSelected) category.filledIcon else category.outlinedIcon,
-                        contentDescription = stringResource(category.titleRes)
-                    )
-                },
-                label = {
-                    Text(
-                        text = stringResource(category.titleRes),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                },
-                colors = NavigationRailItemDefaults.colors(
-                    selectedIconColor = swatch.onContainer,
-                    selectedTextColor = MaterialTheme.colorScheme.onSurface,
-                    indicatorColor = swatch.container,
-                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            )
-        }
-    }
-}
-
-@Composable
-private fun SingleCategoryList(
-    categoryTools: List<Tool>,
+private fun CatalogGrid(
+    catalogTools: List<Tool>,
+    selectedCategory: ToolCategory?,
     favoriteRoutes: List<String>,
-    listState: LazyListState,
+    isLoading: Boolean,
+    contentPadding: PaddingValues,
     horizontalMargin: Dp,
+    onSelectCategory: (ToolCategory?) -> Unit,
+    onToolClick: (Tool) -> Unit,
+    onToggleFavorite: (Tool) -> Unit,
+    onCommitFavoritesOrder: (List<String>) -> Unit
+) {
+    val gridState = rememberLazyGridState()
+    val isFavorite: (Tool) -> Boolean = { it.screen.route in favoriteRoutes }
+
+    LazyVerticalGrid(
+        state = gridState,
+        columns = GridCells.Adaptive(minSize = 160.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .widthIn(max = MaxContentWidth),
+        contentPadding = contentPadding,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        // Mientras carga DataStore no se muestra el estado vacío de favoritos, que parpadearía.
+        if (!isLoading) {
+            item(key = "favorites_section", span = { GridItemSpan(maxLineSpan) }) {
+                FavoritesSection(
+                    favoriteRoutes = favoriteRoutes,
+                    catalogTools = catalogTools,
+                    horizontalMargin = horizontalMargin,
+                    onToolClick = onToolClick,
+                    onCommitOrder = onCommitFavoritesOrder
+                )
+            }
+        }
+
+        item(key = "category_filters", span = { GridItemSpan(maxLineSpan) }) {
+            CategoryFilterRow(
+                selectedCategory = selectedCategory,
+                horizontalMargin = horizontalMargin,
+                onSelectCategory = onSelectCategory
+            )
+        }
+
+        if (selectedCategory == null) {
+            // Vista general: una sección por categoría.
+            ToolCategory.all.forEach { category ->
+                val categoryTools = catalogTools.filter { it.category == category }
+                if (categoryTools.isEmpty()) return@forEach
+                item(
+                    key = "header_category_${category.titleRes}",
+                    span = { GridItemSpan(maxLineSpan) }
+                ) {
+                    CategorySectionHeader(
+                        category = category,
+                        count = categoryTools.size,
+                        modifier = Modifier.animateItem()
+                    )
+                }
+                toolTiles(categoryTools, isFavorite, onToolClick, onToggleFavorite)
+            }
+        } else {
+            // Con filtro: la categoría se abre en sus subcategorías.
+            catalogTools
+                .filter { it.category == selectedCategory }
+                .groupBy { it.subCategory }
+                .forEach { (subCategory, subTools) ->
+                    item(
+                        key = "header_subcategory_$subCategory",
+                        span = { GridItemSpan(maxLineSpan) }
+                    ) {
+                        SubcategoryHeader(
+                            title = stringResource(subCategory),
+                            modifier = Modifier.animateItem()
+                        )
+                    }
+                    toolTiles(subTools, isFavorite, onToolClick, onToggleFavorite)
+                }
+        }
+    }
+}
+
+private fun LazyGridScope.toolTiles(
+    tools: List<Tool>,
+    isFavorite: (Tool) -> Boolean,
     onToolClick: (Tool) -> Unit,
     onToggleFavorite: (Tool) -> Unit
 ) {
-    LazyColumn(
-        state = listState,
-        contentPadding = PaddingValues(
-            start = horizontalMargin,
-            end = horizontalMargin,
-            top = 6.dp,
-            bottom = 24.dp
-        ),
-        modifier = Modifier.fillMaxSize()
+    items(items = tools, key = { "tool_${it.screen.route}" }) { tool ->
+        ToolTile(
+            tool = tool,
+            isFavorite = isFavorite(tool),
+            onClick = { onToolClick(tool) },
+            onToggleFavorite = { onToggleFavorite(tool) },
+            modifier = Modifier.animateItem()
+        )
+    }
+}
+
+@Composable
+private fun FavoritesSection(
+    favoriteRoutes: List<String>,
+    catalogTools: List<Tool>,
+    horizontalMargin: Dp,
+    onToolClick: (Tool) -> Unit,
+    onCommitOrder: (List<String>) -> Unit
+) {
+    val haptic = LocalHapticFeedback.current
+    val toolsByRoute = remember(catalogTools) { catalogTools.associateBy { it.screen.route } }
+
+    // Copia local para que el arrastre sea fluido; se persiste al soltar.
+    val orderedRoutes = remember(favoriteRoutes, toolsByRoute) {
+        favoriteRoutes.filter { it in toolsByRoute }.toMutableStateList()
+    }
+    // Las rutas que ya no resuelven (herramienta quitada) se conservan al final.
+    val commitOrder = {
+        onCommitOrder(orderedRoutes.toList() + favoriteRoutes.filterNot { it in orderedRoutes })
+    }
+
+    val rowState = rememberLazyListState()
+    val reorderState = rememberReorderableLazyListState(lazyListState = rowState) { from, to ->
+        if (from.index in orderedRoutes.indices && to.index in orderedRoutes.indices) {
+            orderedRoutes.add(to.index, orderedRoutes.removeAt(from.index))
+            haptic.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
+        }
+    }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        SectionTitle(
+            title = stringResource(R.string.catalog_favorites_title),
+            supporting = if (orderedRoutes.size > 1) {
+                stringResource(R.string.catalog_favorites_hint)
+            } else {
+                null
+            }
+        )
+
+        if (orderedRoutes.isEmpty()) {
+            CatalogEmptyState(
+                icon = Icons.Outlined.StarOutline,
+                title = stringResource(R.string.categories_empty_favorites_title),
+                subtitle = stringResource(R.string.categories_empty_favorites_subtitle),
+                modifier = Modifier.padding(top = 8.dp)
+            )
+        } else {
+            val moveLeft = stringResource(R.string.catalog_move_left)
+            val moveRight = stringResource(R.string.catalog_move_right)
+
+            LazyRow(
+                state = rowState,
+                modifier = Modifier
+                    .bleedHorizontally(horizontalMargin)
+                    .padding(top = 4.dp),
+                contentPadding = PaddingValues(horizontal = horizontalMargin - 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                itemsIndexed(
+                    items = orderedRoutes,
+                    key = { _, route -> "favorite_$route" }
+                ) { index, route ->
+                    val tool = toolsByRoute.getValue(route)
+                    ReorderableItem(reorderState, key = "favorite_$route") { isDragging ->
+                        FavoriteTile(
+                            tool = tool,
+                            isDragging = isDragging,
+                            onClick = { onToolClick(tool) },
+                            modifier = Modifier
+                                .longPressDraggableHandle(
+                                    onDragStarted = {
+                                        haptic.performHapticFeedback(
+                                            HapticFeedbackType.GestureThresholdActivate
+                                        )
+                                    },
+                                    onDragStopped = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.GestureEnd)
+                                        commitOrder()
+                                    }
+                                )
+                                // Alternativa al arrastre para TalkBack y Switch Access.
+                                .semantics {
+                                    customActions = buildList {
+                                        if (index > 0) {
+                                            add(CustomAccessibilityAction(moveLeft) {
+                                                orderedRoutes.add(index - 1, orderedRoutes.removeAt(index))
+                                                commitOrder()
+                                                true
+                                            })
+                                        }
+                                        if (index < orderedRoutes.lastIndex) {
+                                            add(CustomAccessibilityAction(moveRight) {
+                                                orderedRoutes.add(index + 1, orderedRoutes.removeAt(index))
+                                                commitOrder()
+                                                true
+                                            })
+                                        }
+                                    }
+                                }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CategoryFilterRow(
+    selectedCategory: ToolCategory?,
+    horizontalMargin: Dp,
+    onSelectCategory: (ToolCategory?) -> Unit
+) {
+    LazyRow(
+        modifier = Modifier
+            .bleedHorizontally(horizontalMargin)
+            .padding(top = 8.dp),
+        contentPadding = PaddingValues(horizontal = horizontalMargin),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        itemsIndexed(
-            items = categoryTools,
-            key = { _, tool -> "cat_item_${tool.screen.route}" }
-        ) { index, tool ->
-            val decor = groupDecorBySubcategory(index, categoryTools)
-            ToolCard(
-                tool = tool,
-                isFavorito = favoriteRoutes.contains(tool.screen.route),
-                shape = decor.shape,
-                topPadding = decor.topPad,
-                bottomPadding = decor.bottomPad,
-                onToolClick = onToolClick,
-                onToggleFavorito = { onToggleFavorite(tool) }
+        item(key = "filter_all") {
+            val selected = selectedCategory == null
+            FilterChip(
+                selected = selected,
+                onClick = { onSelectCategory(null) },
+                label = { Text(stringResource(R.string.catalog_filter_all)) },
+                leadingIcon = {
+                    Icon(
+                        imageVector = if (selected) Icons.Filled.Apps else Icons.Outlined.Apps,
+                        contentDescription = null
+                    )
+                },
+                shape = MaterialTheme.shapes.small
+            )
+        }
+        items(items = ToolCategory.all, key = { "filter_${it.titleRes}" }) { category ->
+            val selected = category == selectedCategory
+            val colors = rememberCategoryColors(category)
+            FilterChip(
+                selected = selected,
+                onClick = { onSelectCategory(category) },
+                label = { Text(stringResource(category.titleRes)) },
+                leadingIcon = {
+                    Icon(
+                        imageVector = if (selected) category.filledIcon else category.outlinedIcon,
+                        contentDescription = null
+                    )
+                },
+                shape = MaterialTheme.shapes.small,
+                colors = FilterChipDefaults.filterChipColors(
+                    iconColor = colors.accent,
+                    selectedContainerColor = colors.container,
+                    selectedLabelColor = colors.onContainer,
+                    selectedLeadingIconColor = colors.onContainer
+                )
             )
         }
     }
 }
 
 @Composable
-private fun SearchResultsList(
+private fun SectionTitle(
+    title: String,
+    supporting: String?,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier.padding(top = 8.dp, bottom = 4.dp)) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.semantics { heading() }
+        )
+        if (supporting != null) {
+            Text(
+                text = supporting,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun CategorySectionHeader(
+    category: ToolCategory,
+    count: Int,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = 20.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        CategoryGlyph(category = category, size = 36.dp)
+        Text(
+            text = stringResource(category.titleRes),
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier
+                .weight(1f)
+                .semantics { heading() }
+        )
+        Text(
+            text = count.toString(),
+            style = MaterialTheme.typography.labelLarge,
+            color = rememberCategoryColors(category).accent
+        )
+    }
+}
+
+@Composable
+private fun SubcategoryHeader(
+    title: String,
+    modifier: Modifier = Modifier
+) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = modifier
+            .padding(top = 16.dp)
+            .semantics { heading() }
+    )
+}
+
+@Composable
+private fun SearchResultsContent(
     query: String,
     results: List<Tool>,
     catalogTools: List<Tool>,
-    favoriteRoutes: List<String>,
-    listState: LazyListState,
-    horizontalMargin: Dp,
-    onToolClick: (Tool) -> Unit,
-    onToggleFavorite: (Tool) -> Unit,
-    onClearSearch: () -> Unit
+    onResultClick: (Tool) -> Unit,
+    onClearQuery: () -> Unit
 ) {
-    val displayedTools = if (query.isBlank()) catalogTools else results
+    val displayed = if (query.isBlank()) catalogTools else results
 
     LazyColumn(
-        state = listState,
-        contentPadding = PaddingValues(
-            start = horizontalMargin,
-            end = horizontalMargin,
-            top = 6.dp,
-            bottom = 24.dp
-        ),
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
-        if (displayedTools.isEmpty()) {
+        if (query.isBlank()) {
+            item(key = "search_suggestions_title") {
+                Text(
+                    text = stringResource(R.string.catalog_search_suggestions),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .padding(start = 4.dp, bottom = 8.dp)
+                        .semantics { heading() }
+                )
+            }
+        }
+
+        if (displayed.isEmpty()) {
             item(key = "search_empty_state") {
-                EmptyCatalogStateCard(
+                CatalogEmptyState(
                     icon = Icons.Outlined.SearchOff,
                     title = stringResource(R.string.no_tools_found),
                     subtitle = stringResource(R.string.categories_empty_search_subtitle),
                     actionLabel = stringResource(R.string.categories_clear_filters),
-                    onAction = onClearSearch
+                    onAction = onClearQuery
                 )
             }
         } else {
             itemsIndexed(
-                items = displayedTools,
-                key = { _, tool -> "search_item_${tool.screen.route}" }
+                items = displayed,
+                key = { _, tool -> "search_${tool.screen.route}" }
             ) { index, tool ->
-                val decor = groupDecorBySubcategory(index, displayedTools)
-                ToolCard(
+                ToolSearchResult(
                     tool = tool,
-                    isFavorito = favoriteRoutes.contains(tool.screen.route),
-                    shape = decor.shape,
-                    topPadding = decor.topPad,
-                    bottomPadding = decor.bottomPad,
-                    onToolClick = onToolClick,
-                    onToggleFavorito = { onToggleFavorite(tool) }
+                    index = index,
+                    count = displayed.size,
+                    onClick = { onResultClick(tool) }
                 )
             }
         }
     }
 }
 
-@Composable
-private fun ReorderableFavoritesContent(
-    favoriteRoutes: List<String>,
-    catalogTools: List<Tool>,
-    listState: LazyListState,
-    horizontalMargin: Dp,
-    onToolClick: (Tool) -> Unit,
-    onToggleFavorite: (String) -> Unit,
-    onCommitOrder: (List<String>) -> Unit
-) {
-    val haptic = LocalHapticFeedback.current
-    val favRoutes = remember(favoriteRoutes) { favoriteRoutes.toMutableStateList() }
-    val reorderState = rememberReorderableLazyListState(
-        lazyListState = listState
-    ) { from, to ->
-        val fromIdx = from.index.coerceIn(0, (favRoutes.size - 1).coerceAtLeast(0))
-        val toIdx = to.index.coerceIn(0, (favRoutes.size - 1).coerceAtLeast(0))
-        if (fromIdx in favRoutes.indices && toIdx in favRoutes.indices) {
-            favRoutes.move(fromIdx, toIdx)
-        }
+/**
+ * Extiende el elemento sobre los márgenes laterales del contenedor, para que una fila
+ * horizontal llegue al borde de la pantalla mientras su contenido queda alineado a la grilla.
+ */
+private fun Modifier.bleedHorizontally(margin: Dp): Modifier = layout { measurable, constraints ->
+    val extra = (margin * 2).roundToPx()
+    val placeable = measurable.measure(
+        constraints.copy(
+            minWidth = constraints.minWidth + extra,
+            maxWidth = constraints.maxWidth + extra
+        )
+    )
+    layout(placeable.width - extra, placeable.height) {
+        placeable.place(-extra / 2, 0)
     }
-
-    LazyColumn(
-        state = listState,
-        contentPadding = PaddingValues(
-            start = horizontalMargin,
-            end = horizontalMargin,
-            top = 6.dp,
-            bottom = 24.dp
-        ),
-        modifier = Modifier.fillMaxSize()
-    ) {
-        if (favRoutes.isEmpty()) {
-            item(key = "fav_empty_state") {
-                EmptyCatalogStateCard(
-                    icon = Icons.Outlined.StarOutline,
-                    title = stringResource(R.string.categories_empty_favorites_title),
-                    subtitle = stringResource(R.string.categories_empty_favorites_subtitle)
-                )
-            }
-        } else {
-            itemsIndexed(
-                items = favRoutes,
-                key = { _, route -> route }
-            ) { index, route ->
-                val tool = catalogTools.find { it.screen.route == route } ?: return@itemsIndexed
-                val toolsForDecor = favRoutes.mapNotNull { r ->
-                    catalogTools.find { it.screen.route == r }
-                }
-                val decorIndex = toolsForDecor.indexOfFirst { it.screen.route == route }
-                val decor = if (decorIndex >= 0) {
-                    groupDecorBySubcategory(decorIndex, toolsForDecor)
-                } else {
-                    groupDecorBySubcategory(index, toolsForDecor)
-                }
-
-                ReorderableItem(reorderState, key = route) { isDragging ->
-                    val elev by animateDpAsState(
-                        targetValue = if (isDragging) 6.dp else 0.dp,
-                        label = "fav-drag-elev"
-                    )
-
-                    val cardLongPressDragMod = with(this) {
-                        Modifier.longPressDraggableHandle(
-                            onDragStarted = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            },
-                            onDragStopped = {
-                                onCommitOrder(favRoutes.toList())
-                            }
-                        )
-                    }
-
-                    val handleImmediateDragMod = with(this) {
-                        Modifier.draggableHandle(
-                            onDragStarted = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            },
-                            onDragStopped = {
-                                onCommitOrder(favRoutes.toList())
-                            }
-                        )
-                    }
-
-                    Box(modifier = cardLongPressDragMod) {
-                        ToolCard(
-                            tool = tool,
-                            isFavorito = true,
-                            shape = decor.shape,
-                            topPadding = decor.topPad,
-                            bottomPadding = decor.bottomPad,
-                            onToolClick = onToolClick,
-                            onToggleFavorito = {
-                                favRoutes.remove(tool.screen.route)
-                                onToggleFavorite(tool.screen.route)
-                            },
-                            overrideElevation = elev,
-                            isDragging = isDragging,
-                            showDragHandle = true,
-                            dragHandleModifier = handleImmediateDragMod
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun EmptyCatalogStateCard(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    title: String,
-    subtitle: String,
-    actionLabel: String? = null,
-    onAction: (() -> Unit)? = null
-) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 24.dp),
-        shape = RoundedCornerShape(28.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.secondaryContainer),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                    modifier = Modifier.size(28.dp)
-                )
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(Modifier.height(6.dp))
-
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
-            )
-
-            if (actionLabel != null && onAction != null) {
-                Spacer(Modifier.height(16.dp))
-                FilledTonalButton(onClick = onAction) {
-                    Text(text = actionLabel)
-                }
-            }
-        }
-    }
-}
-
-private fun <T> MutableList<T>.move(from: Int, to: Int) {
-    if (from == to) return
-    val element = removeAt(from)
-    add(to, element)
 }

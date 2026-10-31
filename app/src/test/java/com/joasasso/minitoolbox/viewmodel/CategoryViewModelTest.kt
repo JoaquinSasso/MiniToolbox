@@ -26,6 +26,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -62,56 +63,58 @@ class CategoryViewModelTest {
     }
 
     @Test
-    fun estadoInicial_emiteCategoriaInstrumentosYListaFavoritosVacia() = runTest {
+    fun estadoInicial_sinFiltroSinConsultaYSinFavoritos() = runTest {
         val model = createViewModel()
         val state = model.uiState.first { !it.isLoading }
 
-        assertEquals(ToolCategory.Instrumentos, state.selectedCategory)
-        assertFalse(state.isSearchActive)
+        assertNull(state.selectedCategory)
         assertEquals("", state.searchQuery)
         assertTrue(state.favoriteRoutes.isEmpty())
-
-        model.viewModelScope.cancel()
     }
 
     @Test
-    fun selectCategory_cambiaCategoriaYCierraBusquedaActiva() = runTest {
+    fun selectCategory_aplicaElFiltroYTocarloDeNuevoLoQuita() = runTest {
         val model = createViewModel()
         model.uiState.first { !it.isLoading }
 
-        model.openSearch()
-        model.onSearchQueryChange("regla")
-        val searching = model.uiState.first { it.isSearchActive && it.searchQuery == "regla" }
-        assertTrue(searching.isSearchActive)
-        assertEquals("regla", searching.searchQuery)
+        model.selectCategory(ToolCategory.Organizar)
+        val filtered = model.uiState.first { it.selectedCategory == ToolCategory.Organizar }
+        assertEquals(ToolCategory.Organizar, filtered.selectedCategory)
 
-        model.selectCategory(ToolCategory.Cotidiano)
-
-        val updated = model.uiState.first { it.selectedCategory == ToolCategory.Cotidiano }
-        assertEquals(ToolCategory.Cotidiano, updated.selectedCategory)
-        assertFalse(updated.isSearchActive)
-        assertEquals("", updated.searchQuery)
-
-        model.viewModelScope.cancel()
+        model.selectCategory(ToolCategory.Organizar)
+        assertNull(model.uiState.first { it.selectedCategory == null }.selectedCategory)
     }
 
     @Test
-    fun openYCloseSearch_alternaEstadoDeBusquedaYLimpiaQuery() = runTest {
+    fun selectCategory_cambiaDeUnFiltroAOtroYNullVuelveATodas() = runTest {
         val model = createViewModel()
         model.uiState.first { !it.isLoading }
 
-        model.openSearch()
-        assertTrue(model.uiState.first { it.isSearchActive }.isSearchActive)
+        model.selectCategory(ToolCategory.Medir)
+        model.uiState.first { it.selectedCategory == ToolCategory.Medir }
+
+        model.selectCategory(ToolCategory.Jugar)
+        assertEquals(
+            ToolCategory.Jugar,
+            model.uiState.first { it.selectedCategory == ToolCategory.Jugar }.selectedCategory
+        )
+
+        model.selectCategory(null)
+        assertNull(model.uiState.first { it.selectedCategory == null }.selectedCategory)
+    }
+
+    @Test
+    fun onSearchQueryChange_actualizaLaConsultaSinTocarElFiltro() = runTest {
+        val model = createViewModel()
+        model.uiState.first { !it.isLoading }
+        model.selectCategory(ToolCategory.Medir)
 
         model.onSearchQueryChange("lupa")
-        assertEquals("lupa", model.uiState.first { it.searchQuery == "lupa" }.searchQuery)
+        val searching = model.uiState.first { it.searchQuery == "lupa" }
+        assertEquals(ToolCategory.Medir, searching.selectedCategory)
 
-        model.closeSearch()
-        val closed = model.uiState.first { !it.isSearchActive }
-        assertFalse(closed.isSearchActive)
-        assertEquals("", closed.searchQuery)
-
-        model.viewModelScope.cancel()
+        model.onSearchQueryChange("")
+        assertEquals("", model.uiState.first { it.searchQuery.isEmpty() }.searchQuery)
     }
 
     @Test
@@ -158,8 +161,24 @@ class CategoryViewModelTest {
         assertEquals(ToolRegistry.tools.count(::isCatalogTool), index.size)
 
         val locale = Locale.getDefault()
-        val matchedMeasurement = index.filter { matchesQuery(it, "measurement", locale) || matchesQuery(it, "medicion", locale) }
-        assertTrue(matchedMeasurement.any { it.route == Screen.Ruler.route })
+        val matchedDistance = index.filter { matchesQuery(it, "distance", locale) || matchesQuery(it, "distancia", locale) }
+        assertTrue(matchedDistance.any { it.route == Screen.Ruler.route })
+    }
+
+    @Test
+    fun catalogo_cadaCategoriaTieneHerramientasYCadaSubcategoriaUnaSolaCategoria() {
+        val catalog = ToolRegistry.tools.filter(::isCatalogTool)
+
+        ToolCategory.all.forEach { category ->
+            assertTrue("$category sin herramientas", catalog.any { it.category == category })
+        }
+        catalog.groupBy { it.subCategory }.forEach { (subCategory, tools) ->
+            assertEquals(
+                "La subcategoría ${app.getString(subCategory)} aparece en varias categorías",
+                1,
+                tools.map { it.category }.distinct().size
+            )
+        }
     }
 
     @Test
