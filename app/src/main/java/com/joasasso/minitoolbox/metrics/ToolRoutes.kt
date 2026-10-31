@@ -27,10 +27,6 @@ object ToolRoutes {
         ToolRegistry.tools.firstOrNull { it.screen == Screen.Meetings }
     }
 
-    private val basicPhrasesTool: Tool? by lazy {
-        ToolRegistry.tools.firstOrNull { it.screen == Screen.BasicPhrases }
-    }
-
     /**
      * Resuelve la herramienta correspondiente a partir de un destino Screen.
      */
@@ -41,7 +37,6 @@ object ToolRoutes {
             is Screen.Water, is Screen.WaterStats -> waterTool
             is Screen.Meetings, is Screen.MeetingCreate, is Screen.MeetingDetail,
             is Screen.ExpenseAdd, is Screen.ExpenseEdit -> meetingsTool
-            is Screen.BasicPhrases -> basicPhrasesTool
             else -> ToolRegistry.tools.firstOrNull { it.screen == screen }
         }
     }
