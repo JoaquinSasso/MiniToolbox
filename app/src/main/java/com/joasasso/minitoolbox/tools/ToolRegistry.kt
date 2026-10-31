@@ -23,52 +23,12 @@ object ToolRegistry {
             svgResId = R.drawable.teamselector
         ),
         Tool(
-            name = R.string.tool_coin_flip,
-            screen = Screen.CoinFlip,
-            category = ToolCategory.Entretenimiento,
-            subCategory = R.string.subcategory_random,
-            summary = R.string.sum_tool_coin_flip,
-            svgResId = R.drawable.coin
-        ),
-        Tool(
-            name = R.string.tool_decimal_binary,
-            screen = Screen.DecimalBinary,
-            category = ToolCategory.Herramientas,
-            subCategory = R.string.subcategory_calculator,
-            summary = R.string.sum_tool_decimal_binary,
-            svgResId = R.drawable.decimal_binary
-        ),
-        Tool(
             name = R.string.tool_truco_score,
             screen = Screen.TrucoScoreboard,
-            category = ToolCategory.Entretenimiento,
+            category = ToolCategory.Herramientas,
             subCategory = R.string.subcategory_scoreboards,
             summary = R.string.sum_tool_truco_score,
             svgResId = R.drawable.truco_square
-        ),
-        Tool(
-            name = R.string.tool_age_calculator,
-            screen = Screen.AgeCalculator,
-            category = ToolCategory.Informacion,
-            subCategory = R.string.subcategory_dates,
-            summary = R.string.sum_tool_age_calculator,
-            svgResId = R.drawable.age_calculator
-        ),
-        Tool(
-            name = R.string.tool_zodiac_sign,
-            screen = Screen.ZodiacSign,
-            category = ToolCategory.Informacion,
-            subCategory = R.string.subcategory_dates,
-            summary = R.string.sum_tool_zodiac_sign,
-            svgResId = R.drawable.zodiac_sign
-        ),
-        Tool(
-            name = R.string.tool_percentage,
-            screen = Screen.Percentage,
-            category = ToolCategory.Herramientas,
-            subCategory = R.string.subcategory_calculator,
-            summary = R.string.sum_tool_percentage,
-            svgResId = R.drawable.percentage
         ),
         Tool(
             name = R.string.tool_unit_converter,
@@ -79,17 +39,9 @@ object ToolRegistry {
             svgResId = R.drawable.unit_conversor
         ),
         Tool(
-            name = R.string.tool_password_generator,
-            screen = Screen.PasswordGenerator,
-            category = ToolCategory.Herramientas,
-            subCategory = R.string.subcategory_generator,
-            summary = R.string.sum_tool_password_generator,
-            svgResId = R.drawable.password
-        ),
-        Tool(
             name = R.string.tool_pomodoro_timer,
             screen = Screen.PomodoroList,
-            category = ToolCategory.Organizacion,
+            category = ToolCategory.Herramientas,
             subCategory = R.string.subcategory_others,
             summary = R.string.sum_tool_pomodoro_timer,
             svgResId = R.drawable.timer,
@@ -130,31 +82,15 @@ object ToolRegistry {
         Tool(
             name = R.string.tool_water_reminder,
             screen = Screen.Water,
-            category = ToolCategory.Organizacion,
+            category = ToolCategory.Herramientas,
             subCategory = R.string.subcategory_habits,
             summary = R.string.sum_tool_water_reminder,
             svgResId = R.drawable.water_drop
         ),
         Tool(
-            name = R.string.tool_day_countdown,
-            screen = Screen.Countdown,
-            category = ToolCategory.Informacion,
-            subCategory = R.string.subcategory_dates,
-            summary = R.string.sum_tool_day_countdown,
-            svgResId = R.drawable.countdown
-        ),
-        Tool(
-            name = R.string.tool_country_info,
-            screen = Screen.CountriesInfo,
-            category = ToolCategory.Informacion,
-            subCategory = R.string.subcategory_general,
-            summary = R.string.sum_tool_country_info,
-            svgResId = R.drawable.countries_info
-        ),
-        Tool(
             name = R.string.tool_option_selector,
             screen = Screen.SelectorWheel,
-            category = ToolCategory.Entretenimiento,
+            category = ToolCategory.Herramientas,
             subCategory = R.string.subcategory_random,
             summary = R.string.sum_tool_option_selector,
             svgResId = R.drawable.fortune_wheel
@@ -162,7 +98,7 @@ object ToolRegistry {
         Tool(
             name = R.string.tool_guess_flag,
             screen = Screen.GuessFlag,
-            category = ToolCategory.Entretenimiento,
+            category = ToolCategory.Herramientas,
             subCategory = R.string.subcategory_minigames,
             summary = R.string.sum_tool_guess_flag,
             svgResId = R.drawable.flag
@@ -170,50 +106,10 @@ object ToolRegistry {
         Tool(
             name = R.string.tool_expense_splitter,
             screen = Screen.Meetings,
-            category = ToolCategory.Organizacion,
+            category = ToolCategory.Herramientas,
             subCategory = R.string.subcategory_others,
             summary = R.string.sum_tool_expense_splitter,
             svgResId = R.drawable.expense_splitter
-        ),
-        Tool(
-            name = R.string.tool_dice,
-            screen = Screen.Dice,
-            category = ToolCategory.Entretenimiento,
-            subCategory = R.string.subcategory_random,
-            summary = R.string.sum_tool_dice,
-            svgResId = R.drawable.dice
-        ),
-        Tool(
-            name = R.string.tool_quick_math,
-            screen = Screen.QuickCalcs,
-            category = ToolCategory.Entretenimiento,
-            subCategory = R.string.subcategory_minigames,
-            summary = R.string.sum_tool_quick_math,
-            svgResId = R.drawable.quick_math
-        ),
-        Tool(
-            name = R.string.tool_basic_phrases,
-            screen = Screen.BasicPhrases,
-            category = ToolCategory.Informacion,
-            subCategory = R.string.subcategory_general,
-            summary = R.string.sum_tool_basic_phrases,
-            svgResId = R.drawable.phrases
-        ),
-        Tool(
-            name = R.string.tool_multiverse_me,
-            screen = Screen.MultiverseMe,
-            category = ToolCategory.Entretenimiento,
-            subCategory = R.string.subcategory_minigames,
-            summary = R.string.sum_tool_multiverse_me,
-            svgResId = R.drawable.planet_ringed
-        ),
-        Tool(
-            name = R.string.tool_guess_capital,
-            screen = Screen.GuessCapital,
-            category = ToolCategory.Entretenimiento,
-            subCategory = R.string.subcategory_minigames,
-            summary = R.string.sum_tool_guess_capital,
-            svgResId = R.drawable.capitol
         ),
         Tool(
             name = R.string.tool_compass,
@@ -224,17 +120,9 @@ object ToolRegistry {
             svgResId = R.drawable.compass
         ),
         Tool(
-            name = R.string.tool_todo_list,
-            screen = Screen.Todo,
-            category = ToolCategory.Organizacion,
-            subCategory = R.string.subcategory_others,
-            summary = R.string.sum_tool_todo_list,
-            svgResId = R.drawable.todo_list
-        ),
-        Tool(
             name = R.string.tool_scoreboard,
             screen = Screen.Scoreboard,
-            category = ToolCategory.Entretenimiento,
+            category = ToolCategory.Herramientas,
             subCategory = R.string.subcategory_scoreboards,
             summary = R.string.sum_tool_scoreboard,
             svgResId = R.drawable.scoreboard
@@ -264,11 +152,10 @@ object ToolRegistry {
         Tool(
             name = R.string.tool_minesweeper,
             screen = Screen.Minesweeper,
-            category = ToolCategory.Entretenimiento,
+            category = ToolCategory.Herramientas,
             subCategory = R.string.subcategory_minigames,
             summary = R.string.sum_tool_minesweeper,
             svgResId = R.drawable.bomb
         )
-
     )
 }

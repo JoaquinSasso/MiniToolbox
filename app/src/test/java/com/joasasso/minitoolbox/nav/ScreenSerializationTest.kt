@@ -16,7 +16,6 @@ class ScreenSerializationTest {
             Screen.Water,
             Screen.WaterStats,
             Screen.PomodoroList,
-            Screen.BasicPhrases,
             Screen.Meetings,
             Screen.MeetingCreate,
             Screen.BubbleLevel,
@@ -62,8 +61,6 @@ class ScreenSerializationTest {
         assertEquals(Screen.WaterStats, Screen.fromRouteString("water_stats"))
         assertEquals(Screen.PomodoroList, Screen.fromRouteString("pomodoro_list"))
         assertEquals(Screen.PomodoroList, Screen.fromRouteString("pomodoro"))
-        assertEquals(Screen.BasicPhrases, Screen.fromRouteString("basic_phrases"))
-        assertEquals(Screen.BasicPhrases, Screen.fromRouteString("quotes"))
         assertEquals(Screen.PomodoroDetail("uuid-1"), Screen.fromRouteString("pomodoro/detail/uuid-1"))
         assertEquals(Screen.PomodoroDetail("uuid-2"), Screen.fromRouteString("pomodoro_detail/uuid-2"))
         assertEquals(Screen.MeetingDetail("m-123"), Screen.fromRouteString("meeting_detail/m-123"))
@@ -82,8 +79,6 @@ class ScreenSerializationTest {
     fun `isValidRoute validates known routes`() {
         assertTrue(Screen.isValidRoute("water"))
         assertTrue(Screen.isValidRoute("pomodoro/detail/123"))
-        assertTrue(Screen.isValidRoute("quotes"))
-        assertTrue(Screen.isValidRoute("basic_phrases"))
         assertFalse(Screen.isValidRoute("invalid_route_xyz"))
         assertFalse(Screen.isValidRoute(null))
         assertFalse(Screen.isValidRoute(""))

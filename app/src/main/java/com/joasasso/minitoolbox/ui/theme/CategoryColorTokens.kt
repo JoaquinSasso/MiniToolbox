@@ -32,26 +32,21 @@ private fun darken(color: Color, factor: Float): Color {
 
 fun swatchFromBase(base: Color) = CategorySwatch(base, darken(base, 0.5f))
 
-// Paleta base por categoría (ajustá tonos a tu gusto)
+// Paleta base por categoría
 val CategoryPalette: Map<ToolCategory, CategorySwatch> = mapOf(
     ToolCategory.Herramientas to swatchFromBase(Color(0xFF7AD1FF)),
-    ToolCategory.Organizacion to swatchFromBase(Color(0xFFFFD580)),
-    ToolCategory.Informacion  to swatchFromBase(Color(0xFFA6E3B1)),
-    ToolCategory.Entretenimiento to swatchFromBase(Color(0xFFBFAAFF)),
     ToolCategory.Favoritos    to swatchFromBase(Color(0xFFFF9F9F)),
 )
 
 val SubcategoryPalette: Map<Int, CategorySwatch> = mapOf(
+    R.string.subcategory_instrument  to swatchFromBase(Color(0xFFBFAAFF)), // Violeta lavanda
     R.string.subcategory_generator   to swatchFromBase(Color(0xFF5CC8FF)), // Sky
-    R.string.subcategory_random      to swatchFromBase(Color(0xFFFFB155)), // Amber dulce
     R.string.subcategory_calculator  to swatchFromBase(Color(0xFF6FD3A6)), // Verde menta
-    R.string.subcategory_instrument  to swatchFromBase(Color(0xFF888888)), // Violeta lavanda
-    R.string.subcategory_dates       to swatchFromBase(Color(0xFFFF8A80)), // Coral suave
-    R.string.subcategory_general     to swatchFromBase(Color(0xFF4CCDC4)), // Turquesa
-    R.string.subcategory_habits      to swatchFromBase(Color(0xFF8EA6FF)), // Azul violeta
-    R.string.subcategory_others      to swatchFromBase(Color(0xFFB0EEFF)), // Azul hielo
-    R.string.subcategory_minigames   to swatchFromBase(Color(0xFFDDE25C)), // Lima cálida
-    R.string.subcategory_scoreboards to swatchFromBase(Color(0xFFFF88C2))  // Rosa fresa
+    R.string.subcategory_habits      to swatchFromBase(Color(0xFF8EA6FF)), // Azul índigo
+    R.string.subcategory_others      to swatchFromBase(Color(0xFFFF8A80)), // Coral suave
+    R.string.subcategory_random      to swatchFromBase(Color(0xFFFFB155)), // Amber dulce
+    R.string.subcategory_scoreboards to swatchFromBase(Color(0xFFFF88C2)), // Rosa fresa
+    R.string.subcategory_minigames   to swatchFromBase(Color(0xFFDDE25C))  // Lima cálida
 )
 
 fun swatchForCategory(category: ToolCategory): CategorySwatch =

@@ -14,9 +14,7 @@
 > El API Lite elimina capacidades de reflexión. Se debe verificar que no existan inspecciones dinámicas de mensajes.
 
 *   **Puntos de Uso Identificados:**
-    *   [`GuessCapitalScreen.kt`](../../app/src/main/java/com/joasasso/minitoolbox/tools/entretenimiento/minijuegos/GuessCapitalScreen.kt#L314)
     *   [`GuessFlagScreen.kt`](../../app/src/main/java/com/joasasso/minitoolbox/tools/entretenimiento/minijuegos/GuessFlagScreen.kt#L274)
-    *   [`CountriesInfoScreen.kt`](../../app/src/main/java/com/joasasso/minitoolbox/tools/info/CountriesInfoScreen.kt#L62)
 *   **Dataset:** Validar que `countries.proto.bin` se deserializa correctamente con el nuevo `CountryList.parseFrom(bytes)`.
 
 ## Plan de Acción
@@ -33,5 +31,5 @@
 *   Asegurar que `proguard-rules.pro` incluya las reglas necesarias para Protobuf-Lite para evitar errores de "NoSuchMethodError" tras la minificación.
 
 ### 4. Verificación
-*   Ejecutar los minijuegos de Capitales y Banderas para confirmar que el dataset de países carga correctamente.
+*   Ejecutar el minijuego de Banderas para confirmar que el dataset de países carga correctamente.
 *   Comparar tamaño del APK antes y después del cambio.
