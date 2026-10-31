@@ -20,9 +20,11 @@
 
     <string name="catalog_filter_all">Todas</string>
     <string name="catalog_favorites_title">Favoritos</string>
-    <string name="catalog_favorites_hint">Mantén presionado y arrastra para reordenar</string>
-    <string name="catalog_move_left">Mover a la izquierda</string>
-    <string name="catalog_move_right">Mover a la derecha</string>
+    <string name="catalog_favorites_edit">Editar</string>
+    <string name="catalog_edit_favorites_title">Editar favoritos</string>
+    <string name="catalog_edit_favorites_subtitle">Las primeras aparecen en el widget de inicio, tantas como entren según su tamaño.</string>
+    <string name="catalog_move_up">Mover arriba</string>
+    <string name="catalog_move_down">Mover abajo</string>
     <string name="catalog_search_suggestions">Todas las herramientas</string>
 
     <string name="categories_empty_favorites_title">Fija tus herramientas de siempre</string>

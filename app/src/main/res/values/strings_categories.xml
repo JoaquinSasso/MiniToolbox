@@ -20,9 +20,11 @@
 
     <string name="catalog_filter_all">All</string>
     <string name="catalog_favorites_title">Favorites</string>
-    <string name="catalog_favorites_hint">Long-press and drag to reorder</string>
-    <string name="catalog_move_left">Move left</string>
-    <string name="catalog_move_right">Move right</string>
+    <string name="catalog_favorites_edit">Edit</string>
+    <string name="catalog_edit_favorites_title">Edit favorites</string>
+    <string name="catalog_edit_favorites_subtitle">The first ones appear on your home screen widget, as many as fit its size.</string>
+    <string name="catalog_move_up">Move up</string>
+    <string name="catalog_move_down">Move down</string>
     <string name="catalog_search_suggestions">All tools</string>
 
     <string name="categories_empty_favorites_title">Pin your go-to tools</string>

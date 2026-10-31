@@ -189,52 +189,24 @@ fun ToolTile(
     }
 }
 
-/**
- * Atajo de la fila de favoritos. El arrastre lo agrega quien lo contiene, para que esta pieza
- * no dependa de la librería de reordenamiento.
- */
+/** Acceso directo de la fila de favoritos. */
 @Composable
 fun FavoriteTile(
     tool: Tool,
-    isDragging: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val scale by animateFloatAsState(
-        targetValue = if (isDragging) 1.08f else 1f,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-        label = "favorite-drag-scale"
-    )
-    val rotation by animateFloatAsState(
-        targetValue = if (isDragging) 12f else 0f,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-        label = "favorite-drag-rotation"
-    )
-
     Surface(
         onClick = onClick,
-        modifier = modifier
-            .width(96.dp)
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            },
+        modifier = modifier.width(96.dp),
         shape = MaterialTheme.shapes.large,
-        color = if (isDragging) {
-            MaterialTheme.colorScheme.surfaceContainerHighest
-        } else {
-            MaterialTheme.colorScheme.surface
-        }
+        color = MaterialTheme.colorScheme.surface
     ) {
         Column(
             modifier = Modifier.padding(vertical = 12.dp, horizontal = 4.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            CategoryShapeIcon(
-                tool = tool,
-                size = 64.dp,
-                modifier = Modifier.graphicsLayer { rotationZ = rotation }
-            )
+            CategoryShapeIcon(tool = tool, size = 64.dp)
             Text(
                 text = stringResource(tool.name),
                 style = MaterialTheme.typography.labelLarge,

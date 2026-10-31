@@ -25,7 +25,6 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.rememberTextFieldState
@@ -52,6 +51,7 @@ import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SearchBarState
 import androidx.compose.material3.SearchBarValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -59,9 +59,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -74,8 +74,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.CustomAccessibilityAction
-import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -87,6 +85,7 @@ import com.joasasso.minitoolbox.tools.Tool
 import com.joasasso.minitoolbox.tools.ToolCategory
 import com.joasasso.minitoolbox.ui.components.CatalogEmptyState
 import com.joasasso.minitoolbox.ui.components.CategoryGlyph
+import com.joasasso.minitoolbox.ui.components.EditFavoritesSheet
 import com.joasasso.minitoolbox.ui.components.FavoriteTile
 import com.joasasso.minitoolbox.ui.components.ProPassBadge
 import com.joasasso.minitoolbox.ui.components.ProToolPaywallDialog
@@ -105,8 +104,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
-import sh.calvin.reorderable.ReorderableItem
-import sh.calvin.reorderable.rememberReorderableLazyListState
 import java.util.Locale
 
 /** Ancho máximo del contenido en ventanas grandes (MD3: 840–1040dp). */
@@ -134,6 +131,7 @@ fun CategoriesScreen(
     val proState = LocalProState.current
     var showPaywallDialog by remember { mutableStateOf(false) }
     var selectedProTool by remember { mutableStateOf<Tool?>(null) }
+    var showEditFavorites by rememberSaveable { mutableStateOf(false) }
 
     val handleToolClick: (Tool) -> Unit = { tool ->
         if (tool.isPro && !proState.isPro && !CreditAccessManager.hasActivePass(context)) {
@@ -271,7 +269,7 @@ fun CategoriesScreen(
                 },
                 onToolClick = handleToolClick,
                 onToggleFavorite = onToggleFavorite,
-                onCommitFavoritesOrder = vm::updateFavoritesOrder
+                onEditFavorites = { showEditFavorites = true }
             )
             // Con la barra de búsqueda oculta por el scroll, la grilla pasaría debajo de la
             // barra de estado: esta franja la protege.
@@ -282,6 +280,19 @@ fun CategoriesScreen(
                     .background(MaterialTheme.colorScheme.surface)
             )
         }
+    }
+
+    if (showEditFavorites) {
+        EditFavoritesSheet(
+            favoriteRoutes = uiState.favoriteRoutes,
+            catalogTools = catalogTools,
+            onCommitOrder = vm::updateFavoritesOrder,
+            onRemove = { route ->
+                haptic.performHapticFeedback(HapticFeedbackType.ToggleOff)
+                vm.toggleFavorite(route)
+            },
+            onDismiss = { showEditFavorites = false }
+        )
     }
 
     if (showPaywallDialog) {
@@ -374,7 +385,7 @@ private fun CatalogGrid(
     onSelectCategory: (ToolCategory?) -> Unit,
     onToolClick: (Tool) -> Unit,
     onToggleFavorite: (Tool) -> Unit,
-    onCommitFavoritesOrder: (List<String>) -> Unit
+    onEditFavorites: () -> Unit
 ) {
     val gridState = rememberLazyGridState()
     val isFavorite: (Tool) -> Boolean = { it.screen.route in favoriteRoutes }
@@ -397,7 +408,7 @@ private fun CatalogGrid(
                     catalogTools = catalogTools,
                     horizontalMargin = horizontalMargin,
                     onToolClick = onToolClick,
-                    onCommitOrder = onCommitFavoritesOrder
+                    onEditFavorites = onEditFavorites
                 )
             }
         }
@@ -471,39 +482,30 @@ private fun FavoritesSection(
     catalogTools: List<Tool>,
     horizontalMargin: Dp,
     onToolClick: (Tool) -> Unit,
-    onCommitOrder: (List<String>) -> Unit
+    onEditFavorites: () -> Unit
 ) {
-    val haptic = LocalHapticFeedback.current
-    val toolsByRoute = remember(catalogTools) { catalogTools.associateBy { it.screen.route } }
-
-    // Copia local para que el arrastre sea fluido; se persiste al soltar.
-    val orderedRoutes = remember(favoriteRoutes, toolsByRoute) {
-        favoriteRoutes.filter { it in toolsByRoute }.toMutableStateList()
-    }
-    // Las rutas que ya no resuelven (herramienta quitada) se conservan al final.
-    val commitOrder = {
-        onCommitOrder(orderedRoutes.toList() + favoriteRoutes.filterNot { it in orderedRoutes })
-    }
-
-    val rowState = rememberLazyListState()
-    val reorderState = rememberReorderableLazyListState(lazyListState = rowState) { from, to ->
-        if (from.index in orderedRoutes.indices && to.index in orderedRoutes.indices) {
-            orderedRoutes.add(to.index, orderedRoutes.removeAt(from.index))
-            haptic.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
-        }
+    val favoriteTools = remember(favoriteRoutes, catalogTools) {
+        val toolsByRoute = catalogTools.associateBy { it.screen.route }
+        favoriteRoutes.mapNotNull { toolsByRoute[it] }
     }
 
     Column(modifier = Modifier.fillMaxWidth()) {
-        SectionTitle(
-            title = stringResource(R.string.catalog_favorites_title),
-            supporting = if (orderedRoutes.size > 1) {
-                stringResource(R.string.catalog_favorites_hint)
-            } else {
-                null
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            SectionTitle(
+                title = stringResource(R.string.catalog_favorites_title),
+                modifier = Modifier.weight(1f)
+            )
+            if (favoriteTools.isNotEmpty()) {
+                TextButton(onClick = onEditFavorites) {
+                    Text(stringResource(R.string.catalog_favorites_edit))
+                }
             }
-        )
+        }
 
-        if (orderedRoutes.isEmpty()) {
+        if (favoriteTools.isEmpty()) {
             CatalogEmptyState(
                 icon = Icons.Outlined.StarOutline,
                 title = stringResource(R.string.categories_empty_favorites_title),
@@ -511,60 +513,19 @@ private fun FavoritesSection(
                 modifier = Modifier.padding(top = 8.dp)
             )
         } else {
-            val moveLeft = stringResource(R.string.catalog_move_left)
-            val moveRight = stringResource(R.string.catalog_move_right)
-
             LazyRow(
-                state = rowState,
                 modifier = Modifier
                     .bleedHorizontally(horizontalMargin)
                     .padding(top = 4.dp),
                 contentPadding = PaddingValues(horizontal = horizontalMargin - 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                itemsIndexed(
-                    items = orderedRoutes,
-                    key = { _, route -> "favorite_$route" }
-                ) { index, route ->
-                    val tool = toolsByRoute.getValue(route)
-                    ReorderableItem(reorderState, key = "favorite_$route") { isDragging ->
-                        FavoriteTile(
-                            tool = tool,
-                            isDragging = isDragging,
-                            onClick = { onToolClick(tool) },
-                            modifier = Modifier
-                                .longPressDraggableHandle(
-                                    onDragStarted = {
-                                        haptic.performHapticFeedback(
-                                            HapticFeedbackType.GestureThresholdActivate
-                                        )
-                                    },
-                                    onDragStopped = {
-                                        haptic.performHapticFeedback(HapticFeedbackType.GestureEnd)
-                                        commitOrder()
-                                    }
-                                )
-                                // Alternativa al arrastre para TalkBack y Switch Access.
-                                .semantics {
-                                    customActions = buildList {
-                                        if (index > 0) {
-                                            add(CustomAccessibilityAction(moveLeft) {
-                                                orderedRoutes.add(index - 1, orderedRoutes.removeAt(index))
-                                                commitOrder()
-                                                true
-                                            })
-                                        }
-                                        if (index < orderedRoutes.lastIndex) {
-                                            add(CustomAccessibilityAction(moveRight) {
-                                                orderedRoutes.add(index + 1, orderedRoutes.removeAt(index))
-                                                commitOrder()
-                                                true
-                                            })
-                                        }
-                                    }
-                                }
-                        )
-                    }
+                items(items = favoriteTools, key = { "favorite_${it.screen.route}" }) { tool ->
+                    FavoriteTile(
+                        tool = tool,
+                        onClick = { onToolClick(tool) },
+                        modifier = Modifier.animateItem()
+                    )
                 }
             }
         }
@@ -627,25 +588,17 @@ private fun CategoryFilterRow(
 @Composable
 private fun SectionTitle(
     title: String,
-    supporting: String?,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier.padding(top = 8.dp, bottom = 4.dp)) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.semantics { heading() }
-        )
-        if (supporting != null) {
-            Text(
-                text = supporting,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleLarge,
+        fontWeight = FontWeight.SemiBold,
+        color = MaterialTheme.colorScheme.onSurface,
+        modifier = modifier
+            .padding(top = 8.dp, bottom = 4.dp)
+            .semantics { heading() }
+    )
 }
 
 @Composable
