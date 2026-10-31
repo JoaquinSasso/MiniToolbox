@@ -1,34 +1,73 @@
-// app/src/main/java/com/example/minitoolbox/tools/ToolCategory.kt
 package com.joasasso.minitoolbox.tools
 
+import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.Build
+import androidx.compose.material.icons.filled.Straighten
+import androidx.compose.material.icons.outlined.AutoAwesome
+import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material.icons.outlined.SportsEsports
 import androidx.compose.material.icons.outlined.StarOutline
+import androidx.compose.material.icons.outlined.Straighten
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.joasasso.minitoolbox.R
 
 /**
- * Categorías que aparecen en la barra inferior.
+ * Categorías principales del catálogo de herramientas.
  */
 sealed class ToolCategory(
-    val titleRes: Int,
+    @StringRes val titleRes: Int,
     val outlinedIcon: ImageVector,
     val filledIcon: ImageVector
 ) {
-    object Herramientas :
-        ToolCategory(R.string.category_herramientas, Icons.Outlined.Build, Icons.Filled.Build)
+    data object Instrumentos : ToolCategory(
+        titleRes = R.string.category_instrumentos,
+        outlinedIcon = Icons.Outlined.Straighten,
+        filledIcon = Icons.Filled.Straighten
+    )
 
-    object Favoritos : ToolCategory(
-        R.string.category_favoritos, Icons.Outlined.StarOutline, Icons.Filled.Star
+    data object Cotidiano : ToolCategory(
+        titleRes = R.string.category_cotidiano,
+        outlinedIcon = Icons.Outlined.Schedule,
+        filledIcon = Icons.Filled.Schedule
+    )
+
+    data object Generadores : ToolCategory(
+        titleRes = R.string.category_generadores,
+        outlinedIcon = Icons.Outlined.AutoAwesome,
+        filledIcon = Icons.Filled.AutoAwesome
+    )
+
+    data object Juegos : ToolCategory(
+        titleRes = R.string.category_juegos,
+        outlinedIcon = Icons.Outlined.SportsEsports,
+        filledIcon = Icons.Filled.SportsEsports
+    )
+
+    data object Favoritos : ToolCategory(
+        titleRes = R.string.category_favoritos,
+        outlinedIcon = Icons.Outlined.StarOutline,
+        filledIcon = Icons.Filled.Star
     )
 
     companion object {
-        val all: List<ToolCategory>
-            get() = listOf(
-                Herramientas,
-                Favoritos
-            )
+        /** Categorías de dominio en orden de presentación del catálogo. */
+        val domainCategories: List<ToolCategory> = listOf(
+            Instrumentos,
+            Cotidiano,
+            Generadores,
+            Juegos
+        )
+
+        val all: List<ToolCategory> = listOf(
+            Instrumentos,
+            Cotidiano,
+            Generadores,
+            Juegos,
+            Favoritos
+        )
     }
 }

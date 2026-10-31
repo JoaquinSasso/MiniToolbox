@@ -1,13 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="category_herramientas">Herramientas</string>
     <string name="category_favoritos">Favoritos</string>
-    <string name="subcategory_generator">Generadores</string>
-    <string name="subcategory_calculator">Calculadoras</string>
+    <string name="category_herramientas">Herramientas</string>
+    <string name="category_instrumentos">Instrumentos</string>
+    <string name="category_cotidiano">Cotidiano</string>
+    <string name="category_generadores">Generadores</string>
+    <string name="category_juegos">Juegos</string>
+
+    <string name="subcategory_measurement">Medición</string>
+    <string name="subcategory_sensors">Sensores y Óptica</string>
     <string name="subcategory_instrument">Instrumentos</string>
-    <string name="subcategory_habits">Hábitos y Actividades</string>
-    <string name="subcategory_random">Aleatorio</string>
+    <string name="subcategory_habits">Tiempo y Hábitos</string>
+    <string name="subcategory_calculator">Finanzas y Conversión</string>
+    <string name="subcategory_generator">Códigos QR</string>
+    <string name="subcategory_random">Sorteos y Azar</string>
     <string name="subcategory_scoreboards">Marcadores</string>
     <string name="subcategory_minigames">Minijuegos</string>
-    <string name="subcategory_others">Otros</string>
+    <string name="subcategory_others">Utilidades</string>
+
+    <string name="categories_empty_favorites_title">Aún no tienes favoritos</string>
+    <string name="categories_empty_favorites_subtitle">Toca la estrella en cualquier herramienta para fijarla aquí y en el widget de inicio.</string>
+    <string name="categories_empty_search_subtitle">Prueba buscando por nombre, función o categoría.</string>
+    <string name="categories_clear_filters">Limpiar búsqueda</string>
+    <string name="categories_favorite_add_cd">Agregar a favoritos</string>
+    <string name="categories_favorite_remove_cd">Quitar de favoritos</string>
+    <string name="categories_pro_badge">PRO</string>
 </resources>
