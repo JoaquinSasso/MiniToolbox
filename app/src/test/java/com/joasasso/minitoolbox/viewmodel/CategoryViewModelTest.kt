@@ -18,7 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -40,7 +40,7 @@ import java.util.Locale
 class CategoryViewModelTest {
 
     private lateinit var app: Application
-    private val testDispatcher = StandardTestDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
     private var vm: CategoryViewModel? = null
 
     @Before
@@ -62,48 +62,56 @@ class CategoryViewModelTest {
     }
 
     @Test
-    fun estadoInicial_emiteFiltroAllYListaFavoritosVacia() = runTest {
+    fun estadoInicial_emiteCategoriaInstrumentosYListaFavoritosVacia() = runTest {
         val model = createViewModel()
         val state = model.uiState.first { !it.isLoading }
 
-        assertEquals(CategoryFilter.All, state.selectedFilter)
+        assertEquals(ToolCategory.Instrumentos, state.selectedCategory)
+        assertFalse(state.isSearchActive)
         assertEquals("", state.searchQuery)
-        assertEquals(CatalogLayoutMode.LIST, state.layoutMode)
         assertTrue(state.favoriteRoutes.isEmpty())
+
+        model.viewModelScope.cancel()
     }
 
     @Test
-    fun selectFilter_cambiaFiltroYLimpiaBusquedaActiva() = runTest {
+    fun selectCategory_cambiaCategoriaYCierraBusquedaActiva() = runTest {
         val model = createViewModel()
         model.uiState.first { !it.isLoading }
 
+        model.openSearch()
         model.onSearchQueryChange("regla")
-        assertEquals("regla", model.uiState.first { it.searchQuery == "regla" }.searchQuery)
+        val searching = model.uiState.first { it.isSearchActive && it.searchQuery == "regla" }
+        assertTrue(searching.isSearchActive)
+        assertEquals("regla", searching.searchQuery)
 
-        val targetFilter = CategoryFilter.ByCategory(ToolCategory.Instrumentos)
-        model.selectFilter(targetFilter)
+        model.selectCategory(ToolCategory.Cotidiano)
 
-        val updated = model.uiState.first { it.selectedFilter == targetFilter }
-        assertEquals(targetFilter, updated.selectedFilter)
+        val updated = model.uiState.first { it.selectedCategory == ToolCategory.Cotidiano }
+        assertEquals(ToolCategory.Cotidiano, updated.selectedCategory)
+        assertFalse(updated.isSearchActive)
         assertEquals("", updated.searchQuery)
+
+        model.viewModelScope.cancel()
     }
 
     @Test
-    fun toggleLayoutMode_alternaEntreListYGrid() = runTest {
+    fun openYCloseSearch_alternaEstadoDeBusquedaYLimpiaQuery() = runTest {
         val model = createViewModel()
         model.uiState.first { !it.isLoading }
 
-        model.toggleLayoutMode()
-        assertEquals(
-            CatalogLayoutMode.GRID,
-            model.uiState.first { it.layoutMode == CatalogLayoutMode.GRID }.layoutMode
-        )
+        model.openSearch()
+        assertTrue(model.uiState.first { it.isSearchActive }.isSearchActive)
 
-        model.toggleLayoutMode()
-        assertEquals(
-            CatalogLayoutMode.LIST,
-            model.uiState.first { it.layoutMode == CatalogLayoutMode.LIST }.layoutMode
-        )
+        model.onSearchQueryChange("lupa")
+        assertEquals("lupa", model.uiState.first { it.searchQuery == "lupa" }.searchQuery)
+
+        model.closeSearch()
+        val closed = model.uiState.first { !it.isSearchActive }
+        assertFalse(closed.isSearchActive)
+        assertEquals("", closed.searchQuery)
+
+        model.viewModelScope.cancel()
     }
 
     @Test
@@ -118,6 +126,8 @@ class CategoryViewModelTest {
         model.toggleFavorite(Screen.Compass.route)
         val afterRemove = model.uiState.first { it.favoriteRoutes.isEmpty() }
         assertTrue(afterRemove.favoriteRoutes.isEmpty())
+
+        model.viewModelScope.cancel()
     }
 
     @Test
@@ -136,6 +146,8 @@ class CategoryViewModelTest {
 
         val stateReordered = model.uiState.first { it.favoriteRoutes.firstOrNull() == Screen.Ruler.route }
         assertEquals(reordered, stateReordered.favoriteRoutes)
+
+        model.viewModelScope.cancel()
     }
 
     @Test
@@ -155,5 +167,6 @@ class CategoryViewModelTest {
         val factory = ViewModelProvider.AndroidViewModelFactory.getInstance(app)
         val created = factory.create(CategoryViewModel::class.java).also { vm = it }
         assertNotNull(created)
+        created.viewModelScope.cancel()
     }
 }

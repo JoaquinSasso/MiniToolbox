@@ -13,27 +13,10 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-/**
- * Filtro activo en la pantalla principal del catálogo.
- */
-sealed interface CategoryFilter {
-    data object All : CategoryFilter
-    data object Favorites : CategoryFilter
-    data class ByCategory(val category: ToolCategory) : CategoryFilter
-}
-
-/**
- * Modo de visualización del catálogo en pantallas compactas.
- */
-enum class CatalogLayoutMode {
-    LIST,
-    GRID
-}
-
 data class CategoriesUiState(
-    val selectedFilter: CategoryFilter = CategoryFilter.All,
+    val selectedCategory: ToolCategory = ToolCategory.Instrumentos,
+    val isSearchActive: Boolean = false,
     val searchQuery: String = "",
-    val layoutMode: CatalogLayoutMode = CatalogLayoutMode.LIST,
     val favoriteRoutes: List<String> = emptyList(),
     val isLoading: Boolean = false
 )
@@ -49,20 +32,20 @@ class CategoryViewModel(
         repository = DefaultFavoritesRepository(application)
     )
 
-    private val _selectedFilter = MutableStateFlow<CategoryFilter>(CategoryFilter.All)
+    private val _selectedCategory = MutableStateFlow<ToolCategory>(ToolCategory.Instrumentos)
+    private val _isSearchActive = MutableStateFlow(false)
     private val _searchQuery = MutableStateFlow("")
-    private val _layoutMode = MutableStateFlow(CatalogLayoutMode.LIST)
 
     val uiState: StateFlow<CategoriesUiState> = combine(
-        _selectedFilter,
+        _selectedCategory,
+        _isSearchActive,
         _searchQuery,
-        _layoutMode,
         repository.favoritesFlow
-    ) { filter, query, layout, favorites ->
+    ) { category, searchActive, query, favorites ->
         CategoriesUiState(
-            selectedFilter = filter,
+            selectedCategory = category,
+            isSearchActive = searchActive,
             searchQuery = query,
-            layoutMode = layout,
             favoriteRoutes = favorites,
             isLoading = false
         )
@@ -72,24 +55,28 @@ class CategoryViewModel(
         initialValue = CategoriesUiState(isLoading = true)
     )
 
-    fun selectFilter(filter: CategoryFilter) {
-        _selectedFilter.value = filter
+    fun selectCategory(category: ToolCategory) {
+        _selectedCategory.value = category
+        _isSearchActive.value = false
+        _searchQuery.value = ""
+    }
+
+    fun openSearch() {
+        _isSearchActive.value = true
+    }
+
+    fun closeSearch() {
+        _isSearchActive.value = false
         _searchQuery.value = ""
     }
 
     fun onSearchQueryChange(query: String) {
+        _isSearchActive.value = true
         _searchQuery.value = query
     }
 
     fun clearSearch() {
         _searchQuery.value = ""
-    }
-
-    fun toggleLayoutMode() {
-        _layoutMode.value = when (_layoutMode.value) {
-            CatalogLayoutMode.LIST -> CatalogLayoutMode.GRID
-            CatalogLayoutMode.GRID -> CatalogLayoutMode.LIST
-        }
     }
 
     fun toggleFavorite(route: String) {

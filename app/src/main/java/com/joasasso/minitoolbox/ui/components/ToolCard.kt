@@ -1,14 +1,11 @@
 package com.joasasso.minitoolbox.ui.components
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -28,7 +25,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -54,7 +50,6 @@ fun ToolCard(
     modifier: Modifier = Modifier,
     overrideElevation: Dp? = null,
     isDragging: Boolean = false,
-    showSubcategoryBadge: Boolean = false,
     showDragHandle: Boolean = false,
     dragHandleModifier: Modifier = Modifier
 ) {
@@ -82,7 +77,7 @@ fun ToolCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 14.dp),
+                .padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (showDragHandle) {
@@ -106,7 +101,7 @@ fun ToolCard(
                     painter = painterResource(resId),
                     contentDescription = null,
                     swatch = swatch,
-                    size = 46.dp,
+                    size = 44.dp,
                     shape = RoundedCornerShape(14.dp)
                 )
                 Spacer(Modifier.width(16.dp))
@@ -131,17 +126,6 @@ fun ToolCard(
                     }
                 }
 
-                if (showSubcategoryBadge) {
-                    Text(
-                        text = stringResource(id = tool.subCategory),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = swatch.accent,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(top = 2.dp)
-                    )
-                }
-
                 tool.summary?.let { sumRes ->
                     Text(
                         text = stringResource(id = sumRes),
@@ -154,165 +138,11 @@ fun ToolCard(
                 }
             }
 
-            Spacer(Modifier.width(8.dp))
+            Spacer(Modifier.width(4.dp))
 
             FavoriteToggleButton(
                 isFavorite = isFavorito,
                 onToggle = onToggleFavorito
-            )
-        }
-    }
-}
-
-@Composable
-fun ToolBentoCard(
-    tool: Tool,
-    isFavorito: Boolean,
-    onToolClick: (Tool) -> Unit,
-    onToggleFavorito: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val swatch = swatchForSubcategory(tool.subCategory) ?: swatchForCategory(tool.category)
-
-    Card(
-        onClick = { onToolClick(tool) },
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-            contentColor = MaterialTheme.colorScheme.onSurface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        shape = RoundedCornerShape(20.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
-            ) {
-                tool.svgResId?.let { resId ->
-                    CategoryIcon(
-                        painter = painterResource(resId),
-                        contentDescription = null,
-                        swatch = swatch,
-                        size = 44.dp,
-                        shape = RoundedCornerShape(14.dp)
-                    )
-                }
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    if (tool.isPro) {
-                        ProBadgePill()
-                    }
-                    FavoriteToggleButton(
-                        isFavorite = isFavorito,
-                        onToggle = onToggleFavorito
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(12.dp))
-
-            Text(
-                text = stringResource(id = tool.subCategory),
-                style = MaterialTheme.typography.labelSmall,
-                color = swatch.accent,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            Spacer(Modifier.height(2.dp))
-
-            Text(
-                text = stringResource(id = tool.name),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            tool.summary?.let { sumRes ->
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = stringResource(id = sumRes),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    minLines = 2,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun FavoriteQuickCard(
-    tool: Tool,
-    onToolClick: (Tool) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val swatch = swatchForSubcategory(tool.subCategory) ?: swatchForCategory(tool.category)
-
-    Surface(
-        onClick = { onToolClick(tool) },
-        modifier = modifier.width(156.dp),
-        shape = RoundedCornerShape(18.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
-        border = BorderStroke(
-            width = 1.dp,
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(12.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                tool.svgResId?.let { resId ->
-                    CategoryIcon(
-                        painter = painterResource(resId),
-                        contentDescription = null,
-                        swatch = swatch,
-                        size = 36.dp,
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                }
-                Icon(
-                    imageVector = Icons.Filled.Star,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(16.dp)
-                )
-            }
-
-            Spacer(Modifier.height(10.dp))
-
-            Text(
-                text = stringResource(id = tool.name),
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            Text(
-                text = stringResource(id = tool.subCategory),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
             )
         }
     }
@@ -328,24 +158,13 @@ private fun FavoriteToggleButton(
         else R.string.categories_favorite_add_cd
     )
     IconButton(onClick = onToggle) {
-        Box(
-            modifier = Modifier
-                .size(34.dp)
-                .clip(CircleShape)
-                .background(
-                    if (isFavorite) MaterialTheme.colorScheme.primaryContainer
-                    else MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.55f)
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.StarOutline,
-                contentDescription = cd,
-                tint = if (isFavorite) MaterialTheme.colorScheme.onPrimaryContainer
-                else MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(18.dp)
-            )
-        }
+        Icon(
+            imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.StarOutline,
+            contentDescription = cd,
+            tint = if (isFavorite) MaterialTheme.colorScheme.primary
+            else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+            modifier = Modifier.size(22.dp)
+        )
     }
 }
 
@@ -377,12 +196,12 @@ fun groupDecorBySubcategory(index: Int, list: List<Tool>): GroupDecor {
     val outerCorner = 20.dp
     val innerCorner = 4.dp
     if (list.isEmpty()) {
-        return GroupDecor(RoundedCornerShape(outerCorner), 4.dp, 4.dp)
+        return GroupDecor(RoundedCornerShape(outerCorner), 6.dp, 6.dp)
     }
 
     val safeIndex = index.coerceIn(0, list.lastIndex)
     val cur = list.getOrNull(safeIndex)
-        ?: return GroupDecor(RoundedCornerShape(outerCorner), 4.dp, 4.dp)
+        ?: return GroupDecor(RoundedCornerShape(outerCorner), 6.dp, 6.dp)
 
     val prevSame = safeIndex > 0 && list[safeIndex - 1].subCategory == cur.subCategory
     val nextSame = safeIndex < list.lastIndex && list[safeIndex + 1].subCategory == cur.subCategory
@@ -390,8 +209,8 @@ fun groupDecorBySubcategory(index: Int, list: List<Tool>): GroupDecor {
     return when {
         !prevSame && !nextSame -> GroupDecor(
             shape = RoundedCornerShape(outerCorner),
-            topPad = 4.dp,
-            bottomPad = 4.dp
+            topPad = 6.dp,
+            bottomPad = 6.dp
         )
 
         !prevSame && nextSame -> GroupDecor(
@@ -401,7 +220,7 @@ fun groupDecorBySubcategory(index: Int, list: List<Tool>): GroupDecor {
                 bottomStart = innerCorner,
                 bottomEnd = innerCorner
             ),
-            topPad = 4.dp,
+            topPad = 6.dp,
             bottomPad = 1.dp
         )
 
@@ -419,7 +238,7 @@ fun groupDecorBySubcategory(index: Int, list: List<Tool>): GroupDecor {
                 bottomEnd = outerCorner
             ),
             topPad = 1.dp,
-            bottomPad = 4.dp
+            bottomPad = 6.dp
         )
     }
 }

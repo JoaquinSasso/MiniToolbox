@@ -8,58 +8,54 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.DragIndicator
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.WorkspacePremium
-import androidx.compose.material.icons.outlined.Apps
-import androidx.compose.material.icons.outlined.GridView
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.material.icons.outlined.StarOutline
-import androidx.compose.material.icons.outlined.ViewAgenda
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -72,6 +68,8 @@ import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -91,10 +89,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.joasasso.minitoolbox.tools.Tool
 import com.joasasso.minitoolbox.tools.ToolCategory
-import com.joasasso.minitoolbox.ui.components.FavoriteQuickCard
 import com.joasasso.minitoolbox.ui.components.ProPassBadge
 import com.joasasso.minitoolbox.ui.components.ProToolPaywallDialog
-import com.joasasso.minitoolbox.ui.components.ToolBentoCard
 import com.joasasso.minitoolbox.ui.components.ToolCard
 import com.joasasso.minitoolbox.ui.components.groupDecorBySubcategory
 import com.joasasso.minitoolbox.ui.theme.swatchForCategory
@@ -104,8 +100,6 @@ import com.joasasso.minitoolbox.utils.isCatalogTool
 import com.joasasso.minitoolbox.utils.matchesQuery
 import com.joasasso.minitoolbox.utils.pro.CreditAccessManager
 import com.joasasso.minitoolbox.utils.pro.LocalProState
-import com.joasasso.minitoolbox.viewmodel.CatalogLayoutMode
-import com.joasasso.minitoolbox.viewmodel.CategoryFilter
 import com.joasasso.minitoolbox.viewmodel.CategoryViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
@@ -133,13 +127,8 @@ fun CategoriesScreen(
     val configuration = LocalConfiguration.current
 
     val screenWidthDp = configuration.screenWidthDp
+    val useNavigationRail = screenWidthDp >= 600
     val horizontalMargin: Dp = if (screenWidthDp >= 600) 24.dp else 16.dp
-    val gridColumns: Int = when {
-        screenWidthDp >= 840 -> 3
-        screenWidthDp >= 600 -> 2
-        uiState.layoutMode == CatalogLayoutMode.GRID -> 2
-        else -> 1
-    }
 
     val proState = LocalProState.current
     var showPaywallDialog by remember { mutableStateOf(false) }
@@ -156,10 +145,8 @@ fun CategoriesScreen(
 
     val catalogTools = remember(tools) { tools.filter(::isCatalogTool) }
 
-    val favoritesTools: List<Tool> = remember(uiState.favoriteRoutes, catalogTools) {
-        uiState.favoriteRoutes.mapNotNull { route ->
-            catalogTools.find { it.screen.route == route }
-        }
+    val categoryTools = remember(uiState.selectedCategory, catalogTools) {
+        catalogTools.filter { it.category == uiState.selectedCategory }
     }
 
     val locale = configuration.locales.get(0) ?: Locale.getDefault()
@@ -171,12 +158,8 @@ fun CategoriesScreen(
     LaunchedEffect(uiState.searchQuery) {
         snapshotFlow { uiState.searchQuery.trim() }
             .distinctUntilChanged()
-            .debounce(100)
+            .debounce(80)
             .collectLatest { debouncedQuery = it }
-    }
-
-    LaunchedEffect(Unit) {
-        vm.clearSearch()
     }
 
     val searchResults: List<Tool> = remember(debouncedQuery, searchIndex, locale, catalogTools) {
@@ -191,16 +174,13 @@ fun CategoriesScreen(
         }
     }
 
-    val visibleCategories: List<ToolCategory> = remember(uiState.selectedFilter) {
-        when (val filter = uiState.selectedFilter) {
-            CategoryFilter.All -> ToolCategory.domainCategories
-            CategoryFilter.Favorites -> emptyList()
-            is CategoryFilter.ByCategory -> listOf(filter.category)
-        }
+    val listStateKey = remember(uiState.selectedCategory) {
+        "cat_${uiState.selectedCategory.titleRes}"
     }
-
-    val listStateKey = remember(uiState.selectedFilter) { filterKey(uiState.selectedFilter) }
     val listState = rememberSaveable(listStateKey, saver = LazyListState.Saver) {
+        LazyListState(firstVisibleItemIndex = 0, firstVisibleItemScrollOffset = 0)
+    }
+    val searchListState = rememberSaveable("search_list", saver = LazyListState.Saver) {
         LazyListState(firstVisibleItemIndex = 0, firstVisibleItemScrollOffset = 0)
     }
 
@@ -210,16 +190,8 @@ fun CategoriesScreen(
         focusManager.clearFocus()
     }
 
-    BackHandler(enabled = !isKeyboardOpen && uiState.searchQuery.isNotBlank()) {
-        vm.clearSearch()
-    }
-
-    BackHandler(
-        enabled = !isKeyboardOpen &&
-            uiState.searchQuery.isBlank() &&
-            uiState.selectedFilter != CategoryFilter.All
-    ) {
-        vm.selectFilter(CategoryFilter.All)
+    BackHandler(enabled = !isKeyboardOpen && uiState.isSearchActive) {
+        vm.closeSearch()
     }
 
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -228,172 +200,110 @@ fun CategoriesScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
-            TopAppBar(
+            CatalogTopAppBar(
+                selectedCategory = uiState.selectedCategory,
+                isSearchActive = uiState.isSearchActive,
+                searchQuery = uiState.searchQuery,
+                isPro = proState.isPro,
                 scrollBehavior = scrollBehavior,
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
-                    actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                ),
-                title = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.categories_app_title),
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Surface(
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.secondaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                        ) {
-                            Text(
-                                text = catalogTools.size.toString(),
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
-                            )
-                        }
-                    }
+                onOpenSearch = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    vm.openSearch()
                 },
-                actions = {
-                    ProPassBadge(
-                        modifier = Modifier.padding(end = 6.dp),
-                        onClick = onNavigateToPro
-                    )
-                    if (!proState.isPro) {
-                        Surface(
-                            onClick = onNavigateToPro,
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.tertiaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                            modifier = Modifier.padding(end = 4.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.WorkspacePremium,
-                                    contentDescription = stringResource(R.string.pro_screen_title),
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Text(
-                                    text = stringResource(R.string.categories_pro_badge),
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
-                    }
-                    IconButton(
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            onNavigateToAbout()
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Info,
-                            contentDescription = stringResource(R.string.information)
-                        )
-                    }
+                onCloseSearch = {
+                    focusManager.clearFocus()
+                    vm.closeSearch()
+                },
+                onQueryChange = vm::onSearchQueryChange,
+                onClearQuery = vm::clearSearch,
+                onSearchSubmit = { focusManager.clearFocus() },
+                onNavigateToPro = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onNavigateToPro()
+                },
+                onNavigateToAbout = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onNavigateToAbout()
                 }
             )
+        },
+        bottomBar = {
+            if (!useNavigationRail && !uiState.isSearchActive) {
+                CategoryBottomBar(
+                    selectedCategory = uiState.selectedCategory,
+                    onSelectCategory = { category ->
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        vm.selectCategory(category)
+                    }
+                )
+            }
         }
     ) { innerPadding ->
-        Box(
+        Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = innerPadding.calculateTopPadding()),
-            contentAlignment = Alignment.TopCenter
+                .padding(innerPadding)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .widthIn(max = 1040.dp)
+            if (useNavigationRail && !uiState.isSearchActive) {
+                CategorySideRail(
+                    selectedCategory = uiState.selectedCategory,
+                    onSelectCategory = { category ->
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        vm.selectCategory(category)
+                    }
+                )
+            }
+
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.TopCenter
             ) {
-                // --- Barra de búsqueda MD3 Pill + Toggle de vista ---
-                SearchAndViewModeHeader(
-                    query = uiState.searchQuery,
-                    onQueryChange = vm::onSearchQueryChange,
-                    onClearQuery = vm::clearSearch,
-                    onSearchSubmit = { focusManager.clearFocus() },
-                    layoutMode = uiState.layoutMode,
-                    onToggleLayoutMode = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        vm.toggleLayoutMode()
-                    },
-                    showLayoutToggle = screenWidthDp < 600 && uiState.selectedFilter != CategoryFilter.Favorites,
-                    horizontalMargin = horizontalMargin
-                )
-
-                // --- Fila horizontal de FilterChips MD3 ---
-                CategoryFilterRow(
-                    selectedFilter = uiState.selectedFilter,
-                    favoritesCount = favoritesTools.size,
-                    onSelectFilter = { filter ->
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        vm.selectFilter(filter)
-                    },
-                    horizontalMargin = horizontalMargin
-                )
-
-                // --- Contenido principal ---
-                if (debouncedQuery.isNotBlank()) {
-                    SearchResultsContent(
-                        results = searchResults,
-                        favoriteRoutes = uiState.favoriteRoutes,
-                        gridColumns = gridColumns,
-                        listState = listState,
-                        horizontalMargin = horizontalMargin,
-                        bottomPadding = innerPadding.calculateBottomPadding() + 24.dp,
-                        onToolClick = handleToolClick,
-                        onToggleFavorite = { tool ->
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            vm.toggleFavorite(tool.screen.route)
-                        },
-                        onClearSearch = vm::clearSearch
-                    )
-                } else if (uiState.selectedFilter == CategoryFilter.Favorites) {
-                    ReorderableFavoritesContent(
-                        favoriteRoutes = uiState.favoriteRoutes,
-                        catalogTools = catalogTools,
-                        listState = listState,
-                        horizontalMargin = horizontalMargin,
-                        bottomPadding = innerPadding.calculateBottomPadding() + 24.dp,
-                        onToolClick = handleToolClick,
-                        onToggleFavorite = { route ->
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            vm.toggleFavorite(route)
-                        },
-                        onCommitOrder = vm::updateFavoritesOrder
-                    )
-                } else {
-                    CategorizedCatalogContent(
-                        visibleCategories = visibleCategories,
-                        catalogTools = catalogTools,
-                        favoritesTools = favoritesTools,
-                        favoriteRoutes = uiState.favoriteRoutes,
-                        showQuickFavoritesShelf = uiState.selectedFilter == CategoryFilter.All && favoritesTools.isNotEmpty(),
-                        gridColumns = gridColumns,
-                        listState = listState,
-                        horizontalMargin = horizontalMargin,
-                        bottomPadding = innerPadding.calculateBottomPadding() + 24.dp,
-                        onToolClick = handleToolClick,
-                        onToggleFavorite = { tool ->
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            vm.toggleFavorite(tool.screen.route)
-                        },
-                        onOpenFavoritesReorder = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            vm.selectFilter(CategoryFilter.Favorites)
-                        }
-                    )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .widthIn(max = 760.dp)
+                ) {
+                    if (uiState.isSearchActive) {
+                        SearchResultsList(
+                            query = debouncedQuery,
+                            results = searchResults,
+                            catalogTools = catalogTools,
+                            favoriteRoutes = uiState.favoriteRoutes,
+                            listState = searchListState,
+                            horizontalMargin = horizontalMargin,
+                            onToolClick = handleToolClick,
+                            onToggleFavorite = { tool ->
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                vm.toggleFavorite(tool.screen.route)
+                            },
+                            onClearSearch = vm::clearSearch
+                        )
+                    } else if (uiState.selectedCategory == ToolCategory.Favoritos) {
+                        ReorderableFavoritesContent(
+                            favoriteRoutes = uiState.favoriteRoutes,
+                            catalogTools = catalogTools,
+                            listState = listState,
+                            horizontalMargin = horizontalMargin,
+                            onToolClick = handleToolClick,
+                            onToggleFavorite = { route ->
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                vm.toggleFavorite(route)
+                            },
+                            onCommitOrder = vm::updateFavoritesOrder
+                        )
+                    } else {
+                        SingleCategoryList(
+                            categoryTools = categoryTools,
+                            favoriteRoutes = uiState.favoriteRoutes,
+                            listState = listState,
+                            horizontalMargin = horizontalMargin,
+                            onToolClick = handleToolClick,
+                            onToggleFavorite = { tool ->
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                vm.toggleFavorite(tool.screen.route)
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -438,44 +348,92 @@ fun CategoriesScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SearchAndViewModeHeader(
-    query: String,
+private fun CatalogTopAppBar(
+    selectedCategory: ToolCategory,
+    isSearchActive: Boolean,
+    searchQuery: String,
+    isPro: Boolean,
+    scrollBehavior: TopAppBarScrollBehavior,
+    onOpenSearch: () -> Unit,
+    onCloseSearch: () -> Unit,
     onQueryChange: (String) -> Unit,
     onClearQuery: () -> Unit,
     onSearchSubmit: () -> Unit,
-    layoutMode: CatalogLayoutMode,
-    onToggleLayoutMode: () -> Unit,
-    showLayoutToggle: Boolean,
-    horizontalMargin: Dp
+    onNavigateToPro: () -> Unit,
+    onNavigateToAbout: () -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = horizontalMargin, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        TextField(
-            value = query,
-            onValueChange = onQueryChange,
-            modifier = Modifier.weight(1f),
-            placeholder = {
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(isSearchActive) {
+        if (isSearchActive) {
+            focusRequester.requestFocus()
+        }
+    }
+
+    TopAppBar(
+        scrollBehavior = scrollBehavior,
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+            titleContentColor = MaterialTheme.colorScheme.onSurface,
+            actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+        ),
+        navigationIcon = {
+            if (isSearchActive) {
+                IconButton(onClick = onCloseSearch) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = stringResource(R.string.close)
+                    )
+                }
+            }
+        },
+        title = {
+            if (isSearchActive) {
+                TextField(
+                    value = searchQuery,
+                    onValueChange = onQueryChange,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester),
+                    placeholder = {
+                        Text(
+                            text = stringResource(R.string.categories_search_hint),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        imeAction = ImeAction.Search
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onSearch = { onSearchSubmit() }
+                    ),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent
+                    )
+                )
+            } else {
                 Text(
-                    text = stringResource(R.string.categories_search_hint),
-                    style = MaterialTheme.typography.bodyLarge
+                    text = stringResource(selectedCategory.titleRes),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
-            },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Outlined.Search,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            },
-            trailingIcon = {
+            }
+        },
+        actions = {
+            if (isSearchActive) {
                 AnimatedVisibility(
-                    visible = query.isNotBlank(),
+                    visible = searchQuery.isNotBlank(),
                     enter = fadeIn(),
                     exit = fadeOut()
                 ) {
@@ -486,416 +444,179 @@ private fun SearchAndViewModeHeader(
                         )
                     }
                 }
-            },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions.Default.copy(
-                imeAction = ImeAction.Search
-            ),
-            keyboardActions = KeyboardActions(
-                onSearch = { onSearchSubmit() }
-            ),
-            shape = CircleShape,
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent
-            )
-        )
-
-        if (showLayoutToggle) {
-            val isGrid = layoutMode == CatalogLayoutMode.GRID
-            Surface(
-                onClick = onToggleLayoutMode,
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(52.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
+            } else {
+                IconButton(onClick = onOpenSearch) {
                     Icon(
-                        imageVector = if (isGrid) Icons.Outlined.ViewAgenda else Icons.Outlined.GridView,
-                        contentDescription = stringResource(
-                            if (isGrid) R.string.categories_view_list_cd
-                            else R.string.categories_view_grid_cd
-                        )
+                        imageVector = Icons.Outlined.Search,
+                        contentDescription = stringResource(R.string.categories_search_hint)
                     )
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun CategoryFilterRow(
-    selectedFilter: CategoryFilter,
-    favoritesCount: Int,
-    onSelectFilter: (CategoryFilter) -> Unit,
-    horizontalMargin: Dp
-) {
-    val filters = remember {
-        buildList {
-            add(CategoryFilter.All)
-            add(CategoryFilter.Favorites)
-            ToolCategory.domainCategories.forEach { add(CategoryFilter.ByCategory(it)) }
-        }
-    }
-
-    LazyRow(
-        contentPadding = PaddingValues(horizontal = horizontalMargin, vertical = 4.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        items(
-            items = filters,
-            key = { filter -> "filter_chip_${filterKey(filter)}" }
-        ) { filter ->
-            val isSelected = filter == selectedFilter
-            when (filter) {
-                CategoryFilter.All -> {
-                    FilterChip(
-                        selected = isSelected,
-                        onClick = { onSelectFilter(filter) },
-                        label = {
-                            Text(
-                                text = stringResource(R.string.category_all),
-                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
-                            )
-                        },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = if (isSelected) Icons.Filled.Apps else Icons.Outlined.Apps,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        },
-                        shape = CircleShape
-                    )
-                }
-
-                CategoryFilter.Favorites -> {
-                    val favSwatch = swatchForCategory(ToolCategory.Favoritos)
-                    FilterChip(
-                        selected = isSelected,
-                        onClick = { onSelectFilter(filter) },
-                        label = {
-                            val baseLabel = stringResource(R.string.category_favoritos)
-                            val labelText = if (favoritesCount > 0) "$baseLabel ($favoritesCount)" else baseLabel
-                            Text(
-                                text = labelText,
-                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
-                            )
-                        },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = if (isSelected) Icons.Filled.Star else Icons.Outlined.StarOutline,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        },
-                        shape = CircleShape,
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = favSwatch.container,
-                            selectedLabelColor = favSwatch.onContainer,
-                            selectedLeadingIconColor = favSwatch.onContainer
-                        )
-                    )
-                }
-
-                is CategoryFilter.ByCategory -> {
-                    val category = filter.category
-                    val catSwatch = swatchForCategory(category)
-                    FilterChip(
-                        selected = isSelected,
-                        onClick = { onSelectFilter(filter) },
-                        label = {
-                            Text(
-                                text = stringResource(category.titleRes),
-                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
-                            )
-                        },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = if (isSelected) category.filledIcon else category.outlinedIcon,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        },
-                        shape = CircleShape,
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = catSwatch.container,
-                            selectedLabelColor = catSwatch.onContainer,
-                            selectedLeadingIconColor = catSwatch.onContainer
-                        )
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun CategorizedCatalogContent(
-    visibleCategories: List<ToolCategory>,
-    catalogTools: List<Tool>,
-    favoritesTools: List<Tool>,
-    favoriteRoutes: List<String>,
-    showQuickFavoritesShelf: Boolean,
-    gridColumns: Int,
-    listState: LazyListState,
-    horizontalMargin: Dp,
-    bottomPadding: Dp,
-    onToolClick: (Tool) -> Unit,
-    onToggleFavorite: (Tool) -> Unit,
-    onOpenFavoritesReorder: () -> Unit
-) {
-    LazyColumn(
-        state = listState,
-        contentPadding = PaddingValues(
-            start = horizontalMargin,
-            end = horizontalMargin,
-            top = 8.dp,
-            bottom = bottomPadding
-        ),
-        modifier = Modifier.fillMaxSize()
-    ) {
-        if (showQuickFavoritesShelf) {
-            item(key = "quick_favorites_shelf") {
-                QuickFavoritesSection(
-                    favoritesTools = favoritesTools,
-                    onToolClick = onToolClick,
-                    onOpenFavoritesReorder = onOpenFavoritesReorder
+                ProPassBadge(
+                    modifier = Modifier.padding(end = 2.dp),
+                    onClick = onNavigateToPro
                 )
-                Spacer(Modifier.height(16.dp))
-            }
-        }
-
-        visibleCategories.forEach { category ->
-            val categoryTools = catalogTools.filter { it.category == category }
-            if (categoryTools.isNotEmpty()) {
-                item(key = "cat_header_${category.titleRes}") {
-                    CategorySectionHeader(
-                        category = category,
-                        toolCount = categoryTools.size
-                    )
-                }
-
-                if (gridColumns > 1) {
-                    val rows = categoryTools.chunked(gridColumns)
-                    itemsIndexed(
-                        items = rows,
-                        key = { rowIndex, rowTools ->
-                            "cat_grid_${category.titleRes}_row_${rowIndex}_${rowTools.first().screen.route}"
-                        }
-                    ) { _, rowTools ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 6.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            rowTools.forEach { tool ->
-                                ToolBentoCard(
-                                    tool = tool,
-                                    isFavorito = favoriteRoutes.contains(tool.screen.route),
-                                    onToolClick = onToolClick,
-                                    onToggleFavorito = { onToggleFavorite(tool) },
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                            repeat(gridColumns - rowTools.size) {
-                                Spacer(modifier = Modifier.weight(1f))
-                            }
-                        }
-                    }
-                } else {
-                    val groupedBySubcategory = categoryTools.groupBy { it.subCategory }
-                    groupedBySubcategory.entries.forEach { (subCatRes, subTools) ->
-                        item(key = "subcat_header_${category.titleRes}_$subCatRes") {
-                            SubcategoryGroupHeader(subCategoryRes = subCatRes)
-                        }
-                        itemsIndexed(
-                            items = subTools,
-                            key = { _, tool -> "cat_list_${category.titleRes}_${tool.screen.route}" }
-                        ) { index, tool ->
-                            val decor = groupDecorBySubcategory(index, subTools)
-                            ToolCard(
-                                tool = tool,
-                                isFavorito = favoriteRoutes.contains(tool.screen.route),
-                                shape = decor.shape,
-                                topPadding = decor.topPad,
-                                bottomPadding = decor.bottomPad,
-                                onToolClick = onToolClick,
-                                onToggleFavorito = { onToggleFavorite(tool) }
-                            )
-                        }
+                if (!isPro) {
+                    IconButton(onClick = onNavigateToPro) {
+                        Icon(
+                            imageVector = Icons.Default.WorkspacePremium,
+                            contentDescription = stringResource(R.string.pro_screen_title),
+                            tint = MaterialTheme.colorScheme.tertiary
+                        )
                     }
                 }
-
-                item(key = "cat_spacer_${category.titleRes}") {
-                    Spacer(Modifier.height(16.dp))
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun QuickFavoritesSection(
-    favoritesTools: List<Tool>,
-    onToolClick: (Tool) -> Unit,
-    onOpenFavoritesReorder: () -> Unit
-) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                val favSwatch = swatchForCategory(ToolCategory.Favoritos)
-                Box(
-                    modifier = Modifier
-                        .size(28.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(favSwatch.container),
-                    contentAlignment = Alignment.Center
-                ) {
+                IconButton(onClick = onNavigateToAbout) {
                     Icon(
-                        imageVector = Icons.Filled.Star,
-                        contentDescription = null,
-                        tint = favSwatch.onContainer,
-                        modifier = Modifier.size(16.dp)
+                        imageVector = Icons.Outlined.Info,
+                        contentDescription = stringResource(R.string.information)
                     )
                 }
-                Text(
-                    text = stringResource(R.string.categories_quick_favorites_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
-
-            TextButton(onClick = onOpenFavoritesReorder) {
-                Text(
-                    text = stringResource(R.string.categories_manage_favorites),
-                    style = MaterialTheme.typography.labelLarge
-                )
             }
         }
-
-        Spacer(Modifier.height(6.dp))
-
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            items(
-                items = favoritesTools,
-                key = { tool -> "quick_fav_${tool.screen.route}" }
-            ) { tool ->
-                FavoriteQuickCard(
-                    tool = tool,
-                    onToolClick = onToolClick
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun CategorySectionHeader(
-    category: ToolCategory,
-    toolCount: Int
-) {
-    val swatch = swatchForCategory(category)
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 8.dp, bottom = 6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(swatch.container),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = category.filledIcon,
-                    contentDescription = null,
-                    tint = swatch.onContainer,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
-            Text(
-                text = stringResource(category.titleRes),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        }
-
-        Surface(
-            shape = CircleShape,
-            color = MaterialTheme.colorScheme.surfaceContainerHigh,
-            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-        ) {
-            Text(
-                text = toolCount.toString(),
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
-            )
-        }
-    }
-}
-
-@Composable
-private fun SubcategoryGroupHeader(subCategoryRes: Int) {
-    Text(
-        text = stringResource(subCategoryRes),
-        style = MaterialTheme.typography.labelMedium,
-        fontWeight = FontWeight.SemiBold,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(start = 6.dp, top = 8.dp, bottom = 2.dp)
     )
 }
 
 @Composable
-private fun SearchResultsContent(
-    results: List<Tool>,
+private fun CategoryBottomBar(
+    selectedCategory: ToolCategory,
+    onSelectCategory: (ToolCategory) -> Unit
+) {
+    NavigationBar(
+        containerColor = MaterialTheme.colorScheme.surfaceContainer
+    ) {
+        ToolCategory.all.forEach { category ->
+            val isSelected = category == selectedCategory
+            val swatch = swatchForCategory(category)
+            NavigationBarItem(
+                selected = isSelected,
+                onClick = { onSelectCategory(category) },
+                icon = {
+                    Icon(
+                        imageVector = if (isSelected) category.filledIcon else category.outlinedIcon,
+                        contentDescription = stringResource(category.titleRes)
+                    )
+                },
+                label = {
+                    Text(
+                        text = stringResource(category.titleRes),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = swatch.onContainer,
+                    selectedTextColor = MaterialTheme.colorScheme.onSurface,
+                    indicatorColor = swatch.container,
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            )
+        }
+    }
+}
+
+@Composable
+private fun CategorySideRail(
+    selectedCategory: ToolCategory,
+    onSelectCategory: (ToolCategory) -> Unit
+) {
+    NavigationRail(
+        modifier = Modifier.fillMaxHeight(),
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+    ) {
+        Spacer(Modifier.height(8.dp))
+        ToolCategory.all.forEach { category ->
+            val isSelected = category == selectedCategory
+            val swatch = swatchForCategory(category)
+            NavigationRailItem(
+                selected = isSelected,
+                onClick = { onSelectCategory(category) },
+                icon = {
+                    Icon(
+                        imageVector = if (isSelected) category.filledIcon else category.outlinedIcon,
+                        contentDescription = stringResource(category.titleRes)
+                    )
+                },
+                label = {
+                    Text(
+                        text = stringResource(category.titleRes),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
+                colors = NavigationRailItemDefaults.colors(
+                    selectedIconColor = swatch.onContainer,
+                    selectedTextColor = MaterialTheme.colorScheme.onSurface,
+                    indicatorColor = swatch.container,
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            )
+        }
+    }
+}
+
+@Composable
+private fun SingleCategoryList(
+    categoryTools: List<Tool>,
     favoriteRoutes: List<String>,
-    gridColumns: Int,
     listState: LazyListState,
     horizontalMargin: Dp,
-    bottomPadding: Dp,
     onToolClick: (Tool) -> Unit,
-    onToggleFavorite: (Tool) -> Unit,
-    onClearSearch: () -> Unit
+    onToggleFavorite: (Tool) -> Unit
 ) {
     LazyColumn(
         state = listState,
         contentPadding = PaddingValues(
             start = horizontalMargin,
             end = horizontalMargin,
-            top = 8.dp,
-            bottom = bottomPadding
+            top = 6.dp,
+            bottom = 24.dp
         ),
         modifier = Modifier.fillMaxSize()
     ) {
-        if (results.isEmpty()) {
+        itemsIndexed(
+            items = categoryTools,
+            key = { _, tool -> "cat_item_${tool.screen.route}" }
+        ) { index, tool ->
+            val decor = groupDecorBySubcategory(index, categoryTools)
+            ToolCard(
+                tool = tool,
+                isFavorito = favoriteRoutes.contains(tool.screen.route),
+                shape = decor.shape,
+                topPadding = decor.topPad,
+                bottomPadding = decor.bottomPad,
+                onToolClick = onToolClick,
+                onToggleFavorito = { onToggleFavorite(tool) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun SearchResultsList(
+    query: String,
+    results: List<Tool>,
+    catalogTools: List<Tool>,
+    favoriteRoutes: List<String>,
+    listState: LazyListState,
+    horizontalMargin: Dp,
+    onToolClick: (Tool) -> Unit,
+    onToggleFavorite: (Tool) -> Unit,
+    onClearSearch: () -> Unit
+) {
+    val displayedTools = if (query.isBlank()) catalogTools else results
+
+    LazyColumn(
+        state = listState,
+        contentPadding = PaddingValues(
+            start = horizontalMargin,
+            end = horizontalMargin,
+            top = 6.dp,
+            bottom = 24.dp
+        ),
+        modifier = Modifier.fillMaxSize()
+    ) {
+        if (displayedTools.isEmpty()) {
             item(key = "search_empty_state") {
                 EmptyCatalogStateCard(
                     icon = Icons.Outlined.SearchOff,
@@ -906,60 +627,20 @@ private fun SearchResultsContent(
                 )
             }
         } else {
-            item(key = "search_results_header") {
-                Text(
-                    text = stringResource(R.string.categories_search_results_count, results.size),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 6.dp)
+            itemsIndexed(
+                items = displayedTools,
+                key = { _, tool -> "search_item_${tool.screen.route}" }
+            ) { index, tool ->
+                val decor = groupDecorBySubcategory(index, displayedTools)
+                ToolCard(
+                    tool = tool,
+                    isFavorito = favoriteRoutes.contains(tool.screen.route),
+                    shape = decor.shape,
+                    topPadding = decor.topPad,
+                    bottomPadding = decor.bottomPad,
+                    onToolClick = onToolClick,
+                    onToggleFavorito = { onToggleFavorite(tool) }
                 )
-            }
-
-            if (gridColumns > 1) {
-                val rows = results.chunked(gridColumns)
-                itemsIndexed(
-                    items = rows,
-                    key = { rowIndex, rowTools ->
-                        "search_grid_row_${rowIndex}_${rowTools.first().screen.route}"
-                    }
-                ) { _, rowTools ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 6.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        rowTools.forEach { tool ->
-                            ToolBentoCard(
-                                tool = tool,
-                                isFavorito = favoriteRoutes.contains(tool.screen.route),
-                                onToolClick = onToolClick,
-                                onToggleFavorito = { onToggleFavorite(tool) },
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-                        repeat(gridColumns - rowTools.size) {
-                            Spacer(modifier = Modifier.weight(1f))
-                        }
-                    }
-                }
-            } else {
-                itemsIndexed(
-                    items = results,
-                    key = { _, tool -> "search_item_${tool.screen.route}" }
-                ) { index, tool ->
-                    val decor = groupDecorBySubcategory(index, results)
-                    ToolCard(
-                        tool = tool,
-                        isFavorito = favoriteRoutes.contains(tool.screen.route),
-                        shape = decor.shape,
-                        topPadding = decor.topPad,
-                        bottomPadding = decor.bottomPad,
-                        onToolClick = onToolClick,
-                        onToggleFavorito = { onToggleFavorite(tool) },
-                        showSubcategoryBadge = true
-                    )
-                }
             }
         }
     }
@@ -971,7 +652,6 @@ private fun ReorderableFavoritesContent(
     catalogTools: List<Tool>,
     listState: LazyListState,
     horizontalMargin: Dp,
-    bottomPadding: Dp,
     onToolClick: (Tool) -> Unit,
     onToggleFavorite: (String) -> Unit,
     onCommitOrder: (List<String>) -> Unit
@@ -981,9 +661,8 @@ private fun ReorderableFavoritesContent(
     val reorderState = rememberReorderableLazyListState(
         lazyListState = listState
     ) { from, to ->
-        // Ajustar por el header item en índice 0
-        val fromIdx = (from.index - 1).coerceIn(0, (favRoutes.size - 1).coerceAtLeast(0))
-        val toIdx = (to.index - 1).coerceIn(0, (favRoutes.size - 1).coerceAtLeast(0))
+        val fromIdx = from.index.coerceIn(0, (favRoutes.size - 1).coerceAtLeast(0))
+        val toIdx = to.index.coerceIn(0, (favRoutes.size - 1).coerceAtLeast(0))
         if (fromIdx in favRoutes.indices && toIdx in favRoutes.indices) {
             favRoutes.move(fromIdx, toIdx)
         }
@@ -994,8 +673,8 @@ private fun ReorderableFavoritesContent(
         contentPadding = PaddingValues(
             start = horizontalMargin,
             end = horizontalMargin,
-            top = 8.dp,
-            bottom = bottomPadding
+            top = 6.dp,
+            bottom = 24.dp
         ),
         modifier = Modifier.fillMaxSize()
     ) {
@@ -1008,34 +687,6 @@ private fun ReorderableFavoritesContent(
                 )
             }
         } else {
-            item(key = "fav_reorder_header") {
-                Surface(
-                    shape = RoundedCornerShape(16.dp),
-                    color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.65f),
-                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 10.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.DragIndicator,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Text(
-                            text = stringResource(R.string.favorites_reorder_info),
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
-            }
-
             itemsIndexed(
                 items = favRoutes,
                 key = { _, route -> route }
@@ -1093,7 +744,6 @@ private fun ReorderableFavoritesContent(
                             },
                             overrideElevation = elev,
                             isDragging = isDragging,
-                            showSubcategoryBadge = true,
                             showDragHandle = true,
                             dragHandleModifier = handleImmediateDragMod
                         )
@@ -1167,12 +817,6 @@ private fun EmptyCatalogStateCard(
             }
         }
     }
-}
-
-private fun filterKey(filter: CategoryFilter): String = when (filter) {
-    CategoryFilter.All -> "all"
-    CategoryFilter.Favorites -> "favorites"
-    is CategoryFilter.ByCategory -> "cat_${filter.category.titleRes}"
 }
 
 private fun <T> MutableList<T>.move(from: Int, to: Int) {
