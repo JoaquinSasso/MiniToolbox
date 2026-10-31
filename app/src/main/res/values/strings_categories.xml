@@ -1,13 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="category_herramientas">Tools</string>
+    <string name="categories_app_title">MiniToolbox</string>
+    <string name="category_all">All</string>
     <string name="category_favoritos">Favorites</string>
-    <string name="subcategory_generator">Generator</string>
-    <string name="subcategory_calculator">Calculator</string>
-    <string name="subcategory_instrument">Instrument</string>
-    <string name="subcategory_habits">Habits and Activities</string>
-    <string name="subcategory_random">Random</string>
+    <string name="category_herramientas">Tools</string>
+    <string name="category_instrumentos">Instruments</string>
+    <string name="category_cotidiano">Daily &amp; Productivity</string>
+    <string name="category_generadores">Generators &amp; Random</string>
+    <string name="category_juegos">Games &amp; Scores</string>
+
+    <string name="subcategory_measurement">Measurement</string>
+    <string name="subcategory_sensors">Sensors &amp; Optics</string>
+    <string name="subcategory_instrument">Instruments</string>
+    <string name="subcategory_habits">Time &amp; Habits</string>
+    <string name="subcategory_calculator">Finance &amp; Conversion</string>
+    <string name="subcategory_generator">QR &amp; Codes</string>
+    <string name="subcategory_random">Random &amp; Draws</string>
     <string name="subcategory_scoreboards">Scoreboards</string>
     <string name="subcategory_minigames">Minigames</string>
-    <string name="subcategory_others">Others</string>
+    <string name="subcategory_others">Utilities</string>
+
+    <string name="categories_quick_favorites_title">Pinned favorites</string>
+    <string name="categories_manage_favorites">Reorder</string>
+    <string name="categories_empty_favorites_title">No favorite tools yet</string>
+    <string name="categories_empty_favorites_subtitle">Tap the star icon on any tool to pin it here and on your home screen widget.</string>
+    <string name="categories_search_results_count">%1$d tools found</string>
+    <string name="categories_empty_search_subtitle">Try searching by tool name, function, or category.</string>
+    <string name="categories_clear_filters">Clear search</string>
+    <string name="categories_view_grid_cd">Switch to grid view</string>
+    <string name="categories_view_list_cd">Switch to list view</string>
+    <string name="categories_favorite_add_cd">Add to favorites</string>
+    <string name="categories_favorite_remove_cd">Remove from favorites</string>
+    <string name="categories_pro_badge">PRO</string>
 </resources>

@@ -5,10 +5,11 @@ import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.joasasso.minitoolbox.widgets.actualizarWidgetFavoritos
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-// DataStore de favoritos (tuya)
+// DataStore de favoritos
 val Context.favoritesDataStore by preferencesDataStore(name = "tool_favorites")
 
 // Claves para un máximo de 100 herramientas favoritas (ordenadas)
@@ -36,7 +37,7 @@ suspend fun Context.toogleFavorite(route: String) {
         if (actuales.contains(route)) {
             actuales.remove(route)
         } else {
-            actuales.add(route) // se agrega al final para mantener orden de agregado
+            actuales.add(route)
         }
         writeFavoritasOrdenadas(prefs, actuales)
     }
@@ -59,5 +60,35 @@ suspend fun Context.setFavoritesOrder(newOrder: List<String>) {
     favoritesDataStore.edit { prefs ->
         val orden = newOrder.distinct().take(FAVORITOS_KEYS.size)
         writeFavoritasOrdenadas(prefs, orden)
+    }
+}
+
+interface FavoritesRepository {
+    val favoritesFlow: Flow<List<String>>
+    suspend fun toggleFavorite(route: String)
+    suspend fun setFavoritesOrder(newOrder: List<String>)
+}
+
+class DefaultFavoritesRepository(
+    private val context: Context,
+    private val updateWidgets: Boolean = true
+) : FavoritesRepository {
+    private val appContext = context.applicationContext
+
+    override val favoritesFlow: Flow<List<String>>
+        get() = appContext.flujoToolsFavoritas()
+
+    override suspend fun toggleFavorite(route: String) {
+        appContext.toogleFavorite(route)
+        if (updateWidgets) {
+            runCatching { actualizarWidgetFavoritos(appContext) }
+        }
+    }
+
+    override suspend fun setFavoritesOrder(newOrder: List<String>) {
+        appContext.setFavoritesOrder(newOrder)
+        if (updateWidgets) {
+            runCatching { actualizarWidgetFavoritos(appContext) }
+        }
     }
 }

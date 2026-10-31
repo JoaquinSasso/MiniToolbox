@@ -1,13 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="category_herramientas">Herramientas</string>
+    <string name="categories_app_title">MiniToolbox</string>
+    <string name="category_all">Todas</string>
     <string name="category_favoritos">Favoritos</string>
-    <string name="subcategory_generator">Generadores</string>
-    <string name="subcategory_calculator">Calculadoras</string>
+    <string name="category_herramientas">Herramientas</string>
+    <string name="category_instrumentos">Instrumentos</string>
+    <string name="category_cotidiano">Cotidiano</string>
+    <string name="category_generadores">Generadores y Azar</string>
+    <string name="category_juegos">Juegos y Marcadores</string>
+
+    <string name="subcategory_measurement">Medición</string>
+    <string name="subcategory_sensors">Sensores y Óptica</string>
     <string name="subcategory_instrument">Instrumentos</string>
-    <string name="subcategory_habits">Hábitos y Actividades</string>
-    <string name="subcategory_random">Aleatorio</string>
+    <string name="subcategory_habits">Tiempo y Hábitos</string>
+    <string name="subcategory_calculator">Finanzas y Conversión</string>
+    <string name="subcategory_generator">Códigos QR</string>
+    <string name="subcategory_random">Sorteos y Azar</string>
     <string name="subcategory_scoreboards">Marcadores</string>
     <string name="subcategory_minigames">Minijuegos</string>
-    <string name="subcategory_others">Otros</string>
+    <string name="subcategory_others">Utilidades</string>
+
+    <string name="categories_quick_favorites_title">Favoritos fijados</string>
+    <string name="categories_manage_favorites">Reordenar</string>
+    <string name="categories_empty_favorites_title">Aún no tienes favoritos</string>
+    <string name="categories_empty_favorites_subtitle">Toca la estrella en cualquier herramienta para fijarla aquí y en el widget de inicio.</string>
+    <string name="categories_search_results_count">%1$d herramientas encontradas</string>
+    <string name="categories_empty_search_subtitle">Prueba buscando por nombre, función o categoría.</string>
+    <string name="categories_clear_filters">Limpiar búsqueda</string>
+    <string name="categories_view_grid_cd">Cambiar a vista de cuadrícula</string>
+    <string name="categories_view_list_cd">Cambiar a vista de lista</string>
+    <string name="categories_favorite_add_cd">Agregar a favoritos</string>
+    <string name="categories_favorite_remove_cd">Quitar de favoritos</string>
+    <string name="categories_pro_badge">PRO</string>
 </resources>

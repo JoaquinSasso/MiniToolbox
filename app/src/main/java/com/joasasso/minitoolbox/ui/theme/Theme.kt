@@ -11,31 +11,76 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = Md3PrimaryDark,
+    onPrimary = Md3OnPrimaryDark,
+    primaryContainer = Md3PrimaryContainerDark,
+    onPrimaryContainer = Md3OnPrimaryContainerDark,
+    secondary = Md3SecondaryDark,
+    onSecondary = Md3OnSecondaryDark,
+    secondaryContainer = Md3SecondaryContainerDark,
+    onSecondaryContainer = Md3OnSecondaryContainerDark,
+    tertiary = Md3TertiaryDark,
+    onTertiary = Md3OnTertiaryDark,
+    tertiaryContainer = Md3TertiaryContainerDark,
+    onTertiaryContainer = Md3OnTertiaryContainerDark,
+    error = Md3ErrorDark,
+    onError = Md3OnErrorDark,
+    errorContainer = Md3ErrorContainerDark,
+    onErrorContainer = Md3OnErrorContainerDark,
+    background = Md3SurfaceDark,
+    onBackground = Md3OnSurfaceDark,
+    surface = Md3SurfaceDark,
+    onSurface = Md3OnSurfaceDark,
+    surfaceVariant = Md3SurfaceContainerHighestDark,
+    onSurfaceVariant = Md3OnSurfaceVariantDark,
+    surfaceDim = Md3SurfaceDimDark,
+    surfaceBright = Md3SurfaceBrightDark,
+    surfaceContainerLowest = Md3SurfaceContainerLowestDark,
+    surfaceContainerLow = Md3SurfaceContainerLowDark,
+    surfaceContainer = Md3SurfaceContainerDark,
+    surfaceContainerHigh = Md3SurfaceContainerHighDark,
+    surfaceContainerHighest = Md3SurfaceContainerHighestDark,
+    outline = Md3OutlineDark,
+    outlineVariant = Md3OutlineVariantDark
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    primary = Md3PrimaryLight,
+    onPrimary = Md3OnPrimaryLight,
+    primaryContainer = Md3PrimaryContainerLight,
+    onPrimaryContainer = Md3OnPrimaryContainerLight,
+    secondary = Md3SecondaryLight,
+    onSecondary = Md3OnSecondaryLight,
+    secondaryContainer = Md3SecondaryContainerLight,
+    onSecondaryContainer = Md3OnSecondaryContainerLight,
+    tertiary = Md3TertiaryLight,
+    onTertiary = Md3OnTertiaryLight,
+    tertiaryContainer = Md3TertiaryContainerLight,
+    onTertiaryContainer = Md3OnTertiaryContainerLight,
+    error = Md3ErrorLight,
+    onError = Md3OnErrorLight,
+    errorContainer = Md3ErrorContainerLight,
+    onErrorContainer = Md3OnErrorContainerLight,
+    background = Md3SurfaceLight,
+    onBackground = Md3OnSurfaceLight,
+    surface = Md3SurfaceLight,
+    onSurface = Md3OnSurfaceLight,
+    surfaceVariant = Md3SurfaceContainerHighestLight,
+    onSurfaceVariant = Md3OnSurfaceVariantLight,
+    surfaceDim = Md3SurfaceDimLight,
+    surfaceBright = Md3SurfaceBrightLight,
+    surfaceContainerLowest = Md3SurfaceContainerLowestLight,
+    surfaceContainerLow = Md3SurfaceContainerLowLight,
+    surfaceContainer = Md3SurfaceContainerLight,
+    surfaceContainerHigh = Md3SurfaceContainerHighLight,
+    surfaceContainerHighest = Md3SurfaceContainerHighestLight,
+    outline = Md3OutlineLight,
+    outlineVariant = Md3OutlineVariantLight
 )
 
 @Composable
 fun MiniToolboxTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
