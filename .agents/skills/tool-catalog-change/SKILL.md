@@ -36,13 +36,13 @@ Si la herramienta tiene subpantallas, agregalas también en `ToolRoutes.findTool
 
 No toques la clave. En la entrada de `ToolRegistry`, fijá `metricsKey = "<clave anterior>"`. Agregá la ruta vieja como alias en `Screen.fromRouteString`, porque los widgets y notificaciones ya emitidos traen la ruta anterior.
 
-**Los favoritos se rompen aunque agregues el alias.** Se guardan como `screen.route` en `data/FavoritesDataStore.kt` y se resuelven por igualdad exacta (`CategoriesScreen.kt:489`, `ui/components/EditFavoritesSheet.kt:66`, `widgets/FavoriteToolsWidget.kt:60`), no con `fromRouteString`. Un renombre hace desaparecer el favorito sin aviso. Antes de renombrar, migrá los valores guardados dentro de un `edit {}` o cambiá esas búsquedas para que usen `Screen.fromRouteString`.
+**Los favoritos se rompen aunque agregues el alias.** Se guardan como `screen.route` en `data/FavoritesDataStore.kt` y se resuelven por igualdad exacta (`CategoriesScreen.kt:447`, `ui/components/EditFavoritesSheet.kt:66`, `widgets/FavoriteToolsWidget.kt:60`), no con `fromRouteString`. Un renombre hace desaparecer el favorito sin aviso. Antes de renombrar, migrá los valores guardados dentro de un `edit {}` o cambiá esas búsquedas para que usen `Screen.fromRouteString`.
 
 ## Quitar una herramienta
 
 1. Con la aprobación del autor, borrá los puntos 1 a 6 y los recursos propios: strings, drawables y su DataStore en `data/`.
 2. **No borres** la clave del backend (punto 8) ni del dashboard (punto 9): los datos históricos la siguen usando. En `ToolMetricsKeysTest`, quitala de `expectedKeys`.
-3. Si un usuario la tenía como favorita, la ruta guardada deja de resolver. Hoy no se muestra (`mapNotNull` en `CategoriesScreen.kt:489` y en `widgets/FavoriteToolsWidget.kt:59`; `EditFavoritesSheet.kt:70` la conserva al final al reordenar). En una fusión, conviene migrar el favorito a la herramienta nueva.
+3. Si un usuario la tenía como favorita, la ruta guardada deja de resolver. Hoy no se muestra (`mapNotNull` en `CategoriesScreen.kt:447` y en `widgets/FavoriteToolsWidget.kt:59`; `EditFavoritesSheet.kt:70` la conserva al final al reordenar). En una fusión, conviene migrar el favorito a la herramienta nueva.
 4. Registrá en `docs/metrics-glossary.md` la fecha y el commit desde los que la clave deja de recibir datos.
 
 ## Fusionar herramientas
