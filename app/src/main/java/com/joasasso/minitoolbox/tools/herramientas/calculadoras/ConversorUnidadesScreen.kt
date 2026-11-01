@@ -3,14 +3,11 @@ package com.joasasso.minitoolbox.tools.herramientas.calculadoras
 import androidx.annotation.StringRes
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
@@ -252,23 +249,25 @@ fun ConversorUnidadesScreen(
 }
 
 /**
- * Selector de categoría. Cada opción es un ícono dentro de un contenedor tonal: la elegida se
- * rellena con el color primario y usa la variante sólida del ícono, con un rebote breve al
- * seleccionarla. Es un solo toque por categoría, igual que las pestañas que reemplaza.
+ * Selector de categoría: un grupo de cápsulas tonales unidas. La elegida se rellena con el
+ * color primario y usa la variante sólida del ícono. Es un solo toque por categoría, igual que
+ * las pestañas que reemplaza.
  */
 @Composable
 private fun CategorySelector(selected: UnitCategory, onSelect: (UnitCategory) -> Unit) {
     Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(3.dp),
         modifier = Modifier
             .fillMaxWidth()
             .selectableGroup()
-            .padding(horizontal = 12.dp, vertical = 4.dp)
+            .padding(horizontal = 16.dp, vertical = 4.dp)
     ) {
-        UnitCategory.entries.forEach { category ->
+        val categories = UnitCategory.entries
+        categories.forEachIndexed { index, category ->
             CategoryOption(
                 category = category,
                 selected = category == selected,
+                shape = connectedShape(index, categories.size, category == selected),
                 onClick = { onSelect(category) },
                 modifier = Modifier.weight(1f)
             )
@@ -276,10 +275,24 @@ private fun CategorySelector(selected: UnitCategory, onSelect: (UnitCategory) ->
     }
 }
 
+/**
+ * Forma de cada cápsula del selector: el grupo se lee como una sola pieza (extremos redondos,
+ * uniones con esquinas chicas) y la opción elegida se separa del resto volviéndose píldora.
+ */
+private fun connectedShape(index: Int, count: Int, selected: Boolean): Shape {
+    val outer = 22.dp
+    val inner = 8.dp
+    if (selected) return RoundedCornerShape(outer)
+    val start = if (index == 0) outer else inner
+    val end = if (index == count - 1) outer else inner
+    return RoundedCornerShape(topStart = start, bottomStart = start, topEnd = end, bottomEnd = end)
+}
+
 @Composable
 private fun CategoryOption(
     category: UnitCategory,
     selected: Boolean,
+    shape: Shape,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -296,11 +309,6 @@ private fun CategoryOption(
         if (selected) colors.primary else colors.onSurfaceVariant,
         label = "categoryLabel"
     )
-    val scale by animateFloatAsState(
-        targetValue = if (selected) 1f else 0.92f,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium),
-        label = "categoryScale"
-    )
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -312,12 +320,9 @@ private fun CategoryOption(
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .graphicsLayer {
-                    scaleX = scale
-                    scaleY = scale
-                }
-                .size(width = 64.dp, height = 40.dp)
-                .clip(RoundedCornerShape(if (selected) 14.dp else 20.dp))
+                .fillMaxWidth()
+                .height(44.dp)
+                .clip(shape)
                 .background(containerColor)
         ) {
             Icon(
