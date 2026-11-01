@@ -1,9 +1,9 @@
 package com.joasasso.minitoolbox.tools.herramientas.calculadoras
 
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.util.Locale
 
 class UnitConverterEngineTest {
 
@@ -104,60 +104,156 @@ class UnitConverterEngineTest {
         assertEquals(0.5, UnitConverterEngine.convert(30.0, min, h), 1e-6)
     }
 
-    // -------------------------------------------------------------------------
-    // Parseo de entrada
-    // -------------------------------------------------------------------------
-
     @Test
-    fun parseInput_aceptaPuntoYComa() {
-        assertEquals(10.5, UnitConverterEngine.parseInput("10.5")!!, 1e-9)
-        assertEquals(10.5, UnitConverterEngine.parseInput("10,5")!!, 1e-9)
-        assertEquals(100.0, UnitConverterEngine.parseInput(" 100 ")!!, 1e-9)
-        assertEquals(0.0, UnitConverterEngine.parseInput("0")!!, 1e-9)
-        assertEquals(-5.2, UnitConverterEngine.parseInput("-5,2")!!, 1e-9)
+    fun convertCompound_usaLaUnidadMenorComoValor() {
+        val ftIn = UnitConverterEngine.unit("ft_in")
+        val cm = UnitConverterEngine.unit("cm")
+        val lbOz = UnitConverterEngine.unit("lb_oz")
+        val kg = UnitConverterEngine.unit("kg")
+
+        // 5'11" = 71 in = 180.34 cm
+        assertEquals(180.34, UnitConverterEngine.convert(71.0, ftIn, cm), 1e-9)
+        assertEquals(70.866142, UnitConverterEngine.convert(180.0, cm, ftIn), 1e-6)
+        // 7 lb 4 oz = 116 oz
+        assertEquals(3.288544, UnitConverterEngine.convert(116.0, lbOz, kg), 1e-6)
     }
 
     @Test
-    fun parseInput_rechazaEntradasInvalidas() {
-        assertNull(UnitConverterEngine.parseInput(""))
-        assertNull(UnitConverterEngine.parseInput("   "))
-        assertNull(UnitConverterEngine.parseInput("abc"))
-        assertNull(UnitConverterEngine.parseInput("10.5.2"))
+    fun defaultUnitFor_cadaCategoria() {
+        assertEquals("cm", UnitConverterEngine.defaultUnitFor(UnitCategory.Length).id)
+        assertEquals("kg", UnitConverterEngine.defaultUnitFor(UnitCategory.Weight).id)
+        assertEquals("c", UnitConverterEngine.defaultUnitFor(UnitCategory.Temperature).id)
+        assertEquals("h", UnitConverterEngine.defaultUnitFor(UnitCategory.Time).id)
+    }
+
+    @Test
+    fun idsDeUnidad_sonUnicos() {
+        val ids = UnitConverterEngine.allUnits.map { it.id }
+        assertEquals(ids.size, ids.toSet().size)
     }
 
     // -------------------------------------------------------------------------
     // Formateo de números
     // -------------------------------------------------------------------------
 
+    private val us = Locale.US
+    private val es = Locale.forLanguageTag("es-AR")
+
     @Test
     fun formatNumber_casosComunes() {
-        assertEquals("0", UnitConverterEngine.formatNumber(0.0))
-        assertEquals("1", UnitConverterEngine.formatNumber(1.0))
-        assertEquals("1.5", UnitConverterEngine.formatNumber(1.5))
-        assertEquals("1,000", UnitConverterEngine.formatNumber(1000.0))
-        assertEquals("12,345.67", UnitConverterEngine.formatNumber(12345.67))
-        assertEquals("—", UnitConverterEngine.formatNumber(Double.NaN))
+        assertEquals("0", UnitConverterEngine.formatNumber(0.0, us))
+        assertEquals("1", UnitConverterEngine.formatNumber(1.0, us))
+        assertEquals("1.5", UnitConverterEngine.formatNumber(1.5, us))
+        assertEquals("1,000", UnitConverterEngine.formatNumber(1000.0, us))
+        assertEquals("12,345.7", UnitConverterEngine.formatNumber(12345.67, us))
+        assertEquals("—", UnitConverterEngine.formatNumber(Double.NaN, us))
+        assertEquals("—", UnitConverterEngine.formatNumber(Double.POSITIVE_INFINITY, us))
+    }
+
+    @Test
+    fun formatNumber_seisCifrasSignificativas() {
+        assertEquals("154.324", UnitConverterEngine.formatNumber(154.3235835, us))
+        assertEquals("180.34", UnitConverterEngine.formatNumber(180.34, us))
+        assertEquals("0.123457", UnitConverterEngine.formatNumber(0.1234567, us))
+        assertEquals("1,609.34", UnitConverterEngine.formatNumber(1609.344, us))
+        assertEquals("123,457", UnitConverterEngine.formatNumber(123456.7, us))
+    }
+
+    @Test
+    fun formatNumber_respetaElLocale() {
+        assertEquals("2,5", UnitConverterEngine.formatNumber(2.5, es))
+        assertEquals("1.609,34", UnitConverterEngine.formatNumber(1609.344, es))
+        assertEquals("1609,34", UnitConverterEngine.formatNumber(1609.344, es, grouping = false))
+        assertEquals("1609.34", UnitConverterEngine.formatNumber(1609.344, us, grouping = false))
+    }
+
+    @Test
+    fun formatNumber_negativos() {
+        assertEquals("-40", UnitConverterEngine.formatNumber(-40.0, us))
+        assertEquals("-273.15", UnitConverterEngine.formatNumber(-273.15, us))
     }
 
     @Test
     fun formatNumber_notacionCientificaParaExtremos() {
-        val formattedSmall = UnitConverterEngine.formatNumber(0.00001)
-        // 1E-5
-        assertEquals("1E-5", formattedSmall)
+        assertEquals("1E-5", UnitConverterEngine.formatNumber(0.00001, us))
+        assertEquals("2.5E10", UnitConverterEngine.formatNumber(2.5e10, us))
+    }
 
-        val formattedLarge = UnitConverterEngine.formatNumber(2.5e10)
-        assertEquals("2.5E10", formattedLarge)
+    // -------------------------------------------------------------------------
+    // Formateo de unidades compuestas
+    // -------------------------------------------------------------------------
+
+    private val ftIn = UnitConverterEngine.unit("ft_in")
+    private val lbOz = UnitConverterEngine.unit("lb_oz")
+
+    @Test
+    fun formatValue_piesYPulgadas() {
+        assertEquals("5'11\"", UnitConverterEngine.formatValue(71.0, ftIn, us))
+        assertEquals("5'10.9\"", UnitConverterEngine.formatValue(70.866142, ftIn, us))
+        assertEquals("5'10,9\"", UnitConverterEngine.formatValue(70.866142, ftIn, es))
+        assertEquals("0'0\"", UnitConverterEngine.formatValue(0.0, ftIn, us))
+        assertEquals("-5'11\"", UnitConverterEngine.formatValue(-71.0, ftIn, us))
     }
 
     @Test
-    fun convertAll_devuelveListaCompleta() {
-        val m = UnitConverterEngine.lengthUnits.first { it.id == "m" }
-        val conversions = UnitConverterEngine.convertAll(1.0, m)
+    fun formatValue_piesYPulgadas_redondeoAcarreaAlPie() {
+        // 71.96 in → 72.0 en décimas → 6'0", no 5'12"
+        assertEquals("6'0\"", UnitConverterEngine.formatValue(71.96, ftIn, us))
+        assertEquals("5'11.9\"", UnitConverterEngine.formatValue(71.94, ftIn, us))
+    }
 
-        assertEquals(UnitConverterEngine.lengthUnits.size, conversions.size)
-        val cmItem = conversions.find { it.unit.id == "cm" }
-        assertNotNull(cmItem)
-        assertEquals(100.0, cmItem!!.rawValue, 1e-6)
-        assertEquals("100", cmItem.formattedValue)
+    @Test
+    fun formatValue_piesYPulgadas_agrupaLosPies() {
+        // 1 milla = 5280 ft
+        assertEquals("5,280'0\"", UnitConverterEngine.formatValue(63360.0, ftIn, us))
+        assertEquals("5280'0\"", UnitConverterEngine.formatValue(63360.0, ftIn, us, grouping = false))
+    }
+
+    @Test
+    fun formatValue_librasYOnzas() {
+        assertEquals("7 lb 4 oz", UnitConverterEngine.formatValue(116.0, lbOz, us))
+        assertEquals("154 lb 5,2 oz", UnitConverterEngine.formatValue(2469.177, lbOz, es))
+        assertEquals("8 lb 0 oz", UnitConverterEngine.formatValue(127.97, lbOz, us))
+    }
+
+    @Test
+    fun formatValue_unidadSimple_esElNumero() {
+        assertEquals("180.34", UnitConverterEngine.formatValue(180.34, UnitConverterEngine.unit("cm"), us))
+    }
+
+    @Test
+    fun formatValue_compuestoSeVuelveAParsear() {
+        listOf(70.866142, 71.0, 116.0, 63360.0).forEach { value ->
+            listOf(ftIn, lbOz).forEach { unit ->
+                listOf(us, es).forEach { locale ->
+                    val text = UnitConverterEngine.formatValue(value, unit, locale, grouping = false)
+                    val parsed = MeasurementParser.parse(text, UnitConverterEngine.unit("cm")) as ParsedInput.Valid
+                    assertEquals(text, unit.id, parsed.quantity.unit.id)
+                    assertEquals(text, value, parsed.quantity.value, 0.05)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun targetsFor_ponePrimeroElDestinoMasProbable() {
+        fun firstTarget(id: String) = UnitConverterEngine.targetsFor(UnitConverterEngine.unit(id)).first().id
+        assertEquals("ft_in", firstTarget("cm"))
+        assertEquals("cm", firstTarget("ft_in"))
+        assertEquals("lb", firstTarget("kg"))
+        assertEquals("f", firstTarget("c"))
+        assertEquals("c", firstTarget("f"))
+        assertEquals("min", firstTarget("h"))
+    }
+
+    @Test
+    fun targetsFor_cubreTodaLaCategoriaSinElOrigenNiRepetidos() {
+        UnitConverterEngine.allUnits.forEach { source ->
+            val targets = UnitConverterEngine.targetsFor(source)
+            val expected = UnitConverterEngine.getUnitsForCategory(source.category).filter { it != source }
+            assertEquals(source.id, expected.toSet(), targets.toSet())
+            assertEquals(source.id, expected.size, targets.size)
+            assertTrue(source.id, targets.all { it.category == source.category })
+        }
     }
 }

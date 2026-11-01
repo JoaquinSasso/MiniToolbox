@@ -1,20 +1,13 @@
 package com.joasasso.minitoolbox.tools.herramientas.calculadoras
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.horizontalScroll
+import androidx.annotation.StringRes
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,73 +15,64 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material.icons.outlined.FitnessCenter
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Straighten
 import androidx.compose.material.icons.outlined.Thermostat
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SuggestionChip
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -96,16 +80,54 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 
-/**
- * Ícono representativo por categoría de conversión.
- */
-val UnitCategory.icon: ImageVector
+private val UnitCategory.icon: ImageVector
     get() = when (this) {
         UnitCategory.Length -> Icons.Outlined.Straighten
         UnitCategory.Weight -> Icons.Outlined.FitnessCenter
         UnitCategory.Temperature -> Icons.Outlined.Thermostat
         UnitCategory.Time -> Icons.Outlined.Schedule
     }
+
+@get:StringRes
+private val UnitCategory.hintRes: Int
+    get() = when (this) {
+        UnitCategory.Length -> R.string.conversor_hint_length
+        UnitCategory.Weight -> R.string.conversor_hint_weight
+        UnitCategory.Temperature -> R.string.conversor_hint_temperature
+        UnitCategory.Time -> R.string.conversor_hint_time
+    }
+
+/** Teclas que el teclado decimal del sistema no tiene, según la categoría. */
+private sealed interface ExtraKey {
+    data class Insert(val label: String, val token: String, @StringRes val descriptionRes: Int) : ExtraKey
+    data object ToggleSign : ExtraKey
+}
+
+private fun extraKeysFor(category: UnitCategory): List<ExtraKey> = when (category) {
+    UnitCategory.Length -> listOf(
+        ExtraKey.Insert("ft '", "'", R.string.conversor_key_feet),
+        ExtraKey.Insert("in \"", "\"", R.string.conversor_key_inches)
+    )
+    UnitCategory.Weight -> listOf(
+        ExtraKey.Insert("lb", " lb ", R.string.conversor_key_pounds),
+        ExtraKey.Insert("oz", " oz", R.string.conversor_key_ounces)
+    )
+    UnitCategory.Temperature -> listOf(ExtraKey.ToggleSign)
+    UnitCategory.Time -> emptyList()
+}
+
+@Composable
+private fun InputError.message(): String = when (kind) {
+    InputErrorKind.InvalidFormat -> stringResource(R.string.conversor_error_invalid_format)
+    InputErrorKind.InvalidNumber -> stringResource(R.string.conversor_error_invalid_number)
+    InputErrorKind.UnknownUnit -> stringResource(R.string.conversor_error_unknown_unit, detail.orEmpty())
+    InputErrorKind.AmbiguousQuotes -> stringResource(R.string.conversor_error_ambiguous_quotes)
+    InputErrorKind.InchesOutOfRange -> stringResource(R.string.conversor_error_inches_range)
+    InputErrorKind.OuncesOutOfRange -> stringResource(R.string.conversor_error_ounces_range)
+    InputErrorKind.FractionalFeet -> stringResource(R.string.conversor_error_fractional_feet)
+    InputErrorKind.FractionalPounds -> stringResource(R.string.conversor_error_fractional_pounds)
+    InputErrorKind.UnsupportedCombination -> stringResource(R.string.conversor_error_unsupported)
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -114,7 +136,6 @@ fun ConversorUnidadesScreen(
     viewModel: ConversorUnidadesViewModel = viewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val focusManager = LocalFocusManager.current
     val clipboardManager = LocalClipboardManager.current
     val haptic = LocalHapticFeedback.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -123,15 +144,10 @@ fun ConversorUnidadesScreen(
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
             when (event) {
-                is ConversorUnidadesEvent.CopyToClipboard -> {
+                is ConversorUnidadesEvent.CopyToClipboard ->
                     clipboardManager.setText(AnnotatedString(event.text))
-                }
-                is ConversorUnidadesEvent.ShowSnackbar -> {
-                    snackbarHostState.showSnackbar(
-                        message = copiedMessage,
-                        duration = SnackbarDuration.Short
-                    )
-                }
+                ConversorUnidadesEvent.ShowCopiedMessage ->
+                    snackbarHostState.showSnackbar(copiedMessage, duration = SnackbarDuration.Short)
             }
         }
     }
@@ -151,83 +167,48 @@ fun ConversorUnidadesScreen(
                 .fillMaxSize()
                 .padding(padding)
                 .imePadding()
-                .verticalScroll(rememberScrollState())
-                .padding(bottom = 32.dp)
         ) {
-            // Selector horizontal de categoría (M3 FilterChips)
-            CategorySelectorRow(
-                selectedCategory = state.category,
-                onSelectCategory = { cat ->
+            CategoryTabs(
+                selected = state.category,
+                onSelect = { category ->
                     haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    viewModel.onCategorySelected(cat)
+                    viewModel.onCategorySelected(category)
                 }
             )
 
-            Spacer(Modifier.height(12.dp))
+            ValueField(
+                input = state.input,
+                inputRevision = state.inputRevision,
+                category = state.category,
+                error = state.error,
+                onInputChange = viewModel::onInputChanged,
+                onClear = viewModel::onClearInput,
+                onSuggestionAccepted = viewModel::onSuggestionAccepted,
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp)
+            )
 
-            // Contenedor principal de conversión (Cards Origen, Intercambio y Destino)
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                // Card de Origen (Input)
-                OriginInputCard(
-                    input = state.input,
-                    onInputChange = viewModel::onInputChanged,
-                    fromUnit = state.fromUnit,
-                    availableUnits = UnitConverterEngine.getUnitsForCategory(state.category),
-                    onSelectUnit = { unit ->
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        viewModel.onFromUnitSelected(unit)
-                    },
-                    onClear = {
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        viewModel.onClearInput()
-                    },
-                    onQuickPreset = { preset ->
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        viewModel.onQuickPresetSelected(preset)
-                    },
-                    onDone = { focusManager.clearFocus() }
-                )
+            SourceUnitRow(
+                units = UnitConverterEngine.getUnitsForCategory(state.category),
+                selected = state.sourceUnit,
+                onSelect = { unit ->
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    viewModel.onSourceUnitSelected(unit)
+                }
+            )
 
-                // Botón interactivo de intercambio con resorte animado
-                SwapUnitsDivider(
-                    onSwap = {
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        viewModel.onSwapUnits()
-                    }
-                )
-
-                // Card de Destino (Resultado en tonal primaryContainer)
-                DestinationResultCard(
-                    toUnit = state.toUnit,
-                    availableUnits = UnitConverterEngine.getUnitsForCategory(state.category),
-                    formattedResult = state.formattedResult,
-                    onSelectUnit = { unit ->
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        viewModel.onToUnitSelected(unit)
-                    },
-                    onCopy = {
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        viewModel.onCopyResult()
-                    }
-                )
-
-                // Sección "Todas las conversiones"
-                AllConversionsSection(
-                    items = state.allConversions,
-                    selectedTargetUnit = state.toUnit,
-                    isReferenceMode = state.input.isEmpty(),
-                    fromUnitSymbol = state.fromUnit.symbol,
-                    onSelectAsTarget = { unit ->
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        viewModel.onUnitSelectedFromList(unit)
-                    }
-                )
-            }
+            ResultsList(
+                results = state.results,
+                stale = state.resultsAreStale,
+                onSelect = { unit ->
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    viewModel.onResultSelected(unit)
+                },
+                onCopy = { unit ->
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    viewModel.onCopyResult(unit)
+                },
+                modifier = Modifier.weight(1f)
+            )
         }
     }
 
@@ -237,592 +218,339 @@ fun ConversorUnidadesScreen(
 }
 
 /**
- * Fila desplazable con chips Material 3 para alternar categorías.
+ * Pestañas de categoría. El contenido es propio en lugar del slot `text` de [Tab] porque ese
+ * slot reserva 16 dp por lado y "Temperatura" no entra en un cuarto de pantalla.
  */
 @Composable
-private fun CategorySelectorRow(
-    selectedCategory: UnitCategory,
-    onSelectCategory: (UnitCategory) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 6.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        UnitCategory.entries.forEach { category ->
-            val isSelected = category == selectedCategory
-            FilterChip(
-                selected = isSelected,
-                onClick = { onSelectCategory(category) },
-                label = {
+private fun CategoryTabs(selected: UnitCategory, onSelect: (UnitCategory) -> Unit) {
+    val categories = UnitCategory.entries
+    PrimaryTabRow(selectedTabIndex = categories.indexOf(selected)) {
+        categories.forEach { category ->
+            Tab(
+                selected = category == selected,
+                onClick = { onSelect(category) },
+                unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)
+                ) {
+                    Icon(category.icon, contentDescription = null)
+                    Spacer(Modifier.height(2.dp))
                     Text(
                         text = stringResource(category.titleRes),
-                        style = MaterialTheme.typography.labelLarge
+                        style = MaterialTheme.typography.labelMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
-                },
-                leadingIcon = {
-                    Icon(
-                        imageVector = category.icon,
-                        contentDescription = null,
-                        modifier = Modifier.size(FilterChipDefaults.IconSize)
-                    )
-                },
-                shape = CircleShape
-            )
+                }
+            }
         }
     }
 }
 
-/**
- * Card para el valor y la unidad de origen.
- */
 @Composable
-private fun OriginInputCard(
+private fun ValueField(
     input: String,
+    inputRevision: Int,
+    category: UnitCategory,
+    error: InputError?,
     onInputChange: (String) -> Unit,
-    fromUnit: ConversionUnit,
-    availableUnits: List<ConversionUnit>,
-    onSelectUnit: (ConversionUnit) -> Unit,
     onClear: () -> Unit,
-    onQuickPreset: (String) -> Unit,
-    onDone: () -> Unit,
+    onSuggestionAccepted: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-        ),
-        modifier = modifier.fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            // Cabecera: Etiqueta "De" y selector de unidad
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Surface(
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.surfaceContainerHighest
-                ) {
-                    Text(
-                        text = stringResource(R.string.conversor_de_label),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                    )
-                }
+    val focusRequester = remember { FocusRequester() }
+    val keyboard = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
 
-                UnitDropdownSelector(
-                    currentUnit = fromUnit,
-                    availableUnits = availableUnits,
-                    onUnitSelected = onSelectUnit,
-                    contentDescription = stringResource(R.string.conversor_unidad_origen_cd)
-                )
-            }
-
-            // Campo de entrada de valor con tipografía display y botón de limpieza
-            TextField(
-                value = input,
-                onValueChange = onInputChange,
-                placeholder = {
-                    Text(
-                        text = "0",
-                        style = MaterialTheme.typography.displaySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
-                    )
-                },
-                textStyle = MaterialTheme.typography.displaySmall.copy(
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.Bold
-                ),
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Decimal,
-                    imeAction = ImeAction.Done
-                ),
-                keyboardActions = KeyboardActions(onDone = { onDone() }),
-                trailingIcon = {
-                    AnimatedVisibility(
-                        visible = input.isNotEmpty(),
-                        enter = fadeIn() + scaleIn(),
-                        exit = fadeOut() + scaleOut()
-                    ) {
-                        IconButton(onClick = onClear) {
-                            Icon(
-                                imageVector = Icons.Default.Clear,
-                                contentDescription = stringResource(R.string.conversor_limpiar),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
-                ),
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            // Chips rápidos de prueba/ejemplo
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                listOf("1", "5", "10", "50", "100").forEach { preset ->
-                    SuggestionChip(
-                        onClick = { onQuickPreset(preset) },
-                        label = { Text(preset, style = MaterialTheme.typography.labelSmall) },
-                        shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier.height(30.dp)
-                    )
-                }
-            }
-        }
+    // El campo guarda el cursor; el ViewModel, el texto. Solo se pisa el campo cuando el
+    // ViewModel cambió el texto por su cuenta (sube inputRevision): comparar contra `input`
+    // en cada cambio pisaría teclas escritas antes de que llegue el estado nuevo.
+    var fieldValue by remember { mutableStateOf(TextFieldValue(input, TextRange(input.length))) }
+    LaunchedEffect(inputRevision) {
+        if (fieldValue.text != input) fieldValue = TextFieldValue(input, TextRange(input.length))
     }
-}
-
-/**
- * Divisor con botón de intercambio de unidades con física de resorte.
- */
-@Composable
-private fun SwapUnitsDivider(
-    onSwap: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 2.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        HorizontalDivider(
-            modifier = Modifier.fillMaxWidth(),
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-        )
-
-        var swapAngle by remember { mutableFloatStateOf(0f) }
-        val animatedRotation by animateFloatAsState(
-            targetValue = swapAngle,
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioMediumBouncy,
-                stiffness = Spring.StiffnessLow
-            ),
-            label = "swapRotation"
-        )
-
-        FilledTonalIconButton(
-            onClick = {
-                swapAngle += 180f
-                onSwap()
-            },
-            shape = CircleShape,
-            colors = IconButtonDefaults.filledTonalIconButtonColors(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-            ),
-            modifier = Modifier.size(46.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.SwapVert,
-                contentDescription = stringResource(R.string.conversor_intercambiar),
-                modifier = Modifier.rotate(animatedRotation)
-            )
-        }
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+        keyboard?.show()
     }
-}
 
-/**
- * Card de resultado en color primario container.
- */
-@Composable
-private fun DestinationResultCard(
-    toUnit: ConversionUnit,
-    availableUnits: List<ConversionUnit>,
-    formattedResult: String?,
-    onSelectUnit: (ConversionUnit) -> Unit,
-    onCopy: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        ),
-        modifier = modifier.fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            // Cabecera: Etiqueta "A" y selector de unidad destino
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Surface(
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.12f)
-                ) {
-                    Text(
-                        text = stringResource(R.string.conversor_a_label),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                    )
-                }
-
-                UnitDropdownSelector(
-                    currentUnit = toUnit,
-                    availableUnits = availableUnits,
-                    onUnitSelected = onSelectUnit,
-                    contentDescription = stringResource(R.string.conversor_unidad_destino_cd),
-                    isPrimaryContainer = true
-                )
-            }
-
-            // Resultado numérico destacado
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp),
-                verticalAlignment = Alignment.Bottom,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = formattedResult ?: "0",
-                    style = MaterialTheme.typography.displayMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
-                )
-                Text(
-                    text = toUnit.symbol,
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.75f),
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(bottom = 6.dp, start = 8.dp)
-                )
-            }
-
-            // Botón de acción: Copiar resultado
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-                Button(
-                    onClick = onCopy,
-                    enabled = formattedResult != null,
-                    shape = CircleShape,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ContentCopy,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(stringResource(R.string.conversor_copiar))
-                }
-            }
-        }
+    fun applyEdit(edit: ConverterInputEditing.Edit) {
+        fieldValue = TextFieldValue(edit.text, TextRange(edit.cursor))
+        onInputChange(edit.text)
     }
-}
 
-/**
- * Selector desplegable de unidades con diseño M3.
- */
-@Composable
-private fun UnitDropdownSelector(
-    currentUnit: ConversionUnit,
-    availableUnits: List<ConversionUnit>,
-    onUnitSelected: (ConversionUnit) -> Unit,
-    contentDescription: String,
-    modifier: Modifier = Modifier,
-    isPrimaryContainer: Boolean = false
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Box(modifier = modifier) {
-        Surface(
-            onClick = { expanded = true },
-            shape = RoundedCornerShape(12.dp),
-            color = if (isPrimaryContainer) {
-                MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.12f)
-            } else {
-                MaterialTheme.colorScheme.surfaceContainerHighest
-            },
-            contentColor = if (isPrimaryContainer) {
-                MaterialTheme.colorScheme.onPrimaryContainer
-            } else {
-                MaterialTheme.colorScheme.onSurface
-            },
-            modifier = Modifier.semantics { this.contentDescription = contentDescription }
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                Text(
-                    text = "${stringResource(currentUnit.nameRes)} (${currentUnit.symbol})",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Icon(
-                    imageVector = Icons.Default.ArrowDropDown,
-                    contentDescription = null
-                )
-            }
-        }
-
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            modifier = Modifier.widthIn(min = 210.dp)
-        ) {
-            availableUnits.forEach { unit ->
-                val isSelected = unit == currentUnit
-                DropdownMenuItem(
-                    text = {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = stringResource(unit.nameRes),
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                            )
-                            Spacer(Modifier.width(16.dp))
-                            Surface(
-                                shape = CircleShape,
-                                color = if (isSelected) {
-                                    MaterialTheme.colorScheme.primaryContainer
-                                } else {
-                                    MaterialTheme.colorScheme.surfaceContainerHighest
-                                }
-                            ) {
-                                Text(
-                                    text = unit.symbol,
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = if (isSelected) {
-                                        MaterialTheme.colorScheme.onPrimaryContainer
-                                    } else {
-                                        MaterialTheme.colorScheme.onSurfaceVariant
-                                    },
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+    OutlinedTextField(
+        value = fieldValue,
+        onValueChange = { newValue ->
+            val textChanged = newValue.text != fieldValue.text
+            fieldValue = newValue
+            if (textChanged) onInputChange(newValue.text)
+        },
+        label = { Text(stringResource(R.string.unidad_valor)) },
+        placeholder = { Text(stringResource(category.hintRes)) },
+        textStyle = MaterialTheme.typography.headlineSmall,
+        singleLine = true,
+        isError = error != null,
+        trailingIcon = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                extraKeysFor(category).forEach { key ->
+                    ExtraKeyButton(
+                        key = key,
+                        onClick = {
+                            val edit = when (key) {
+                                is ExtraKey.Insert -> ConverterInputEditing.insert(
+                                    fieldValue.text, fieldValue.selection.start, fieldValue.selection.end, key.token
                                 )
+                                ExtraKey.ToggleSign -> ConverterInputEditing.toggleSign(fieldValue.text)
                             }
+                            applyEdit(edit)
                         }
-                    },
-                    leadingIcon = if (isSelected) {
-                        {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary
-                            )
+                    )
+                }
+                // Siempre presente (deshabilitado si no hay texto): si apareciera recién al escribir,
+                // correría las teclas de la izquierda justo cuando el usuario va a tocarlas.
+                IconButton(onClick = onClear, enabled = input.isNotEmpty()) {
+                    Icon(Icons.Filled.Clear, contentDescription = stringResource(R.string.conversor_limpiar))
+                }
+            }
+        },
+        supportingText = error?.let {
+            {
+                Column {
+                    Text(it.message())
+                    it.suggestionText?.let { suggestion ->
+                        TextButton(
+                            onClick = onSuggestionAccepted,
+                            contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp)
+                        ) {
+                            Text(stringResource(R.string.conversor_suggestion, suggestion))
                         }
-                    } else null,
-                    onClick = {
-                        expanded = false
-                        onUnitSelected(unit)
                     }
+                }
+            }
+        },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+        modifier = modifier
+            .fillMaxWidth()
+            .focusRequester(focusRequester)
+    )
+}
+
+@Composable
+private fun ExtraKeyButton(key: ExtraKey, onClick: () -> Unit) {
+    val (label, description) = when (key) {
+        is ExtraKey.Insert -> key.label to stringResource(key.descriptionRes)
+        ExtraKey.ToggleSign -> "±" to stringResource(R.string.conversor_key_sign)
+    }
+    FilledTonalButton(
+        onClick = onClick,
+        contentPadding = PaddingValues(horizontal = 10.dp),
+        modifier = Modifier
+            .padding(end = 4.dp)
+            .height(40.dp)
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.clearAndSetSemantics { contentDescription = description }
+        )
+    }
+}
+
+@Composable
+private fun SourceUnitRow(
+    units: List<ConversionUnit>,
+    selected: ConversionUnit,
+    onSelect: (ConversionUnit) -> Unit
+) {
+    val listState = rememberLazyListState()
+    val selectedIndex = units.indexOf(selected)
+    // Solo se desplaza si el chip elegido (por ejemplo, detectado desde el texto) quedó fuera
+    // de la vista; así al abrir la pantalla se ven las primeras unidades.
+    LaunchedEffect(selected) {
+        if (selectedIndex < 0) return@LaunchedEffect
+        val layout = listState.layoutInfo
+        val item = layout.visibleItemsInfo.firstOrNull { it.index == selectedIndex }
+        val fullyVisible = item != null &&
+            item.offset >= layout.viewportStartOffset &&
+            item.offset + item.size <= layout.viewportEndOffset
+        if (!fullyVisible) listState.animateScrollToItem((selectedIndex - 1).coerceAtLeast(0))
+    }
+
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 4.dp)) {
+        Text(
+            text = stringResource(R.string.conversor_de_label),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 16.dp, end = 8.dp)
+        )
+        LazyRow(
+            state = listState,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(end = 16.dp)
+        ) {
+            items(units, key = { "source_${it.id}" }) { unit ->
+                FilterChip(
+                    selected = unit == selected,
+                    onClick = { onSelect(unit) },
+                    label = { Text(unit.symbol) }
                 )
             }
         }
     }
 }
 
-/**
- * Sección que lista todas las conversiones de la categoría en tiempo real.
- */
 @Composable
-private fun AllConversionsSection(
-    items: List<UnitConversionItem>,
-    selectedTargetUnit: ConversionUnit,
-    isReferenceMode: Boolean,
-    fromUnitSymbol: String,
-    onSelectAsTarget: (ConversionUnit) -> Unit,
+private fun ResultsList(
+    results: List<ConversionRow>,
+    stale: Boolean,
+    onSelect: (ConversionUnit) -> Unit,
+    onCopy: (ConversionUnit) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(
+    if (results.isEmpty()) {
+        Box(modifier = modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.TopCenter) {
+            Text(
+                text = stringResource(R.string.conversor_empty_hint),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        return
+    }
+
+    val primary = results.first()
+    val others = results.drop(1)
+    val contentAlpha = if (stale) 0.38f else 1f
+
+    LazyColumn(
         modifier = modifier
             .fillMaxWidth()
-            .padding(top = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+            .alpha(contentAlpha),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp)
+    ) {
+        item(key = "primary_${primary.unit.id}") {
+            PrimaryResultCard(
+                row = primary,
+                enabled = !stale,
+                onSelect = { onSelect(primary.unit) },
+                onCopy = { onCopy(primary.unit) }
+            )
+            Spacer(Modifier.height(8.dp))
+        }
+        items(others, key = { "other_${it.unit.id}" }) { row ->
+            ResultRow(
+                row = row,
+                enabled = !stale,
+                onSelect = { onSelect(row.unit) },
+                onCopy = { onCopy(row.unit) }
+            )
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+        }
+    }
+}
+
+/** Texto principal de una fila: las unidades compuestas ya traen sus símbolos (`5'10.9"`). */
+private fun ConversionRow.valueWithSymbol(): String =
+    if (unit.compound != null) display else "$display ${unit.symbol}"
+
+@Composable
+private fun PrimaryResultCard(row: ConversionRow, enabled: Boolean, onSelect: () -> Unit, onCopy: () -> Unit) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(
+                enabled = enabled,
+                onClickLabel = stringResource(R.string.conversor_use_as_input),
+                onClick = onSelect
+            )
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            modifier = Modifier.padding(start = 20.dp, end = 8.dp, top = 12.dp, bottom = 12.dp)
         ) {
-            Text(
-                text = stringResource(R.string.conversor_todas_conversiones),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            if (isReferenceMode) {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = stringResource(R.string.conversor_equivalencia_referencia, fromUnitSymbol),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = stringResource(row.unit.nameRes),
+                    style = MaterialTheme.typography.labelLarge
+                )
+                Text(
+                    text = row.valueWithSymbol(),
+                    style = MaterialTheme.typography.displaySmall,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
-        }
-
-        items.forEach { item ->
-            val isTarget = item.unit == selectedTargetUnit
-            Card(
-                onClick = { onSelectAsTarget(item.unit) },
-                colors = CardDefaults.cardColors(
-                    containerColor = if (isTarget) {
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
-                    } else {
-                        MaterialTheme.colorScheme.surfaceContainerLow
-                    }
-                ),
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Surface(
-                            shape = RoundedCornerShape(8.dp),
-                            color = MaterialTheme.colorScheme.secondaryContainer,
-                            modifier = Modifier.defaultMinSize(minWidth = 44.dp)
-                        ) {
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
-                            ) {
-                                Text(
-                                    text = item.unit.symbol,
-                                    style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                                )
-                            }
-                        }
-
-                        Column {
-                            Text(
-                                text = "${item.formattedValue} ${item.unit.symbol}",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                text = stringResource(item.unit.nameRes),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-
-                    if (isTarget) {
-                        Surface(
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Text(
-                                    text = stringResource(R.string.conversor_a_label),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
-                    } else {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                            contentDescription = stringResource(R.string.conversor_toca_para_seleccionar),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-                }
-            }
+            CopyButton(row = row, enabled = enabled, onCopy = onCopy)
         }
     }
 }
 
-/**
- * Diálogo informativo con instrucciones y ejemplos.
- */
 @Composable
-private fun ConverterInfoDialog(
-    onDismiss: () -> Unit
-) {
+private fun ResultRow(row: ConversionRow, enabled: Boolean, onSelect: () -> Unit, onCopy: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(
+                enabled = enabled,
+                onClickLabel = stringResource(R.string.conversor_use_as_input),
+                onClick = onSelect
+            )
+            .padding(start = 4.dp, top = 6.dp, bottom = 6.dp)
+    ) {
+        Text(
+            text = row.valueWithSymbol(),
+            style = MaterialTheme.typography.titleLarge,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(
+            text = stringResource(row.unit.nameRes),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1
+        )
+        CopyButton(row = row, enabled = enabled, onCopy = onCopy)
+    }
+}
+
+@Composable
+private fun CopyButton(row: ConversionRow, enabled: Boolean, onCopy: () -> Unit) {
+    IconButton(onClick = onCopy, enabled = enabled) {
+        Icon(
+            Icons.Filled.ContentCopy,
+            contentDescription = stringResource(R.string.conversor_copy_cd, row.valueWithSymbol()),
+            modifier = Modifier.size(20.dp)
+        )
+    }
+}
+
+@Composable
+private fun ConverterInfoDialog(onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = {
-            Text(
-                text = stringResource(R.string.unidad_info_titulo),
-                style = MaterialTheme.typography.headlineSmall
-            )
-        },
+        title = { Text(stringResource(R.string.unidad_info_titulo)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(R.string.unidad_info_linea1))
-                Text(stringResource(R.string.unidad_info_linea2))
-                Text(stringResource(R.string.unidad_info_linea3))
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text = stringResource(R.string.unidad_info_linea4),
-                    fontWeight = FontWeight.Bold
-                )
-                Text(stringResource(R.string.unidad_info_linea5))
-                Text(stringResource(R.string.unidad_info_linea6))
-                Text(stringResource(R.string.unidad_info_linea7))
-                Text(stringResource(R.string.unidad_info_linea8))
+                Text(stringResource(R.string.conversor_info_1))
+                Text(stringResource(R.string.conversor_info_2))
+                Text(stringResource(R.string.conversor_info_3))
+                Text(stringResource(R.string.conversor_info_4))
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.close))
-            }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.close)) }
         }
     )
 }

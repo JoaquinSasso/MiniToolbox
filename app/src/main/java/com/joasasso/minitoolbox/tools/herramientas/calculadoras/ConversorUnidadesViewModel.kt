@@ -1,9 +1,7 @@
 package com.joasasso.minitoolbox.tools.herramientas.calculadoras
 
-import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.joasasso.minitoolbox.R
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -11,162 +9,200 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 sealed interface ConversorUnidadesEvent {
-    data class ShowSnackbar(@StringRes val messageRes: Int) : ConversorUnidadesEvent
     data class CopyToClipboard(val text: String) : ConversorUnidadesEvent
+    data object ShowCopiedMessage : ConversorUnidadesEvent
 }
+
+/**
+ * Una fila de resultados. [display] lleva separador de miles; [copyText] no, para que se
+ * pueda pegar en otra app o volver a escribir en el conversor.
+ */
+data class ConversionRow(
+    val unit: ConversionUnit,
+    val display: String,
+    val copyText: String
+)
+
+/** Error de la entrada, con la interpretación sugerida ya formateada si existe. */
+data class InputError(
+    val kind: InputErrorKind,
+    val detail: String? = null,
+    val suggestionText: String? = null
+)
 
 data class ConversorUnidadesUiState(
     val category: UnitCategory = UnitCategory.Length,
     val input: String = "",
-    val fromUnit: ConversionUnit = UnitConverterEngine.lengthUnits[0],
-    val toUnit: ConversionUnit = UnitConverterEngine.lengthUnits[1],
-    val formattedResult: String? = null,
-    val rawResult: Double? = null,
-    val allConversions: List<UnitConversionItem> = emptyList(),
+    /**
+     * Sube cada vez que el ViewModel reemplaza el texto por su cuenta (borrar, tocar una fila,
+     * aceptar una sugerencia). La UI lo usa para saber cuándo pisar el campo y mover el cursor.
+     */
+    val inputRevision: Int = 0,
+    val sourceUnit: ConversionUnit = UnitConverterEngine.defaultUnitFor(UnitCategory.Length),
+    val results: List<ConversionRow> = emptyList(),
+    /** true cuando la entrada actual es inválida y [results] corresponde al último valor válido. */
+    val resultsAreStale: Boolean = false,
+    val error: InputError? = null,
     val showInfoDialog: Boolean = false
 )
 
-class ConversorUnidadesViewModel : ViewModel() {
+class ConversorUnidadesViewModel(
+    private val localeProvider: () -> Locale = { Locale.getDefault() }
+) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(createInitialState())
+    private val _uiState = MutableStateFlow(ConversorUnidadesUiState())
     val uiState: StateFlow<ConversorUnidadesUiState> = _uiState.asStateFlow()
 
     private val _events = Channel<ConversorUnidadesEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
 
-    init {
-        recalculate()
-    }
-
-    private fun createInitialState(): ConversorUnidadesUiState {
-        val initialCategory = UnitCategory.Length
-        val units = UnitConverterEngine.getUnitsForCategory(initialCategory)
-        return ConversorUnidadesUiState(
-            category = initialCategory,
-            input = "",
-            fromUnit = units[0],
-            toUnit = units[1]
-        )
-    }
-
-    fun onCategorySelected(newCategory: UnitCategory) {
-        if (_uiState.value.category == newCategory) return
-        val units = UnitConverterEngine.getUnitsForCategory(newCategory)
-        _uiState.update { current ->
-            current.copy(
-                category = newCategory,
-                fromUnit = units[0],
-                toUnit = units[1]
-            )
-        }
-        recalculate()
-    }
+    /** Último valor válido; es el que se usa al tocar una fila. */
+    private var lastValid: Quantity? = null
+    private var inputHasExplicitUnit = false
+    private var pendingSuggestion: Quantity? = null
 
     fun onInputChanged(raw: String) {
-        // Filtra caracteres válidos: dígitos y a lo sumo un separador decimal (. o ,)
-        val sanitized = sanitizeDecimalInput(raw)
-        _uiState.update { it.copy(input = sanitized) }
+        val text = raw.take(MAX_INPUT_LENGTH)
+        _uiState.update {
+            it.copy(input = text, inputRevision = if (text != raw) it.inputRevision + 1 else it.inputRevision)
+        }
         recalculate()
     }
 
-    fun onFromUnitSelected(unit: ConversionUnit) {
-        _uiState.update { it.copy(fromUnit = unit) }
-        recalculate()
-    }
-
-    fun onToUnitSelected(unit: ConversionUnit) {
-        _uiState.update { it.copy(toUnit = unit) }
-        recalculate()
-    }
-
-    fun onSwapUnits() {
-        _uiState.update { current ->
-            current.copy(
-                fromUnit = current.toUnit,
-                toUnit = current.fromUnit
+    /**
+     * Cambia de categoría. Un número solo se conserva y se reinterpreta en la unidad por
+     * defecto de la nueva categoría; un texto con unidad propia (`180 cm`) o inválido se borra,
+     * porque si no la unidad del texto volvería a imponer la categoría anterior.
+     */
+    fun onCategorySelected(category: UnitCategory) {
+        val current = _uiState.value
+        if (current.category == category) return
+        val keepInput = !inputHasExplicitUnit && current.error == null
+        _uiState.update {
+            it.copy(
+                category = category,
+                sourceUnit = UnitConverterEngine.defaultUnitFor(category),
+                input = if (keepInput) it.input else "",
+                inputRevision = if (keepInput) it.inputRevision else it.inputRevision + 1
             )
         }
         recalculate()
+    }
+
+    /** Elige la unidad de origen. Si el texto traía otra unidad escrita, se borra. */
+    fun onSourceUnitSelected(unit: ConversionUnit) {
+        val current = _uiState.value
+        if (current.sourceUnit == unit) return
+        _uiState.update {
+            it.copy(
+                category = unit.category,
+                sourceUnit = unit,
+                input = if (inputHasExplicitUnit) "" else it.input,
+                inputRevision = if (inputHasExplicitUnit) it.inputRevision + 1 else it.inputRevision
+            )
+        }
+        recalculate()
+    }
+
+    /** Toca una fila: esa unidad pasa a ser el origen, con el valor ya convertido. */
+    fun onResultSelected(unit: ConversionUnit) {
+        val quantity = lastValid ?: return
+        if (_uiState.value.resultsAreStale) return
+        val value = UnitConverterEngine.convert(quantity.value, quantity.unit, unit)
+        applyQuantity(Quantity(value, unit))
+    }
+
+    fun onSuggestionAccepted() {
+        val suggestion = pendingSuggestion ?: return
+        applyQuantity(suggestion)
     }
 
     fun onClearInput() {
-        _uiState.update { it.copy(input = "") }
+        _uiState.update { it.copy(input = "", inputRevision = it.inputRevision + 1) }
         recalculate()
     }
 
-    fun onQuickPresetSelected(preset: String) {
-        _uiState.update { it.copy(input = preset) }
-        recalculate()
-    }
-
-    fun onUnitSelectedFromList(unit: ConversionUnit) {
-        _uiState.update { it.copy(toUnit = unit) }
-        recalculate()
+    fun onCopyResult(unit: ConversionUnit) {
+        val row = _uiState.value.results.firstOrNull { it.unit == unit } ?: return
+        viewModelScope.launch {
+            _events.send(ConversorUnidadesEvent.CopyToClipboard(row.copyText))
+            _events.send(ConversorUnidadesEvent.ShowCopiedMessage)
+        }
     }
 
     fun onShowInfoDialog(show: Boolean) {
         _uiState.update { it.copy(showInfoDialog = show) }
     }
 
-    fun onCopyResult() {
-        val state = _uiState.value
-        val textToCopy = state.rawResult?.let { UnitConverterEngine.formatCleanRaw(it) }
-            ?: state.formattedResult
-            ?: return
-
-        viewModelScope.launch {
-            _events.send(ConversorUnidadesEvent.CopyToClipboard(textToCopy))
-            _events.send(ConversorUnidadesEvent.ShowSnackbar(R.string.unidad_resultado_copiado))
+    private fun applyQuantity(quantity: Quantity) {
+        val text = UnitConverterEngine.formatValue(quantity.value, quantity.unit, localeProvider(), grouping = false)
+        _uiState.update {
+            it.copy(
+                category = quantity.unit.category,
+                sourceUnit = quantity.unit,
+                input = text,
+                inputRevision = it.inputRevision + 1
+            )
         }
+        recalculate()
     }
 
     private fun recalculate() {
         val state = _uiState.value
-        val parsedValue = UnitConverterEngine.parseInput(state.input)
-
-        if (parsedValue != null) {
-            val converted = UnitConverterEngine.convert(parsedValue, state.fromUnit, state.toUnit)
-            val all = UnitConverterEngine.convertAll(parsedValue, state.fromUnit)
-            _uiState.update {
-                it.copy(
-                    rawResult = converted,
-                    formattedResult = UnitConverterEngine.formatNumber(converted),
-                    allConversions = all
-                )
+        pendingSuggestion = null
+        when (val parsed = MeasurementParser.parse(state.input, state.sourceUnit)) {
+            ParsedInput.Empty -> {
+                lastValid = null
+                inputHasExplicitUnit = false
+                _uiState.update { it.copy(results = emptyList(), resultsAreStale = false, error = null) }
             }
-        } else {
-            // Con entrada vacía o inválida, mostramos como referencia la conversión de 1 unidad base
-            val referenceConversions = UnitConverterEngine.convertAll(1.0, state.fromUnit)
-            _uiState.update {
-                it.copy(
-                    rawResult = null,
-                    formattedResult = null,
-                    allConversions = referenceConversions
-                )
+
+            is ParsedInput.Valid -> {
+                val quantity = parsed.quantity
+                lastValid = quantity
+                inputHasExplicitUnit = parsed.explicitUnit
+                _uiState.update {
+                    it.copy(
+                        category = quantity.unit.category,
+                        sourceUnit = quantity.unit,
+                        results = buildRows(quantity),
+                        resultsAreStale = false,
+                        error = null
+                    )
+                }
+            }
+
+            is ParsedInput.Invalid -> {
+                pendingSuggestion = parsed.suggestion
+                val suggestionText = parsed.suggestion?.let {
+                    UnitConverterEngine.formatValue(it.value, it.unit, localeProvider(), grouping = false)
+                }
+                _uiState.update {
+                    it.copy(
+                        resultsAreStale = it.results.isNotEmpty(),
+                        error = InputError(parsed.kind, parsed.detail, suggestionText)
+                    )
+                }
             }
         }
     }
 
-    private fun sanitizeDecimalInput(raw: String): String {
-        val filtered = raw.filter { it.isDigit() || it == '.' || it == ',' }
-        val separatorCount = filtered.count { it == '.' || it == ',' }
-        if (separatorCount <= 1) return filtered
-
-        // Preservar solo el primer separador
-        var seenSeparator = false
-        val sb = java.lang.StringBuilder()
-        for (ch in filtered) {
-            if (ch == '.' || ch == ',') {
-                if (!seenSeparator) {
-                    sb.append(ch)
-                    seenSeparator = true
-                }
-            } else {
-                sb.append(ch)
-            }
+    private fun buildRows(quantity: Quantity): List<ConversionRow> {
+        val locale = localeProvider()
+        return UnitConverterEngine.targetsFor(quantity.unit).map { target ->
+            val value = UnitConverterEngine.convert(quantity.value, quantity.unit, target)
+            ConversionRow(
+                unit = target,
+                display = UnitConverterEngine.formatValue(value, target, locale),
+                copyText = UnitConverterEngine.formatValue(value, target, locale, grouping = false)
+            )
         }
-        return sb.toString()
+    }
+
+    private companion object {
+        const val MAX_INPUT_LENGTH = 40
     }
 }

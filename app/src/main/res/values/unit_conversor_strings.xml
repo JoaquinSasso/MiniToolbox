@@ -9,6 +9,7 @@
     <string name="unit_centimeter">Centimeter</string>
     <string name="unit_millimeter">Millimeter</string>
     <string name="unit_kilometer">Kilometer</string>
+    <string name="unit_feet_inches">Feet + inches</string>
     <string name="unit_inch">Inch</string>
     <string name="unit_foot">Foot</string>
     <string name="unit_yard">Yard</string>
@@ -18,6 +19,7 @@
     <string name="unit_gram">Gram</string>
     <string name="unit_milligram">Milligram</string>
     <string name="unit_ton">Ton</string>
+    <string name="unit_pounds_ounces">Pounds + ounces</string>
     <string name="unit_pound">Pound</string>
     <string name="unit_ounce">Ounce</string>
 
@@ -30,50 +32,42 @@
     <string name="unit_hour">Hour</string>
     <string name="unit_day">Day</string>
 
-    <!-- M3 Conversor strings -->
-    <string name="conversor_de_label">From</string>
-    <string name="conversor_a_label">To</string>
-    <string name="conversor_intercambiar">Swap units</string>
-    <string name="conversor_todas_conversiones">All conversions</string>
-    <string name="conversor_toca_para_seleccionar">Tap to select as target</string>
-    <string name="conversor_limpiar">Clear value</string>
-    <string name="conversor_unidad_origen_cd">Select origin unit</string>
-    <string name="conversor_unidad_destino_cd">Select destination unit</string>
-    <string name="conversor_equivalencia_referencia">Reference equivalence for 1 %1$s:</string>
-    <string name="conversor_copiar">Copy</string>
-
-    <!-- Unit types -->
-    <string name="unidad_tipo_longitud">Length</string>
-    <string name="unidad_tipo_peso">Weight</string>
-    <string name="unidad_tipo_temperatura">Temperature</string>
-    <string name="unidad_tipo_tiempo">Time</string>
-
-    <!-- Input field -->
+    <!-- Entrada -->
     <string name="unidad_valor">Value</string>
+    <string name="conversor_hint_length">e.g. 180 or 5\'11</string>
+    <string name="conversor_hint_weight">e.g. 70 or 7 lb 4 oz</string>
+    <string name="conversor_hint_temperature">e.g. 30</string>
+    <string name="conversor_hint_time">e.g. 2.5</string>
+    <string name="conversor_de_label">From</string>
+    <string name="conversor_limpiar">Clear value</string>
+    <string name="conversor_key_feet">Insert feet symbol</string>
+    <string name="conversor_key_inches">Insert inches symbol</string>
+    <string name="conversor_key_pounds">Insert pounds</string>
+    <string name="conversor_key_ounces">Insert ounces</string>
+    <string name="conversor_key_sign">Toggle negative sign</string>
 
-    <!-- Buttons -->
-    <string name="unidad_boton_copiar">Copy</string>
-    <string name="unidad_boton_resetear">Reset</string>
-    <string name="unidad_boton_cerrar">Close</string>
+    <!-- Errores de entrada -->
+    <string name="conversor_error_invalid_format">Enter a number, like 180 or 5\'11</string>
+    <string name="conversor_error_invalid_number">Check the number: use a single decimal separator</string>
+    <string name="conversor_error_unknown_unit">Unknown unit “%1$s”</string>
+    <string name="conversor_error_ambiguous_quotes">Use \' for feet and \" for inches, like 5\'11\"</string>
+    <string name="conversor_error_inches_range">Inches must be less than 12</string>
+    <string name="conversor_error_ounces_range">Ounces must be less than 16</string>
+    <string name="conversor_error_fractional_feet">Use whole feet when adding inches, like 5\'11</string>
+    <string name="conversor_error_fractional_pounds">Use whole pounds when adding ounces, like 7 lb 4 oz</string>
+    <string name="conversor_error_unsupported">Only feet + inches and pounds + ounces can be combined</string>
+    <string name="conversor_suggestion">Did you mean %1$s?</string>
 
-    <!-- Content descriptions -->
-    <string name="unidad_content_desc_copiar">Copy result</string>
-    <string name="unidad_content_desc_resetear">Reset fields</string>
-
-    <!-- Snackbar -->
+    <!-- Resultados -->
+    <string name="conversor_empty_hint">Type a value to see it in every unit</string>
+    <string name="conversor_use_as_input">Use as input</string>
+    <string name="conversor_copy_cd">Copy %1$s</string>
     <string name="unidad_resultado_copiado">Result copied</string>
 
-    <!-- Final result -->
-    <string name="unidad_resultado_final">Result: %1$s %2$s</string>
-
-    <!-- Help dialog -->
+    <!-- Diálogo de ayuda -->
     <string name="unidad_info_titulo">About the Unit Converter</string>
-    <string name="unidad_info_linea1">• Convert values between length, weight, temperature and time units.</string>
-    <string name="unidad_info_linea2">• Enter the value, select origin and destination units, and the result is calculated automatically.</string>
-    <string name="unidad_info_linea3">• Use the "Copy" button to save the result or "Reset" to clear the fields.</string>
-    <string name="unidad_info_linea4">Examples of units:</string>
-    <string name="unidad_info_linea5">– Length: meter, inch, mile, etc.</string>
-    <string name="unidad_info_linea6">– Weight: kilogram, pound, ounce, etc.</string>
-    <string name="unidad_info_linea7">– Temperature: Celsius, Fahrenheit, Kelvin.</string>
-    <string name="unidad_info_linea8">– Time: second, minute, hour, day.</string>
+    <string name="conversor_info_1">• Type a value and you will see it in every unit of the category as you type.</string>
+    <string name="conversor_info_2">• Feet and inches: 5\'11, 5\'11.5\" or 5 ft 11 in. Pounds and ounces: 7 lb 4 oz. The keys next to the field add \' \" lb and oz.</string>
+    <string name="conversor_info_3">• If you type or paste the unit (180 cm, 70 kg, 30 °C), it is detected and the category changes by itself.</string>
+    <string name="conversor_info_4">• Tap a result to use it as the new value. The copy icon copies it.</string>
 </resources>

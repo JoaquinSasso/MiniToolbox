@@ -2,10 +2,14 @@ package com.joasasso.minitoolbox.tools.herramientas.calculadoras
 
 import androidx.annotation.StringRes
 import com.joasasso.minitoolbox.R
+import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Locale
 import kotlin.math.abs
+import kotlin.math.floor
+import kotlin.math.log10
+import kotlin.math.roundToLong
 
 enum class UnitCategory(@StringRes val titleRes: Int) {
     Length(R.string.unit_type_length),
@@ -14,18 +18,22 @@ enum class UnitCategory(@StringRes val titleRes: Int) {
     Time(R.string.unit_type_time)
 }
 
+/**
+ * Unidad compuesta de dos partes (mayor + menor). El valor de una [ConversionUnit] compuesta se
+ * expresa siempre en la unidad menor: 5'11" se guarda como 71 pulgadas.
+ */
+enum class CompoundFormat(val minorPerMajor: Int, val majorSymbol: String, val minorSymbol: String) {
+    FeetInches(12, "'", "\""),
+    PoundsOunces(16, " lb ", " oz")
+}
+
 data class ConversionUnit(
     val id: String,
     @StringRes val nameRes: Int,
     val symbol: String,
     val category: UnitCategory,
-    val factorToBase: Double = 1.0
-)
-
-data class UnitConversionItem(
-    val unit: ConversionUnit,
-    val rawValue: Double,
-    val formattedValue: String
+    val factorToBase: Double = 1.0,
+    val compound: CompoundFormat? = null
 )
 
 /**
@@ -33,11 +41,15 @@ data class UnitConversionItem(
  */
 object UnitConverterEngine {
 
+    private const val SIGNIFICANT_DIGITS = 6
+    private const val MAX_FRACTION_DIGITS = 6
+
     val lengthUnits: List<ConversionUnit> = listOf(
         ConversionUnit("m", R.string.unit_meter, "m", UnitCategory.Length, 1.0),
         ConversionUnit("cm", R.string.unit_centimeter, "cm", UnitCategory.Length, 0.01),
         ConversionUnit("mm", R.string.unit_millimeter, "mm", UnitCategory.Length, 0.001),
         ConversionUnit("km", R.string.unit_kilometer, "km", UnitCategory.Length, 1000.0),
+        ConversionUnit("ft_in", R.string.unit_feet_inches, "ft·in", UnitCategory.Length, 0.0254, CompoundFormat.FeetInches),
         ConversionUnit("in", R.string.unit_inch, "in", UnitCategory.Length, 0.0254),
         ConversionUnit("ft", R.string.unit_foot, "ft", UnitCategory.Length, 0.3048),
         ConversionUnit("yd", R.string.unit_yard, "yd", UnitCategory.Length, 0.9144),
@@ -49,6 +61,7 @@ object UnitConverterEngine {
         ConversionUnit("g", R.string.unit_gram, "g", UnitCategory.Weight, 0.001),
         ConversionUnit("mg", R.string.unit_milligram, "mg", UnitCategory.Weight, 0.000001),
         ConversionUnit("t", R.string.unit_ton, "t", UnitCategory.Weight, 1000.0),
+        ConversionUnit("lb_oz", R.string.unit_pounds_ounces, "lb·oz", UnitCategory.Weight, 0.028349523125, CompoundFormat.PoundsOunces),
         ConversionUnit("lb", R.string.unit_pound, "lb", UnitCategory.Weight, 0.45359237),
         ConversionUnit("oz", R.string.unit_ounce, "oz", UnitCategory.Weight, 0.028349523125)
     )
@@ -66,6 +79,10 @@ object UnitConverterEngine {
         ConversionUnit("d", R.string.unit_day, "d", UnitCategory.Time, 86400.0)
     )
 
+    val allUnits: List<ConversionUnit> = lengthUnits + weightUnits + temperatureUnits + timeUnits
+
+    fun unit(id: String): ConversionUnit = allUnits.first { it.id == id }
+
     fun getUnitsForCategory(category: UnitCategory): List<ConversionUnit> {
         return when (category) {
             UnitCategory.Length -> lengthUnits
@@ -73,6 +90,39 @@ object UnitConverterEngine {
             UnitCategory.Temperature -> temperatureUnits
             UnitCategory.Time -> timeUnits
         }
+    }
+
+    /**
+     * Unidad de origen al entrar a cada categoría: la más usada en países métricos,
+     * desde donde suele partir la conversión.
+     */
+    fun defaultUnitFor(category: UnitCategory): ConversionUnit {
+        return when (category) {
+            UnitCategory.Length -> unit("cm")
+            UnitCategory.Weight -> unit("kg")
+            UnitCategory.Temperature -> unit("c")
+            UnitCategory.Time -> unit("h")
+        }
+    }
+
+    /**
+     * Destino más probable para cada origen: el equivalente del otro sistema (cm → pies +
+     * pulgadas, kg → lb) o, en tiempo, la unidad vecina. Se muestra primero y destacado.
+     */
+    private val primaryTargetIds: Map<String, String> = mapOf(
+        "m" to "ft", "cm" to "ft_in", "mm" to "in", "km" to "mi",
+        "ft_in" to "cm", "in" to "cm", "ft" to "m", "yd" to "m", "mi" to "km",
+        "kg" to "lb", "g" to "oz", "mg" to "g", "t" to "lb",
+        "lb_oz" to "kg", "lb" to "kg", "oz" to "g",
+        "c" to "f", "f" to "c", "k" to "c",
+        "s" to "min", "min" to "h", "h" to "min", "d" to "h"
+    )
+
+    /** Unidades de destino para [source]: primero la más probable, después el resto en orden. */
+    fun targetsFor(source: ConversionUnit): List<ConversionUnit> {
+        val others = getUnitsForCategory(source.category).filter { it != source }
+        val primary = primaryTargetIds[source.id]?.let(::unit) ?: return others
+        return listOf(primary) + others.filter { it != primary }
     }
 
     /**
@@ -107,65 +157,53 @@ object UnitConverterEngine {
     }
 
     /**
-     * Formatea un número para visualización en pantalla con hasta 6 decimales significativos,
-     * eliminando ceros redundantes a la derecha y usando notación científica para valores extremos.
+     * Formatea un número con hasta [SIGNIFICANT_DIGITS] cifras significativas, usando los
+     * separadores de [locale]. Con [grouping] en false no agrega separador de miles, para que
+     * el texto se pueda volver a parsear o pegar en otra app.
      */
-    fun formatNumber(value: Double): String {
+    fun formatNumber(value: Double, locale: Locale, grouping: Boolean = true): String {
         if (value.isNaN() || value.isInfinite()) return "—"
-        if (abs(value) == 0.0) return "0"
+        if (value == 0.0) return "0"
 
+        val symbols = DecimalFormatSymbols.getInstance(locale)
         val absVal = abs(value)
         if (absVal >= 1e9 || absVal < 1e-4) {
-            val symbols = DecimalFormatSymbols(Locale.US)
-            val df = DecimalFormat("0.####E0", symbols)
-            return df.format(value)
+            return DecimalFormat("0.####E0", symbols).format(value)
         }
 
-        val symbols = DecimalFormatSymbols(Locale.US)
-        val df = DecimalFormat("#,##0.######", symbols)
-        return df.format(value)
+        val integerDigits = floor(log10(absVal)).toInt() + 1
+        val df = DecimalFormat(if (grouping) "#,##0" else "0", symbols).apply {
+            maximumFractionDigits = (SIGNIFICANT_DIGITS - integerDigits).coerceIn(0, MAX_FRACTION_DIGITS)
+            roundingMode = RoundingMode.HALF_UP
+        }
+        return normalizeNegativeZero(df.format(value))
     }
 
     /**
-     * Formato numérico limpio sin separadores de miles, apto para copiar al portapapeles.
+     * Formatea [value], expresado en [unit], para mostrarlo. Las unidades compuestas se muestran
+     * como `5'10.9"` o `7 lb 4 oz`, con la parte menor redondeada a un decimal.
      */
-    fun formatCleanRaw(value: Double): String {
-        if (value.isNaN() || value.isInfinite()) return "0"
-        if (abs(value) == 0.0) return "0"
+    fun formatValue(value: Double, unit: ConversionUnit, locale: Locale, grouping: Boolean = true): String {
+        val compound = unit.compound ?: return formatNumber(value, locale, grouping)
+        if (value.isNaN() || value.isInfinite()) return "—"
 
-        val absVal = abs(value)
-        if (absVal >= 1e9 || absVal < 1e-4) {
-            val symbols = DecimalFormatSymbols(Locale.US)
-            val df = DecimalFormat("0.####E0", symbols)
-            return df.format(value)
+        val absMinor = abs(value)
+        if (absMinor >= 1e9) {
+            return (formatNumber(value / compound.minorPerMajor, locale, grouping) + compound.majorSymbol).trimEnd()
         }
 
-        val symbols = DecimalFormatSymbols(Locale.US)
-        val df = DecimalFormat("0.######", symbols)
-        return df.format(value)
+        // Redondeo en décimas de la unidad menor antes de separar, para que 5'11.96" pase a 6'0".
+        val tenths = (absMinor * 10).roundToLong()
+        val tenthsPerMajor = compound.minorPerMajor * 10L
+        val major = tenths / tenthsPerMajor
+        val minor = (tenths % tenthsPerMajor) / 10.0
+
+        val symbols = DecimalFormatSymbols.getInstance(locale)
+        val majorText = DecimalFormat(if (grouping) "#,##0" else "0", symbols).format(major)
+        val minorText = DecimalFormat("0.#", symbols).format(minor)
+        val sign = if (value < 0 && tenths > 0) "-" else ""
+        return "$sign$majorText${compound.majorSymbol}$minorText${compound.minorSymbol}".trim()
     }
 
-    /**
-     * Calcula la conversión de [value] a todas las unidades de la misma categoría.
-     */
-    fun convertAll(value: Double, from: ConversionUnit): List<UnitConversionItem> {
-        val units = getUnitsForCategory(from.category)
-        return units.map { targetUnit ->
-            val res = convert(value, from, targetUnit)
-            UnitConversionItem(
-                unit = targetUnit,
-                rawValue = res,
-                formattedValue = formatNumber(res)
-            )
-        }
-    }
-
-    /**
-     * Sanitiza y parsea el texto de entrada a Double, admitiendo coma o punto decimal.
-     */
-    fun parseInput(rawInput: String): Double? {
-        val cleaned = rawInput.trim().replace(',', '.')
-        if (cleaned.isEmpty()) return null
-        return cleaned.toDoubleOrNull()
-    }
+    private fun normalizeNegativeZero(text: String): String = if (text == "-0") "0" else text
 }
