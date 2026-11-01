@@ -32,13 +32,13 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoFixHigh
+import androidx.compose.material.icons.filled.Balance
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Scale
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Straighten
 import androidx.compose.material.icons.filled.Thermostat
-import androidx.compose.material.icons.outlined.Scale
+import androidx.compose.material.icons.outlined.Balance
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Straighten
 import androidx.compose.material.icons.outlined.Thermostat
@@ -104,7 +104,7 @@ import com.joasasso.minitoolbox.ui.components.TopBarReusable
 private val UnitCategory.icon: ImageVector
     get() = when (this) {
         UnitCategory.Length -> Icons.Outlined.Straighten
-        UnitCategory.Weight -> Icons.Outlined.Scale
+        UnitCategory.Weight -> Icons.Outlined.Balance
         UnitCategory.Temperature -> Icons.Outlined.Thermostat
         UnitCategory.Time -> Icons.Outlined.Schedule
     }
@@ -112,7 +112,7 @@ private val UnitCategory.icon: ImageVector
 private val UnitCategory.selectedIcon: ImageVector
     get() = when (this) {
         UnitCategory.Length -> Icons.Filled.Straighten
-        UnitCategory.Weight -> Icons.Filled.Scale
+        UnitCategory.Weight -> Icons.Filled.Balance
         UnitCategory.Temperature -> Icons.Filled.Thermostat
         UnitCategory.Time -> Icons.Filled.Schedule
     }
