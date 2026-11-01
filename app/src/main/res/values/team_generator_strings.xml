@@ -9,13 +9,14 @@
     <string name="team_generator_help_1">   – Choose between \"Team count\" or \"Team size\".</string>
     <string name="team_generator_help_2">   – Each player places one finger on the screen (supports up to 10 fingers).</string>
     <string name="team_generator_help_3">   – Uneven teams are supported when numbers don\'t divide evenly (e.g. 8 players in teams of 3 will form 2 teams of 3 and 1 of 2).</string>
-    <string name="team_generator_help_4">   – Hold your fingers still for 1 second until the rings fill up. Results stay frozen on screen so you can lift your fingers.</string>
+    <string name="team_generator_help_4">   – Hold your fingers still for 1 second until the rings fill up. Results stay frozen. To restart, triple-tap the screen (even with fingers still held) or tap \"New draw\".</string>
     <string name="team_mode_count">Team count</string>
     <string name="team_mode_size">Team size</string>
     <string name="team_min_fingers_required">Place at least %d fingers</string>
     <string name="team_fingers_detected">%d fingers detected</string>
     <string name="team_new_draw">New draw</string>
     <string name="team_results_title">Teams formed</string>
+    <string name="team_results_hint">Teams formed • Triple-tap to restart</string>
     <string name="team_group_summary_single">%1$d teams of %2$d</string>
     <string name="team_group_summary_double">%1$d teams of %2$d and %3$d of %4$d</string>
 </resources>

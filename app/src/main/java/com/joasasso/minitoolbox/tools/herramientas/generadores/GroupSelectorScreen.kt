@@ -212,8 +212,36 @@ fun GroupSelectorScreen(
                     .then(
                         if (uiState.isFrozen) {
                             Modifier.pointerInput(uiState.isFrozen) {
-                                detectTapGestures {
-                                    viewModel.reset()
+                                val tracker = TripleTapTracker()
+                                val downTimes = mutableMapOf<Long, Long>()
+                                val downPositions = mutableMapOf<Long, Offset>()
+                                awaitPointerEventScope {
+                                    while (true) {
+                                        val event = awaitPointerEvent()
+                                        event.changes.forEach { change ->
+                                            val id = change.id.value
+                                            if (change.pressed && !change.previousPressed) {
+                                                downTimes[id] = change.uptimeMillis
+                                                downPositions[id] = change.position
+                                            } else if (!change.pressed && change.previousPressed) {
+                                                val startTime = downTimes.remove(id)
+                                                val startPos = downPositions.remove(id)
+                                                if (startTime != null && startPos != null) {
+                                                    val duration = change.uptimeMillis - startTime
+                                                    val dx = change.position.x - startPos.x
+                                                    val dy = change.position.y - startPos.y
+                                                    val distance = kotlin.math.sqrt(dx * dx + dy * dy)
+                                                    if (duration < 400L && distance < 60f) {
+                                                        val triggered = tracker.registerTap(change.uptimeMillis)
+                                                        if (triggered) {
+                                                            viewModel.reset()
+                                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         } else {
@@ -318,7 +346,7 @@ fun GroupSelectorScreen(
 
                 // Píldora flotante con estado y previsualización (no ocupa altura de layout)
                 val statusText = when {
-                    uiState.isFrozen -> stringResource(R.string.team_results_title)
+                    uiState.isFrozen -> stringResource(R.string.team_results_hint)
                     fingerCount == 0 -> stringResource(R.string.place_fingers)
                     fingerCount < minRequired -> stringResource(
                         R.string.team_min_fingers_required,

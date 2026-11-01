@@ -9,13 +9,14 @@
     <string name="team_generator_help_1">   – Elige entre \"N° de equipos\" o \"Tamaño de equipo\".</string>
     <string name="team_generator_help_2">   – Cada participante coloca un dedo en la pantalla (admite hasta 10 dedos simultáneos).</string>
     <string name="team_generator_help_3">   – Se admiten equipos disparejos si el total no es múltiplo exacto (por ejemplo, 8 jugadores en equipos de 3 formarán 2 equipos de 3 y 1 de 2).</string>
-    <string name="team_generator_help_4">   – Mantengan los dedos quietos 1 segundo hasta que se completen los aros. El resultado queda fijo para que puedan levantar los dedos.</string>
+    <string name="team_generator_help_4">   – Mantengan los dedos quietos 1 segundo hasta que se completen los aros. El resultado queda fijo. Para reiniciar, da 3 toques a la pantalla (incluso sin soltar los dedos) o toca \"Nuevo sorteo\".</string>
     <string name="team_mode_count">N° Equipos</string>
     <string name="team_mode_size">Por tamaño</string>
     <string name="team_min_fingers_required">Apoya al menos %d dedos</string>
     <string name="team_fingers_detected">%d dedos detectados</string>
     <string name="team_new_draw">Nuevo sorteo</string>
     <string name="team_results_title">Equipos formados</string>
+    <string name="team_results_hint">Equipos formados • Triple toque para reiniciar</string>
     <string name="team_group_summary_single">%1$d equipos de %2$d</string>
     <string name="team_group_summary_double">%1$d equipos de %2$d y %3$d de %4$d</string>
 </resources>
