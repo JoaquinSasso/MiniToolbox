@@ -2,7 +2,16 @@ package com.joasasso.minitoolbox.tools.herramientas.calculadoras
 
 import androidx.annotation.StringRes
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.background
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -36,6 +45,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoFixHigh
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Straighten
+import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.material.icons.outlined.FitnessCenter
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Straighten
@@ -52,12 +65,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -99,6 +110,14 @@ private val UnitCategory.icon: ImageVector
         UnitCategory.Weight -> Icons.Outlined.FitnessCenter
         UnitCategory.Temperature -> Icons.Outlined.Thermostat
         UnitCategory.Time -> Icons.Outlined.Schedule
+    }
+
+private val UnitCategory.selectedIcon: ImageVector
+    get() = when (this) {
+        UnitCategory.Length -> Icons.Filled.Straighten
+        UnitCategory.Weight -> Icons.Filled.FitnessCenter
+        UnitCategory.Temperature -> Icons.Filled.Thermostat
+        UnitCategory.Time -> Icons.Filled.Schedule
     }
 
 @get:StringRes
@@ -181,7 +200,7 @@ fun ConversorUnidadesScreen(
                 .padding(padding)
                 .imePadding()
         ) {
-            CategoryTabs(
+            CategorySelector(
                 selected = state.category,
                 onSelect = { category ->
                     haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
@@ -197,7 +216,7 @@ fun ConversorUnidadesScreen(
                 onInputChange = viewModel::onInputChanged,
                 onClear = viewModel::onClearInput,
                 onSuggestionAccepted = viewModel::onSuggestionAccepted,
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp)
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp)
             )
 
             SourceUnitRow(
@@ -233,34 +252,89 @@ fun ConversorUnidadesScreen(
 }
 
 /**
- * Pestañas de categoría. El contenido es propio en lugar del slot `text` de [Tab] porque ese
- * slot reserva 16 dp por lado y "Temperatura" no entra en un cuarto de pantalla.
+ * Selector de categoría. Cada opción es un ícono dentro de un contenedor tonal: la elegida se
+ * rellena con el color primario y usa la variante sólida del ícono, con un rebote breve al
+ * seleccionarla. Es un solo toque por categoría, igual que las pestañas que reemplaza.
  */
 @Composable
-private fun CategoryTabs(selected: UnitCategory, onSelect: (UnitCategory) -> Unit) {
-    val categories = UnitCategory.entries
-    PrimaryTabRow(selectedTabIndex = categories.indexOf(selected)) {
-        categories.forEach { category ->
-            Tab(
+private fun CategorySelector(selected: UnitCategory, onSelect: (UnitCategory) -> Unit) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .selectableGroup()
+            .padding(horizontal = 12.dp, vertical = 4.dp)
+    ) {
+        UnitCategory.entries.forEach { category ->
+            CategoryOption(
+                category = category,
                 selected = category == selected,
                 onClick = { onSelect(category) },
-                unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)
-                ) {
-                    Icon(category.icon, contentDescription = null)
-                    Spacer(Modifier.height(2.dp))
-                    Text(
-                        text = stringResource(category.titleRes),
-                        style = MaterialTheme.typography.labelMedium,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
+                modifier = Modifier.weight(1f)
+            )
         }
+    }
+}
+
+@Composable
+private fun CategoryOption(
+    category: UnitCategory,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val colors = MaterialTheme.colorScheme
+    val containerColor by animateColorAsState(
+        if (selected) colors.primary else colors.surfaceContainerHighest,
+        label = "categoryContainer"
+    )
+    val iconColor by animateColorAsState(
+        if (selected) colors.onPrimary else colors.onSurfaceVariant,
+        label = "categoryIcon"
+    )
+    val labelColor by animateColorAsState(
+        if (selected) colors.primary else colors.onSurfaceVariant,
+        label = "categoryLabel"
+    )
+    val scale by animateFloatAsState(
+        targetValue = if (selected) 1f else 0.92f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium),
+        label = "categoryScale"
+    )
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .selectable(selected = selected, role = Role.Tab, onClick = onClick)
+            .padding(vertical = 2.dp)
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                }
+                .size(width = 64.dp, height = 40.dp)
+                .clip(RoundedCornerShape(if (selected) 14.dp else 20.dp))
+                .background(containerColor)
+        ) {
+            Icon(
+                imageVector = if (selected) category.selectedIcon else category.icon,
+                contentDescription = null,
+                tint = iconColor
+            )
+        }
+        Spacer(Modifier.height(2.dp))
+        Text(
+            text = stringResource(category.titleRes),
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+            color = labelColor,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
 
