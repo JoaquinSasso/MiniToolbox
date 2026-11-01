@@ -1,6 +1,17 @@
 package com.joasasso.minitoolbox.tools.herramientas.calculadoras
 
 import androidx.annotation.StringRes
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Surface
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,6 +33,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoFixHigh
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.outlined.FitnessCenter
@@ -29,12 +41,13 @@ import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Straighten
 import androidx.compose.material.icons.outlined.Thermostat
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -197,6 +210,8 @@ fun ConversorUnidadesScreen(
             )
 
             ResultsList(
+                category = state.category,
+                sourceEcho = state.sourceEcho,
                 results = state.results,
                 stale = state.resultsAreStale,
                 onSelect = { unit ->
@@ -321,12 +336,17 @@ private fun ValueField(
                 Column {
                     Text(it.message())
                     it.suggestionText?.let { suggestion ->
-                        TextButton(
+                        AssistChip(
                             onClick = onSuggestionAccepted,
-                            contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp)
-                        ) {
-                            Text(stringResource(R.string.conversor_suggestion, suggestion))
-                        }
+                            label = { Text(stringResource(R.string.conversor_suggestion, suggestion)) },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Filled.AutoFixHigh,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(AssistChipDefaults.IconSize)
+                                )
+                            }
+                        )
                     }
                 }
             }
@@ -405,6 +425,8 @@ private fun SourceUnitRow(
 
 @Composable
 private fun ResultsList(
+    category: UnitCategory,
+    sourceEcho: String?,
     results: List<ConversionRow>,
     stale: Boolean,
     onSelect: (ConversionUnit) -> Unit,
@@ -412,57 +434,113 @@ private fun ResultsList(
     modifier: Modifier = Modifier
 ) {
     if (results.isEmpty()) {
-        Box(modifier = modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.TopCenter) {
-            Text(
-                text = stringResource(R.string.conversor_empty_hint),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+        EmptyResults(category = category, modifier = modifier)
         return
     }
 
     val primary = results.first()
     val others = results.drop(1)
-    val contentAlpha = if (stale) 0.38f else 1f
+    val contentAlpha by animateFloatAsState(if (stale) 0.38f else 1f, label = "staleAlpha")
 
     LazyColumn(
         modifier = modifier
             .fillMaxWidth()
             .alpha(contentAlpha),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp)
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 16.dp)
     ) {
-        item(key = "primary_${primary.unit.id}") {
+        item(key = "primary") {
             PrimaryResultCard(
                 row = primary,
+                sourceEcho = sourceEcho,
                 enabled = !stale,
                 onSelect = { onSelect(primary.unit) },
                 onCopy = { onCopy(primary.unit) }
             )
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(12.dp))
         }
-        items(others, key = { "other_${it.unit.id}" }) { row ->
+        itemsIndexed(others, key = { _, row -> "other_${row.unit.id}" }) { index, row ->
             ResultRow(
                 row = row,
+                shape = groupedShape(index, others.size),
                 enabled = !stale,
                 onSelect = { onSelect(row.unit) },
-                onCopy = { onCopy(row.unit) }
+                onCopy = { onCopy(row.unit) },
+                modifier = Modifier.animateItem()
             )
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         }
     }
 }
 
-/** Texto principal de una fila: las unidades compuestas ya traen sus símbolos (`5'10.9"`). */
+/**
+ * Forma de una fila dentro del grupo de resultados secundarios: solo la primera y la última
+ * redondean sus esquinas exteriores, para que el grupo se lea como una sola tarjeta.
+ */
+private fun groupedShape(index: Int, count: Int): Shape {
+    val outer = 16.dp
+    val inner = 4.dp
+    return RoundedCornerShape(
+        topStart = if (index == 0) outer else inner,
+        topEnd = if (index == 0) outer else inner,
+        bottomStart = if (index == count - 1) outer else inner,
+        bottomEnd = if (index == count - 1) outer else inner
+    )
+}
+
+@Composable
+private fun EmptyResults(category: UnitCategory, modifier: Modifier = Modifier) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 32.dp, vertical = 24.dp)
+    ) {
+        Surface(
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            modifier = Modifier.size(64.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(category.icon, contentDescription = null, modifier = Modifier.size(32.dp))
+            }
+        }
+        Spacer(Modifier.height(16.dp))
+        Text(
+            text = stringResource(R.string.conversor_empty_hint),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+/** Texto plano de una fila: las unidades compuestas ya traen sus símbolos (`5'10.9"`). */
 private fun ConversionRow.valueWithSymbol(): String =
     if (unit.compound != null) display else "$display ${unit.symbol}"
 
+/** El número con peso completo y el símbolo más liviano, para que la cifra se lea primero. */
+private fun ConversionRow.styledValue(symbolStyle: SpanStyle): AnnotatedString = buildAnnotatedString {
+    append(display)
+    if (unit.compound == null) {
+        append(" ")
+        withStyle(symbolStyle) { append(unit.symbol) }
+    }
+}
+
 @Composable
-private fun PrimaryResultCard(row: ConversionRow, enabled: Boolean, onSelect: () -> Unit, onCopy: () -> Unit) {
+private fun PrimaryResultCard(
+    row: ConversionRow,
+    sourceEcho: String?,
+    enabled: Boolean,
+    onSelect: () -> Unit,
+    onCopy: () -> Unit
+) {
+    val onContainer = MaterialTheme.colorScheme.onPrimaryContainer
     Card(
+        shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            contentColor = onContainer
         ),
         modifier = Modifier
             .fillMaxWidth()
@@ -474,19 +552,36 @@ private fun PrimaryResultCard(row: ConversionRow, enabled: Boolean, onSelect: ()
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(start = 20.dp, end = 8.dp, top = 12.dp, bottom = 12.dp)
+            modifier = Modifier
+                .animateContentSize()
+                .padding(start = 24.dp, end = 12.dp, top = 16.dp, bottom = 16.dp)
         ) {
             Column(modifier = Modifier.weight(1f)) {
+                sourceEcho?.let {
+                    Text(
+                        text = stringResource(R.string.conversor_echo, it),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = onContainer.copy(alpha = 0.8f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
                 Text(
-                    text = stringResource(row.unit.nameRes),
-                    style = MaterialTheme.typography.labelLarge
-                )
-                Text(
-                    text = row.valueWithSymbol(),
+                    text = row.styledValue(
+                        SpanStyle(
+                            fontSize = MaterialTheme.typography.headlineSmall.fontSize,
+                            fontWeight = FontWeight.Normal
+                        )
+                    ),
                     style = MaterialTheme.typography.displaySmall,
-                    fontWeight = FontWeight.SemiBold,
+                    fontWeight = FontWeight.Bold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = stringResource(row.unit.nameRes),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = onContainer.copy(alpha = 0.8f)
                 )
             }
             CopyButton(row = row, enabled = enabled, onCopy = onCopy)
@@ -495,33 +590,47 @@ private fun PrimaryResultCard(row: ConversionRow, enabled: Boolean, onSelect: ()
 }
 
 @Composable
-private fun ResultRow(row: ConversionRow, enabled: Boolean, onSelect: () -> Unit, onCopy: () -> Unit) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
+private fun ResultRow(
+    row: ConversionRow,
+    shape: Shape,
+    enabled: Boolean,
+    onSelect: () -> Unit,
+    onCopy: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        shape = shape,
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        modifier = modifier
             .fillMaxWidth()
-            .clickable(
-                enabled = enabled,
-                onClickLabel = stringResource(R.string.conversor_use_as_input),
-                onClick = onSelect
-            )
-            .padding(start = 4.dp, top = 6.dp, bottom = 6.dp)
+            .padding(bottom = 2.dp)
     ) {
-        Text(
-            text = row.valueWithSymbol(),
-            style = MaterialTheme.typography.titleLarge,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f)
-        )
-        Spacer(Modifier.width(8.dp))
-        Text(
-            text = stringResource(row.unit.nameRes),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1
-        )
-        CopyButton(row = row, enabled = enabled, onCopy = onCopy)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .clickable(
+                    enabled = enabled,
+                    onClickLabel = stringResource(R.string.conversor_use_as_input),
+                    onClick = onSelect
+                )
+                .padding(start = 20.dp, top = 4.dp, bottom = 4.dp, end = 4.dp)
+        ) {
+            Text(
+                text = row.styledValue(SpanStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)),
+                style = MaterialTheme.typography.titleLarge,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = stringResource(row.unit.nameRes),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1
+            )
+            CopyButton(row = row, enabled = enabled, onCopy = onCopy)
+        }
     }
 }
 

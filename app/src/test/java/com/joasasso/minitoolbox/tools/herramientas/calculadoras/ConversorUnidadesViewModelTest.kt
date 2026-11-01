@@ -150,6 +150,19 @@ class ConversorUnidadesViewModelTest {
         assertNull(state.error)
     }
 
+    @Test
+    fun eco_muestraElValorInterpretadoConSuUnidad() {
+        assertNull(state.sourceEcho)
+        viewModel.onInputChanged("1800")
+        assertEquals("1.800 cm", state.sourceEcho)
+        viewModel.onInputChanged("5 ft 11 in")
+        assertEquals("5'11\"", state.sourceEcho)
+        viewModel.onInputChanged("5'13")
+        assertEquals("5'11\"", state.sourceEcho)
+        viewModel.onClearInput()
+        assertNull(state.sourceEcho)
+    }
+
     // -------------------------------------------------------------------------
     // Errores
     // -------------------------------------------------------------------------

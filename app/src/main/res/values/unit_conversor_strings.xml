@@ -59,6 +59,7 @@
     <string name="conversor_suggestion">Did you mean %1$s?</string>
 
     <!-- Resultados -->
+    <string name="conversor_echo" translatable="false">%1$s =</string>
     <string name="conversor_empty_hint">Type a value to see it in every unit</string>
     <string name="conversor_use_as_input">Use as input</string>
     <string name="conversor_copy_cd">Copy %1$s</string>

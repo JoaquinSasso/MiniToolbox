@@ -42,6 +42,8 @@ data class ConversorUnidadesUiState(
      */
     val inputRevision: Int = 0,
     val sourceUnit: ConversionUnit = UnitConverterEngine.defaultUnitFor(UnitCategory.Length),
+    /** El valor tal como se interpretó (`180 cm`, `5'11"`), para confirmarlo junto al resultado. */
+    val sourceEcho: String? = null,
     val results: List<ConversionRow> = emptyList(),
     /** true cuando la entrada actual es inválida y [results] corresponde al último valor válido. */
     val resultsAreStale: Boolean = false,
@@ -157,7 +159,9 @@ class ConversorUnidadesViewModel(
             ParsedInput.Empty -> {
                 lastValid = null
                 inputHasExplicitUnit = false
-                _uiState.update { it.copy(results = emptyList(), resultsAreStale = false, error = null) }
+                _uiState.update {
+                    it.copy(results = emptyList(), sourceEcho = null, resultsAreStale = false, error = null)
+                }
             }
 
             is ParsedInput.Valid -> {
@@ -168,6 +172,10 @@ class ConversorUnidadesViewModel(
                     it.copy(
                         category = quantity.unit.category,
                         sourceUnit = quantity.unit,
+                        sourceEcho = withSymbol(
+                            UnitConverterEngine.formatValue(quantity.value, quantity.unit, localeProvider()),
+                            quantity.unit
+                        ),
                         results = buildRows(quantity),
                         resultsAreStale = false,
                         error = null
@@ -201,6 +209,9 @@ class ConversorUnidadesViewModel(
             )
         }
     }
+
+    private fun withSymbol(text: String, unit: ConversionUnit): String =
+        if (unit.compound != null) text else "$text ${unit.symbol}"
 
     private companion object {
         const val MAX_INPUT_LENGTH = 40
