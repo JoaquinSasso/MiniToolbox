@@ -9,6 +9,7 @@
     <string name="unit_centimeter">Centímetro</string>
     <string name="unit_millimeter">Milímetro</string>
     <string name="unit_kilometer">Kilómetro</string>
+    <string name="unit_feet_inches">Pies + pulgadas</string>
     <string name="unit_inch">Pulgada</string>
     <string name="unit_foot">Pie</string>
     <string name="unit_yard">Yarda</string>
@@ -18,6 +19,7 @@
     <string name="unit_gram">Gramo</string>
     <string name="unit_milligram">Miligramo</string>
     <string name="unit_ton">Tonelada</string>
+    <string name="unit_pounds_ounces">Libras + onzas</string>
     <string name="unit_pound">Libra</string>
     <string name="unit_ounce">Onza</string>
 
@@ -30,39 +32,42 @@
     <string name="unit_hour">Hora</string>
     <string name="unit_day">Día</string>
 
-    <!-- Tipos de unidad -->
-    <string name="unidad_tipo_longitud">Longitud</string>
-    <string name="unidad_tipo_peso">Peso</string>
-    <string name="unidad_tipo_temperatura">Temperatura</string>
-    <string name="unidad_tipo_tiempo">Tiempo</string>
-
-    <!-- Campo de entrada -->
+    <!-- Entrada -->
     <string name="unidad_valor">Valor</string>
+    <string name="conversor_hint_length">ej.: 180 o 5\'11</string>
+    <string name="conversor_hint_weight">ej.: 70 o 7 lb 4 oz</string>
+    <string name="conversor_hint_temperature">ej.: 30</string>
+    <string name="conversor_hint_time">ej.: 2,5</string>
+    <string name="conversor_de_label">De</string>
+    <string name="conversor_limpiar">Borrar valor</string>
+    <string name="conversor_key_feet">Insertar símbolo de pies</string>
+    <string name="conversor_key_inches">Insertar símbolo de pulgadas</string>
+    <string name="conversor_key_pounds">Insertar libras</string>
+    <string name="conversor_key_ounces">Insertar onzas</string>
+    <string name="conversor_key_sign">Cambiar signo</string>
 
-    <!-- Botones -->
-    <string name="unidad_boton_copiar">Copiar</string>
-    <string name="unidad_boton_resetear">Resetear</string>
-    <string name="unidad_boton_cerrar">Cerrar</string>
+    <!-- Errores de entrada -->
+    <string name="conversor_error_invalid_format">Escribí un número, por ejemplo 180 o 5\'11</string>
+    <string name="conversor_error_invalid_number">Revisá el número: usá un solo separador decimal</string>
+    <string name="conversor_error_unknown_unit">No conozco la unidad “%1$s”</string>
+    <string name="conversor_error_ambiguous_quotes">Usá \' para pies y \" para pulgadas, por ejemplo 5\'11\"</string>
+    <string name="conversor_error_inches_range">Las pulgadas tienen que ser menos de 12</string>
+    <string name="conversor_error_ounces_range">Las onzas tienen que ser menos de 16</string>
+    <string name="conversor_error_fractional_feet">Usá pies enteros si sumás pulgadas, por ejemplo 5\'11</string>
+    <string name="conversor_error_fractional_pounds">Usá libras enteras si sumás onzas, por ejemplo 7 lb 4 oz</string>
+    <string name="conversor_error_unsupported">Solo se pueden combinar pies + pulgadas y libras + onzas</string>
+    <string name="conversor_suggestion">¿Quisiste decir %1$s?</string>
 
-    <!-- Content descriptions -->
-    <string name="unidad_content_desc_copiar">Copiar resultado</string>
-    <string name="unidad_content_desc_resetear">Resetear campos</string>
-
-    <!-- Snackbar -->
+    <!-- Resultados -->
+    <string name="conversor_empty_hint">Escribí un valor para verlo en todas las unidades</string>
+    <string name="conversor_use_as_input">Usar como valor</string>
+    <string name="conversor_copy_cd">Copiar %1$s</string>
     <string name="unidad_resultado_copiado">Resultado copiado</string>
-
-    <!-- Resultado final -->
-    <string name="unidad_resultado_final">Resultado: %1$s %2$s</string>
 
     <!-- Diálogo de ayuda -->
     <string name="unidad_info_titulo">Acerca del conversor de unidades</string>
-    <string name="unidad_info_linea1">• Convertí valores entre unidades de longitud, peso, temperatura y tiempo.</string>
-    <string name="unidad_info_linea2">• Ingresá el valor, seleccioná las unidades de origen y destino, y el resultado se calcula automáticamente.</string>
-    <string name="unidad_info_linea3">• Usá el botón "Copiar" para guardar el resultado o "Resetear" para limpiar los campos.</string>
-    <string name="unidad_info_linea4">Ejemplos de unidades:</string>
-    <string name="unidad_info_linea5">– Longitud: metro, pulgada, milla, etc.</string>
-    <string name="unidad_info_linea6">– Peso: kilogramo, libra, onza, etc.</string>
-    <string name="unidad_info_linea7">– Temperatura: Celsius, Fahrenheit, Kelvin.</string>
-    <string name="unidad_info_linea8">– Tiempo: segundo, minuto, hora, día.</string>
-
+    <string name="conversor_info_1">• Escribí un valor y lo vas a ver en todas las unidades de la categoría mientras escribís.</string>
+    <string name="conversor_info_2">• Pies y pulgadas: 5\'11, 5\'11,5\" o 5 ft 11 in. Libras y onzas: 7 lb 4 oz. Las teclas junto al campo agregan \' \" lb y oz.</string>
+    <string name="conversor_info_3">• Si escribís o pegás la unidad (180 cm, 70 kg, 30 °C), se detecta sola y cambia la categoría.</string>
+    <string name="conversor_info_4">• Tocá un resultado para usarlo como nuevo valor. El ícono de copiar lo copia.</string>
 </resources>

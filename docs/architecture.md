@@ -25,8 +25,8 @@ flowchart TD
         
         subgraph Screens [Pantallas / Tools]
             direction TB
-            VM_Screens["Screens con ViewModel<br/>(Categories, Minesweeper, Agua...)"]
-            State_Screens["Screens con Local State<br/>(Pomodoro, Conversor, Instrumentos...)"]
+            VM_Screens["Screens con ViewModel<br/>(Categories, Minesweeper, Agua, Conversor...)"]
+            State_Screens["Screens con Local State<br/>(Pomodoro, Instrumentos...)"]
             style VM_Screens fill:#e1f5fe,stroke:#01579b,color:#000
             style State_Screens fill:#fff9c4,stroke:#fbc02d,color:#000
         end

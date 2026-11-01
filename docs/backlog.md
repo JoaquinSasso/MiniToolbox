@@ -56,4 +56,5 @@ Las líneas citan el estado de `master @ 58105f5` (2026-10-02). Antes de trabaja
 - [ ] **Compartir resultados** desde la regla AR y el marcador de Truco. Hoy solo 3 pantallas usan `ACTION_SEND`.
 - [ ] **Landscape** en la regla AR y el nivel de burbuja, vía `LockScreenOrientationIfAllowed`.
 - [ ] **Medir el onboarding** de las herramientas de sensores (evento `onboarding_dismissed`), para saber si se lee.
+- [ ] **Conversiones recientes en el conversor de unidades**, con botón para invertir (patrón de PCalc). Hoy el estado vive solo en `ConversorUnidadesViewModel` y se pierde al cerrar la app: requiere un repositorio con DataStore. Evidencia: `ConversorUnidadesViewModel.kt` no recibe repositorio. Hecho: lista de recientes persistida y testeada, con decisión del autor sobre cuántas guardar.
 - [ ] **GIFs del README.** Pendientes hasta cerrar los cambios de UI.
