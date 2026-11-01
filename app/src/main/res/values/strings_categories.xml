@@ -1,25 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="category_favoritos">Favorites</string>
-    <string name="category_herramientas">Tools</string>
-    <string name="category_instrumentos">Instruments</string>
-    <string name="category_cotidiano">Daily</string>
-    <string name="category_generadores">Generators</string>
-    <string name="category_juegos">Games</string>
+    <string name="category_measure">Measure</string>
+    <string name="category_essentials">Essentials</string>
+    <string name="category_organize">Organize</string>
+    <string name="category_generate">Generate</string>
+    <string name="category_play">Play</string>
 
-    <string name="subcategory_measurement">Measurement</string>
-    <string name="subcategory_sensors">Sensors &amp; Optics</string>
-    <string name="subcategory_instrument">Instruments</string>
-    <string name="subcategory_habits">Time &amp; Habits</string>
-    <string name="subcategory_calculator">Finance &amp; Conversion</string>
-    <string name="subcategory_generator">QR &amp; Codes</string>
-    <string name="subcategory_random">Random &amp; Draws</string>
+    <string name="subcategory_distance">Distance</string>
+    <string name="subcategory_sensors">Sensors</string>
+    <string name="subcategory_light_lens">Light &amp; lens</string>
+    <string name="subcategory_conversion">Conversion</string>
+    <string name="subcategory_routines">Routines</string>
+    <string name="subcategory_money">Money</string>
+    <string name="subcategory_codes">Codes</string>
+    <string name="subcategory_draws">Draws</string>
     <string name="subcategory_scoreboards">Scoreboards</string>
     <string name="subcategory_minigames">Minigames</string>
-    <string name="subcategory_others">Utilities</string>
+    <string name="subcategory_system">System</string>
 
-    <string name="categories_empty_favorites_title">No favorite tools yet</string>
-    <string name="categories_empty_favorites_subtitle">Tap the star icon on any tool to pin it here and on your home screen widget.</string>
+    <string name="catalog_filter_all">All</string>
+    <string name="catalog_favorites_title">Favorites</string>
+    <string name="catalog_favorites_edit">Edit</string>
+    <string name="catalog_edit_favorites_title">Edit favorites</string>
+    <string name="catalog_edit_favorites_subtitle">The first ones appear on your home screen widget, as many as fit its size.</string>
+    <string name="catalog_move_up">Move up</string>
+    <string name="catalog_move_down">Move down</string>
+    <string name="catalog_search_suggestions">All tools</string>
+
+    <string name="categories_empty_favorites_title">Pin your go-to tools</string>
+    <string name="categories_empty_favorites_subtitle">Tap the star on any tool to keep it here and on your home screen widget.</string>
     <string name="categories_empty_search_subtitle">Try searching by tool name, function, or category.</string>
     <string name="categories_clear_filters">Clear search</string>
     <string name="categories_favorite_add_cd">Add to favorites</string>

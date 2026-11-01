@@ -14,8 +14,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 data class CategoriesUiState(
-    val selectedCategory: ToolCategory = ToolCategory.Instrumentos,
-    val isSearchActive: Boolean = false,
+    /** Filtro del catálogo; `null` muestra todas las categorías agrupadas. */
+    val selectedCategory: ToolCategory? = null,
     val searchQuery: String = "",
     val favoriteRoutes: List<String> = emptyList(),
     val isLoading: Boolean = false
@@ -32,19 +32,16 @@ class CategoryViewModel(
         repository = DefaultFavoritesRepository(application)
     )
 
-    private val _selectedCategory = MutableStateFlow<ToolCategory>(ToolCategory.Instrumentos)
-    private val _isSearchActive = MutableStateFlow(false)
+    private val _selectedCategory = MutableStateFlow<ToolCategory?>(null)
     private val _searchQuery = MutableStateFlow("")
 
     val uiState: StateFlow<CategoriesUiState> = combine(
         _selectedCategory,
-        _isSearchActive,
         _searchQuery,
         repository.favoritesFlow
-    ) { category, searchActive, query, favorites ->
+    ) { category, query, favorites ->
         CategoriesUiState(
             selectedCategory = category,
-            isSearchActive = searchActive,
             searchQuery = query,
             favoriteRoutes = favorites,
             isLoading = false
@@ -55,28 +52,13 @@ class CategoryViewModel(
         initialValue = CategoriesUiState(isLoading = true)
     )
 
-    fun selectCategory(category: ToolCategory) {
-        _selectedCategory.value = category
-        _isSearchActive.value = false
-        _searchQuery.value = ""
-    }
-
-    fun openSearch() {
-        _isSearchActive.value = true
-    }
-
-    fun closeSearch() {
-        _isSearchActive.value = false
-        _searchQuery.value = ""
+    /** Tocar el filtro activo lo desactiva y vuelve a "Todas". */
+    fun selectCategory(category: ToolCategory?) {
+        _selectedCategory.value = if (category == _selectedCategory.value) null else category
     }
 
     fun onSearchQueryChange(query: String) {
-        _isSearchActive.value = true
         _searchQuery.value = query
-    }
-
-    fun clearSearch() {
-        _searchQuery.value = ""
     }
 
     fun toggleFavorite(route: String) {

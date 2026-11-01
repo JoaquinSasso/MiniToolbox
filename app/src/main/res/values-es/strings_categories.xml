@@ -1,25 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="category_favoritos">Favoritos</string>
-    <string name="category_herramientas">Herramientas</string>
-    <string name="category_instrumentos">Instrumentos</string>
-    <string name="category_cotidiano">Cotidiano</string>
-    <string name="category_generadores">Generadores</string>
-    <string name="category_juegos">Juegos</string>
+    <string name="category_measure">Medir</string>
+    <string name="category_essentials">Esenciales</string>
+    <string name="category_organize">Organizar</string>
+    <string name="category_generate">Generar</string>
+    <string name="category_play">Jugar</string>
 
-    <string name="subcategory_measurement">Medición</string>
-    <string name="subcategory_sensors">Sensores y Óptica</string>
-    <string name="subcategory_instrument">Instrumentos</string>
-    <string name="subcategory_habits">Tiempo y Hábitos</string>
-    <string name="subcategory_calculator">Finanzas y Conversión</string>
-    <string name="subcategory_generator">Códigos QR</string>
-    <string name="subcategory_random">Sorteos y Azar</string>
+    <string name="subcategory_distance">Distancia</string>
+    <string name="subcategory_sensors">Sensores</string>
+    <string name="subcategory_light_lens">Luz y lente</string>
+    <string name="subcategory_conversion">Conversión</string>
+    <string name="subcategory_routines">Rutinas</string>
+    <string name="subcategory_money">Cuentas</string>
+    <string name="subcategory_codes">Códigos</string>
+    <string name="subcategory_draws">Sorteos</string>
     <string name="subcategory_scoreboards">Marcadores</string>
     <string name="subcategory_minigames">Minijuegos</string>
-    <string name="subcategory_others">Utilidades</string>
+    <string name="subcategory_system">Sistema</string>
 
-    <string name="categories_empty_favorites_title">Aún no tienes favoritos</string>
-    <string name="categories_empty_favorites_subtitle">Toca la estrella en cualquier herramienta para fijarla aquí y en el widget de inicio.</string>
+    <string name="catalog_filter_all">Todas</string>
+    <string name="catalog_favorites_title">Favoritos</string>
+    <string name="catalog_favorites_edit">Editar</string>
+    <string name="catalog_edit_favorites_title">Editar favoritos</string>
+    <string name="catalog_edit_favorites_subtitle">Las primeras aparecen en el widget de inicio, tantas como entren según su tamaño.</string>
+    <string name="catalog_move_up">Mover arriba</string>
+    <string name="catalog_move_down">Mover abajo</string>
+    <string name="catalog_search_suggestions">Todas las herramientas</string>
+
+    <string name="categories_empty_favorites_title">Fija tus herramientas de siempre</string>
+    <string name="categories_empty_favorites_subtitle">Toca la estrella en cualquier herramienta para tenerla aquí y en el widget de inicio.</string>
     <string name="categories_empty_search_subtitle">Prueba buscando por nombre, función o categoría.</string>
     <string name="categories_clear_filters">Limpiar búsqueda</string>
     <string name="categories_favorite_add_cd">Agregar a favoritos</string>
