@@ -10,10 +10,14 @@ import com.joasasso.minitoolbox.data.aguaDataStore
 import com.joasasso.minitoolbox.data.guardarAguaFecha
 import com.joasasso.minitoolbox.data.guardarObjetivo
 import com.joasasso.minitoolbox.data.guardarPorVaso
+import java.time.LocalDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -28,7 +32,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import java.time.LocalDate
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
@@ -52,10 +55,21 @@ class AguaStatisticsViewModelTest {
         Dispatchers.resetMain()
     }
 
+    /**
+     * Mantiene un colector de `uiState` durante todo el test. Sin él, `WhileSubscribed(5000)`
+     * deja de escuchar DataStore cada vez que el reloj virtual avanza 5 s entre dos `first {}`,
+     * y el estado puede quedar congelado en un valor viejo: el test espera hasta el timeout
+     * de `runTest` (falla intermitente en CI con `UncompletedCoroutinesError`).
+     */
+    private fun TestScope.mantenerSuscripto(state: StateFlow<*>) {
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { state.collect {} }
+    }
+
     @Test
     fun uiState_inicialmenteVacio_exponeValoresPorDefecto() = runTest {
         val model = AguaStatisticsViewModel(app, DefaultAguaRepository)
         vm = model
+        mantenerSuscripto(model.uiState)
 
         val state = model.uiState.first { !it.isLoading }
         assertTrue(state.historico.isEmpty())
@@ -78,6 +92,7 @@ class AguaStatisticsViewModelTest {
 
         val model = AguaStatisticsViewModel(app, DefaultAguaRepository)
         vm = model
+        mantenerSuscripto(model.uiState)
 
         val state = model.uiState.first { !it.isLoading && it.historico.size == 2 }
         assertEquals(listOf(dia1 to 1500, dia2 to 2500), state.historico)
@@ -100,6 +115,7 @@ class AguaStatisticsViewModelTest {
             todayProvider = { LocalDate.of(2026, 10, 10) }
         )
         vm = model
+        mantenerSuscripto(model.uiState)
 
         model.uiState.first { !it.isLoading && it.historico.size == 1 }
 
