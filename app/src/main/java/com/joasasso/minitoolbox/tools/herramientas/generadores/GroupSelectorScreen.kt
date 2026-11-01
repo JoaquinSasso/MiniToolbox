@@ -35,6 +35,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -83,6 +84,9 @@ fun GroupSelectorScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val haptic = LocalHapticFeedback.current
     val textMeasurer = rememberTextMeasurer()
+
+    val currentIsFrozen by rememberUpdatedState(uiState.isFrozen)
+    val currentOnReset by rememberUpdatedState { viewModel.reset() }
 
     var fingerPositions by remember { mutableStateOf<Map<Long, Offset>>(emptyMap()) }
     var holdProgress by remember { mutableFloatStateOf(0f) }
@@ -209,61 +213,49 @@ fun GroupSelectorScreen(
                     .fillMaxWidth()
                     .weight(1f)
                     .background(MaterialTheme.colorScheme.background)
-                    .then(
-                        if (uiState.isFrozen) {
-                            Modifier.pointerInput(uiState.isFrozen) {
-                                val tracker = TripleTapTracker()
-                                val downTimes = mutableMapOf<Long, Long>()
-                                val downPositions = mutableMapOf<Long, Offset>()
-                                awaitPointerEventScope {
-                                    while (true) {
-                                        val event = awaitPointerEvent()
-                                        event.changes.forEach { change ->
-                                            val id = change.id.value
-                                            if (change.pressed && !change.previousPressed) {
-                                                downTimes[id] = change.uptimeMillis
-                                                downPositions[id] = change.position
-                                            } else if (!change.pressed && change.previousPressed) {
-                                                val startTime = downTimes.remove(id)
-                                                val startPos = downPositions.remove(id)
-                                                if (startTime != null && startPos != null) {
-                                                    val duration = change.uptimeMillis - startTime
-                                                    val dx = change.position.x - startPos.x
-                                                    val dy = change.position.y - startPos.y
-                                                    val distance = kotlin.math.sqrt(dx * dx + dy * dy)
-                                                    if (duration < 400L && distance < 60f) {
-                                                        val triggered = tracker.registerTap(change.uptimeMillis)
-                                                        if (triggered) {
-                                                            viewModel.reset()
-                                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                        }
+                    .pointerInput(Unit) {
+                        val tracker = TripleTapTracker()
+                        val downTimes = mutableMapOf<Long, Long>()
+                        val downPositions = mutableMapOf<Long, Offset>()
+                        val pointers = mutableMapOf<Long, Offset>()
+
+                        awaitPointerEventScope {
+                            while (true) {
+                                val event = awaitPointerEvent()
+                                event.changes.forEach { change ->
+                                    val id = change.id.value
+                                    if (change.pressed) {
+                                        pointers[id] = change.position
+                                        if (!change.previousPressed) {
+                                            downTimes[id] = change.uptimeMillis
+                                            downPositions[id] = change.position
+                                        }
+                                    } else {
+                                        pointers.remove(id)
+                                        if (change.previousPressed) {
+                                            val startTime = downTimes.remove(id)
+                                            val startPos = downPositions.remove(id)
+                                            if (startTime != null && startPos != null && currentIsFrozen) {
+                                                val duration = change.uptimeMillis - startTime
+                                                val dx = change.position.x - startPos.x
+                                                val dy = change.position.y - startPos.y
+                                                val distance = kotlin.math.sqrt(dx * dx + dy * dy)
+                                                if (duration < 400L && distance < 60f) {
+                                                    val triggered = tracker.registerTap(change.uptimeMillis)
+                                                    if (triggered) {
+                                                        currentOnReset()
+                                                        tracker.reset()
+                                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                                     }
                                                 }
                                             }
                                         }
                                     }
                                 }
-                            }
-                        } else {
-                            Modifier.pointerInput(uiState.isFrozen) {
-                                awaitEachGesture {
-                                    val pointers = mutableMapOf<Long, Offset>()
-                                    while (true) {
-                                        val event = awaitPointerEvent()
-                                        event.changes.forEach { change ->
-                                            if (change.pressed) {
-                                                pointers[change.id.value] = change.position
-                                            } else {
-                                                pointers.remove(change.id.value)
-                                            }
-                                        }
-                                        fingerPositions = pointers.toMap()
-                                        if (pointers.isEmpty()) break
-                                    }
-                                }
+                                fingerPositions = pointers.toMap()
                             }
                         }
-                    )
+                    }
             ) {
                 // Dibujo de los dedos en el Canvas
                 val primaryColor = MaterialTheme.colorScheme.primary
