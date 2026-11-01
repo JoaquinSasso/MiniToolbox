@@ -12,12 +12,16 @@ import com.joasasso.minitoolbox.TestApplication
 import com.joasasso.minitoolbox.data.DefaultAguaRepository
 import com.joasasso.minitoolbox.data.aguaDataStore
 import com.joasasso.minitoolbox.data.guardarAguaFecha
+import java.time.LocalDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -34,7 +38,6 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
-import java.time.LocalDate
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
@@ -60,11 +63,22 @@ class AguaViewModelTest {
         Dispatchers.resetMain()
     }
 
+    /**
+     * Mantiene un colector de `uiState` durante todo el test. Sin él, `WhileSubscribed(5000)`
+     * deja de escuchar DataStore cada vez que el reloj virtual avanza 5 s entre dos `first {}`,
+     * y el estado puede quedar congelado en un valor viejo: el test espera hasta el timeout
+     * de `runTest` (falla intermitente en CI con `UncompletedCoroutinesError`).
+     */
+    private fun TestScope.mantenerSuscripto(state: StateFlow<*>) {
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { state.collect {} }
+    }
+
     @Test
     fun agregarAgua_incrementaConsumoYEmiteEvento() = runTest {
         val dateFlow = MutableStateFlow(LocalDate.of(2026, 10, 2))
         val model = AguaViewModel(app, DefaultAguaRepository, dateFlowOverride = dateFlow)
         vm = model
+        mantenerSuscripto(model.uiState)
 
         model.uiState.first { !it.isLoading }
 
@@ -86,6 +100,7 @@ class AguaViewModelTest {
         val dateFlow = MutableStateFlow(fecha)
         val model = AguaViewModel(app, DefaultAguaRepository, dateFlowOverride = dateFlow)
         vm = model
+        mantenerSuscripto(model.uiState)
 
         try {
             model.uiState.first { !it.isLoading }
@@ -146,6 +161,7 @@ class AguaViewModelTest {
         val dateFlow = MutableStateFlow(LocalDate.of(2026, 10, 2))
         val model = AguaViewModel(app, DefaultAguaRepository, dateFlowOverride = dateFlow)
         vm = model
+        mantenerSuscripto(model.uiState)
 
         model.uiState.first { !it.isLoading }
 
@@ -165,6 +181,7 @@ class AguaViewModelTest {
         val dateFlow = MutableStateFlow(LocalDate.of(2026, 10, 2))
         val model = AguaViewModel(app, DefaultAguaRepository, dateFlowOverride = dateFlow)
         vm = model
+        mantenerSuscripto(model.uiState)
 
         model.uiState.first { !it.isLoading }
 
@@ -195,6 +212,7 @@ class AguaViewModelTest {
 
         val model = AguaViewModel(app, DefaultAguaRepository, dateFlowOverride = dateFlow)
         vm = model
+        mantenerSuscripto(model.uiState)
 
         // Verificar que en día 1 se leen los 1750 ml
         val stateDia1 = model.uiState.first { !it.isLoading && it.totalAgua == 1750 }
@@ -230,6 +248,7 @@ class AguaViewModelTest {
         val dateFlow = MutableStateFlow(LocalDate.of(2026, 10, 2))
         val model = AguaViewModel(app, DefaultAguaRepository, dateFlowOverride = dateFlow)
         vm = model
+        mantenerSuscripto(model.uiState)
 
         model.uiState.first { !it.isLoading }
 
@@ -249,6 +268,7 @@ class AguaViewModelTest {
         val dateFlow = MutableStateFlow(LocalDate.of(2026, 10, 2))
         val model = AguaViewModel(app, DefaultAguaRepository, dateFlowOverride = dateFlow)
         vm = model
+        mantenerSuscripto(model.uiState)
 
         model.uiState.first { !it.isLoading }
 
