@@ -65,6 +65,6 @@ fun ToolCategory.polygon(): RoundedPolygon = when (this) {
     ToolCategory.Medir -> MaterialShapes.Cookie4Sided
     ToolCategory.Esenciales -> MaterialShapes.Sunny
     ToolCategory.Organizar -> MaterialShapes.Clover4Leaf
-    ToolCategory.Generar -> MaterialShapes.SoftBurst
-    ToolCategory.Jugar -> MaterialShapes.Puffy
+    ToolCategory.Generar -> MaterialShapes.Cookie7Sided
+    ToolCategory.Jugar -> MaterialShapes.Pentagon
 }
