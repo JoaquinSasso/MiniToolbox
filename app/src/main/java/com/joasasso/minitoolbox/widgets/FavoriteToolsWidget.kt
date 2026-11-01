@@ -39,11 +39,7 @@ import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.data.FAVORITOS_KEYS
 import com.joasasso.minitoolbox.data.flujoToolsFavoritas
 import com.joasasso.minitoolbox.tools.ToolRegistry
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import com.joasasso.minitoolbox.metrics.MetricsSource
 
 class FavoriteToolsWidget : GlanceAppWidget() {
@@ -52,6 +48,9 @@ class FavoriteToolsWidget : GlanceAppWidget() {
     override val sizeMode = SizeMode.Exact
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        // Al crear la sesión (instalación, widget nuevo, reinicio) el estado puede estar vacío
+        // o viejo: se copia desde DataStore. Corre dentro del trabajo de Glance, sin goAsync.
+        copiarFavoritosAlEstado(context, id, context.flujoToolsFavoritas().first())
         provideContent {
             val prefs = currentState<Preferences>()
             val size = LocalSize.current
@@ -150,39 +149,13 @@ class FavoriteToolsWidget : GlanceAppWidget() {
     }
 }
 
+/**
+ * Sin overrides a propósito: `GlanceAppWidgetReceiver` ya llama a `goAsync()` en `onUpdate`,
+ * y un segundo `goAsync()` devuelve `null` (crash al instalar, cuando llega `APPWIDGET_UPDATE`).
+ * La copia de favoritos al estado del widget se hace en `FavoriteToolsWidget.provideGlance`.
+ */
 class FavoriteToolsWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = FavoriteToolsWidget()
-
-    // Cuando se agrega el primer widget de este tipo
-    override fun onEnabled(context: Context) {
-        super.onEnabled(context)
-        // Sembrar estado inicial desde DataStore → estado del widget
-        val pendingResult = goAsync()
-        CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
-            try {
-                actualizarWidgetFavoritos(context)
-            } finally {
-                pendingResult.finish()
-            }
-        }
-    }
-
-    // Cuando el sistema pide actualizar (al agregar una nueva instancia, cambiar tamaño, etc.)
-    override fun onUpdate(
-        context: Context,
-        appWidgetManager: android.appwidget.AppWidgetManager,
-        appWidgetIds: IntArray
-    ) {
-        super.onUpdate(context, appWidgetManager, appWidgetIds)
-        val pendingResult = goAsync()
-        CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
-            try {
-                actualizarWidgetFavoritos(context)
-            } finally {
-                pendingResult.finish()
-            }
-        }
-    }
 }
 
 suspend fun actualizarWidgetFavoritos(context: Context) {
@@ -190,13 +163,21 @@ suspend fun actualizarWidgetFavoritos(context: Context) {
     val glanceIds = GlanceAppWidgetManager(context).getGlanceIds(FavoriteToolsWidget::class.java)
 
     glanceIds.forEach { id ->
-        updateAppWidgetState(context, FavoriteToolsWidget().stateDefinition, id) { prefs ->
-            prefs.toMutablePreferences().apply {
-                FAVORITOS_KEYS.forEachIndexed { index, key ->
-                    if (index < favoritos.size) set(key, favoritos[index]) else remove(key)
-                }
+        copiarFavoritosAlEstado(context, id, favoritos)
+        FavoriteToolsWidget().update(context, id)
+    }
+}
+
+private suspend fun copiarFavoritosAlEstado(
+    context: Context,
+    id: GlanceId,
+    favoritos: List<String>
+) {
+    updateAppWidgetState(context, PreferencesGlanceStateDefinition, id) { prefs ->
+        prefs.toMutablePreferences().apply {
+            FAVORITOS_KEYS.forEachIndexed { index, key ->
+                if (index < favoritos.size) set(key, favoritos[index]) else remove(key)
             }
         }
-        FavoriteToolsWidget().update(context, id)
     }
 }
