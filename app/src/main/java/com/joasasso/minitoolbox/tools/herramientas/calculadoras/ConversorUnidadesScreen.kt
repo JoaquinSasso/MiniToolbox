@@ -3,7 +3,6 @@ package com.joasasso.minitoolbox.tools.herramientas.calculadoras
 import androidx.annotation.StringRes
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.selection.selectable
@@ -96,7 +95,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -251,9 +249,9 @@ fun ConversorUnidadesScreen(
 }
 
 /**
- * Selector de categoría: un grupo de cápsulas tonales unidas. La elegida se rellena con el
- * color primario y usa la variante sólida del ícono. Es un solo toque por categoría, igual que
- * las pestañas que reemplaza.
+ * Selector de categoría: cuatro píldoras tonales del mismo ancho. La elegida solo cambia de
+ * color (primario) y usa la variante sólida del ícono; la forma no cambia. Es un solo toque
+ * por categoría, igual que las pestañas que reemplaza.
  */
 @Composable
 private fun CategorySelector(selected: UnitCategory, onSelect: (UnitCategory) -> Unit) {
@@ -265,12 +263,10 @@ private fun CategorySelector(selected: UnitCategory, onSelect: (UnitCategory) ->
             .padding(horizontal = 16.dp, vertical = 4.dp)
     ) {
         val categories = UnitCategory.entries
-        val selectedIndex = categories.indexOf(selected)
-        categories.forEachIndexed { index, category ->
+        categories.forEach { category ->
             CategoryOption(
                 category = category,
                 selected = category == selected,
-                corners = capsuleCorners(index, categories.size, selectedIndex),
                 onClick = { onSelect(category) },
                 modifier = Modifier.weight(1f)
             )
@@ -278,28 +274,10 @@ private fun CategorySelector(selected: UnitCategory, onSelect: (UnitCategory) ->
     }
 }
 
-/** Radios de las esquinas de una cápsula: lado inicial y lado final. */
-private data class CapsuleCorners(val start: Dp, val end: Dp)
-
-/**
- * Esquinas de cada cápsula del selector. El grupo se lee como una sola pieza: extremos redondos
- * y uniones con esquinas chicas. Toda unión que toca a la opción elegida se redondea de los dos
- * lados (la elegida y su vecina), así la píldora seleccionada nunca queda pegada a un borde recto.
- */
-private fun capsuleCorners(index: Int, count: Int, selectedIndex: Int): CapsuleCorners {
-    val round = 22.dp
-    val tight = 8.dp
-    val selected = index == selectedIndex
-    val start = if (index == 0 || selected || index - 1 == selectedIndex) round else tight
-    val end = if (index == count - 1 || selected || index + 1 == selectedIndex) round else tight
-    return CapsuleCorners(start, end)
-}
-
 @Composable
 private fun CategoryOption(
     category: UnitCategory,
     selected: Boolean,
-    corners: CapsuleCorners,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -316,8 +294,6 @@ private fun CategoryOption(
         if (selected) colors.primary else colors.onSurfaceVariant,
         label = "categoryLabel"
     )
-    val startRadius by animateDpAsState(corners.start, label = "categoryStartCorner")
-    val endRadius by animateDpAsState(corners.end, label = "categoryEndCorner")
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -331,14 +307,7 @@ private fun CategoryOption(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(44.dp)
-                .clip(
-                    RoundedCornerShape(
-                        topStart = startRadius,
-                        bottomStart = startRadius,
-                        topEnd = endRadius,
-                        bottomEnd = endRadius
-                    )
-                )
+                .clip(CircleShape)
                 .background(containerColor)
         ) {
             Icon(
