@@ -1,12 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="team_size">Tamaño de equipo</string>
-    <string name="place_fingers">Pon aquí los dedos para formar equipos</string>
-    <string name="incorrect_player_count">Cantidad de jugadores incorrecta</string>
+    <string name="place_fingers">Coloquen los dedos aquí (hasta 10)</string>
+    <string name="incorrect_player_count">Cantidad de jugadores insuficiente</string>
     <string name="about_team_generator">Acerca de Selector de Grupos</string>
-    <string name="team_generator_purpose">• Para qué sirve: Distribuye participantes en equipos de tamaño fijo de forma aleatoria y táctil.</string>
+    <string name="team_generator_purpose">• Para qué sirve: Distribuye participantes en equipos de forma aleatoria y táctil.</string>
     <string name="team_help_guide">• Guía rápida:</string>
-    <string name="team_generator_help_1">   – Selecciona el tamaño de equipo (2–5).</string>
-    <string name="team_generator_help_2">   – Cada jugador debe colocar un dedo en la pantalla. Si el número de dedos no es divisible, verás un aviso de error.</string>
-    <string name="team_generator_help_3">   – Los círculos de colores debajo de los dedos de cada jugador indican los equipos asignados.</string>
+    <string name="team_generator_help_1">   – Elige entre \"N° de equipos\" o \"Tamaño de equipo\".</string>
+    <string name="team_generator_help_2">   – Cada participante coloca un dedo en la pantalla (admite hasta 10 dedos simultáneos).</string>
+    <string name="team_generator_help_3">   – Se admiten equipos disparejos si el total no es múltiplo exacto (por ejemplo, 8 jugadores en equipos de 3 formarán 2 equipos de 3 y 1 de 2).</string>
+    <string name="team_generator_help_4">   – Mantengan los dedos quietos 1 segundo hasta que se completen los aros. El resultado queda fijo. Para reiniciar, da 3 toques a la pantalla (incluso sin soltar los dedos) o toca \"Nuevo sorteo\".</string>
+    <string name="team_mode_count">N° Equipos</string>
+    <string name="team_mode_size">Por tamaño</string>
+    <string name="team_min_fingers_required">Apoya al menos %d dedos</string>
+    <string name="team_fingers_detected">%d dedos detectados</string>
+    <string name="team_new_draw">Nuevo sorteo</string>
+    <string name="team_results_title">Equipos formados</string>
+    <string name="team_results_hint">Equipos formados • Triple toque para reiniciar</string>
+    <string name="team_group_summary_single">%1$d equipos de %2$d</string>
+    <string name="team_group_summary_double">%1$d equipos de %2$d y %3$d de %4$d</string>
 </resources>
