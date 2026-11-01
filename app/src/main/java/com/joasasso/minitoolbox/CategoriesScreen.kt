@@ -30,10 +30,8 @@ import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.WorkspacePremium
-import androidx.compose.material.icons.outlined.Apps
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.SearchOff
@@ -41,8 +39,6 @@ import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.AppBarWithSearch
 import androidx.compose.material3.ExpandedFullScreenSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -91,7 +87,6 @@ import com.joasasso.minitoolbox.ui.components.ProPassBadge
 import com.joasasso.minitoolbox.ui.components.ProToolPaywallDialog
 import com.joasasso.minitoolbox.ui.components.ToolSearchResult
 import com.joasasso.minitoolbox.ui.components.ToolTile
-import com.joasasso.minitoolbox.ui.theme.rememberCategoryColors
 import com.joasasso.minitoolbox.utils.ads.RewardedManager
 import com.joasasso.minitoolbox.utils.buildSearchIndexForAllTools
 import com.joasasso.minitoolbox.utils.isCatalogTool
@@ -253,7 +248,6 @@ fun CategoriesScreen(
         ) {
             CatalogGrid(
                 catalogTools = catalogTools,
-                selectedCategory = uiState.selectedCategory,
                 favoriteRoutes = uiState.favoriteRoutes,
                 isLoading = uiState.isLoading,
                 contentPadding = PaddingValues(
@@ -263,10 +257,6 @@ fun CategoriesScreen(
                     bottom = innerPadding.calculateBottomPadding() + 24.dp
                 ),
                 horizontalMargin = horizontalMargin,
-                onSelectCategory = { category ->
-                    haptic.performHapticFeedback(HapticFeedbackType.SegmentTick)
-                    vm.selectCategory(category)
-                },
                 onToolClick = handleToolClick,
                 onToggleFavorite = onToggleFavorite,
                 onEditFavorites = { showEditFavorites = true }
@@ -377,12 +367,10 @@ private fun CatalogSearchField(
 @Composable
 private fun CatalogGrid(
     catalogTools: List<Tool>,
-    selectedCategory: ToolCategory?,
     favoriteRoutes: List<String>,
     isLoading: Boolean,
     contentPadding: PaddingValues,
     horizontalMargin: Dp,
-    onSelectCategory: (ToolCategory?) -> Unit,
     onToolClick: (Tool) -> Unit,
     onToggleFavorite: (Tool) -> Unit,
     onEditFavorites: () -> Unit
@@ -400,9 +388,11 @@ private fun CatalogGrid(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Mientras carga DataStore no se muestra el estado vacío de favoritos, que parpadearía.
-        if (!isLoading) {
-            item(key = "favorites_section", span = { GridItemSpan(maxLineSpan) }) {
+        // La sección está desde el primer frame, vacía mientras carga DataStore. Si se insertara
+        // al terminar la carga, la grilla mantendría anclado el primer ítem visible y los
+        // favoritos quedarían arriba, fuera de pantalla (arranque en frío).
+        item(key = "favorites_section", span = { GridItemSpan(maxLineSpan) }) {
+            if (!isLoading) {
                 FavoritesSection(
                     favoriteRoutes = favoriteRoutes,
                     catalogTools = catalogTools,
@@ -413,48 +403,16 @@ private fun CatalogGrid(
             }
         }
 
-        item(key = "category_filters", span = { GridItemSpan(maxLineSpan) }) {
-            CategoryFilterRow(
-                selectedCategory = selectedCategory,
-                horizontalMargin = horizontalMargin,
-                onSelectCategory = onSelectCategory
-            )
-        }
-
-        if (selectedCategory == null) {
-            // Vista general: una sección por categoría.
-            ToolCategory.all.forEach { category ->
-                val categoryTools = catalogTools.filter { it.category == category }
-                if (categoryTools.isEmpty()) return@forEach
-                item(
-                    key = "header_category_${category.titleRes}",
-                    span = { GridItemSpan(maxLineSpan) }
-                ) {
-                    CategorySectionHeader(
-                        category = category,
-                        count = categoryTools.size,
-                        modifier = Modifier.animateItem()
-                    )
-                }
-                toolTiles(categoryTools, isFavorite, onToolClick, onToggleFavorite)
+        ToolCategory.all.forEach { category ->
+            val categoryTools = catalogTools.filter { it.category == category }
+            if (categoryTools.isEmpty()) return@forEach
+            item(
+                key = "header_category_${category.titleRes}",
+                span = { GridItemSpan(maxLineSpan) }
+            ) {
+                CategorySectionHeader(category = category)
             }
-        } else {
-            // Con filtro: la categoría se abre en sus subcategorías.
-            catalogTools
-                .filter { it.category == selectedCategory }
-                .groupBy { it.subCategory }
-                .forEach { (subCategory, subTools) ->
-                    item(
-                        key = "header_subcategory_$subCategory",
-                        span = { GridItemSpan(maxLineSpan) }
-                    ) {
-                        SubcategoryHeader(
-                            title = stringResource(subCategory),
-                            modifier = Modifier.animateItem()
-                        )
-                    }
-                    toolTiles(subTools, isFavorite, onToolClick, onToggleFavorite)
-                }
+            toolTiles(categoryTools, isFavorite, onToolClick, onToggleFavorite)
         }
     }
 }
@@ -533,59 +491,6 @@ private fun FavoritesSection(
 }
 
 @Composable
-private fun CategoryFilterRow(
-    selectedCategory: ToolCategory?,
-    horizontalMargin: Dp,
-    onSelectCategory: (ToolCategory?) -> Unit
-) {
-    LazyRow(
-        modifier = Modifier
-            .bleedHorizontally(horizontalMargin)
-            .padding(top = 8.dp),
-        contentPadding = PaddingValues(horizontal = horizontalMargin),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        item(key = "filter_all") {
-            val selected = selectedCategory == null
-            FilterChip(
-                selected = selected,
-                onClick = { onSelectCategory(null) },
-                label = { Text(stringResource(R.string.catalog_filter_all)) },
-                leadingIcon = {
-                    Icon(
-                        imageVector = if (selected) Icons.Filled.Apps else Icons.Outlined.Apps,
-                        contentDescription = null
-                    )
-                },
-                shape = MaterialTheme.shapes.small
-            )
-        }
-        items(items = ToolCategory.all, key = { "filter_${it.titleRes}" }) { category ->
-            val selected = category == selectedCategory
-            val colors = rememberCategoryColors(category)
-            FilterChip(
-                selected = selected,
-                onClick = { onSelectCategory(category) },
-                label = { Text(stringResource(category.titleRes)) },
-                leadingIcon = {
-                    Icon(
-                        imageVector = if (selected) category.filledIcon else category.outlinedIcon,
-                        contentDescription = null
-                    )
-                },
-                shape = MaterialTheme.shapes.small,
-                colors = FilterChipDefaults.filterChipColors(
-                    iconColor = colors.accent,
-                    selectedContainerColor = colors.container,
-                    selectedLabelColor = colors.onContainer,
-                    selectedLeadingIconColor = colors.onContainer
-                )
-            )
-        }
-    }
-}
-
-@Composable
 private fun SectionTitle(
     title: String,
     modifier: Modifier = Modifier
@@ -604,7 +509,6 @@ private fun SectionTitle(
 @Composable
 private fun CategorySectionHeader(
     category: ToolCategory,
-    count: Int,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -619,31 +523,9 @@ private fun CategorySectionHeader(
             text = stringResource(category.titleRes),
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier
-                .weight(1f)
-                .semantics { heading() }
-        )
-        Text(
-            text = count.toString(),
-            style = MaterialTheme.typography.labelLarge,
-            color = rememberCategoryColors(category).accent
+            modifier = Modifier.semantics { heading() }
         )
     }
-}
-
-@Composable
-private fun SubcategoryHeader(
-    title: String,
-    modifier: Modifier = Modifier
-) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.titleMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = modifier
-            .padding(top = 16.dp)
-            .semantics { heading() }
-    )
 }
 
 @Composable

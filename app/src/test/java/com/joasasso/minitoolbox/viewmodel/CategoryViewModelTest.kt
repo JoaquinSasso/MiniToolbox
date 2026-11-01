@@ -26,7 +26,6 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -63,55 +62,21 @@ class CategoryViewModelTest {
     }
 
     @Test
-    fun estadoInicial_sinFiltroSinConsultaYSinFavoritos() = runTest {
+    fun estadoInicial_sinConsultaYSinFavoritos() = runTest {
         val model = createViewModel()
         val state = model.uiState.first { !it.isLoading }
 
-        assertNull(state.selectedCategory)
         assertEquals("", state.searchQuery)
         assertTrue(state.favoriteRoutes.isEmpty())
     }
 
     @Test
-    fun selectCategory_aplicaElFiltroYTocarloDeNuevoLoQuita() = runTest {
+    fun onSearchQueryChange_actualizaYLimpiaLaConsulta() = runTest {
         val model = createViewModel()
         model.uiState.first { !it.isLoading }
-
-        model.selectCategory(ToolCategory.Organizar)
-        val filtered = model.uiState.first { it.selectedCategory == ToolCategory.Organizar }
-        assertEquals(ToolCategory.Organizar, filtered.selectedCategory)
-
-        model.selectCategory(ToolCategory.Organizar)
-        assertNull(model.uiState.first { it.selectedCategory == null }.selectedCategory)
-    }
-
-    @Test
-    fun selectCategory_cambiaDeUnFiltroAOtroYNullVuelveATodas() = runTest {
-        val model = createViewModel()
-        model.uiState.first { !it.isLoading }
-
-        model.selectCategory(ToolCategory.Medir)
-        model.uiState.first { it.selectedCategory == ToolCategory.Medir }
-
-        model.selectCategory(ToolCategory.Jugar)
-        assertEquals(
-            ToolCategory.Jugar,
-            model.uiState.first { it.selectedCategory == ToolCategory.Jugar }.selectedCategory
-        )
-
-        model.selectCategory(null)
-        assertNull(model.uiState.first { it.selectedCategory == null }.selectedCategory)
-    }
-
-    @Test
-    fun onSearchQueryChange_actualizaLaConsultaSinTocarElFiltro() = runTest {
-        val model = createViewModel()
-        model.uiState.first { !it.isLoading }
-        model.selectCategory(ToolCategory.Medir)
 
         model.onSearchQueryChange("lupa")
-        val searching = model.uiState.first { it.searchQuery == "lupa" }
-        assertEquals(ToolCategory.Medir, searching.selectedCategory)
+        assertEquals("lupa", model.uiState.first { it.searchQuery == "lupa" }.searchQuery)
 
         model.onSearchQueryChange("")
         assertEquals("", model.uiState.first { it.searchQuery.isEmpty() }.searchQuery)
