@@ -30,12 +30,6 @@ sealed class Screen {
         override val route: String get() = "dev_metrics"
     }
 
-    @Serializable
-    @SerialName("pro")
-    data object Pro : Screen() {
-        override val route: String get() = "pro"
-    }
-
     // --- Tools
     @Serializable
     @SerialName("group_selector")
@@ -230,7 +224,6 @@ sealed class Screen {
                 "categories" -> Categories
                 "about" -> About
                 "dev_metrics", "dev/metrics" -> DevMetrics
-                "pro" -> Pro
                 "group_selector" -> GroupSelector
                 "truco_scoreboard" -> TrucoScoreboard
                 "pomodoro", "pomodoro_list" -> PomodoroList

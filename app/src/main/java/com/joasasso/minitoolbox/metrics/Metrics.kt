@@ -144,14 +144,6 @@ fun toolUse(
     scheduleIfEnabled(ctx)
 }
 
-/** Impresión de anuncio + agenda upload (respeta opt-out) */
-fun adImpression(context: Context, type: String) = io {
-    val ctx = context.applicationContext
-    if (!isMetricsEnabled(ctx)) return@io
-    ctx.repo().incrementAdImpression(type)
-    scheduleIfEnabled(ctx)
-}
-
 /** NUEVO: Uso de widget + agenda upload (respeta opt-out) */
 fun widgetUse(context: Context, widgetType: String) = io {
     val ctx = context.applicationContext

@@ -29,18 +29,7 @@ sceneview = "4.37.0"
 arcore = "1.56.0"
 ossLicenses = "17.5.2"
 ossLicensesPlugin = "0.13.0"
-# Ads / Consent
-gma = "25.5.0"
-ump = "4.0.0"
 guava = "33.7.1-android"
-# Mediation adapters (usa las últimas de cada partner)
-admob-unity = "4.20.1.0"      # com.google.ads.mediation:unity
-admob-meta  = "6.22.0.1"      # com.google.ads.mediation:facebook
-
-metaSdk = "6.22.0"
-unitySdk = "4.20.1"
-
-billing = "9.1.0"
 androidx-browser = "1.10.0"
 appcompat = "1.8.0"
 fragmentKtx = "1.9.0"
@@ -98,18 +87,7 @@ arsceneview = { module = "io.github.sceneview:arsceneview", version.ref = "scene
 arcore = { module = "com.google.ar:core", version.ref = "arcore" }
 play-services-oss-licenses = { module = "com.google.android.gms:play-services-oss-licenses", version.ref = "ossLicenses" }
 
-# Ads + Consent
-google-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "gma" }
-google-ump = { module = "com.google.android.ump:user-messaging-platform", version.ref = "ump" }
 guava-android = { module = "com.google.guava:guava", version.ref = "guava" }
-# Mediation adapters
-admob-unity = { module = "com.google.ads.mediation:unity", version.ref = "admob-unity" }
-admob-meta = { module = "com.google.ads.mediation:facebook", version.ref = "admob-meta" }
-# Meta + Unity Ads SDKs
-meta-sdk = { module = "com.facebook.android:audience-network-sdk", version.ref = "metaSdk" }
-unity-sdk = { module = "com.unity3d.ads:unity-ads", version.ref = "unitySdk" }
-
-billing-ktx = { module = "com.android.billingclient:billing-ktx", version.ref = "billing" }
 androidx-browser = { module = "androidx.browser:browser", version.ref = "androidx-browser" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 androidx-fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragmentKtx" }

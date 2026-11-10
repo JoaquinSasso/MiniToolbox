@@ -1,9 +1,7 @@
 package com.joasasso.minitoolbox.tools.organizacion.divisorGastos
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -45,11 +43,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.data.Reunion
-import com.joasasso.minitoolbox.ui.components.ProToolPaywallDialog
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
-import com.joasasso.minitoolbox.utils.ads.RewardedManager
-import com.joasasso.minitoolbox.utils.pro.CreditAccessManager
-import com.joasasso.minitoolbox.utils.pro.LocalProState
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import java.text.DateFormat.getDateInstance
@@ -64,11 +58,9 @@ fun DetallesReunionScreen(
     onBack: () -> Unit,
     onEditarGasto: (String, String) -> Unit,
     onAgregarGasto: (String) -> Unit,
-    onNavigateToPro: () -> Unit,
     vm: ReunionDetailViewModel = viewModel()
 ) {
     val context = LocalContext.current
-    val activity = context as? Activity
     var showInfo by remember { mutableStateOf(false) }
     val haptic = LocalHapticFeedback.current
 

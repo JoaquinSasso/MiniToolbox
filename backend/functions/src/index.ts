@@ -299,7 +299,6 @@ type DailyDoc = {
 		tool_entry: Record<string, Record<string, number>>;
 		/** Retencion: retention[antiguedad][intensidad]. Calculada en el dispositivo. */
 		retention: Record<string, Record<string, number>>;
-		ads: Record<string, number>;
 		versions: Record<string, number>;
 		versions_first_seen: Record<string, number>;
 		lang_primary: Record<string, number>;
@@ -403,10 +402,8 @@ function normDoc(id: string, data: FirebaseFirestore.DocumentData): DailyDoc {
 		addRetention(k.slice(0, cut), k.slice(cut + 1), Number(v || 0));
 	}
 
-	// --- ads ---
-	const adsNested = data.ads && typeof data.ads === "object" ? data.ads : {};
-	const adsFlat = pickPrefix(data, "ads");
-	const ads = mergeCounts(adsNested, adsFlat);
+	// "ads" (impresiones de anuncios) se retiró: los documentos históricos todavía lo
+	// tienen, pero ya no se lee ni se expone.
 
 	// --- versions ---
 	const versionsNested =
@@ -466,7 +463,6 @@ function normDoc(id: string, data: FirebaseFirestore.DocumentData): DailyDoc {
 			tools_dau,
 			tool_entry,
 			retention,
-			ads,
 			versions,
 			versions_first_seen,
 			lang_primary,
@@ -686,13 +682,6 @@ export const ingest = onRequest(
 						}
 					}
 
-					if (it.ads) {
-						for (const [k, v] of Object.entries(it.ads)) {
-							const n = Number(v || 0);
-							if (n > 0) updates[`ads.${k}`] = inc(n);
-						}
-					}
-
 					if ((it as any).versions) {
 						for (const [ver, v] of Object.entries(
 							(it as any).versions as Record<string, number>,
@@ -746,7 +735,7 @@ export const ingest = onRequest(
 					tx.set(dayRef, {}, { merge: true });
 
 					if (Object.keys(updates).length) {
-						tx.update(dayRef, updates); // app_open, tools, ads, lang, widgets
+						tx.update(dayRef, updates); // app_open, tools, lang, widgets
 					}
 					// versions y versions_first_seen con FieldPath (sin spread)
 					for (const [path, val] of verPairs) {
@@ -975,7 +964,6 @@ export const metricsSummary = onRequest(
 			let total_app_open = 0;
 			let total_daily_active = 0;
 			const agg_tools: Record<string, number> = {};
-			const agg_ads: Record<string, number> = {};
 			const agg_versions: Record<string, number> = {};
 			const agg_versions_fs: Record<string, number> = {};
 			const agg_lang_primary: Record<string, number> = {};
@@ -990,7 +978,6 @@ export const metricsSummary = onRequest(
 				total_app_open += Number(r.totals.app_open ?? 0);
 				total_daily_active += Number(r.totals.daily_active ?? 0);
 				sumMap(agg_tools, r.totals.tools);
-				sumMap(agg_ads, r.totals.ads);
 				sumMap(agg_versions, r.totals.versions);
 				sumMap(agg_versions_fs, r.totals.versions_first_seen);
 				sumMap(agg_lang_primary, r.totals.lang_primary);
@@ -1019,7 +1006,6 @@ export const metricsSummary = onRequest(
 				total_daily_active,
 				top: {
 					tools: topK(agg_tools, 10),
-					ads: topK(agg_ads, 10),
 					versions: topK(agg_versions, 10),
 					versions_first_seen: topK(agg_versions_fs, 10),
 					lang_primary: topK(agg_lang_primary, 10),

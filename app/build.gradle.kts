@@ -197,19 +197,6 @@ dependencies {
     //Proveedor único de ListenableFuture
     implementation(libs.guava.android)
 
-    // --- Ads + Consent ---
-    implementation(libs.google.ads) {
-        // Evita que Ads traiga el stub 1.0
-        exclude(group = "com.google.guava", module = "listenablefuture")
-    }
-
-    implementation(libs.admob.unity)
-    implementation(libs.unity.sdk)
-    implementation(libs.admob.meta)
-    implementation(libs.meta.sdk)
-
-    implementation(libs.google.ump)
-
     implementation(libs.androidx.media)
 
     implementation(libs.reorderable)
@@ -221,7 +208,6 @@ dependencies {
         // Excluyéndola, material3 queda alineado con el resto de Compose.
         exclude(group = "androidx.compose.material3")
     }
-    implementation(libs.billing.ktx)
     implementation(libs.androidx.browser)
 
     implementation(libs.androidx.work.runtime.ktx)

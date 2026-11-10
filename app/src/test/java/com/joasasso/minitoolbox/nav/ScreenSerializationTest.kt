@@ -20,7 +20,6 @@ class ScreenSerializationTest {
             Screen.MeetingCreate,
             Screen.BubbleLevel,
             Screen.ArRuler,
-            Screen.Pro,
             Screen.DevMetrics
         )
 

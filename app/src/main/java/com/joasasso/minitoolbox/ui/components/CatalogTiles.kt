@@ -159,22 +159,13 @@ fun ToolTile(
                 modifier = Modifier.padding(top = 12.dp, end = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Text(
-                        text = stringResource(tool.name),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f, fill = false)
-                    )
-                    if (tool.isPro) {
-                        ProBadgePill()
-                    }
-                }
+                Text(
+                    text = stringResource(tool.name),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
                 tool.summary?.let { summaryRes ->
                     Text(
                         text = stringResource(summaryRes),
@@ -296,23 +287,6 @@ private fun FavoriteToggle(
                 scaleX = scale
                 scaleY = scale
             }
-        )
-    }
-}
-
-@Composable
-fun ProBadgePill(modifier: Modifier = Modifier) {
-    Surface(
-        modifier = modifier,
-        shape = CircleShape,
-        color = MaterialTheme.colorScheme.tertiaryContainer,
-        contentColor = MaterialTheme.colorScheme.onTertiaryContainer
-    ) {
-        Text(
-            text = stringResource(R.string.categories_pro_badge),
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
         )
     }
 }

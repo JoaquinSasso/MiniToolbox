@@ -39,7 +39,7 @@ data class PayloadAnalysis(
 
 /** Campos del item que contienen mapas clave -> contador. */
 private val COUNTER_FIELDS = listOf(
-    "tools", "ads", "versions", "versions_first_seen",
+    "tools", "versions", "versions_first_seen",
     "lang_primary", "lang_secondary", "widgets"
 )
 

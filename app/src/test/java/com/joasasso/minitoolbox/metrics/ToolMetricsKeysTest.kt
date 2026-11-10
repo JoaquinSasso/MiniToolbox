@@ -125,12 +125,12 @@ class ToolMetricsKeysTest {
         assertEquals("meetings", ToolRoutes.metricsKey(Screen.Meetings))
         assertEquals("meetings", ToolRoutes.metricsKey(Screen.MeetingDetail("m-1")))
         assertNull(ToolRoutes.metricsKey(Screen.Categories))
-        assertNull(ToolRoutes.metricsKey(Screen.Pro))
+        assertNull(ToolRoutes.metricsKey(Screen.DevMetrics))
     }
 
     @Test
     fun `una pantalla que no es herramienta no genera metrica`() {
-        assertNull(ToolRoutes.metricsKey(Screen.Pro.route))
+        assertNull(ToolRoutes.metricsKey(Screen.DevMetrics.route))
         assertNull(ToolRoutes.metricsKey(Screen.Categories.route))
     }
 
@@ -157,8 +157,7 @@ class ToolMetricsKeysTest {
     @Test
     fun `los startRoute de notificaciones y widgets son rutas validas`() {
         val startRoutes = listOf(
-            Screen.Water.route,   // AguaNotification, AguaWidget, AguaMiniWidget
-            Screen.Pro.route      // RedirectToPaywall
+            Screen.Water.route    // AguaNotification, AguaWidget, AguaMiniWidget
         )
 
         for (route in startRoutes) {

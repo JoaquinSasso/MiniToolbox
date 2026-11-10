@@ -4,28 +4,6 @@
     <issue
         id="DefaultLocale"
         message="Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead"
-        errorLine1="        return String.format(&quot;%02d:%02d&quot;, m, s)"
-        errorLine2="               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/joasasso/minitoolbox/utils/pro/CreditAccessManager.kt"
-            line="200"
-            column="16"/>
-    </issue>
-
-    <issue
-        id="DefaultLocale"
-        message="Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead"
-        errorLine1="        return String.format(&quot;%04d%02d%02d&quot;, y, m, d)"
-        errorLine2="               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/joasasso/minitoolbox/utils/pro/CreditAccessManager.kt"
-            line="208"
-            column="16"/>
-    </issue>
-
-    <issue
-        id="DefaultLocale"
-        message="Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead"
         errorLine1="                        text = stringResource(R.string.zoom_label, String.format(&quot;%.1f&quot;, ratioFromState)),"
         errorLine2="                                                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
@@ -410,50 +388,6 @@
 
     <issue
         id="GradleDependency"
-        message="A newer version of com.google.android.gms:play-services-ads than 24.6.0 is available: 25.4.0"
-        errorLine1="gma = &quot;24.6.0&quot;"
-        errorLine2="      ~~~~~~~~">
-        <location
-            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
-            line="32"
-            column="7"/>
-    </issue>
-
-    <issue
-        id="GradleDependency"
-        message="A newer version of com.google.android.ump:user-messaging-platform than 3.2.0 is available: 4.0.0"
-        errorLine1="ump = &quot;3.2.0&quot;"
-        errorLine2="      ~~~~~~~">
-        <location
-            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
-            line="33"
-            column="7"/>
-    </issue>
-
-    <issue
-        id="GradleDependency"
-        message="A newer version of com.google.ads.mediation:unity than 4.12.5.0 is available: 4.20.0.0"
-        errorLine1="admob-unity = &quot;4.12.5.0&quot;      # com.google.ads.mediation:unity"
-        errorLine2="              ~~~~~~~~~~">
-        <location
-            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
-            line="36"
-            column="15"/>
-    </issue>
-
-    <issue
-        id="GradleDependency"
-        message="A newer version of com.google.ads.mediation:facebook than 6.17.0.0 is available: 6.22.0.0"
-        errorLine1="admob-meta  = &quot;6.17.0.0&quot;      # com.google.ads.mediation:facebook"
-        errorLine2="              ~~~~~~~~~~">
-        <location
-            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
-            line="37"
-            column="15"/>
-    </issue>
-
-    <issue
-        id="GradleDependency"
         message="A newer version of androidx.compose.runtime:runtime-saveable than 1.9.1 is available: 1.12.0"
         errorLine1="runtimeSaveable = &quot;1.9.1&quot;"
         errorLine2="                  ~~~~~~~">
@@ -461,17 +395,6 @@
             file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
             line="42"
             column="19"/>
-    </issue>
-
-    <issue
-        id="GradleDependency"
-        message="A newer version of com.android.billingclient:billing-ktx than 8.0.0 is available: 9.1.0"
-        errorLine1="billing = &quot;8.0.0&quot;"
-        errorLine2="          ~~~~~~~">
-        <location
-            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
-            line="43"
-            column="11"/>
     </issue>
 
     <issue
@@ -641,28 +564,6 @@
 
     <issue
         id="NewerVersionAvailable"
-        message="A newer version of com.facebook.android:audience-network-sdk than 6.17.0 is available: 6.22.0"
-        errorLine1="metaSdk = &quot;6.17.0&quot;"
-        errorLine2="          ~~~~~~~~">
-        <location
-            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
-            line="39"
-            column="11"/>
-    </issue>
-
-    <issue
-        id="NewerVersionAvailable"
-        message="A newer version of com.unity3d.ads:unity-ads than 4.12.5 is available: 4.20.0"
-        errorLine1="unitySdk = &quot;4.12.5&quot;"
-        errorLine2="           ~~~~~~~~">
-        <location
-            file="$HOME/AndroidStudioProjects/MiniToolbox/gradle/libs.versions.toml"
-            line="40"
-            column="12"/>
-    </issue>
-
-    <issue
-        id="NewerVersionAvailable"
         message="A newer version of org.jetbrains.kotlin.plugin.serialization than 2.2.10 is available: 2.4.10"
         errorLine1="kotlin-serialization = { id = &quot;org.jetbrains.kotlin.plugin.serialization&quot;, version = &quot;2.2.10&quot; }"
         errorLine2="                                                                                     ~~~~~~~~">
@@ -818,39 +719,6 @@
     <issue
         id="LocalContextGetResourceValueCall"
         message="Querying resource values using LocalContext.current"
-        errorLine1="    val inappId = remember { context.getString(R.string.billing_pro_id) }"
-        errorLine2="                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/joasasso/minitoolbox/ui/screens/ProScreen.kt"
-            line="55"
-            column="30"/>
-    </issue>
-
-    <issue
-        id="LocalContextGetResourceValueCall"
-        message="Querying resource values using LocalContext.current"
-        errorLine1="                Toast.makeText(context, context.getString(R.string.pro_toast_thanks), Toast.LENGTH_SHORT).show()"
-        errorLine2="                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/joasasso/minitoolbox/ui/screens/ProScreen.kt"
-            line="74"
-            column="41"/>
-    </issue>
-
-    <issue
-        id="LocalContextGetResourceValueCall"
-        message="Querying resource values using LocalContext.current"
-        errorLine1="                        Toast.makeText(context, context.getString(R.string.pro_toast_warning_unable_to_buy), Toast.LENGTH_SHORT).show()"
-        errorLine2="                                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/joasasso/minitoolbox/ui/screens/ProScreen.kt"
-            line="133"
-            column="49"/>
-    </issue>
-
-    <issue
-        id="LocalContextGetResourceValueCall"
-        message="Querying resource values using LocalContext.current"
         errorLine1="            context.startActivity(Intent.createChooser(shareIntent, context.getString(R.string.share)))"
         errorLine2="                                                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
@@ -945,17 +813,6 @@
             file="src/main/java/com/joasasso/minitoolbox/tools/organizacion/pomodoro/PomodoroAlarmActivity.kt"
             line="143"
             column="13"/>
-    </issue>
-
-    <issue
-        id="StaticFieldLeak"
-        message="Do not place Android context classes in static fields (static reference to `BillingClientWrapper` which has field `context` pointing to `Context`); this is a memory leak"
-        errorLine1="    // Referencia al wrapper interno"
-        errorLine2="    ^">
-        <location
-            file="src/main/java/com/joasasso/minitoolbox/utils/pro/ProSilentInitializer.kt"
-            line="29"
-            column="5"/>
     </issue>
 
     <issue
@@ -1054,72 +911,6 @@
         <location
             file="src/main/res/values/about_strings.xml"
             line="58"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.admob_banner_prod` appears to be unused"
-        errorLine1="    &lt;string name=&quot;admob_banner_prod&quot; translatable=&quot;false&quot;>ca-app-pub-7623187138639860/6833925404&lt;/string> &lt;!-- prod -->"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/ad_related_strings.xml"
-            line="4"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.admob_banner_test` appears to be unused"
-        errorLine1="    &lt;string name=&quot;admob_banner_test&quot; translatable=&quot;false&quot;>ca-app-pub-3940256099942544/6300978111&lt;/string> &lt;!-- test oficial -->"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/ad_related_strings.xml"
-            line="5"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.admob_rewarded_interstitial_prod` appears to be unused"
-        errorLine1="    &lt;string name=&quot;admob_rewarded_interstitial_prod&quot; translatable=&quot;false&quot;>ca-app-pub-7623187138639860/9677986647&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/ad_related_strings.xml"
-            line="10"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.admob_rewarded_interstitial_test` appears to be unused"
-        errorLine1="    &lt;string name=&quot;admob_rewarded_interstitial_test&quot; translatable=&quot;false&quot;>ca-app-pub-3940256099942544/5354046379&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/ad_related_strings.xml"
-            line="11"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.billing_pro_inapp` appears to be unused"
-        errorLine1="    &lt;string name=&quot;billing_pro_inapp&quot; translatable=&quot;false&quot;>pro_lifetime&lt;/string>      &lt;!-- Producto único (INAPP) -->"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/ad_related_strings.xml"
-            line="12"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.billing_pro_sub` appears to be unused"
-        errorLine1="    &lt;string name=&quot;billing_pro_sub&quot; translatable=&quot;false&quot;>pro_monthly&lt;/string>         &lt;!-- Subscripción (SUBS), opcional -->"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/ad_related_strings.xml"
-            line="13"
             column="13"/>
     </issue>
 
@@ -1836,50 +1627,6 @@
             file="src/main/res/drawable/pro_badge.xml"
             line="1"
             column="1"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.pro_benefit_tools_title` appears to be unused"
-        errorLine1="    &lt;string name=&quot;pro_benefit_tools_title&quot;>Exclusive Tools&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/pro_related_strings.xml"
-            line="8"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.pro_benefit_tools_desc` appears to be unused"
-        errorLine1="    &lt;string name=&quot;pro_benefit_tools_desc&quot;>Unlimited access to the most powerful features.&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/pro_related_strings.xml"
-            line="9"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.pro_buy_button_disabled` appears to be unused"
-        errorLine1="    &lt;string name=&quot;pro_buy_button_disabled&quot;>PRO mode is still in development&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/pro_related_strings.xml"
-            line="16"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.paywall_grace_info` appears to be unused"
-        errorLine1="    &lt;string name=&quot;paywall_grace_info&quot;>Free passes left today: %1$d&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/pro_related_strings.xml"
-            line="31"
-            column="13"/>
     </issue>
 
     <issue

@@ -63,7 +63,6 @@ class CategoriesScreenColdStartTest {
                     tools = ToolRegistry.tools,
                     onToolClick = {},
                     vm = model,
-                    onNavigateToPro = {},
                     onNavigateToAbout = {}
                 )
             }
