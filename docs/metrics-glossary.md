@@ -1,5 +1,7 @@
 # Glosario de Métricas y Telemetría
 
+[English](metrics-glossary.en.md)
+
 Este documento define la semántica exacta de los contadores utilizados en el sistema de telemetría propia de MiniToolbox. Su objetivo es evitar errores de interpretación estadística al redactar informes o documentos públicos.
 
 ---
@@ -7,15 +9,15 @@ Este documento define la semántica exacta de los contadores utilizados en el si
 ## 1. Métricas de Actividad General
 
 ### `app_open`
-- **Qué mide:** Cada vez que la `MainActivity` se crea o se reinicia (start).
-- **Cuándo incrementa:** En el `LaunchedEffect` de la pantalla principal.
+- **Qué mide:** Cada vez que se crea `MainActivity`, incluida una recreación por cambio de configuración (tema o idioma). Volver a la app desde segundo plano sin que la actividad se destruya no cuenta.
+- **Cuándo incrementa:** En el `LaunchedEffect(Unit)` de `MainActivity.onCreate` (`MainActivity.kt:58`).
 - **Limitación Histórica:** **[SESGO DETECTADO]** Entre el 24/09/2025 y el 17/08/2026, este contador duplicaba la primera apertura del día por un bug de colisión con `daily_active`. Toda la serie histórica en ese rango tiene un sesgo de aproximadamente +1 apertura por dispositivo/día.
 - **Uso correcto:** Frecuencia de uso bruta. No sirve para contar usuarios.
 
 ### `daily_active` (DAU)
 - **Qué mide:** Dispositivos activos únicos por día.
-- **Cuándo incrementa:** Exactamente una vez cada 24hs (según reloj local del dispositivo) al abrir la app.
-- **Guarda:** Se apoya en una marca de tiempo en `SharedPreferences`.
+- **Cuándo incrementa:** Una vez por día calendario, según el reloj local del dispositivo, en la primera apertura de ese día. No es una ventana de 24 horas: abrir a las 23:59 y a las 00:01 cuenta dos días.
+- **Guarda:** Guarda el último día contado en `SharedPreferences` (`metrics_daily_once`, `Metrics.kt:122`).
 - **Uso correcto:** Es la métrica más fiel para medir el tamaño de la audiencia diaria.
 
 ---
@@ -29,15 +31,17 @@ Este documento define la semántica exacta de los contadores utilizados en el si
 - **ADVERTENCIA:** **NO mide usuarios únicos totales.** El número total acumulado de este contador está inflado por el factor de actualización (promedio de versiones instaladas por usuario).
 
 ### `versions`
-- **Qué mide:** Uso total por versión (equivalente a `app_open` pero segmentado).
-- **Uso correcto:** Identificar qué porcentaje de la base de usuarios sigue en versiones antiguas.
+- **Qué mide:** Dispositivos-día por versión. Cada dispositivo suma **1** por día a la versión que tiene instalada, sin importar cuántas veces abra la app (`ensureDailyVersionAndLangMarks` en `AggregatesRepository.kt`). No equivale a `app_open`.
+- **Uso correcto:** Identificar qué porcentaje de la base de usuarios sigue en versiones antiguas. La suma de todas las versiones en un período da los dispositivos-día de ese período.
 
 ---
 
 ## 3. Métricas de Funcionalidades
 
 ### `tools`
-- **Qué mide:** Interacciones con herramientas específicas (clic en el menú o apertura).
+- **Qué mide:** Aperturas de herramientas.
+- **Cuándo incrementa:** En el `NavGraph`, cuando la ruta actual cambia a una que pertenece a una herramienta (`NavGraph.kt:69-78`). Un debouncer descarta repeticiones de la misma herramienta dentro de los 5 segundos (`TOOL_USAGE_METRIC_COOLDOWN_MS`).
+- **Limitación:** Pasar de una subpantalla a otra de la misma herramienta (por ejemplo, de la lista de Pomodoro al detalle) vuelve a contar si pasaron más de 5 segundos. Está en el backlog como `tool-count-per-route`.
 - **Estructura:** Mapa de `tool_id` -> `count`.
 - **Nota:** No mide tiempo de permanencia, solo intención de uso.
 - **Clave:** Desde la v1.3.2 proviene de `Tool.metricsKey`, un identificador estable e independiente de la ruta de navegación. Con la migración a navegación type-safe, las subpantallas se unifican bajo la clave principal de su herramienta: `pomodoro_list` y `pomodoro/detail` reportan bajo `pomodoro`, `water_stats` bajo `water`, y las subtelas de divisor de gastos bajo `meetings`.
@@ -75,8 +79,13 @@ Este documento define la semántica exacta de los contadores utilizados en el si
 - **Limitación:** La ventana tarda 28 días en madurar. Toda instalación nueva cae en los tramos bajos por construcción, así que leer estos datos durante el primer mes de vida de una versión lleva a conclusiones falsas.
 
 ### `widgets`
-- **Qué mide:** Actualizaciones o interacciones con Glance Widgets en la pantalla de inicio.
-- **Uso correcto:** Medir el valor del ecosistema de widgets.
+- **Qué mide:** Toques en los widgets, no actualizaciones. Estructura: mapa de clave -> `count`.
+- **Claves:**
+  - `widget_water_normal`, `widget_water_mini`: botones de sumar y quitar agua (`AguaCallback.kt`).
+  - `widget_flashlight`, `widget_flashlight_mini`: encender o apagar la linterna.
+  - `widget_shortcuts`: se cuenta en `MainActivity` para **cualquier** apertura con ruta de inicio, incluidas las que vienen de notificaciones. No mide solo el widget de favoritos (backlog: `widget-shortcuts-mislabel`).
+- **Limitación:** Quitar agua desde el widget suma la métrica sin respetar el opt-out de métricas (`AguaCallback.kt:46`; backlog: `widget-optout-bypass`).
+- **Uso correcto:** Comparar el uso entre widgets de agua y de linterna. `widget_shortcuts` no sirve para medir el widget de favoritos.
 
 ### `ads` (retirada)
 - **Qué medía:** Impresiones de anuncios (banner, intersticial, rewarded).
@@ -112,7 +121,8 @@ Este documento define la semántica exacta de los contadores utilizados en el si
 
 ### `lang_primary` / `lang_secondary`
 - **Qué mide:** Idiomas configurados en el sistema del usuario.
-- **Cuándo incrementa:** Una vez por día por dispositivo.
+- **Cuándo incrementa:** Una vez por día por dispositivo, junto con `versions`. `lang_secondary` solo cuenta si el segundo idioma es distinto del primero.
+- **Nota:** Como con `versions`, la suma de `lang_primary` en un período da los dispositivos-día de ese período.
 - **Uso correcto:** Priorizar traducciones y soporte local.
 
 ---
@@ -129,6 +139,6 @@ Es tolerable para conteos diarios, pero invalida cualquier análisis horario y c
 Para cualquier cifra pública (README, Portfolio, LinkedIn), se debe priorizar:
 1. **Google Play Console** para "Instalaciones Totales" y "Calificaciones".
 2. **`daily_active`** para "Usuarios Activos" (solo serie post 17/08/2026).
-3. **`tools`** para "Funcionalidades más populares".
+3. **`tools_dau`** para "Funcionalidades más populares", con `tools` como medida de intensidad. Si solo se dispone de `tools` (por ejemplo, en el export Markdown del dashboard), aclarar que son aperturas y no personas.
 
 **Nunca utilizar `versions_first_seen` como equivalente a "Usuarios" sin aclarar la semántica de actualización.**

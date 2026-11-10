@@ -67,7 +67,7 @@ flowchart TD
 
 ## 2. Telemetry
 
-Collects usage without device, user or session identifiers. The device only sends daily counters. The meaning of each counter is in [metrics-glossary.md](metrics-glossary.md) (Spanish).
+Collects usage without device, user or session identifiers. The device only sends daily counters. The meaning of each counter is in [metrics-glossary.en.md](metrics-glossary.en.md).
 
 ### Diagram B: end-to-end pipeline
 
