@@ -12,7 +12,7 @@ Restricciones vigentes de MiniToolbox. Cambiar cualquiera requiere una decisión
 ## 2. Pipeline de métricas
 
 - **Local:** agregados diarios en DataStore (`metrics/storage/`).
-- **Envío:** WorkManager (`metrics/uploader/`), autenticado con Firebase App Check. El backend todavía acepta API key para clientes anteriores a la 1.3.2, y esa rama se retira cuando el rollup `metrics_auth` muestre 0 tráfico por API key.
+- **Envío:** WorkManager (`metrics/uploader/`), autenticado exclusivamente con Firebase App Check. La ingesta no acepta API key: los clientes anteriores a la 1.3.2 se rechazan con 401 (`docs/decisions/appcheck-only-ingest.md`).
 - **Backend:** Firebase Cloud Functions, exclusivamente en TypeScript (`backend/functions/src/`), con escritura en Firestore. Las reglas de Firestore niegan todo acceso directo.
 - **Visualización:** dashboard estático en Firebase Hosting (`dashboard/public/`), que lee a través de las Cloud Functions.
 

@@ -100,10 +100,11 @@ Este documento define la semántica exacta de los contadores utilizados en el si
 - **Para qué sirve:** Detectar dispositivos con problemas de envío. Sin esto, un dispositivo que dejó de reportar es indistinguible de uno que no se usa.
 - **Nota:** No forma parte de los agregados diarios; se registra a nivel de lote.
 
-### `auth_method`
-- **Qué mide:** Cómo se autenticó cada lote: `appcheck` o `api_key`.
-- **Dónde vive:** `metrics_ingest_batches`, `metrics_ingest_logs` y el rollup mensual `metrics_auth`.
-- **Para qué sirve:** Es el criterio para retirar la autenticación por API key. Mientras haya tráfico con `api_key`, eliminar esa rama del backend dejaría a esos dispositivos bloqueados de forma permanente.
+### `auth_method` (retirada)
+- **Qué medía:** Cómo se autenticó cada lote: `appcheck` o `api_key`.
+- **Estado:** La ingesta acepta solo App Check (`docs/decisions/appcheck-only-ingest.md`), así que el campo dejó de escribirse en `metrics_ingest_batches` y `metrics_ingest_logs`.
+- **Rollup `metrics_auth`:** Conserva el nombre y la forma por continuidad. Desde el cambio, `appcheck` y `by_version.<versión>.appcheck` equivalen a lotes aceptados. Los meses anteriores también tienen `api_key`, que queda en Firestore pero `metricsAuth` ya no devuelve. Para un total de lotes aceptados que valga también para esos meses, usar `batches`.
+- **Lotes rechazados:** No se cuentan en Firestore. Se ven en Cloud Logging como `ingest_unauthorized`, con la `app_version` declarada.
 
 ---
 

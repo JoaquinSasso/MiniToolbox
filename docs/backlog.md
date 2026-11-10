@@ -7,7 +7,7 @@ Las líneas citan el estado de `master @ 58105f5` (2026-10-02). Antes de trabaja
 
 ## P0: corregir antes del próximo release
 
-- [ ] `backend-read-credential`: los endpoints de lectura aceptan también la credencial de escritura. Evidencia: `index.ts:847-853,900-901,959-960`. Hecho: la lectura solo acepta `READ_METRICS_API_KEY`, la clave de lectura se rotó y hay rate limiting en `ingest`.
+- [ ] `backend-read-credential`: la lectura ya acepta solo `READ_METRICS_API_KEY`, pero esa clave no se rotó y `ingest` no tiene rate limiting. Evidencia: `isReadAuthorized` en `backend/functions/src/index.ts`; `ingest` no limita por origen. Hecho: clave de lectura rotada (con el dashboard reconfigurado) y rate limiting en `ingest`.
 - [ ] `requiresapi-notifications`: `@RequiresApi(TIRAMISU)` silencia el lint de API para toda la navegación (minSdk 28). Además, en API 28-32 se pide `POST_NOTIFICATIONS` (probablemente muestra "denegado" en Agua). Evidencia: `MainActivity.kt:44`, `NavGraph.kt:70`, `PomodoroScreen.kt:82,113-117`, `AguaReminderScreen.kt:92,307-313`, `PomodoroAlarmActivity.kt:123`. Hecho: sin esas anotaciones, el permiso se pide solo con `SDK_INT >= 33` y `lintDebug` pasa.
 - [ ] `receiver-uncaught-exceptions`: hay `try/finally` sin `catch` en scopes ad-hoc dentro de receivers; una excepción mata el proceso. Evidencia: `PomodoroAlarmReceiver.kt:149-155`, `ResetAguaReceiver.kt:16-24`, `AguaNotification.kt:26-33`. Hecho: `catch` con log que re-lanza `CancellationException`.
 
@@ -44,7 +44,7 @@ Las líneas citan el estado de `master @ 58105f5` (2026-10-02). Antes de trabaja
 
 ## P2: documentación
 
-- [ ] `readme-refresh`: el README está desactualizado o es inexacto. Evidencia: badge de Kotlin 2.2.20 (línea 8) contra 2.4.20 en `libs.versions.toml:5`, `METRICS_API_KEY` (línea 74) eliminado en `a95191b`, cifras de Play (líneas 96-97), "faltan tests" (línea 116), "hilos persistentes" del Pomodoro (línea 38), y la tabla de Protobuf medida con Lite sin benchmark en el repo (líneas 20-28). Hecho: README en inglés con cifras verificables y versión en español aparte.
+- [ ] `readme-refresh`: el README está desactualizado o es inexacto. Evidencia: badge de Kotlin 2.2.20 (línea 8) contra 2.4.20 en `libs.versions.toml:5`, cifras de Play (líneas 96-97), "faltan tests" (línea 116), "hilos persistentes" del Pomodoro (línea 38), y la tabla de Protobuf medida con Lite sin benchmark en el repo (líneas 20-28). Hecho: README en inglés con cifras verificables y versión en español aparte.
 - [ ] `architecture-doc`: `docs/architecture.md` se verificó por última vez el 23/08/2026. Hecho: diagramas y conteos al día, con fecha y commit de verificación actualizados.
 - [ ] `performance-doc`: `docs/performance_tests.md` atribuye las mediciones a Protobuf Lite, pero la app usa `protobuf-java`. Hecho: benchmark reproducible en el repo y documento regenerado.
 
