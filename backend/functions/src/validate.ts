@@ -9,7 +9,8 @@ export type IngestItem = {
 	tool_entry?: Record<string, number>;
 	/** Retencion: 1 marca por dia en "<antiguedad>.<intensidad>". */
 	retention?: Record<string, number>;
-	ads?: Record<string, number>;
+	// "ads" ya no se procesa: la app quitó los anuncios. Los clientes viejos que todavía
+	// lo envían no se rechazan; el campo simplemente se ignora.
 
 	versions?: Record<string, number>; // DAU por versión
 	versions_first_seen?: Record<string, number>; // first-seen por versión
@@ -207,7 +208,6 @@ export function validateBody(
 		const toolsDau = sanitizeMap(it.tools_dau, dropped);
 		const toolEntry = sanitizeMap(it.tool_entry, dropped);
 		const retention = sanitizeMap(it.retention, dropped);
-		const ads = sanitizeMap(it.ads, dropped);
 		const versions = sanitizeMap(it.versions, dropped);
 		const versionsFirstSeen = sanitizeMap(it.versions_first_seen, dropped);
 		const langPrimary = sanitizeMap(it.lang_primary, dropped);
@@ -219,7 +219,6 @@ export function validateBody(
 			toolsDau,
 			toolEntry,
 			retention,
-			ads,
 			versions,
 			versionsFirstSeen,
 			langPrimary,
@@ -239,7 +238,6 @@ export function validateBody(
 			tools_dau: toolsDau as Record<string, number>,
 			tool_entry: toolEntry as Record<string, number>,
 			retention: retention as Record<string, number>,
-			ads: ads as Record<string, number>,
 			versions: versions as Record<string, number>,
 			versions_first_seen: versionsFirstSeen as Record<string, number>,
 			lang_primary: langPrimary as Record<string, number>,

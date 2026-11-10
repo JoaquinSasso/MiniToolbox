@@ -1,7 +1,5 @@
 package com.joasasso.minitoolbox
 
-import android.app.Activity
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,7 +29,6 @@ import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.SearchOff
@@ -83,16 +80,11 @@ import com.joasasso.minitoolbox.ui.components.CatalogEmptyState
 import com.joasasso.minitoolbox.ui.components.CategoryGlyph
 import com.joasasso.minitoolbox.ui.components.EditFavoritesSheet
 import com.joasasso.minitoolbox.ui.components.FavoriteTile
-import com.joasasso.minitoolbox.ui.components.ProPassBadge
-import com.joasasso.minitoolbox.ui.components.ProToolPaywallDialog
 import com.joasasso.minitoolbox.ui.components.ToolSearchResult
 import com.joasasso.minitoolbox.ui.components.ToolTile
-import com.joasasso.minitoolbox.utils.ads.RewardedManager
 import com.joasasso.minitoolbox.utils.buildSearchIndexForAllTools
 import com.joasasso.minitoolbox.utils.isCatalogTool
 import com.joasasso.minitoolbox.utils.matchesQuery
-import com.joasasso.minitoolbox.utils.pro.CreditAccessManager
-import com.joasasso.minitoolbox.utils.pro.LocalProState
 import com.joasasso.minitoolbox.viewmodel.CategoryViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
@@ -110,32 +102,18 @@ fun CategoriesScreen(
     tools: List<Tool>,
     onToolClick: (Tool) -> Unit,
     vm: CategoryViewModel = viewModel(),
-    onNavigateToPro: () -> Unit,
     onNavigateToAbout: () -> Unit
 ) {
     val uiState by vm.uiState.collectAsStateWithLifecycle()
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
-    val activity = context as? Activity
     val configuration = LocalConfiguration.current
     val scope = rememberCoroutineScope()
 
     val windowWidth = with(LocalDensity.current) { LocalWindowInfo.current.containerSize.width.toDp() }
     val horizontalMargin: Dp = if (windowWidth >= 600.dp) 24.dp else 16.dp
 
-    val proState = LocalProState.current
-    var showPaywallDialog by remember { mutableStateOf(false) }
-    var selectedProTool by remember { mutableStateOf<Tool?>(null) }
     var showEditFavorites by rememberSaveable { mutableStateOf(false) }
-
-    val handleToolClick: (Tool) -> Unit = { tool ->
-        if (tool.isPro && !proState.isPro && !CreditAccessManager.hasActivePass(context)) {
-            selectedProTool = tool
-            showPaywallDialog = true
-        } else {
-            onToolClick(tool)
-        }
-    }
 
     val catalogTools = remember(tools) { tools.filter(::isCatalogTool) }
 
@@ -204,19 +182,6 @@ fun CategoriesScreen(
                 inputField = inputField,
                 scrollBehavior = searchScrollBehavior,
                 actions = {
-                    ProPassBadge(
-                        modifier = Modifier.padding(start = 4.dp),
-                        onClick = onNavigateToPro
-                    )
-                    if (!proState.isPro) {
-                        IconButton(onClick = onNavigateToPro) {
-                            Icon(
-                                imageVector = Icons.Filled.WorkspacePremium,
-                                contentDescription = stringResource(R.string.pro_screen_title),
-                                tint = MaterialTheme.colorScheme.tertiary
-                            )
-                        }
-                    }
                     IconButton(onClick = onNavigateToAbout) {
                         Icon(
                             imageVector = Icons.Outlined.Info,
@@ -235,7 +200,7 @@ fun CategoriesScreen(
                     catalogTools = catalogTools,
                     onResultClick = { tool ->
                         scope.launch { searchBarState.animateToCollapsed() }
-                        handleToolClick(tool)
+                        onToolClick(tool)
                     },
                     onClearQuery = { textFieldState.clearText() }
                 )
@@ -257,7 +222,7 @@ fun CategoriesScreen(
                     bottom = innerPadding.calculateBottomPadding() + 24.dp
                 ),
                 horizontalMargin = horizontalMargin,
-                onToolClick = handleToolClick,
+                onToolClick = onToolClick,
                 onToggleFavorite = onToggleFavorite,
                 onEditFavorites = { showEditFavorites = true }
             )
@@ -282,44 +247,6 @@ fun CategoriesScreen(
                 vm.toggleFavorite(route)
             },
             onDismiss = { showEditFavorites = false }
-        )
-    }
-
-    if (showPaywallDialog) {
-        ProToolPaywallDialog(
-            onDismiss = { showPaywallDialog = false },
-            onGoToPro = {
-                showPaywallDialog = false
-                onNavigateToPro()
-            },
-            onWatchAd = {
-                showPaywallDialog = false
-                if (activity != null) {
-                    RewardedManager.show(
-                        activity = activity,
-                        onReward = {
-                            CreditAccessManager.startTimedPassForAd(activity)
-                            Toast
-                                .makeText(activity, R.string.pro_unlocked_toast, Toast.LENGTH_SHORT)
-                                .show()
-                            selectedProTool?.let { onToolClick(it) }
-                        },
-                        onUnavailable = {
-                            val used = CreditAccessManager.consumeGrace(activity)
-                            if (used) {
-                                Toast
-                                    .makeText(activity, R.string.free_pass_used_toast, Toast.LENGTH_SHORT)
-                                    .show()
-                                selectedProTool?.let { onToolClick(it) }
-                            } else {
-                                Toast
-                                    .makeText(activity, R.string.paywall_no_ad_try_later, Toast.LENGTH_SHORT)
-                                    .show()
-                            }
-                        }
-                    )
-                }
-            }
         )
     }
 }

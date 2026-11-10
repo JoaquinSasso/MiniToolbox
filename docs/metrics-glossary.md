@@ -78,9 +78,11 @@ Este documento define la semántica exacta de los contadores utilizados en el si
 - **Qué mide:** Actualizaciones o interacciones con Glance Widgets en la pantalla de inicio.
 - **Uso correcto:** Medir el valor del ecosistema de widgets.
 
-### `ads`
-- **Qué mide:** Impresiones de anuncios (banner, intersticial, etc.).
-- **Nota:** Sirve para comparar contra los datos de AdMob y detectar discrepancias de carga.
+### `ads` (retirada)
+- **Qué medía:** Impresiones de anuncios (banner, intersticial, rewarded).
+- **Estado:** Retirada junto con los anuncios y el modo PRO. La primera versión posterior a la 1.4.0 ya no la envía (`schema_version` 4), y el backend ignora el campo si un cliente viejo lo sigue mandando: no lo escribe en Firestore ni lo devuelve en `metricsDaily` ni en `metricsSummary`.
+- **Datos históricos:** Los documentos de `metrics_daily` anteriores al cambio conservan el mapa `ads`; no se borraron. Para consultarlos hay que leer Firestore directamente, porque la API ya no los expone.
+- **Clave relacionada:** `pro` en `tools` no fue nunca una herramienta: era la pantalla de compra del modo PRO. Puede aparecer en datos históricos y se excluye al analizar el uso de herramientas.
 
 ---
 
@@ -88,7 +90,8 @@ Este documento define la semántica exacta de los contadores utilizados en el si
 
 ### `schema_version`
 - **Qué es:** Versión del formato del payload enviado por el cliente.
-- **Valores:** `1` (v1.3.2 inicial), `2` (agrega `tools_dau`), `3` (agrega `tool_entry` y `retention`).
+- **Valores:** `1` (v1.3.2 inicial), `2` (agrega `tools_dau`), `3` (agrega `tool_entry` y `retention`), `4` (quita `ads`).
+- **Nota:** El backend hoy no persiste este número; viaja en el payload pero no se guarda en Firestore.
 - **Para qué sirve:** Separar datos históricos si alguna vez cambia la semántica de un campo. Es imposible de agregar retroactivamente: sin este número, un cambio de significado mezcla para siempre los datos viejos con los nuevos.
 
 ### `client_health`

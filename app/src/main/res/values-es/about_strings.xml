@@ -45,7 +45,6 @@ Si la app te resulta útil, para mí ya valió la pena.
         <item>RIkas Dzihab</item>
     </string-array>
 
-    <string name="privacy_options_button">Opciones de privacidad</string>
     <string name="no_navigator_available">No hay navegador disponible.</string>
 
     <string name="about_metrics_description">Ayudá a mejorar MiniToolbox enviando métricas de uso anónimas</string>

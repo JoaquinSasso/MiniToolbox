@@ -104,17 +104,15 @@ object UploadScheduler {
     data class FlushThreshold(
         val appOpens: Int = 1,     // al registrar 1 apertura, gatilla envío
         val tools: Int = 20,       // o 20 usos de herramientas
-        val ads: Int = 20,         // o 20 impresiones de anuncios
-        val total: Int? = null     // o umbral global (app+tools+ads). null = no usar
+        val total: Int? = null     // o umbral global (app+tools). null = no usar
     )
 
-    private suspend fun pendingDeltaTotals(ctx: Context): Triple<Int, Int, Int> {
+    private suspend fun pendingDeltaTotals(ctx: Context): Pair<Int, Int> {
         val repo = AggregatesRepository(ctx)
         val deltas = repo.buildDeltasSinceLastSent()
         val app = deltas.sumOf { it.appOpen }
         val tools = deltas.sumOf { it.tools.values.sum() }
-        val ads = deltas.sumOf { it.ads.values.sum() }
-        return Triple(app, tools, ads)
+        return app to tools
     }
 
     private suspend fun hasPendingPayload(ctx: Context): Boolean {
@@ -146,12 +144,11 @@ object UploadScheduler {
             return
         }
 
-        val (app, tools, ads) = pendingDeltaTotals(ctx)
-        val total = app + tools + ads
+        val (app, tools) = pendingDeltaTotals(ctx)
+        val total = app + tools
         val trigger =
             app >= thresholds.appOpens ||
                     tools >= thresholds.tools ||
-                    ads >= thresholds.ads ||
                     (thresholds.total != null && total >= thresholds.total)
 
         if (trigger) {

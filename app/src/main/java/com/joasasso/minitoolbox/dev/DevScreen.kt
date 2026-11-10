@@ -1,7 +1,5 @@
 package com.joasasso.minitoolbox.dev
 
-import android.app.Activity
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -34,8 +32,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.google.android.gms.ads.MobileAds
-import com.joasasso.minitoolbox.utils.pro.CreditAccessManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -43,7 +39,6 @@ import kotlinx.coroutines.withContext
 @Composable
 fun MetricsDevScreen() {
     val ctx = LocalContext.current
-    val activity = ctx as Activity
     val scope = rememberCoroutineScope()
     val scroll = rememberScrollState()
 
@@ -111,7 +106,7 @@ fun MetricsDevScreen() {
                             fontSize = 12.sp
                         )
                         Text(
-                            text = "Deltas Pendientes: AppOpens=${s.remainingTotals.first} | Tools=${s.remainingTotals.second} | Ads=${s.remainingTotals.third}",
+                            text = "Deltas Pendientes: AppOpens=${s.remainingTotals.first} | Tools=${s.remainingTotals.second}",
                             color = cardContent,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold
@@ -216,11 +211,6 @@ fun MetricsDevScreen() {
                     simulateMetricEvents(ctx, "metricsTest")
                     refresh()
                 }) { Text("+1 metricsTest") }
-
-                OutlinedButton(onClick = {
-                    simulateMetricEvents(ctx, "ad")
-                    refresh()
-                }) { Text("+1 Ad") }
             }
 
             HorizontalDivider(
@@ -234,20 +224,6 @@ fun MetricsDevScreen() {
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
             )
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(
-                    modifier = Modifier.weight(1f),
-                    onClick = { openAdInspector(activity) }
-                ) { Text("Ad Inspector") }
-
-                OutlinedButton(
-                    modifier = Modifier.weight(1f),
-                    onClick = {
-                        CreditAccessManager.endTimedPass(activity)
-                        Toast.makeText(ctx, "Modo PRO finalizado", Toast.LENGTH_SHORT).show()
-                    }
-                ) { Text("Terminar PRO") }
-            }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(
                     modifier = Modifier.weight(1f),
@@ -311,7 +287,6 @@ fun MetricsDevScreen() {
                                     .put("day", d.day)
                                     .put("app_open", d.appOpen)
                                     .put("tools", org.json.JSONObject(d.tools))
-                                    .put("ads", org.json.JSONObject(d.ads))
                             )
                         }
                         prettyJson(
@@ -333,11 +308,5 @@ fun MetricsDevScreen() {
                 )
             }
         }
-    }
-}
-
-fun openAdInspector(activity: Activity) {
-    MobileAds.openAdInspector(activity) { error ->
-        Log.d("Ads", "AdInspector abierto: ${error?.message}")
     }
 }

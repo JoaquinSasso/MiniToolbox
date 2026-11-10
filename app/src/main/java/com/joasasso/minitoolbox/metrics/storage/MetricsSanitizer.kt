@@ -54,7 +54,6 @@ object MetricsSanitizer {
         MetricsKeys.TOOL_DAU_BY_DAY_JSON,
         MetricsKeys.TOOL_ENTRY_BY_DAY_JSON,
         MetricsKeys.RETENTION_BY_DAY_JSON,
-        MetricsKeys.AD_IMPRESSIONS_BY_DAY_JSON,
         MetricsKeys.VERSION_DAU_BY_DAY_JSON,
         MetricsKeys.VERSION_FIRST_SEEN_BY_DAY_JSON,
         MetricsKeys.LANG_PRIMARY_BY_DAY_JSON,
@@ -64,12 +63,17 @@ object MetricsSanitizer {
         MetricsKeys.SENT_TOOL_DAU_BY_DAY_JSON,
         MetricsKeys.SENT_TOOL_ENTRY_BY_DAY_JSON,
         MetricsKeys.SENT_RETENTION_BY_DAY_JSON,
-        MetricsKeys.SENT_AD_IMPR_BY_DAY_JSON,
         MetricsKeys.SENT_VERSION_DAU_BY_DAY_JSON,
         MetricsKeys.SENT_VERSION_FIRST_SEEN_BY_DAY_JSON,
         MetricsKeys.SENT_LANG_PRIMARY_BY_DAY_JSON,
         MetricsKeys.SENT_LANG_SECONDARY_BY_DAY_JSON,
         MetricsKeys.SENT_WIDGET_USE_BY_DAY_JSON
+    )
+
+    /** Claves que ya no se escriben y se borran del disco si siguen ahí. */
+    private val RETIRED_KEYS = listOf(
+        MetricsKeys.RETIRED_AD_IMPRESSIONS_BY_DAY_JSON,
+        MetricsKeys.RETIRED_SENT_AD_IMPR_BY_DAY_JSON
     )
 
     /** Mapas día -> contador. */
@@ -104,6 +108,7 @@ object MetricsSanitizer {
      */
     suspend fun runIfNeeded(context: Context): Report? {
         val prefs = readPrefs(context)
+        removeRetiredKeysIfPresent(context, prefs)
         if (prefs[MetricsKeys.SCHEMA_VERSION] == SCHEMA_VERSION) return null
 
         val report = sanitizeNow(context, discardPendingPayload = true)
@@ -176,6 +181,22 @@ object MetricsSanitizer {
             droppedDays = droppedDays,
             clearedPendingPayload = discardPendingPayload
         )
+    }
+
+    /**
+     * Borra las claves de [RETIRED_KEYS] que sigan en disco.
+     *
+     * Va por fuera de [SCHEMA_VERSION] a propósito: subir la versión descartaría el lote
+     * congelado de todos los dispositivos, y para borrar dos claves que nadie lee no hace
+     * falta. Solo escribe si encuentra alguna, así que en el arranque normal no cuesta nada.
+     */
+    private suspend fun removeRetiredKeysIfPresent(context: Context, prefs: Preferences) {
+        if (RETIRED_KEYS.none { prefs.contains(it) }) return
+        try {
+            context.metricsDataStore.edit { e -> RETIRED_KEYS.forEach { e.remove(it) } }
+        } catch (e: IOException) {
+            Log.w("MetricsSanitizer", "No se pudieron borrar las claves retiradas", e)
+        }
     }
 
     /** Día más antiguo que se conserva, en formato "yyyy-MM-dd". */

@@ -177,7 +177,6 @@ class UploadMetricsWorker(appContext: Context, params: WorkerParameters) :
                 .put("tools_dau", org.json.JSONObject(d.toolsDau as Map<*, *>))
                 .put("tool_entry", org.json.JSONObject(d.toolEntry as Map<*, *>))
                 .put("retention", org.json.JSONObject(d.retention as Map<*, *>))
-                .put("ads", org.json.JSONObject(d.ads as Map<*, *>))
                 .put("versions", org.json.JSONObject(d.versions as Map<*, *>))
                 .put("versions_first_seen", org.json.JSONObject(d.versionsFirstSeen as Map<*, *>))
                 .put("lang_primary", org.json.JSONObject(d.langPrimary as Map<*, *>))
@@ -221,7 +220,6 @@ class UploadMetricsWorker(appContext: Context, params: WorkerParameters) :
             toolsDau = clean(d.toolsDau),
             toolEntry = clean(d.toolEntry),
             retention = clean(d.retention),
-            ads = clean(d.ads),
             versions = clean(d.versions),
             versionsFirstSeen = clean(d.versionsFirstSeen),
             langPrimary = clean(d.langPrimary),
@@ -298,7 +296,6 @@ class UploadMetricsWorker(appContext: Context, params: WorkerParameters) :
                     toolsDau = objToMap(item.optJSONObject("tools_dau")),
                     toolEntry = objToMap(item.optJSONObject("tool_entry")),
                     retention = objToMap(item.optJSONObject("retention")),
-                    ads = objToMap(item.optJSONObject("ads")),
                     versions = objToMap(item.optJSONObject("versions")),
                     versionsFirstSeen = objToMap(item.optJSONObject("versions_first_seen")),
                     langPrimary = objToMap(item.optJSONObject("lang_primary")),
@@ -323,7 +320,7 @@ class UploadMetricsWorker(appContext: Context, params: WorkerParameters) :
          * Es imposible de agregar retroactivamente: sin esto, un cambio de significado
          * mezcla para siempre los datos viejos con los nuevos.
          */
-        private const val PAYLOAD_SCHEMA_VERSION = 3
+        private const val PAYLOAD_SCHEMA_VERSION = 4
 
         /** Intentos antes de descartar un lote y desbloquear la cola. */
         private const val MAX_ATTEMPTS = 5

@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -212,22 +213,43 @@ class MetricsSanitizerTest {
     }
 
     @Test
-    fun `sanea tambien los mapas de widgets y anuncios`() = runTest {
+    fun `sanea tambien el mapa de widgets`() = runTest {
         val day = today()
         context.metricsDataStore.edit {
             it[MetricsKeys.WIDGET_USE_BY_DAY_JSON] =
                 JsonUtils.toDayNestedIntMap(mapOf(day to mapOf("widget/agua" to 4)))
-            it[MetricsKeys.AD_IMPRESSIONS_BY_DAY_JSON] =
-                JsonUtils.toDayNestedIntMap(mapOf(day to mapOf("banner/top" to 2)))
         }
 
         MetricsSanitizer.sanitizeNow(context, discardPendingPayload = false)
 
         val prefs = context.metricsDataStore.data.first()
         val widgets = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.WIDGET_USE_BY_DAY_JSON])
-        val ads = JsonUtils.fromDayNestedIntMap(prefs[MetricsKeys.AD_IMPRESSIONS_BY_DAY_JSON])
 
         assertEquals(4, widgets.getValue(day)["widget_agua"])
-        assertEquals(2, ads.getValue(day)["banner_top"])
+    }
+
+    /**
+     * Un dispositivo que actualiza desde una versión con anuncios ya tiene el esquema
+     * al día: la limpieza tiene que correr igual, y sin tocar el lote congelado.
+     */
+    @Test
+    fun `runIfNeeded borra las claves retiradas sin descartar el lote pendiente`() = runTest {
+        val day = today()
+        context.metricsDataStore.edit {
+            it[MetricsKeys.SCHEMA_VERSION] = MetricsSanitizer.SCHEMA_VERSION
+            it[MetricsKeys.RETIRED_AD_IMPRESSIONS_BY_DAY_JSON] =
+                JsonUtils.toDayNestedIntMap(mapOf(day to mapOf("banner" to 2)))
+            it[MetricsKeys.RETIRED_SENT_AD_IMPR_BY_DAY_JSON] =
+                JsonUtils.toDayNestedIntMap(mapOf(day to mapOf("banner" to 1)))
+            it[MetricsKeys.PENDING_BATCH_PAYLOAD_JSON] = "{\"items\":[]}"
+        }
+
+        val report = MetricsSanitizer.runIfNeeded(context)
+
+        val prefs = context.metricsDataStore.data.first()
+        assertNull("con el esquema al día no debe haber pasada de saneo", report)
+        assertFalse(prefs.contains(MetricsKeys.RETIRED_AD_IMPRESSIONS_BY_DAY_JSON))
+        assertFalse(prefs.contains(MetricsKeys.RETIRED_SENT_AD_IMPR_BY_DAY_JSON))
+        assertEquals("{\"items\":[]}", prefs[MetricsKeys.PENDING_BATCH_PAYLOAD_JSON])
     }
 }

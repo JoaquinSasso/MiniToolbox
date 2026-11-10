@@ -30,7 +30,6 @@ object MetricsKeys {
     val APP_OPEN_COUNT_BY_DAY      = stringPreferencesKey("app_open_count_by_day")       // Map<day, Int>
     val DAILY_ACTIVE_BY_DAY        = stringPreferencesKey("daily_active_by_day")         // Map<day, Int>
     val TOOL_USE_BY_DAY_JSON       = stringPreferencesKey("tool_use_by_day_json")        // Map<day, Map<toolId, Int>>
-    val AD_IMPRESSIONS_BY_DAY_JSON = stringPreferencesKey("ad_impr_by_day_json")         // Map<day, Map<type, Int>>
 
     /**
      * Dispositivos-día por herramienta: 1 por herramienta y por día, sin importar cuántas
@@ -68,7 +67,6 @@ object MetricsKeys {
     val SENT_APP_OPEN_BY_DAY       = stringPreferencesKey("sent_app_open_by_day")        // Map<day, Int>
     val SENT_DAILY_ACTIVE_BY_DAY   = stringPreferencesKey("sent_daily_active_by_day")    // Map<day, Int>
     val SENT_TOOL_USE_BY_DAY_JSON  = stringPreferencesKey("sent_tool_use_by_day_json")   // Map<day, Map<toolId, Int>>
-    val SENT_AD_IMPR_BY_DAY_JSON   = stringPreferencesKey("sent_ad_impr_by_day_json")    // Map<day, Map<type, Int>>
     val SENT_TOOL_DAU_BY_DAY_JSON  = stringPreferencesKey("sent_tool_dau_by_day_json")   // Map<day, Map<toolId, 0|1>>
     val SENT_TOOL_ENTRY_BY_DAY_JSON = stringPreferencesKey("sent_tool_entry_by_day_json") // Map<day, Map<toolId.source, Int>>
     val SENT_RETENTION_BY_DAY_JSON  = stringPreferencesKey("sent_retention_by_day_json")  // Map<day, Map<age.intensity, 0|1>>
@@ -139,4 +137,14 @@ object MetricsKeys {
 
     /** Si el último envío llevó token de App Check. Diagnóstico para la DevScreen. */
     val LAST_UPLOAD_USED_APPCHECK = booleanPreferencesKey("last_upload_used_appcheck")
+
+    // ---------------------------------------------------------------------
+    // Claves retiradas
+    // ---------------------------------------------------------------------
+    // Ya no se escriben. Siguen declaradas solo para que MetricsSanitizer las borre en
+    // los dispositivos que actualizan desde una versión que sí las usaba.
+
+    /** Impresiones de anuncios por día. Retirada al quitar los anuncios de la app. */
+    val RETIRED_AD_IMPRESSIONS_BY_DAY_JSON = stringPreferencesKey("ad_impr_by_day_json")
+    val RETIRED_SENT_AD_IMPR_BY_DAY_JSON   = stringPreferencesKey("sent_ad_impr_by_day_json")
 }

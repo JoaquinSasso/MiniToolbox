@@ -18,9 +18,7 @@ Este diagrama muestra cómo conviven las dos estrategias de estado en la app. Se
 ```mermaid
 flowchart TD
     subgraph UI_Layer [Capa de UI Jetpack Compose]
-        MA[MainActivity] --> CG[ConsentGateProvider]
-        CG --> PSP[ProStateProvider]
-        PSP --> MT[MiniToolboxTheme]
+        MA[MainActivity] --> MT[MiniToolboxTheme]
         MT --> NG[NavGraph]
         
         subgraph Screens [Pantallas / Tools]
@@ -39,20 +37,13 @@ flowchart TD
     end
 
     subgraph Services_Background [Servicios y Background]
-        subgraph Ads_Billing [Ads & Billing]
-            BM[BillingClientWrapper]
-            AM[AdsManager]
-            IM[InterstitialManager]
-            RM[RewardedManager]
-            PR[ProRepository]
-        end
         PAS[PomodoroAlarmService]
         WM[WorkManager - UploadMetrics]
         GW[Widgets Glance]
     end
 
     subgraph Data_Layer [Capa de Datos]
-        DS[(16 DataStores Preferences)]
+        DS[(14 DataStores Preferences)]
         PB[Protobuf - Countries Data]
     end
 
@@ -63,7 +54,6 @@ flowchart TD
     PAS --> DS
     WM --> DS
     GW --> DS
-    NG --> Ads_Billing
     State_Screens -.-> PAS
     GW -->|widgetUse| MET
 ```
@@ -160,7 +150,7 @@ flowchart TD
 
 ```
 app/src/main/java/com/joasasso/minitoolbox/
-├── data/               # Repositorios y DataStores globales (Pro, Favoritos, etc.)
+├── data/               # Repositorios y DataStores globales (Favoritos, Agua, etc.)
 ├── metrics/            # Pipeline de telemetría (storage, uploader)
 ├── nav/                # Definiciones de Screen y rutas
 ├── tools/              # Lógica de herramientas
@@ -175,8 +165,8 @@ app/src/main/java/com/joasasso/minitoolbox/
 │       ├── divisorGastos/
 │       ├── pomodoro/
 │       └── recordatorios/
-├── ui/                 # Componentes comunes, temas y capas globales (Ads)
-├── utils/              # Managers de Ads y Billing
+├── ui/                 # Componentes comunes y temas
+├── utils/              # Utilidades transversales (Application, búsqueda, navegación)
 ├── viewmodel/          # ViewModels de pantallas principales
 └── widgets/            # Implementaciones de Glance Widgets
 ```
@@ -185,10 +175,9 @@ app/src/main/java/com/joasasso/minitoolbox/
 
 ## 6. Modelo de Persistencia
 
-El sistema utiliza **16 instancias de `preferencesDataStore`**. 
-- 14 están centralizadas en archivos dentro del paquete `data/`.
+El sistema utiliza **14 instancias de `preferencesDataStore`** (`git grep -n "by preferencesDataStore" -- app/src/main/java`).
+- 13 están centralizadas en archivos dentro del paquete `data/`.
 - 1 está en `metrics/storage/` (`MetricsDataStore.kt`), aislada a propósito por pertenecer al subsistema de telemetría.
-- 1 está en `utils/pro/` (`ProRepository.kt`) para el estado en caché de la compra Pro.
 
 **Nota sobre duplicidad:** Algunos archivos en `data/` declaran más de un DataStore (ej. `PomodoroDataStore.kt`). Esto suele indicar una transición incompleta de esquemas o una separación de responsabilidades (estado vs. configuración) pendiente de unificar.
 

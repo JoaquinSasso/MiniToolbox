@@ -53,31 +53,13 @@ import com.joasasso.minitoolbox.tools.organizacion.pomodoro.PomodoroScreen
 import com.joasasso.minitoolbox.tools.organizacion.pomodoro.PomodoroTimersListScreen
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AguaReminderScreen
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AguaStatisticsScreen
-import com.joasasso.minitoolbox.ui.screens.ProScreen
 import com.joasasso.minitoolbox.utils.ToolDebouncer
-import com.joasasso.minitoolbox.utils.ads.InterstitialManager
-import com.joasasso.minitoolbox.utils.ads.RewardedManager
-import com.joasasso.minitoolbox.utils.ads.ToolUsageTracker
-import com.joasasso.minitoolbox.utils.findActivity
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
-fun MiniToolboxNavGraph(
-    navController: NavHostController,
-    shouldShowAds: Boolean,
-    interstitialAdUnitId: String,
-    rewardedAdUnitId: String
-) {
+fun MiniToolboxNavGraph(navController: NavHostController) {
     val animationDuration = 280
     val context = LocalContext.current
-    val activity = context.findActivity()
-
-    LaunchedEffect(Unit) {
-        if (activity != null) {
-            RewardedManager.init(activity, rewardedAdUnitId)
-            InterstitialManager.init(context.applicationContext, interstitialAdUnitId)
-        }
-    }
 
     val metricsDebouncer = remember { ToolDebouncer(cooldownMs = TOOL_USAGE_METRIC_COOLDOWN_MS) }
 
@@ -90,14 +72,6 @@ fun MiniToolboxNavGraph(
         if (route != lastRoute && tool != null) {
             if (metricsDebouncer.canExecute(tool.metricsKey)) {
                 toolUse(context, tool.metricsKey, PendingEntrySource.consume())
-            }
-
-            val isNewAccess = ToolUsageTracker.onToolOpened(context, tool.metricsKey)
-            if (isNewAccess && activity != null) {
-                InterstitialManager.onToolOpened(
-                    activity = activity,
-                    shouldShowAds = shouldShowAds
-                )
             }
 
             lastRoute = route
@@ -158,7 +132,6 @@ fun MiniToolboxNavGraph(
             CategoriesScreen(
                 tools = ToolRegistry.tools,
                 onToolClick = { tool -> navController.navigate(tool.screen) },
-                onNavigateToPro = { navController.navigate(Screen.Pro) },
                 onNavigateToAbout = { navController.navigate(Screen.About) }
             )
         }
@@ -247,8 +220,7 @@ fun MiniToolboxNavGraph(
                 },
                 onAgregarGasto = { idReunion ->
                     navController.navigate(Screen.ExpenseAdd(reunionId = idReunion))
-                },
-                onNavigateToPro = { navController.navigate(Screen.Pro) }
+                }
             )
         }
         composable<Screen.ExpenseEdit> { _ ->
@@ -285,15 +257,11 @@ fun MiniToolboxNavGraph(
                         android.content.Intent(context, com.google.android.gms.oss.licenses.OssLicensesMenuActivity::class.java)
                     )
                 },
-                onOpenDevTools = { navController.navigate(Screen.DevMetrics) },
-                onNavigateToPro = { navController.navigate(Screen.Pro) }
+                onOpenDevTools = { navController.navigate(Screen.DevMetrics) }
             )
         }
         composable<Screen.DevMetrics> {
             MetricsDiagnosticsScreen(onBack = onBackSmart)
-        }
-        composable<Screen.Pro> {
-            ProScreen(onBack = onBackSmart)
         }
         composable<Screen.Minesweeper> {
             MinesweeperScreen(onBack = onBackSmart)

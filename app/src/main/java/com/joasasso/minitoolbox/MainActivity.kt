@@ -29,11 +29,6 @@ import com.joasasso.minitoolbox.metrics.widgetUse
 import com.joasasso.minitoolbox.nav.Screen
 import com.joasasso.minitoolbox.ui.theme.MiniToolboxTheme
 import com.joasasso.minitoolbox.ui.utils.LockScreenOrientationIfAllowed
-import com.joasasso.minitoolbox.utils.ads.ConsentGateProvider
-import com.joasasso.minitoolbox.utils.ads.LocalConsentState
-import com.joasasso.minitoolbox.utils.pro.LocalProState
-import com.joasasso.minitoolbox.utils.pro.ProSilentInitializer
-import com.joasasso.minitoolbox.utils.pro.ProStateProvider
 
 class MainActivity : AppCompatActivity() {
 
@@ -52,114 +47,84 @@ class MainActivity : AppCompatActivity() {
         val isMetricsConfigured = MetricsConfig.isConfigured
         Log.d("Metrics", "metrics configured: $isMetricsConfigured")
 
-        // 🔹 Inicialización / restauración silenciosa del estado PRO
-        ProSilentInitializer.init(
-            context = applicationContext,
-            inappProductId = getString(R.string.billing_pro_id)
-        )
-
         setContent {
             LockScreenOrientationIfAllowed(
                 orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT,
                 enabled = true
             )
-            ConsentGateProvider {
-                LaunchedEffect(Unit) {
-                    if (isMetricsConfigured) {
-                        // Registrar apertura y "open once" del día
-                        appOpen(applicationContext)
-                        dailyOpenOnce(applicationContext)
+            LaunchedEffect(Unit) {
+                if (isMetricsConfigured) {
+                    // Registrar apertura y "open once" del día
+                    appOpen(applicationContext)
+                    dailyOpenOnce(applicationContext)
 
-                        // 🔸 Planificador con cotas
-                        UploadScheduler.maybeFlushOnThreshold(
-                            applicationContext,
-                            UploadScheduler.FlushThreshold(appOpens = 1, tools = Int.MAX_VALUE, ads = Int.MAX_VALUE)
-                        )
+                    // 🔸 Planificador con cotas
+                    UploadScheduler.maybeFlushOnThreshold(
+                        applicationContext,
+                        UploadScheduler.FlushThreshold(appOpens = 1, tools = Int.MAX_VALUE)
+                    )
+                }
+            }
+
+            val lifecycleOwner = LocalLifecycleOwner.current
+            DisposableEffect(lifecycleOwner) {
+                val observer = LifecycleEventObserver { _, event ->
+                    if (event == Lifecycle.Event.ON_STOP) {
+                        if (isMetricsConfigured) {
+                            UploadScheduler.enqueueNowExpedited(
+                                applicationContext,
+                                MetricsConfig.endpoint
+                            )
+                        }
                     }
                 }
+                lifecycleOwner.lifecycle.addObserver(observer)
+                onDispose {
+                    lifecycleOwner.lifecycle.removeObserver(observer)
+                }
+            }
 
-                val lifecycleOwner = LocalLifecycleOwner.current
-                DisposableEffect(lifecycleOwner) {
-                    val observer = LifecycleEventObserver { _, event ->
-                        if (event == Lifecycle.Event.ON_STOP) {
-                            if (isMetricsConfigured) {
-                                UploadScheduler.enqueueNowExpedited(
-                                    applicationContext,
-                                    MetricsConfig.endpoint
+            MiniToolboxTheme {
+                val navController = rememberNavController()
+                // Estado Compose de la ruta inicial
+                var startRoute by rememberSaveable { mutableStateOf(startRouteState) }
+
+                // Exponer el setter al Activity (onNewIntent lo usa)
+                DisposableEffect(Unit) {
+                    pushStartRoute = { newRoute -> startRoute = newRoute }
+                    onDispose { pushStartRoute = null }
+                }
+                MiniToolboxNavGraph(navController = navController)
+
+                LaunchedEffect(startRoute) {
+                    val raw = startRoute
+                    if (!raw.isNullOrBlank()) {
+                        val targetScreen = Screen.fromJson(raw) ?: Screen.fromRouteString(raw)
+                        if (targetScreen != null && targetScreen != Screen.Categories) {
+                            try {
+                                PendingEntrySource.set(
+                                    intent?.getStringExtra(MetricsSource.EXTRA_START_SOURCE)
                                 )
-                            }
-                        }
-                    }
-                    lifecycleOwner.lifecycle.addObserver(observer)
-                    onDispose {
-                        lifecycleOwner.lifecycle.removeObserver(observer)
-                    }
-                }
+                                widgetUse(applicationContext, "widget_shortcuts")
 
-                ProStateProvider {
-                    MiniToolboxTheme {
-                        val navController = rememberNavController()
-                        val pro = LocalProState.current
-                        val consent = LocalConsentState.current
-                        val shouldShowAds = !pro.isPro && consent.canRequestAds
+                                navController.popBackStack<Screen.Categories>(inclusive = false)
 
-                        // Estado Compose de la ruta inicial
-                        var startRoute by rememberSaveable { mutableStateOf(startRouteState) }
-
-                        // Exponer el setter al Activity (onNewIntent lo usa)
-                        DisposableEffect(Unit) {
-                            pushStartRoute = { newRoute -> startRoute = newRoute }
-                            onDispose { pushStartRoute = null }
-                        }
-                        MiniToolboxNavGraph(
-                            navController = navController,
-                            shouldShowAds = if (BuildConfig.DEBUG) true else shouldShowAds,
-                            interstitialAdUnitId = if (BuildConfig.DEBUG)
-                                getString(R.string.admob_interstitial_test)
-                            else
-                                getString(R.string.admob_interstitial_prod),
-                            rewardedAdUnitId = if (BuildConfig.DEBUG)
-                                getString(R.string.admob_rewarded_test)
-                            else
-                                getString(R.string.admob_rewarded_prod)
-                        )
-
-                        LaunchedEffect(startRoute) {
-                            val raw = startRoute
-                            if (!raw.isNullOrBlank()) {
-                                val targetScreen = Screen.fromJson(raw) ?: Screen.fromRouteString(raw)
-                                if (targetScreen != null && targetScreen != Screen.Categories) {
-                                    try {
-                                        PendingEntrySource.set(
-                                            intent?.getStringExtra(MetricsSource.EXTRA_START_SOURCE)
-                                        )
-                                        widgetUse(applicationContext, "widget_shortcuts")
-
-                                        navController.popBackStack<Screen.Categories>(inclusive = false)
-
-                                        navController.navigate(targetScreen) {
-                                            launchSingleTop = true
-                                            restoreState = false
-                                        }
-                                    } catch (e: Exception) {
-                                        Log.e("Navigation", "Error navegando a destino: $raw", e)
-                                    } finally {
-                                        startRoute = null
-                                    }
-                                } else {
-                                    startRoute = null
+                                navController.navigate(targetScreen) {
+                                    launchSingleTop = true
+                                    restoreState = false
                                 }
+                            } catch (e: Exception) {
+                                Log.e("Navigation", "Error navegando a destino: $raw", e)
+                            } finally {
+                                startRoute = null
                             }
+                        } else {
+                            startRoute = null
                         }
                     }
                 }
             }
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        ProSilentInitializer.recheckOnForeground()
     }
 
     override fun onNewIntent(intent: Intent) {

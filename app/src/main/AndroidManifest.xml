@@ -47,11 +47,6 @@
             android:showWhenLocked="true"
             android:turnScreenOn="true" />
 
-        <!-- Metadata para Admob-->
-        <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="@string/admob_app_id" />
-
         <!-- Receiver para recordatorio de agua -->
         <receiver
             android:name="com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.WaterReminderReceiver"

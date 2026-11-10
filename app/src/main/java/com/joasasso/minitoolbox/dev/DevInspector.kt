@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.datastore.preferences.core.edit
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.appcheck.FirebaseAppCheck
-import com.joasasso.minitoolbox.metrics.adImpression
 import com.joasasso.minitoolbox.metrics.appOpen
 import com.joasasso.minitoolbox.metrics.isMetricsEnabled
 import com.joasasso.minitoolbox.metrics.storage.AggregatesRepository
@@ -33,7 +32,6 @@ data class DayDeltaView(
     val day: String,
     val appOpen: Int,
     val tools: Map<String, Int>,
-    val ads: Map<String, Int>,
     val versions: Map<String, Int> = emptyMap(),
     val versionsFirstSeen: Map<String, Int> = emptyMap(),
     val langPrimary: Map<String, Int> = emptyMap(),
@@ -49,7 +47,7 @@ data class DevSnapshot(
     val pendingBatchId: String,
     val pendingPayloadJson: String,
     val remainingDeltas: List<DayDeltaView>,
-    val remainingTotals: Triple<Int, Int, Int> // (appOpens, tools, ads)
+    val remainingTotals: Pair<Int, Int> // (appOpens, tools)
 )
 
 /** Carga un snapshot completo del estado actual de métricas y uploader. */
@@ -66,7 +64,6 @@ suspend fun loadDevSnapshot(context: Context): DevSnapshot {
             day = it.day,
             appOpen = it.appOpen,
             tools = it.tools.toMap(),
-            ads = it.ads.toMap(),
             versions = it.versions.toMap(),
             versionsFirstSeen = it.versionsFirstSeen.toMap(),
             langPrimary = it.langPrimary.toMap(),
@@ -75,10 +72,9 @@ suspend fun loadDevSnapshot(context: Context): DevSnapshot {
         )
     }
 
-    val remainingTotals = Triple(
+    val remainingTotals = Pair(
         remaining.sumOf { it.appOpen },
-        remaining.sumOf { it.tools.values.sum() },
-        remaining.sumOf { it.ads.values.sum() }
+        remaining.sumOf { it.tools.values.sum() }
     )
 
     val endpoint = MetricsConfig.endpoint
@@ -173,7 +169,6 @@ fun simulateMetricEvents(context: Context, type: String) {
         "open" -> appOpen(context)
         "test_tool" -> toolUse(context, "metricTest")
         "metricsTest" -> toolUse(context, "metricsTest")
-        "ad" -> adImpression(context, "banner")
     }
 }
 

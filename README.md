@@ -87,7 +87,6 @@ Si faltan, la app funciona igual, pero no reporta métricas.
 - **Asincronía:** Kotlin Coroutines & Flow.
 - **Persistencia:** Jetpack DataStore, Protobuf (Full Java).
 - **Backend:** Firebase Functions & Firestore (procesamiento externo de métricas).
-- **Monetización:** Google Play Billing Library & AdMob.
 - **Análisis:** Custom Telemetry System (sin SDKs externos en la App).
 
 ---
