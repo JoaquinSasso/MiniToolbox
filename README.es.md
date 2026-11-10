@@ -60,6 +60,14 @@ Cada uno cita el commit que introdujo o corrigió el problema.
 
 ARCore con SceneView. La matemática de la medición está separada de la UI en `ArRulerMath`, con tests unitarios, y el estado de la pantalla vive en `ArRulerViewModel`.
 
+### Nivel burbuja a partir de cuaterniones
+
+El [nivel burbuja](app/src/main/java/com/joasasso/minitoolbox/tools/herramientas/instrumentos/BubbleLevelScreen.kt) lee `TYPE_ROTATION_VECTOR`, que es un cuaternión, lo convierte en una matriz de rotación y saca de ella el vector "arriba" del dispositivo. No usa los ángulos de Euler de `getOrientation()`, que caen en gimbal lock cuando el teléfono está vertical. Ese mismo vector le indica al nivel si el teléfono está apoyado, en vertical o en horizontal, y el modo cambia solo.
+
+### Dataset de países sin conexión
+
+El juego de banderas lee sus 245 países de un binario Protobuf de 23 KB en `assets/`, sin acceso a la red. Al principio el dataset se parseaba como JSON (Moshi y después Gson) y pasó a Protobuf en `03cdf3f`. La comparación de tiempos de carga de [docs/performance_tests.md](docs/performance_tests.md) no se cita acá porque se midió con Protobuf Lite, mientras la app usa `protobuf-java` completo, y no hay un benchmark en el repo para reproducirla.
+
 ## Qué dicen los datos de uso
 
 Fuente: export Markdown del dashboard del 15/05/2026 al 10/11/2026 (180 días). Son contadores, no usuarios, y las builds debug reportan al mismo endpoint que producción, así que el dispositivo del autor está incluido.

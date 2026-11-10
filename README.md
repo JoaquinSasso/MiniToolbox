@@ -60,6 +60,14 @@ Each one cites the commit that introduced or fixed the problem.
 
 ARCore with SceneView. The measurement math is extracted from the UI into `ArRulerMath` and covered by unit tests, and the screen state lives in `ArRulerViewModel`.
 
+### Bubble level from quaternions
+
+The [bubble level](app/src/main/java/com/joasasso/minitoolbox/tools/herramientas/instrumentos/BubbleLevelScreen.kt) reads `TYPE_ROTATION_VECTOR`, a quaternion, converts it to a rotation matrix and takes the device's "up" vector from it. It does not use the Euler angles from `getOrientation()`, which hit gimbal lock when the phone stands upright. The same vector tells the level whether the phone is lying flat, in portrait or in landscape, and it switches mode on its own.
+
+### Offline countries dataset
+
+The flag game reads its 245 countries from a 23 KB Protobuf binary in `assets/`, with no network access. The dataset was first parsed as JSON (Moshi, then Gson) and moved to Protobuf in `03cdf3f`. The load-time comparison in [docs/performance_tests.md](docs/performance_tests.md) is not quoted here because it was measured with Protobuf Lite, while the app uses full `protobuf-java`, and there is no benchmark in the repo to reproduce it.
+
 ## What the usage data says
 
 Source: dashboard Markdown export for 2026-05-15 to 2026-11-10 (180 days). These are counters, not users, and debug builds report to the same endpoint as production, so the author's own device is included.

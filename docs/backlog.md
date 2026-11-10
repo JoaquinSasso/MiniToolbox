@@ -9,7 +9,7 @@ Las líneas citan el estado de `master @ 58105f5` (2026-10-02). Antes de trabaja
 
 - [ ] `backend-read-credential`: la lectura ya acepta solo `READ_METRICS_API_KEY`, pero esa clave no se rotó y `ingest` no tiene rate limiting. Evidencia: `isReadAuthorized` en `backend/functions/src/index.ts`; `ingest` no limita por origen. Hecho: clave de lectura rotada (con el dashboard reconfigurado) y rate limiting en `ingest`.
 - [ ] `requiresapi-notifications`: `@RequiresApi(TIRAMISU)` silencia el lint de API para toda la navegación (minSdk 28). Además, en API 28-32 se pide `POST_NOTIFICATIONS` (probablemente muestra "denegado" en Agua). Evidencia: `MainActivity.kt:44`, `NavGraph.kt:70`, `PomodoroScreen.kt:82,113-117`, `AguaReminderScreen.kt:92,307-313`, `PomodoroAlarmActivity.kt:123`. Hecho: sin esas anotaciones, el permiso se pide solo con `SDK_INT >= 33` y `lintDebug` pasa.
-- [ ] `receiver-uncaught-exceptions`: hay `try/finally` sin `catch` en scopes ad-hoc dentro de receivers; una excepción mata el proceso. Evidencia: `PomodoroAlarmReceiver.kt:149-155`, `ResetAguaReceiver.kt:16-24`, `AguaNotification.kt:26-33`. Hecho: `catch` con log que re-lanza `CancellationException`.
+- [ ] `receiver-uncaught-exceptions`: hay `try/finally` sin `catch` en scopes ad-hoc dentro de receivers; una excepción mata el proceso. Evidencia: `PomodoroAlarmReceiver.kt:149-155` (`stopPomodoro`). Los receivers de agua ya tienen `catch` (verificado el 2026-11-10). Hecho: `catch` con log que re-lanza `CancellationException`.
 
 ## P1: calidad de datos de telemetría
 
@@ -19,6 +19,7 @@ Las líneas citan el estado de `master @ 58105f5` (2026-10-02). Antes de trabaja
 - [ ] `debug-traffic-in-prod`: las builds debug envían al endpoint de producción y el payload no lleva `build_type`. Evidencia: `MetricsConfig.kt`, `UploadMetricsWorker.kt:196-203`, `dev/DevInspector.kt:173-176`. Hecho: `build_type` en el payload y el backend descarta o separa `debug`.
 - [ ] `uploader-transient-resend`: tras `MAX_ATTEMPTS` se limpia el lote sin `commitSent`, así que se reenvía con un `batch_id` nuevo (posible doble conteo) y `dropped_batches` reporta una pérdida que no ocurrió. Evidencia: `UploadMetricsWorker.kt:148-153`. Hecho: comportamiento definido y testeado en `UploadWorkerTest`.
 - [ ] `dashboard-export`: el export Markdown omite `daily_active`, `tools_dau`, `tool_entry` y `retention`, y rotula `versions_first_seen` como "Instalaciones nuevas". Evidencia: `dashboard/public/index.html:271,622,1011-1032`. Hecho: export completo, con rótulos alineados al glosario.
+- [ ] `dashboard-metricsauth-rewrite`: el dashboard pide `/api/metricsAuth`, pero Hosting no tiene ese rewrite y la ruta cae en `**` (devuelve `index.html`), así que el panel de lotes muestra "Sin datos" en producción. No se probó contra el sitio desplegado. Evidencia: `dashboard/public/index.html:799` contra `dashboard/firebase.json:5-30`. Hecho: rewrite agregado y panel con datos en el sitio desplegado.
 - [ ] `glossary-mismatch`: el glosario dice que `versions` equivale a `app_open`, pero el código lo cuenta una vez por día. Además, `app_open` no cuenta "al reiniciar". Evidencia: `metrics-glossary.md:10,32` contra `AggregatesRepository.kt:121-129` y `MainActivity.kt:67-71`. Hecho: glosario corregido.
 
 ## P1: calidad de código, build y CI
@@ -45,7 +46,6 @@ Las líneas citan el estado de `master @ 58105f5` (2026-10-02). Antes de trabaja
 
 ## P2: documentación
 
-- [ ] `architecture-doc`: `docs/architecture.md` se verificó por última vez el 23/08/2026. Hecho: diagramas y conteos al día, con fecha y commit de verificación actualizados.
 - [ ] `performance-doc`: `docs/performance_tests.md` atribuye las mediciones a Protobuf Lite, pero la app usa `protobuf-java`. Hecho: benchmark reproducible en el repo y documento regenerado.
 
 ## Producto (requiere decisión del autor)
