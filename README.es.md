@@ -66,7 +66,7 @@ El [nivel burbuja](app/src/main/java/com/joasasso/minitoolbox/tools/herramientas
 
 ### Dataset de países sin conexión
 
-El juego de banderas lee sus 245 países de un binario Protobuf de 23 KB en `assets/`, sin acceso a la red. Al principio el dataset se parseaba como JSON (Moshi y después Gson) y pasó a Protobuf en `03cdf3f`. La comparación de tiempos de carga de [docs/performance_tests.md](docs/performance_tests.md) no se cita acá porque se midió con Protobuf Lite, mientras la app usa `protobuf-java` completo, y no hay un benchmark en el repo para reproducirla.
+El juego de banderas lee sus 206 países de un binario Protobuf de 23 KB en `assets/`, sin acceso a la red. Al principio el dataset se parseaba como JSON (Moshi y después Gson) y pasó a Protobuf en `03cdf3f`. La comparación de tiempos de carga de [docs/performance_tests.md](docs/performance_tests.md) no se cita acá porque se midió con Protobuf Lite, mientras la app usa `protobuf-java` completo, y no hay un benchmark en el repo para reproducirla.
 
 ## Qué dicen los datos de uso
 

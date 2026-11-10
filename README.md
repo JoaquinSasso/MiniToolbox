@@ -66,7 +66,7 @@ The [bubble level](app/src/main/java/com/joasasso/minitoolbox/tools/herramientas
 
 ### Offline countries dataset
 
-The flag game reads its 245 countries from a 23 KB Protobuf binary in `assets/`, with no network access. The dataset was first parsed as JSON (Moshi, then Gson) and moved to Protobuf in `03cdf3f`. The load-time comparison in [docs/performance_tests.md](docs/performance_tests.md) is not quoted here because it was measured with Protobuf Lite, while the app uses full `protobuf-java`, and there is no benchmark in the repo to reproduce it.
+The flag game reads its 206 countries from a 23 KB Protobuf binary in `assets/`, with no network access. The dataset was first parsed as JSON (Moshi, then Gson) and moved to Protobuf in `03cdf3f`. The load-time comparison in [docs/performance_tests.md](docs/performance_tests.md) is not quoted here because it was measured with Protobuf Lite, while the app uses full `protobuf-java`, and there is no benchmark in the repo to reproduce it.
 
 ## What the usage data says
 
@@ -78,7 +78,7 @@ Source: dashboard Markdown export for 2026-05-15 to 2026-11-10 (180 days). These
 
 ## Architecture
 
-Single Gradle module (`:app`) by design; see [DECISIONS.md](DECISIONS.md). The full description, with diagrams, is in [docs/architecture.md](docs/architecture.md).
+Single Gradle module (`:app`) by design; see [DECISIONS.md](DECISIONS.md). The full description, with diagrams, is in [docs/architecture.en.md](docs/architecture.en.md).
 
 - **UI:** Jetpack Compose with Material 3 (expressive APIs from the alpha Compose BOM), Navigation Compose with type-safe routes, and Glance for widgets.
 - **State:** MVVM is being adopted progressively. Ten `ViewModel`s exposing `StateFlow` already back the water reminder, expense splitter, unit converter, minesweeper, AR ruler, team generator and the catalog. Older tools still keep state inside the Composable and are migrated when touched.

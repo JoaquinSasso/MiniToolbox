@@ -1,5 +1,7 @@
 # Arquitectura de MiniToolbox
 
+[English](architecture.en.md)
+
 Describe la arquitectura real del sistema, incluidas sus asimetrías y limitaciones. Cada caja y cada flecha de los diagramas corresponde a código existente; los conteos se reproducen con los comandos de la sección 8.
 
 **Última verificación:** 10 de noviembre de 2026
@@ -237,7 +239,7 @@ Una discrepancia entre el código y este documento es un bug de documentación. 
 
 | Dato | Comando | Valor |
 |---|---|---|
-| DataStores | `git grep -c "by preferencesDataStore" -- app/src/main/java` | 14 |
+| DataStores | `git grep "by preferencesDataStore" -- app/src/main/java \| wc -l` | 14 |
 | Destinos en `Screen` | `grep -c "@SerialName" app/src/main/java/com/joasasso/minitoolbox/nav/Screen.kt` | 27 |
 | Destinos en el `NavGraph` | `grep -c "composable<" app/src/main/java/com/joasasso/minitoolbox/NavGraph.kt` | 27 |
 | Entradas de `ToolRegistry` | `grep -c "Tool(" app/src/main/java/com/joasasso/minitoolbox/tools/ToolRegistry.kt` | 19 |
