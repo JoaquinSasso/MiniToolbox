@@ -40,11 +40,11 @@ Las líneas citan el estado de `master @ 58105f5` (2026-10-02). Antes de trabaja
 - [ ] `flaky-gasto-form-test`: `GastoFormViewModelTest` falla de forma intermitente con `IllegalStateException: Dispatchers.Main is used concurrently with setting it` en `resetMain`. Falló en 2 tests y pasó al re-ejecutar sin cambios (`.\gradlew.bat testDebugUnitTest`, 2026-10-31). Evidencia: `GastoFormViewModelTest.kt:50-53`. Hecho: el `tearDown` espera a que terminen las corrutinas del ViewModel antes de `resetMain` y el test pasa en 20 corridas seguidas.
 - [ ] `mines-engine-invariant`: el motor no valida `mines <= celdas - zona segura`, y su test está con `@Ignore`. Evidencia: `MinesweeperEngine.kt:238-247`, `MinesEngineTest.kt:77`. Hecho: el motor valida y el test se reactiva.
 - [ ] `auto-backup`: el manifest no declara `allowBackup` ni `dataExtractionRules`, y los XML de reglas son plantillas sin usar. Evidencia: `AndroidManifest.xml`, `res/xml/data_extraction_rules.xml`. Hecho: una decisión explícita sobre qué se respalda (como mínimo, excluir el estado de métricas).
+- [ ] `ar-ruler-typo`: el nombre en inglés de la regla AR dice "Aumented Reality Ruler". Evidencia: `app/src/main/res/values/strings_tools.xml:18`. Hecho: "Augmented Reality Ruler".
 - [ ] `accessibility`: los instrumentos dibujados con `Canvas` no tienen semántica. Evidencia: `git grep -n "semantics"` devuelve un solo uso (`ui/components/Stepper.kt:35`). Hecho: `semantics` en brújula, nivel, regla y lupa, verificado con TalkBack.
 
 ## P2: documentación
 
-- [ ] `readme-refresh`: el README está desactualizado o es inexacto. Evidencia: badge de Kotlin 2.2.20 (línea 8) contra 2.4.20 en `libs.versions.toml:5`, cifras de Play (líneas 96-97), "faltan tests" (línea 116), "hilos persistentes" del Pomodoro (línea 38), y la tabla de Protobuf medida con Lite sin benchmark en el repo (líneas 20-28). Hecho: README en inglés con cifras verificables y versión en español aparte.
 - [ ] `architecture-doc`: `docs/architecture.md` se verificó por última vez el 23/08/2026. Hecho: diagramas y conteos al día, con fecha y commit de verificación actualizados.
 - [ ] `performance-doc`: `docs/performance_tests.md` atribuye las mediciones a Protobuf Lite, pero la app usa `protobuf-java`. Hecho: benchmark reproducible en el repo y documento regenerado.
 
@@ -58,4 +58,4 @@ Las líneas citan el estado de `master @ 58105f5` (2026-10-02). Antes de trabaja
 - [ ] **Landscape** en la regla AR y el nivel de burbuja, vía `LockScreenOrientationIfAllowed`.
 - [ ] **Medir el onboarding** de las herramientas de sensores (evento `onboarding_dismissed`), para saber si se lee.
 - [ ] **Conversiones recientes en el conversor de unidades**, con botón para invertir (patrón de PCalc). Hoy el estado vive solo en `ConversorUnidadesViewModel` y se pierde al cerrar la app: requiere un repositorio con DataStore. Evidencia: `ConversorUnidadesViewModel.kt` no recibe repositorio. Hecho: lista de recientes persistida y testeada, con decisión del autor sobre cuántas guardar.
-- [ ] **GIFs del README.** Pendientes hasta cerrar los cambios de UI.
+- [ ] **Capturas y GIFs del README.** Las de `Screenshots/` son anteriores a los últimos cambios de UI, y `menu.png`, `habitos.png` y `edad.png` muestran herramientas retiradas. Evidencia: `git log -1 -- Screenshots/` contra `git log -1` de cada pantalla. Hecho: capturas nuevas con los nombres listados en el comentario de la sección de capturas de `README.md`, y las viejas borradas.
