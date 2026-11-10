@@ -14,7 +14,6 @@ import * as logger from "firebase-functions/logger";
 initializeApp();
 const db = getFirestore();
 
-const METRICS_API_KEY = defineSecret("METRICS_API_KEY");
 const READ_METRICS_API_KEY = defineSecret("READ_METRICS_API_KEY");
 
 // ------------ Helpers ------------
@@ -61,6 +60,16 @@ function getHeaderApiKey(req: any): string {
 	const m = /^Bearer\s+(.+)$/i.exec(auth || "");
 	const bearer = m ? m[1] : "";
 	return (k1 || k2 || bearer || "").trim();
+}
+
+/**
+ * Lectura: solo READ_METRICS_API_KEY. La clave de escritura que antes tambien se
+ * aceptaba viajo embebida en APKs publicados y se considera expuesta.
+ */
+function isReadAuthorized(req: any): boolean {
+	const apiKey = getHeaderApiKey(req);
+	const readK = (READ_METRICS_API_KEY.value() || "").trim();
+	return Boolean(apiKey) && Boolean(readK) && apiKey === readK;
 }
 
 /**
@@ -510,21 +519,16 @@ function topK(map: Record<string, number>, k: number) {
 
 // ------------ Functions ------------
 export const ingest = onRequest(
-	{ secrets: [METRICS_API_KEY] },
 	async (req, res) => {
 		try {
 			if (req.method !== "POST") {
 				sendJson(res, 405, { ok: false, error: "method_not_allowed" });
 				return;
 			}
-			// Autenticacion: App Check (1.3.2+) o API key (versiones anteriores).
-			// La rama de API key se elimina cuando auth_method sea 100% "appcheck".
-			const appCheckOk = await verifyAppCheck(req);
-			const apiKey = getHeaderApiKey(req);
-			const expected = (METRICS_API_KEY.value() || "").trim();
-			const apiKeyOk = Boolean(expected) && apiKey === expected;
-
-			if (!appCheckOk && !apiKeyOk) {
+			// Autenticacion: solo App Check. Las versiones anteriores a la 1.3.2, que
+			// enviaban una API key, se rechazan (docs/decisions/appcheck-only-ingest.md).
+			// ingest_unauthorized con app_version es la forma de medir cuantas quedan.
+			if (!(await verifyAppCheck(req))) {
 				logger.warn("ingest_unauthorized", {
 					app_version:
 						typeof req.body?.app_version === "string"
@@ -534,8 +538,6 @@ export const ingest = onRequest(
 				sendJson(res, 401, { ok: false, error: "unauthorized" });
 				return;
 			}
-
-			const authMethod = appCheckOk ? "appcheck" : "api_key";
 
 			// Claves de herramienta no reconocidas en este lote. Se acumulan para
 			// loguear una sola vez: si aparece algo aca, o hay una herramienta nueva
@@ -554,7 +556,6 @@ export const ingest = onRequest(
 			if (dropped.keys.length > 0 || dropped.items > 0) {
 				logger.warn("ingest_sanitized", {
 					app_version: body.app_version,
-					auth_method: authMethod,
 					dropped_keys: [...new Set(dropped.keys)].slice(0, 20),
 					dropped_items: dropped.items,
 				});
@@ -577,7 +578,6 @@ export const ingest = onRequest(
 					platform: body.platform,
 					app_version: body.app_version,
 					items: (body.items ?? []).length,
-					auth_method: authMethod,
 					// Campo de expiracion para la politica TTL de Firestore. Esta coleccion
 					// solo sirve para deduplicar reenvios y el cliente descarta un lote
 					// pendiente a los 14 dias, asi que 90 es margen de sobra.
@@ -760,10 +760,10 @@ export const ingest = onRequest(
 				consecutive_failures: 0,
 			};
 
-			// Rollup mensual del metodo de autenticacion.
-			// Es el contador que decide cuando se puede retirar la rama de API key:
-			// mientras haya trafico con "api_key", hay dispositivos que quedarian
-			// bloqueados de forma permanente si se elimina.
+			// Rollup mensual de lotes aceptados y salud del cliente. Conserva el nombre
+			// "metrics_auth" y el contador "appcheck" por continuidad historica: antes
+			// separaba App Check de API key; desde que solo se acepta App Check,
+			// "appcheck" equivale a lotes aceptados. Los meses viejos tienen "api_key".
 			const authMonth = (body.items?.[0]?.day || ymdTZ(new Date(), DEFAULT_TZ)).slice(
 				0,
 				7,
@@ -773,7 +773,7 @@ export const ingest = onRequest(
 				.doc(authMonth)
 				.set(
 					{
-						[authMethod]: FieldValue.increment(1),
+						appcheck: FieldValue.increment(1),
 						// Salud del cliente: se cuentan LOTES con problema, no se suman los
 						// contadores. Son acumulados de por vida del dispositivo y cada lote
 						// repite el mismo total historico, asi que sumarlos no significa nada.
@@ -786,7 +786,7 @@ export const ingest = onRequest(
 						// Las claves con puntos ("1.3.2") van dentro de un objeto literal,
 						// no como field path, asi que no se interpretan como anidamiento.
 						by_version: {
-							[body.app_version]: { [authMethod]: FieldValue.increment(1) },
+							[body.app_version]: { appcheck: FieldValue.increment(1) },
 						},
 						updatedAt: FieldValue.serverTimestamp(),
 					},
@@ -798,7 +798,6 @@ export const ingest = onRequest(
 				batch_id: body.batch_id,
 				platform: body.platform,
 				app_version: body.app_version,
-				auth_method: authMethod,
 				total_items: totalItems,
 				total_app_open_delta: totalOpens,
 				total_daily_active_delta: totalDaily,
@@ -825,18 +824,14 @@ export const ingest = onRequest(
 );
 
 export const metricsDaily = onRequest(
-	{ secrets: [READ_METRICS_API_KEY, METRICS_API_KEY] },
+	{ secrets: [READ_METRICS_API_KEY] },
 	async (req, res) => {
 		try {
 			if (req.method !== "GET") {
 				sendJson(res, 405, { ok: false, error: "method_not_allowed" });
 				return;
 			}
-			const apiKey = getHeaderApiKey(req);
-			const readK = (READ_METRICS_API_KEY.value() || "").trim();
-			const writeK = (METRICS_API_KEY.value() || "").trim();
-			// Lectura acepta READ o WRITE
-			if (!(apiKey && (apiKey === readK || apiKey === writeK))) {
+			if (!isReadAuthorized(req)) {
 				sendJson(res, 401, { ok: false, error: "unauthorized" });
 				return;
 			}
@@ -871,24 +866,22 @@ export const metricsDaily = onRequest(
 );
 
 /**
- * Estado de la migracion a App Check: cuantos lotes llegaron con cada metodo de
- * autenticacion, por mes y por version de app.
+ * Lotes aceptados y salud del pipeline, por mes y por version de app (rollup
+ * metrics_auth). "appcheck" es el total de lotes aceptados; el conteo historico
+ * por API key de los meses anteriores ya no se expone.
  *
  * Lee documentos de rollup (uno por mes), no la coleccion de lotes, asi que el costo
  * no crece con el volumen de ingesta.
  */
 export const metricsAuth = onRequest(
-	{ secrets: [READ_METRICS_API_KEY, METRICS_API_KEY] },
+	{ secrets: [READ_METRICS_API_KEY] },
 	async (req, res) => {
 		try {
 			if (req.method !== "GET") {
 				sendJson(res, 405, { ok: false, error: "method_not_allowed" });
 				return;
 			}
-			const apiKey = getHeaderApiKey(req);
-			const readK = (READ_METRICS_API_KEY.value() || "").trim();
-			const writeK = (METRICS_API_KEY.value() || "").trim();
-			if (!(apiKey && (apiKey === readK || apiKey === writeK))) {
+			if (!isReadAuthorized(req)) {
 				sendJson(res, 401, { ok: false, error: "unauthorized" });
 				return;
 			}
@@ -911,18 +904,22 @@ export const metricsAuth = onRequest(
 				.filter((snap) => snap.exists)
 				.map((snap) => {
 					const d = snap.data() || {};
+					// Solo el contador de lotes aceptados: los meses viejos tambien tienen
+					// "api_key" dentro de cada version y no se devuelve.
+					const byVersion: Record<string, { appcheck: number }> = {};
+					for (const [ver, counts] of Object.entries(
+						(d.by_version || {}) as Record<string, Record<string, number>>,
+					)) {
+						byVersion[ver] = { appcheck: Number(counts?.appcheck || 0) };
+					}
 					return {
 						month: snap.id,
 						appcheck: Number(d.appcheck || 0),
-						api_key: Number(d.api_key || 0),
 						batches: Number(d.batches || 0),
 						with_dropped: Number(d.with_dropped || 0),
 						with_sanitized: Number(d.with_sanitized || 0),
 						with_failures: Number(d.with_failures || 0),
-						by_version: (d.by_version || {}) as Record<
-							string,
-							Record<string, number>
-						>,
+						by_version: byVersion,
 					};
 				});
 
@@ -937,18 +934,14 @@ export const metricsAuth = onRequest(
 );
 
 export const metricsSummary = onRequest(
-	{ secrets: [READ_METRICS_API_KEY, METRICS_API_KEY] },
+	{ secrets: [READ_METRICS_API_KEY] },
 	async (req, res) => {
 		try {
 			if (req.method !== "GET") {
 				sendJson(res, 405, { ok: false, error: "method_not_allowed" });
 				return;
 			}
-			const apiKey = getHeaderApiKey(req);
-			const readK = (READ_METRICS_API_KEY.value() || "").trim();
-			const writeK = (METRICS_API_KEY.value() || "").trim();
-			// Lectura acepta READ o WRITE
-			if (!(apiKey && (apiKey === readK || apiKey === writeK))) {
+			if (!isReadAuthorized(req)) {
 				sendJson(res, 401, { ok: false, error: "unauthorized" });
 				return;
 			}

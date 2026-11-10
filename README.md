@@ -69,10 +69,8 @@ El proyecto utiliza una arquitectura orientada a componentes con **Jetpack Compo
 - **UI:** Interfaces 100% declarativas con Material 3 y soporte para Widgets nativos (Glance).
 
 ### Configuración local
-Para habilitar la telemetría, configurá `local.properties` con:
-- `METRICS_ENDPOINT`
-- `METRICS_API_KEY`
-Si faltan, la app funciona igual, pero no reporta métricas.
+Para habilitar la telemetría, configurá `METRICS_ENDPOINT` en `local.properties`. La autenticación es solo por Firebase App Check: en builds debug hay que registrar el token de debug en la consola de Firebase.
+Si falta el endpoint, la app funciona igual, pero no reporta métricas.
 
 ### Estructura del Repositorio
 - `/app`: Código fuente Android (Kotlin).

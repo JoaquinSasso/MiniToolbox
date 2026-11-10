@@ -15,8 +15,8 @@ description: >-
 2. **Persistencia.** `metrics/storage/AggregatesRepository.kt` acumula contadores por día en `metricsDataStore` (`storage/MetricsDataStore.kt`), como mapas JSON dentro de Preferences.
 3. **Agendado.** `metrics/uploader/UploadScheduler.kt` encola `OneTimeWorkRequest` únicos (`maybeSchedule`, `enqueueNowExpedited` en `ON_STOP`, `maybeFlushOnThreshold`). No es un trabajo periódico.
 4. **Envío.** `metrics/uploader/UploadMetricsWorker.kt` arma el payload (`PAYLOAD_SCHEMA_VERSION = 4`), lo congela como lote pendiente con un `batch_id` y lo envía con `MetricsUploader.kt`, que agrega el header `X-Firebase-AppCheck`. La respuesta se clasifica en `UploadOutcome`: Success, PermanentReject, AuthError o Transient.
-5. **Ingesta.** `backend/functions/src/index.ts`, función `ingest`. Valida y sanea con `validate.ts`, deduplica por `batch_id` (`metrics_ingest_batches`) e incrementa `metrics_daily/{mes}/days/{día}`. Registra cada lote en `metrics_ingest_logs` y el método de autenticación en `metrics_auth`.
-6. **Lectura.** Las funciones `metricsDaily`, `metricsSummary` y `metricsAuth` requieren el header `X-API-Key`. El dashboard (`dashboard/public/index.html`) las consume y guarda la URL y la clave en `localStorage`. Sin clave, muestra datos de demostración.
+5. **Ingesta.** `backend/functions/src/index.ts`, función `ingest`. Valida y sanea con `validate.ts`, deduplica por `batch_id` (`metrics_ingest_batches`) e incrementa `metrics_daily/{mes}/days/{día}`. Solo acepta App Check: sin token válido responde 401 y loguea `ingest_unauthorized`. Registra cada lote en `metrics_ingest_logs` y los lotes aceptados y la salud del cliente en el rollup `metrics_auth`.
+6. **Lectura.** Las funciones `metricsDaily`, `metricsSummary` y `metricsAuth` requieren el header `X-API-Key` con `READ_METRICS_API_KEY` (la clave de escritura ya no existe). El dashboard (`dashboard/public/index.html`) las consume y guarda la URL y la clave en `localStorage`. Sin clave, muestra datos de demostración.
 
 ## Contratos (romperlos corrompe datos de forma irreversible)
 

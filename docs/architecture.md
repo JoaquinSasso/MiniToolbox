@@ -81,14 +81,14 @@ flowchart TD
     end
 
     subgraph Backend [Backend Google Cloud]
-        UM -->|HTTPS POST JSON| CF_ingest["Cloud Function: ingest"]
+        UM -->|HTTPS POST JSON + token App Check| CF_ingest["Cloud Function: ingest"]
         CF_ingest -->|Increment Counters| FS[(Firestore)]
         
         FS -->|Solo Lectura| CF_read["Cloud Functions: metricsDaily / Summary"]
     end
 
     subgraph Analytics [Dashboard]
-        CF_read -->|X-API-Key| DB[Dashboard Web]
+        CF_read -->|X-API-Key de lectura| DB[Dashboard Web]
     end
 
     note[Firestore Rules niegan acceso directo.<br/>Todo acceso es vía Cloud Function.]

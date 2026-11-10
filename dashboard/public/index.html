@@ -340,13 +340,12 @@
       <div id="authSummary" style="margin-bottom:12px; font-size:13px"></div>
       <table id="tblAuth"><thead><tr>
         <th>Versión</th>
-        <th class="num">App Check</th>
-        <th class="num">API Key</th>
+        <th class="num">Lotes</th>
       </tr></thead><tbody></tbody></table>
       <p style="font-size:12px; color:var(--muted); margin:12px 0 0">
-        La columna API Key cuenta lotes de versiones anteriores a la 1.3.2. Mientras no
-        sea cero de forma sostenida, quitar esa rama del backend dejaría a esos
-        dispositivos sin poder enviar métricas nunca más.
+        Lotes autenticados con App Check, por versión. La ingesta solo acepta App Check: las versiones
+        anteriores a la 1.3.2 se rechazan y no aparecen acá (se ven como
+        <span class="mono">ingest_unauthorized</span> en Cloud Logging).
       </p>
     </div>
   </section>
@@ -794,58 +793,43 @@
         <td class="num" style="color:${color}">${pct}%</td></tr>`;
     }).join("");
   }
-  /* ---------- estado de la migración a App Check ---------- */
+  /* ---------- lotes aceptados por versión ---------- */
   async function renderAuth(){
     let data;
     try{ data=await apiGet("metricsAuth",{months:3}); }
     catch(e){
-      $("#authSummary").innerHTML=`<span style="color:var(--faint)">Sin datos de autenticación disponibles.</span>`;
+      $("#authSummary").innerHTML=`<span style="color:var(--faint)">Sin datos de lotes disponibles.</span>`;
       $("#tblAuth tbody").innerHTML="";
       $("#authMeta").textContent="";
       return;
     }
 
     const byVersion={};
-    let appcheck=0, apikey=0;
     let batches=0, withDropped=0, withSanitized=0, withFailures=0;
     for(const m of (data.months||[])){
-      appcheck+=Number(m.appcheck||0);
-      apikey+=Number(m.api_key||0);
       batches+=Number(m.batches||0);
       withDropped+=Number(m.with_dropped||0);
       withSanitized+=Number(m.with_sanitized||0);
       withFailures+=Number(m.with_failures||0);
       for(const [v,counts] of Object.entries(m.by_version||{})){
-        if(!byVersion[v])byVersion[v]={appcheck:0,api_key:0};
-        byVersion[v].appcheck+=Number(counts.appcheck||0);
-        byVersion[v].api_key+=Number(counts.api_key||0);
+        byVersion[v]=(byVersion[v]||0)+Number(counts.appcheck||0);
       }
     }
 
     renderHealth({batches,withDropped,withSanitized,withFailures});
 
-    const total=appcheck+apikey;
-    $("#authMeta").textContent=total?`${fmt(total)} lotes · últimos 3 meses`:"";
-    if(!total){
+    $("#authMeta").textContent=batches?`${fmt(batches)} lotes · últimos 3 meses`:"";
+    if(!batches){
       $("#authSummary").innerHTML=`<span style="color:var(--faint)">Todavía no se registraron lotes.</span>`;
-      $("#tblAuth tbody").innerHTML=`<tr><td colspan="3" class="empty">Sin datos</td></tr>`;
+      $("#tblAuth tbody").innerHTML=`<tr><td colspan="2" class="empty">Sin datos</td></tr>`;
       return;
     }
 
-    const pct=Math.round(appcheck*100/total);
-    const clean=apikey===0;
-    $("#authSummary").innerHTML=
-      `<b>${pct}%</b> de los lotes autenticaron con App Check `+
-      `(${fmt(appcheck)} contra ${fmt(apikey)} por API Key). `+
-      (clean
-        ? `<span style="color:var(--pos)">Se puede retirar la API Key.</span>`
-        : `<span style="color:var(--warn)">Todavía no conviene retirar la API Key.</span>`);
-
-    const rows=Object.entries(byVersion).sort((a,b)=>b[1].api_key-a[1].api_key);
-    $("#tblAuth tbody").innerHTML=rows.map(([v,c])=>`
+    $("#authSummary").innerHTML=`<b>${fmt(batches)}</b> lotes aceptados en los últimos 3 meses.`;
+    const rows=Object.entries(byVersion).filter(([,n])=>n>0).sort((a,b)=>b[1]-a[1]);
+    $("#tblAuth tbody").innerHTML=rows.map(([v,n])=>`
       <tr><td><span class="mono">${v}</span></td>
-      <td class="num">${fmt(c.appcheck)}</td>
-      <td class="num">${fmt(c.api_key)}</td></tr>`).join("");
+      <td class="num">${fmt(n)}</td></tr>`).join("");
   }
   /* ---------- alcance (DAU por herramienta) y origen de entrada ---------- */
   function renderReach(a){
