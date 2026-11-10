@@ -11,8 +11,19 @@ Las líneas citan el estado de `master @ 58105f5` (2026-10-02). Antes de trabaja
 
 ## P1: calidad de datos de telemetría
 
+<<<<<<< HEAD
 - [ ] `dashboard-metricsauth-rewrite`: el rewrite de `/api/metricsAuth` ya está en `dashboard/firebase.json`, pero falta desplegar Hosting (`firebase deploy --only hosting` desde `dashboard/`, manual) y comprobar que el panel de lotes muestra datos en el sitio desplegado. Antes del rewrite la ruta caía en `**` y devolvía `index.html`. Hecho: panel con datos en el sitio desplegado.
 - [ ] `entry-source-leak`: si el deep link apunta a la herramienta en la que ya está el usuario (por ejemplo, tocar el widget de Agua con Agua abierta), `launchSingleTop` no cambia la ruta, el `LaunchedEffect` del NavGraph no corre y el origen queda pendiente: se atribuye a la próxima herramienta que se abra navegando. Evidencia: `MainActivity.kt:117,128`, `NavGraph.kt:79,87` (en `c165f35`; el arranque en frío ya no pasa por ese camino, solo `onNewIntent`). Hecho: el origen pendiente se descarta (o se consume) cuando la navegación no cambia de destino, con test.
+=======
+- [ ] `widget-shortcuts-mislabel`: se cuenta `widget_shortcuts` para cualquier deep link, incluidas las notificaciones. Evidencia: `MainActivity.kt:136`. Hecho: solo se cuenta si el origen es `MetricsSource.WIDGET` desde el widget de favoritos, y queda documentado en el glosario.
+- [ ] `tool-count-per-route`: navegar entre subpantallas de una herramienta vuelve a contarla. Evidencia: `NavGraph.kt:94-112` compara `route`, no la herramienta. Hecho: se cuenta solo cuando cambia la herramienta, con un test.
+- [ ] `about-as-tool`: `About` está registrada como herramienta y cuenta en `tools`. Evidencia: `ToolRegistry.kt:147-152`. Hecho: requiere decisión del autor (DECISIONS §4).
+- [ ] `widget-optout-bypass`: quitar agua desde el widget llama a `AggregatesRepository.incrementWidgetUse` directamente, sin pasar por `isMetricsEnabled`, así que suma la métrica aunque el usuario haya desactivado las métricas (sumar agua sí lo respeta). Evidencia: `AguaCallback.kt:46` contra `AguaCallback.kt:26`. Hecho: ambos callbacks usan `widgetUse`, con un test que verifique el opt-out.
+- [ ] `debug-traffic-in-prod`: las builds debug envían al endpoint de producción y el payload no lleva `build_type`. Evidencia: `MetricsConfig.kt`, `UploadMetricsWorker.kt:196-203`, `dev/DevInspector.kt:173-176`. Hecho: `build_type` en el payload y el backend descarta o separa `debug`.
+- [ ] `uploader-transient-resend`: tras `MAX_ATTEMPTS` se limpia el lote sin `commitSent`, así que se reenvía con un `batch_id` nuevo (posible doble conteo) y `dropped_batches` reporta una pérdida que no ocurrió. Evidencia: `UploadMetricsWorker.kt:148-153`. Hecho: comportamiento definido y testeado en `UploadWorkerTest`.
+- [ ] `dashboard-export`: el export Markdown omite `daily_active`, `tools_dau`, `tool_entry` y `retention`, y rotula `versions_first_seen` como "Instalaciones nuevas". Evidencia: `dashboard/public/index.html:271,622,1011-1032`. Hecho: export completo, con rótulos alineados al glosario.
+- [ ] `dashboard-metricsauth-rewrite`: el dashboard pide `/api/metricsAuth`, pero Hosting no tiene ese rewrite y la ruta cae en `**` (devuelve `index.html`), así que el panel de lotes muestra "Sin datos" en producción. No se probó contra el sitio desplegado. Evidencia: `dashboard/public/index.html:799` contra `dashboard/firebase.json:5-30`. Hecho: rewrite agregado y panel con datos en el sitio desplegado.
+>>>>>>> 45f0556 (docs(metrics): corregir el glosario contra el código y agregar metrics-glossary.en.md)
 
 ## P1: calidad de código, build y CI
 

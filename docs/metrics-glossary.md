@@ -40,8 +40,13 @@ Este documento define la semántica exacta de los contadores utilizados en el si
 
 ### `tools`
 - **Qué mide:** Aperturas de herramientas.
+<<<<<<< HEAD
 - **Cuándo incrementa:** En el `NavGraph`, al entrar a una herramienta desde fuera de ella (`NavGraph.kt:69-82`, `ToolRoutes.visitToCount`). Moverse entre subpantallas de la misma herramienta (lista y detalle de Pomodoro, agua y estadísticas) no vuelve a contar. Pasar por una pantalla que no es herramienta, como Categorías, cierra la visita: volver a entrar cuenta otra vez. Un debouncer descarta además repeticiones de la misma herramienta dentro de los 5 segundos (`TOOL_USAGE_METRIC_COOLDOWN_MS`).
 - **Limitación histórica:** Con `schema_version` 4 o anterior se comparaba la ruta, no la herramienta. Pasar de una subpantalla a otra de la misma herramienta volvía a contar si habían pasado más de 5 segundos (infla sobre todo `pomodoro`, `water` y `meetings`), y volver a la misma herramienta después de pasar por Categorías no contaba si la ruta era idéntica a la de la última herramienta. Los dos efectos van en sentidos opuestos, así que el corte en `schema_version` 5 no tiene una dirección fija por herramienta.
+=======
+- **Cuándo incrementa:** En el `NavGraph`, cuando la ruta actual cambia a una que pertenece a una herramienta (`NavGraph.kt:69-78`). Un debouncer descarta repeticiones de la misma herramienta dentro de los 5 segundos (`TOOL_USAGE_METRIC_COOLDOWN_MS`).
+- **Limitación:** Pasar de una subpantalla a otra de la misma herramienta (por ejemplo, de la lista de Pomodoro al detalle) vuelve a contar si pasaron más de 5 segundos. Está en el backlog como `tool-count-per-route`.
+>>>>>>> 45f0556 (docs(metrics): corregir el glosario contra el código y agregar metrics-glossary.en.md)
 - **Estructura:** Mapa de `tool_id` -> `count`.
 - **Clave `about`:** Acerca de está en `ToolRegistry` pero no es una herramienta. Hasta `schema_version` 4 sumaba en `tools`, `tools_dau` y `tool_entry`; desde `schema_version` 5 no cuenta (`ToolRoutes.usageKey`). Excluirla al analizar datos anteriores. El backend la sigue aceptando (`EXTRA_KNOWN_TOOLS`) para los clientes viejos.
 - **Nota:** No mide tiempo de permanencia, solo intención de uso.
@@ -84,10 +89,16 @@ Este documento define la semántica exacta de los contadores utilizados en el si
 - **Claves:**
   - `widget_water_normal`, `widget_water_mini`: botones de sumar y quitar agua (`AguaCallback.kt`).
   - `widget_flashlight`, `widget_flashlight_mini`: encender o apagar la linterna.
+<<<<<<< HEAD
   - `widget_shortcuts`: toques en una herramienta del widget de favoritos. Se cuenta en `MainActivity` solo si el Intent trae origen `widget` y la marca `startWidget` que pone `FavoriteToolsWidget` (`MetricsSource.deepLinkWidgetKey`). Las aperturas desde notificaciones y desde los widgets de agua no suman acá: quedan en `tool_entry` con su origen.
 - **Limitación histórica:** Desde `22f6c43` (24/09/2025) hasta la rama `fix/water-widget-metrics-optout`, quitar agua desde el widget sumaba la métrica aunque el usuario hubiera desactivado las métricas. Como hasta la rama `fix/upload-respects-optout` el envío tampoco revisaba el opt-out, esos toques pudieron llegar al servidor.
 - **Limitación histórica:** Con `schema_version` 4 o anterior, `widget_shortcuts` sumaba **cualquier** apertura con ruta de inicio, incluidas las notificaciones de Agua y Pomodoro y los widgets de agua. Desde `schema_version` 5 (rama `fix/widget-shortcuts-source`, primera versión publicada después de 1.4.0) mide solo el widget de favoritos. La serie se parte en esa versión y los valores bajan; como el backend no guarda `schema_version`, en Firestore el corte solo se ubica por la fecha del release.
 - **Uso correcto:** Comparar el uso entre widgets de agua y de linterna. `widget_shortcuts` mide el widget de favoritos solo en datos de `schema_version` 5 en adelante.
+=======
+  - `widget_shortcuts`: se cuenta en `MainActivity` para **cualquier** apertura con ruta de inicio, incluidas las que vienen de notificaciones. No mide solo el widget de favoritos (backlog: `widget-shortcuts-mislabel`).
+- **Limitación:** Quitar agua desde el widget suma la métrica sin respetar el opt-out de métricas (`AguaCallback.kt:46`; backlog: `widget-optout-bypass`).
+- **Uso correcto:** Comparar el uso entre widgets de agua y de linterna. `widget_shortcuts` no sirve para medir el widget de favoritos.
+>>>>>>> 45f0556 (docs(metrics): corregir el glosario contra el código y agregar metrics-glossary.en.md)
 
 ### `ads` (retirada)
 - **Qué medía:** Impresiones de anuncios (banner, intersticial, rewarded).
@@ -161,6 +172,10 @@ Es tolerable para conteos diarios, pero invalida cualquier análisis horario y c
 Para cualquier cifra pública (README, Portfolio, LinkedIn), se debe priorizar:
 1. **Google Play Console** para "Instalaciones Totales" y "Calificaciones".
 2. **`daily_active`** para "Usuarios Activos" (solo serie post 17/08/2026).
+<<<<<<< HEAD
 3. **`tools_dau`** para "Funcionalidades más populares", con `tools` como medida de intensidad. Si solo se dispone de `tools` (por ejemplo, en un export Markdown generado antes de que incluyera `tools_dau`), aclarar que son aperturas y no personas.
+=======
+3. **`tools_dau`** para "Funcionalidades más populares", con `tools` como medida de intensidad. Si solo se dispone de `tools` (por ejemplo, en el export Markdown del dashboard), aclarar que son aperturas y no personas.
+>>>>>>> 45f0556 (docs(metrics): corregir el glosario contra el código y agregar metrics-glossary.en.md)
 
 **Nunca utilizar `versions_first_seen` como equivalente a "Usuarios" sin aclarar la semántica de actualización.**

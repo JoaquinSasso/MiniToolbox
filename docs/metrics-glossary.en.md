@@ -40,10 +40,16 @@ This document defines the exact meaning of the counters in MiniToolbox's own tel
 
 ### `tools`
 - **What it measures:** Tool opens.
+<<<<<<< HEAD
 - **When it increments:** In the `NavGraph`, when the user enters a tool from outside it (`NavGraph.kt:69-82`, `ToolRoutes.visitToCount`). Moving between sub-screens of the same tool (Pomodoro list and detail, water and statistics) does not count again. Going through a screen that is not a tool, such as Categories, ends the visit: entering again counts again. A debouncer also drops repeats of the same tool within 5 seconds (`TOOL_USAGE_METRIC_COOLDOWN_MS`).
 - **Historical limitation:** With `schema_version` 4 or earlier the route was compared, not the tool. Moving between sub-screens of the same tool counted again if more than 5 seconds had passed (mostly inflating `pomodoro`, `water` and `meetings`), and returning to the same tool after going through Categories did not count when the route matched the last tool's route. The two effects go in opposite directions, so the break at `schema_version` 5 has no fixed direction per tool.
 - **Structure:** Map of `tool_id` -> `count`.
 - **`about` key:** About is in `ToolRegistry` but it is not a tool. Up to `schema_version` 4 it added to `tools`, `tools_dau` and `tool_entry`; from `schema_version` 5 it does not count (`ToolRoutes.usageKey`). Exclude it when analyzing earlier data. The backend still accepts it (`EXTRA_KNOWN_TOOLS`) for old clients.
+=======
+- **When it increments:** In the `NavGraph`, when the current route changes to one that belongs to a tool (`NavGraph.kt:69-78`). A debouncer drops repeats of the same tool within 5 seconds (`TOOL_USAGE_METRIC_COOLDOWN_MS`).
+- **Limitation:** Moving between sub-screens of the same tool (for example, from the Pomodoro list to the detail) counts again if more than 5 seconds have passed. Tracked in the backlog as `tool-count-per-route`.
+- **Structure:** Map of `tool_id` -> `count`.
+>>>>>>> 45f0556 (docs(metrics): corregir el glosario contra el código y agregar metrics-glossary.en.md)
 - **Note:** It does not measure time spent, only intent to use.
 - **Key:** Since v1.3.2 it comes from `Tool.metricsKey`, a stable identifier independent of the navigation route. With the migration to type-safe navigation, sub-screens report under their tool's main key: `pomodoro_list` and `pomodoro/detail` report as `pomodoro`, `water_stats` as `water`, and the expense splitter sub-screens as `meetings`.
 - **Retired tools (2026-10-30):** The following tools were removed from the app catalog: `zodiac_sign`, `multiverse_me`, `quick_calcs`, `basic_phrases` (whose historical backend key was `quotes`), `countries_info`, `percentage`, `coin_flip`, `todo`, `age_calculator`, `countdown`, `guess_capital`, `decimal_binary`, `password_generator` and `dice`. Their keys are kept in the backend's `TOOL_ROUTE_MAP` and the dashboard's `TOOL_CATALOG` so historical data can still be read, but they stop receiving events from the versions after this change.
@@ -83,10 +89,16 @@ This document defines the exact meaning of the counters in MiniToolbox's own tel
 - **Keys:**
   - `widget_water_normal`, `widget_water_mini`: the add and remove water buttons (`AguaCallback.kt`).
   - `widget_flashlight`, `widget_flashlight_mini`: turning the flashlight on or off.
+<<<<<<< HEAD
   - `widget_shortcuts`: taps on a tool in the favorites widget. Counted in `MainActivity` only when the Intent carries the `widget` source and the `startWidget` marker set by `FavoriteToolsWidget` (`MetricsSource.deepLinkWidgetKey`). Opens from notifications and from the water widgets do not add here: they are recorded in `tool_entry` with their source.
 - **Historical limitation:** From `22f6c43` (2025-09-24) until the `fix/water-widget-metrics-optout` branch, removing water from the widget added to the metric even when the user had turned metrics off. Since uploads did not check the opt-out either until the `fix/upload-respects-optout` branch, those taps may have reached the server.
 - **Historical limitation:** With `schema_version` 4 or earlier, `widget_shortcuts` counted **any** open with a start route, including the water and Pomodoro notifications and the water widgets. From `schema_version` 5 (`fix/widget-shortcuts-source` branch, first release after 1.4.0) it measures the favorites widget only. The series breaks at that version and values drop; since the backend does not store `schema_version`, the break can only be located in Firestore by the release date.
 - **Correct use:** Compare usage between the water and flashlight widgets. `widget_shortcuts` measures the favorites widget only in data from `schema_version` 5 onwards.
+=======
+  - `widget_shortcuts`: counted in `MainActivity` for **any** open with a start route, including those coming from notifications. It does not measure the favorites widget alone (backlog: `widget-shortcuts-mislabel`).
+- **Limitation:** Removing water from the widget adds to the metric without honoring the metrics opt-out (`AguaCallback.kt:46`; backlog: `widget-optout-bypass`).
+- **Correct use:** Compare usage between the water and flashlight widgets. `widget_shortcuts` cannot be used to measure the favorites widget.
+>>>>>>> 45f0556 (docs(metrics): corregir el glosario contra el código y agregar metrics-glossary.en.md)
 
 ### `ads` (retired)
 - **What it measured:** Ad impressions (banner, interstitial, rewarded).
@@ -100,14 +112,21 @@ This document defines the exact meaning of the counters in MiniToolbox's own tel
 
 ### `schema_version`
 - **What it is:** Version of the payload format sent by the client.
+<<<<<<< HEAD
 - **Values:** `1` (initial v1.3.2), `2` (adds `tools_dau`), `3` (adds `tool_entry` and `retention`), `4` (removes `ads`), `5` (`widgets.widget_shortcuts` counts the favorites widget only; `tools`, `tools_dau` and `tool_entry` count per tool visit instead of per route, and do not count `about`; `client_health.dropped_batches` no longer counts transient errors).
+=======
+- **Values:** `1` (initial v1.3.2), `2` (adds `tools_dau`), `3` (adds `tool_entry` and `retention`), `4` (removes `ads`).
+>>>>>>> 45f0556 (docs(metrics): corregir el glosario contra el código y agregar metrics-glossary.en.md)
 - **Note:** The backend does not persist this number today; it travels in the payload but is not stored in Firestore.
 - **What it is for:** Separating historical data if a field's meaning ever changes. It cannot be added retroactively: without this number, a change in meaning mixes old and new data forever.
 
 ### `client_health`
 - **What it measures:** Health of the upload pipeline itself on the device.
 - **Fields:** `dropped_batches`, `sanitized_keys`, `consecutive_failures`.
+<<<<<<< HEAD
 - **`dropped_batches`:** Batches discarded without a confirmed upload. It adds 1 when the server permanently rejects a batch and sanitizing does not fix it (or the attempts for that rejection run out). Transient errors do not add: after the retries run out the batch is kept with the same `batch_id` and sent again on the next trigger. **Historical limitation:** up to `schema_version` 4, running out of transient retries deleted the batch and added 1; the batch was sent again with a different `batch_id`, so that counter overstates losses and aggregates may be double counted if the server had stored the original.
+=======
+>>>>>>> 45f0556 (docs(metrics): corregir el glosario contra el código y agregar metrics-glossary.en.md)
 - **What it is for:** Detecting devices with upload problems. Without it, a device that stopped reporting cannot be told apart from one that is not being used.
 - **Note:** It is not part of the daily aggregates; it is recorded per batch.
 
@@ -129,6 +148,7 @@ This document defines the exact meaning of the counters in MiniToolbox's own tel
 
 ---
 
+<<<<<<< HEAD
 ## Note on the opt-out
 
 Turning metrics off in About stops both recording and uploading. Queued uploads are cancelled and anything recorded but not yet sent is discarded: it is marked as sent without sending it (`AggregatesRepository.discardUnsent`), so turning metrics back on uploads only what is recorded afterwards. The worker checks again before sending, in case it was already queued.
@@ -148,6 +168,8 @@ Debug builds send to the same endpoint as production and their data adds to the 
 
 ---
 
+=======
+>>>>>>> 45f0556 (docs(metrics): corregir el glosario contra el código y agregar metrics-glossary.en.md)
 ## Note on time zones
 
 The `day` field is computed with the **device's local clock** (`SimpleDateFormat("yyyy-MM-dd")` with no fixed zone). A single day groups up to 24 different time zones.
@@ -160,6 +182,10 @@ This is acceptable for daily counts, but it rules out any hourly analysis and an
 For any public figure (README, portfolio, LinkedIn), prefer:
 1. **Google Play Console** for "Total installs" and "Ratings".
 2. **`daily_active`** for "Active users" (series only exists from 2026-08-17).
+<<<<<<< HEAD
 3. **`tools_dau`** for "Most popular features", with `tools` as the intensity measure. If only `tools` is available (for example, in a Markdown export generated before it included `tools_dau`), state that the figures are opens, not people.
+=======
+3. **`tools_dau`** for "Most popular features", with `tools` as the intensity measure. If only `tools` is available (for example, in the dashboard's Markdown export), state that the figures are opens, not people.
+>>>>>>> 45f0556 (docs(metrics): corregir el glosario contra el código y agregar metrics-glossary.en.md)
 
 **Never use `versions_first_seen` as an equivalent of "Users" without explaining the update semantics.**
