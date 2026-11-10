@@ -83,7 +83,7 @@ This document defines the exact meaning of the counters in MiniToolbox's own tel
   - `widget_water_normal`, `widget_water_mini`: the add and remove water buttons (`AguaCallback.kt`).
   - `widget_flashlight`, `widget_flashlight_mini`: turning the flashlight on or off.
   - `widget_shortcuts`: counted in `MainActivity` for **any** open with a start route, including those coming from notifications. It does not measure the favorites widget alone (backlog: `widget-shortcuts-mislabel`).
-- **Limitation:** Removing water from the widget adds to the metric without honoring the metrics opt-out (`AguaCallback.kt:46`; backlog: `widget-optout-bypass`).
+- **Historical limitation:** From `22f6c43` (2025-09-24) until the `fix/water-widget-metrics-optout` branch, removing water from the widget added to the metric even when the user had turned metrics off. Since uploads do not check the opt-out either (backlog: `upload-ignores-optout`), those taps may have reached the server.
 - **Correct use:** Compare usage between the water and flashlight widgets. `widget_shortcuts` cannot be used to measure the favorites widget.
 
 ### `ads` (retired)

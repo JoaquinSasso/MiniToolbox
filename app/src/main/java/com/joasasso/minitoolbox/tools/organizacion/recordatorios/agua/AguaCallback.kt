@@ -8,7 +8,6 @@ import com.joasasso.minitoolbox.data.flujoFrecuenciaMinutos
 import com.joasasso.minitoolbox.data.flujoNotificacionesActivas
 import com.joasasso.minitoolbox.data.flujoPorVaso
 import com.joasasso.minitoolbox.data.incrementarAguaHoy
-import com.joasasso.minitoolbox.metrics.storage.AggregatesRepository
 import com.joasasso.minitoolbox.metrics.widgetUse
 import com.joasasso.minitoolbox.widgets.WidgetWaterKindResolver
 import kotlinx.coroutines.flow.first
@@ -43,7 +42,7 @@ class QuitarAguaCallback : ActionCallback {
 
         // Agregar uso a las métricas
         val kind = WidgetWaterKindResolver.resolve(context, glanceId)
-        AggregatesRepository(context).incrementWidgetUse(kind)
+        widgetUse(context, kind)
 
         // Reprogramar el recordatorio de agua solo si las notificaciones están activas
         if (context.flujoNotificacionesActivas().first()) {

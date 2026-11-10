@@ -84,7 +84,7 @@ Este documento define la semántica exacta de los contadores utilizados en el si
   - `widget_water_normal`, `widget_water_mini`: botones de sumar y quitar agua (`AguaCallback.kt`).
   - `widget_flashlight`, `widget_flashlight_mini`: encender o apagar la linterna.
   - `widget_shortcuts`: se cuenta en `MainActivity` para **cualquier** apertura con ruta de inicio, incluidas las que vienen de notificaciones. No mide solo el widget de favoritos (backlog: `widget-shortcuts-mislabel`).
-- **Limitación:** Quitar agua desde el widget suma la métrica sin respetar el opt-out de métricas (`AguaCallback.kt:46`; backlog: `widget-optout-bypass`).
+- **Limitación histórica:** Desde `22f6c43` (24/09/2025) hasta la rama `fix/water-widget-metrics-optout`, quitar agua desde el widget sumaba la métrica aunque el usuario hubiera desactivado las métricas. Como el envío tampoco revisa el opt-out (backlog: `upload-ignores-optout`), esos toques pudieron llegar al servidor.
 - **Uso correcto:** Comparar el uso entre widgets de agua y de linterna. `widget_shortcuts` no sirve para medir el widget de favoritos.
 
 ### `ads` (retirada)
