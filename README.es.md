@@ -81,13 +81,13 @@ Fuente: export Markdown del dashboard del 15/05/2026 al 10/11/2026 (180 días). 
 Un solo módulo de Gradle (`:app`), por decisión; ver [DECISIONS.md](DECISIONS.md). La descripción completa, con diagramas, está en [docs/architecture.md](docs/architecture.md).
 
 - **UI:** Jetpack Compose con Material 3 (las APIs expresivas del BOM alpha de Compose), Navigation Compose con rutas type-safe y Glance para los widgets.
-- **Estado:** MVVM, adoptado de forma progresiva. Diez `ViewModel` con `StateFlow` ya respaldan el recordatorio de agua, el divisor de gastos, el conversor de unidades, el buscaminas, la regla AR, el generador de equipos y el catálogo. Las herramientas más viejas todavía guardan el estado en el Composable y se migran cuando se las toca.
+- **Estado:** MVVM, adoptado de forma progresiva. Once `ViewModel` con `StateFlow` ya respaldan el recordatorio de agua, el divisor de gastos, el conversor de unidades, el buscaminas, el juego de banderas, la regla AR, el generador de equipos y el catálogo. Las herramientas más viejas todavía guardan el estado en el Composable y se migran cuando se las toca.
 - **Persistencia:** Preferences DataStore detrás de repositorios. El dataset de países del juego de banderas es un binario Protobuf en `assets/` y se lee sin conexión.
 - **Concurrencia:** corrutinas y Flow de Kotlin, WorkManager para los envíos.
 
 ## Tests y CI
 
-- **320 tests unitarios en la JVM** (1 omitido), con `./gradlew testDebugUnitTest`. Usan JUnit 4, Robolectric donde hace falta un `Context` o DataStore, `kotlinx-coroutines-test` y Mockito. Cubren el pipeline de métricas, los ViewModels y los motores puros (buscaminas, liquidación de deudas, conversión de unidades, armado de equipos, matemática AR). Las convenciones están en [docs/testing.md](docs/testing.md).
+- **342 tests unitarios en la JVM** (1 omitido), con `./gradlew testDebugUnitTest`. Usan JUnit 4, Robolectric donde hace falta un `Context` o DataStore, `kotlinx-coroutines-test` y Mockito. Cubren el pipeline de métricas, los ViewModels y los motores puros (buscaminas, liquidación de deudas, conversión de unidades, armado de equipos, matemática AR). Las convenciones están en [docs/testing.md](docs/testing.md).
 - **Lo que no está cubierto:** no hay tests de UI ni instrumentados, no se mide la cobertura y el backend no tiene tests.
 - **[Android CI](.github/workflows/android.yml):** tests unitarios, `assembleDebug` y `lintDebug` en cada push y pull request a `master`. El lint corre contra un baseline de issues heredados; los nuevos se corrigen, no se agregan.
 - **[Backend CI](.github/workflows/backend.yml):** `npm ci`, `npm run lint`, `npm run build`.

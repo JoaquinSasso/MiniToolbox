@@ -24,14 +24,14 @@ flowchart TD
     subgraph UI [UI: Jetpack Compose]
         MA[MainActivity] --> MT[MiniToolboxTheme]
         MT --> NG[NavGraph]
-        NG --> VMS["Pantallas con ViewModel<br/>catálogo, agua y estadísticas,<br/>divisor de gastos (3), conversor,<br/>buscaminas, regla AR, equipos"]
-        NG --> LSS["Pantallas con estado local<br/>Pomodoro, instrumentos, linterna,<br/>QR, selector, marcadores, banderas"]
+        NG --> VMS["Pantallas con ViewModel<br/>catálogo, agua y estadísticas,<br/>divisor de gastos (3), conversor,<br/>buscaminas, banderas, regla AR, equipos"]
+        NG --> LSS["Pantallas con estado local<br/>Pomodoro, instrumentos, linterna,<br/>QR, selector, marcadores"]
         style VMS fill:#e1f5fe,stroke:#01579b,color:#000
         style LSS fill:#fff9c4,stroke:#fbc02d,color:#000
     end
 
     subgraph Logic [Lógica y estado]
-        VM["ViewModels (10)<br/>StateFlow"]
+        VM["ViewModels (11)<br/>StateFlow"]
         CS["Compose state<br/>remember / mutableStateOf"]
         MET["Emisor: metrics/Metrics.kt"]
     end
@@ -185,7 +185,7 @@ app/src/main/java/com/joasasso/minitoolbox/
 ├── tools/           # Tool, ToolCategory, ToolRegistry
 │   ├── entretenimiento/
 │   │   ├── aleatorio/      # Selector de opciones
-│   │   └── minijuegos/     # Banderas; minesweeper/ con motor y ViewModel
+│   │   └── minijuegos/     # Banderas (ViewModel y FlagQuiz); minesweeper/ con motor y ViewModel
 │   ├── herramientas/
 │   │   ├── calculadoras/   # Conversor de unidades (motor, parser, ViewModel)
 │   │   ├── generadores/    # QR, generador de equipos
@@ -242,7 +242,7 @@ Una discrepancia entre el código y este documento es un bug de documentación. 
 | Destinos en `Screen` | `grep -c "@SerialName" app/src/main/java/com/joasasso/minitoolbox/nav/Screen.kt` | 27 |
 | Destinos en el `NavGraph` | `grep -c "composable<" app/src/main/java/com/joasasso/minitoolbox/NavGraph.kt` | 27 |
 | Entradas de `ToolRegistry` | `grep -c "Tool(" app/src/main/java/com/joasasso/minitoolbox/tools/ToolRegistry.kt` | 19 |
-| ViewModels | `git ls-files "app/src/main/*ViewModel.kt" \| wc -l` | 10 |
+| ViewModels | `git ls-files "app/src/main/*ViewModel.kt" \| wc -l` | 11 |
 | Widgets Glance | `git grep -l "GlanceAppWidget()" -- app/src/main/java \| wc -l` | 5 |
 
 Una mejora posible es convertir esta tabla en un test que falle cuando un conteo cambie, para que el documento no se desactualice en silencio.

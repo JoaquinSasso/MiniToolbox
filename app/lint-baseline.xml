@@ -103,39 +103,6 @@
     <issue
         id="LocalContextGetResourceValueCall"
         message="Querying resource values using LocalContext.current"
-        errorLine1="                lastResult = context.getString(R.string.result_timeout)"
-        errorLine2="                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/joasasso/minitoolbox/tools/entretenimiento/minijuegos/GuessFlagScreen.kt"
-            line="111"
-            column="30"/>
-    </issue>
-
-    <issue
-        id="LocalContextGetResourceValueCall"
-        message="Querying resource values using LocalContext.current"
-        errorLine1="                                        lastResult = context.getString(R.string.result_new_record)"
-        errorLine2="                                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/joasasso/minitoolbox/tools/entretenimiento/minijuegos/GuessFlagScreen.kt"
-            line="194"
-            column="54"/>
-    </issue>
-
-    <issue
-        id="LocalContextGetResourceValueCall"
-        message="Querying resource values using LocalContext.current"
-        errorLine1="                                    lastResult = context.getString(R.string.result_wrong)"
-        errorLine2="                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/joasasso/minitoolbox/tools/entretenimiento/minijuegos/GuessFlagScreen.kt"
-            line="199"
-            column="50"/>
-    </issue>
-
-    <issue
-        id="LocalContextGetResourceValueCall"
-        message="Querying resource values using LocalContext.current"
         errorLine1="                    currentPhaseName = phaseName.ifBlank { context.getString(R.string.pomodoro_work) },"
         errorLine2="                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location

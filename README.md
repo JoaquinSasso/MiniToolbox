@@ -81,13 +81,13 @@ Source: dashboard Markdown export for 2026-05-15 to 2026-11-10 (180 days). These
 Single Gradle module (`:app`) by design; see [DECISIONS.md](DECISIONS.md). The full description, with diagrams, is in [docs/architecture.en.md](docs/architecture.en.md).
 
 - **UI:** Jetpack Compose with Material 3 (expressive APIs from the alpha Compose BOM), Navigation Compose with type-safe routes, and Glance for widgets.
-- **State:** MVVM is being adopted progressively. Ten `ViewModel`s exposing `StateFlow` already back the water reminder, expense splitter, unit converter, minesweeper, AR ruler, team generator and the catalog. Older tools still keep state inside the Composable and are migrated when touched.
+- **State:** MVVM is being adopted progressively. Eleven `ViewModel`s exposing `StateFlow` already back the water reminder, expense splitter, unit converter, minesweeper, flag game, AR ruler, team generator and the catalog. Older tools still keep state inside the Composable and are migrated when touched.
 - **Persistence:** Preferences DataStore behind repositories. The countries dataset for the flag game is a Protobuf binary in `assets/`, read offline.
 - **Concurrency:** Kotlin coroutines and Flow, WorkManager for uploads.
 
 ## Testing and CI
 
-- **320 JVM unit tests** (1 skipped), run with `./gradlew testDebugUnitTest`. They use JUnit 4, Robolectric where a `Context` or DataStore is needed, `kotlinx-coroutines-test` and Mockito. They cover the metrics pipeline, ViewModels, and the pure engines (minesweeper, debt settlement, unit conversion, team partitioning, AR math). Conventions are in [docs/testing.md](docs/testing.md).
+- **342 JVM unit tests** (1 skipped), run with `./gradlew testDebugUnitTest`. They use JUnit 4, Robolectric where a `Context` or DataStore is needed, `kotlinx-coroutines-test` and Mockito. They cover the metrics pipeline, ViewModels, and the pure engines (minesweeper, debt settlement, unit conversion, team partitioning, AR math). Conventions are in [docs/testing.md](docs/testing.md).
 - **Not covered:** there are no UI or instrumented tests, no coverage measurement, and the backend has no tests.
 - **[Android CI](.github/workflows/android.yml):** unit tests, `assembleDebug` and `lintDebug` on every push and pull request to `master`. Lint runs against a baseline of inherited issues; new ones are fixed, not added to it.
 - **[Backend CI](.github/workflows/backend.yml):** `npm ci`, `npm run lint`, `npm run build`.

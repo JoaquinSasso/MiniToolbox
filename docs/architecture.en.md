@@ -24,14 +24,14 @@ flowchart TD
     subgraph UI [UI: Jetpack Compose]
         MA[MainActivity] --> MT[MiniToolboxTheme]
         MT --> NG[NavGraph]
-        NG --> VMS["Screens with a ViewModel<br/>catalog, water and stats,<br/>expense splitter (3), unit converter,<br/>minesweeper, AR ruler, team generator"]
-        NG --> LSS["Screens with local state<br/>Pomodoro, instruments, flashlight,<br/>QR, option selector, scoreboards, flags"]
+        NG --> VMS["Screens with a ViewModel<br/>catalog, water and stats,<br/>expense splitter (3), unit converter,<br/>minesweeper, flags, AR ruler, team generator"]
+        NG --> LSS["Screens with local state<br/>Pomodoro, instruments, flashlight,<br/>QR, option selector, scoreboards"]
         style VMS fill:#e1f5fe,stroke:#01579b,color:#000
         style LSS fill:#fff9c4,stroke:#fbc02d,color:#000
     end
 
     subgraph Logic [Logic and state]
-        VM["ViewModels (10)<br/>StateFlow"]
+        VM["ViewModels (11)<br/>StateFlow"]
         CS["Compose state<br/>remember / mutableStateOf"]
         MET["Emitter: metrics/Metrics.kt"]
     end
@@ -185,7 +185,7 @@ app/src/main/java/com/joasasso/minitoolbox/
 ├── tools/           # Tool, ToolCategory, ToolRegistry
 │   ├── entretenimiento/
 │   │   ├── aleatorio/      # Option selector
-│   │   └── minijuegos/     # Flags; minesweeper/ with engine and ViewModel
+│   │   └── minijuegos/     # Flags (ViewModel and FlagQuiz); minesweeper/ with engine and ViewModel
 │   ├── herramientas/
 │   │   ├── calculadoras/   # Unit converter (engine, parser, ViewModel)
 │   │   ├── generadores/    # QR, team generator
@@ -242,7 +242,7 @@ A mismatch between the code and this document is a documentation bug. The counts
 | Destinations in `Screen` | `grep -c "@SerialName" app/src/main/java/com/joasasso/minitoolbox/nav/Screen.kt` | 27 |
 | Destinations in the `NavGraph` | `grep -c "composable<" app/src/main/java/com/joasasso/minitoolbox/NavGraph.kt` | 27 |
 | `ToolRegistry` entries | `grep -c "Tool(" app/src/main/java/com/joasasso/minitoolbox/tools/ToolRegistry.kt` | 19 |
-| ViewModels | `git ls-files "app/src/main/*ViewModel.kt" \| wc -l` | 10 |
+| ViewModels | `git ls-files "app/src/main/*ViewModel.kt" \| wc -l` | 11 |
 | Glance widgets | `git grep -l "GlanceAppWidget()" -- app/src/main/java \| wc -l` | 5 |
 
 A possible improvement is turning this table into a test that fails when a count changes, so the document cannot drift silently.
