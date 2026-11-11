@@ -2,8 +2,6 @@
 package com.joasasso.minitoolbox
 
 import android.app.Activity
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -55,7 +53,6 @@ import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AguaRemind
 import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AguaStatisticsScreen
 import com.joasasso.minitoolbox.utils.ToolDebouncer
 
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun MiniToolboxNavGraph(navController: NavHostController) {
     val animationDuration = 280

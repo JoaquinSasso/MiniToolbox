@@ -4,12 +4,11 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.compose.setContent
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.joasasso.minitoolbox.nav.Screen
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -120,10 +119,11 @@ class PomodoroAlarmActivity : AppCompatActivity() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onStart() {
         super.onStart()
-        registerReceiver(stopReceiver, IntentFilter(ACTION_POMODORO_ALARM_STOP), RECEIVER_NOT_EXPORTED)
+        ContextCompat.registerReceiver(
+            this, stopReceiver, IntentFilter(ACTION_POMODORO_ALARM_STOP), ContextCompat.RECEIVER_NOT_EXPORTED
+        )
         // Si la alarma ya se apagó por otra vía (p. ej. tocaron la acción de
         // la notificación mientras esta pantalla todavía cargaba, o venció el
         // auto-silencio de 30s), no dejar esta pantalla mostrando "sonando".

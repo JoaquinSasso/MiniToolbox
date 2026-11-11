@@ -5,11 +5,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.PackageManager
-import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -63,6 +60,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import com.joasasso.minitoolbox.utils.NotificationPermission
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -79,7 +77,6 @@ import kotlin.math.min
 const val ACTION_POMODORO_ALARM_START = "POMODORO_ALARM_START"
 const val ACTION_POMODORO_ALARM_STOP  = "POMODORO_ALARM_STOP"
 
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PomodoroScreen(
@@ -111,9 +108,9 @@ fun PomodoroScreen(
     ) { /* no-op */ }
 
     LaunchedEffect(Unit) {
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
-            != PackageManager.PERMISSION_GRANTED
-        ) notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        if (NotificationPermission.shouldRequest(context)) {
+            notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
         // Asegurar canales de notificación creados
         ensurePomodoroChannels(context)
     }
@@ -151,7 +148,7 @@ fun PomodoroScreen(
                 alarmRinging = i.action == ACTION_POMODORO_ALARM_START
             }
         }
-        context.registerReceiver(rcv, filter, Context.RECEIVER_NOT_EXPORTED)
+        ContextCompat.registerReceiver(context, rcv, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
 
         // lectura inicial al entrar
         alarmRinging = AlarmState.isActive(context)
