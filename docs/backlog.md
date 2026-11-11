@@ -12,6 +12,7 @@ Las líneas citan el estado de `master @ 58105f5` (2026-10-02). Antes de trabaja
 ## P1: calidad de datos de telemetría
 
 - [ ] `dashboard-metricsauth-rewrite`: el rewrite de `/api/metricsAuth` ya está en `dashboard/firebase.json`, pero falta desplegar Hosting (`firebase deploy --only hosting` desde `dashboard/`, manual) y comprobar que el panel de lotes muestra datos en el sitio desplegado. Antes del rewrite la ruta caía en `**` y devolvía `index.html`. Hecho: panel con datos en el sitio desplegado.
+- [ ] `entry-source-leak`: si el deep link apunta a la herramienta en la que ya está el usuario (por ejemplo, tocar el widget de Agua con Agua abierta), `launchSingleTop` no cambia la ruta, el `LaunchedEffect` del NavGraph no corre y el origen queda pendiente: se atribuye a la próxima herramienta que se abra navegando. Evidencia: `MainActivity.kt:103,112`, `NavGraph.kt:69,77`. Hecho: el origen pendiente se descarta (o se consume) cuando la navegación no cambia de destino, con test.
 
 ## P1: calidad de código, build y CI
 
