@@ -2,11 +2,9 @@ package com.joasasso.minitoolbox
 
 import android.content.Intent
 import android.content.pm.ActivityInfo
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.compose.setContent
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.runtime.DisposableEffect
@@ -36,7 +34,6 @@ class MainActivity : AppCompatActivity() {
     // bridge para comunicar onNewIntent -> Compose
     private var pushStartRoute: ((String?) -> Unit)? = null
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
