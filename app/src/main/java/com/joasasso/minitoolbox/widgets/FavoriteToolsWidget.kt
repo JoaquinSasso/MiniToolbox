@@ -115,6 +115,7 @@ class FavoriteToolsWidget : GlanceAppWidget() {
                                                 Intent(context, MainActivity::class.java).apply {
                                                     putExtra(Screen.EXTRA_START_ROUTE_JSON, Screen.toJson(tool.screen))
                                                     putExtra(MetricsSource.EXTRA_START_SOURCE, MetricsSource.WIDGET)
+                                                    putExtra(MetricsSource.EXTRA_START_WIDGET, MetricsSource.FAVORITES_WIDGET_KEY)
                                                     addFlags(
                                                         Intent.FLAG_ACTIVITY_CLEAR_TOP or
                                                                 Intent.FLAG_ACTIVITY_SINGLE_TOP

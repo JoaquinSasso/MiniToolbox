@@ -32,6 +32,15 @@ object MetricsSource {
     /** Extra del Intent que transporta el origen hasta MainActivity. */
     const val EXTRA_START_SOURCE = "startSource"
 
+    /**
+     * Extra que identifica qué widget abrió la app. Hoy solo lo pone el widget de
+     * favoritos: los de agua también abren con [WIDGET], pero no deben contar como él.
+     */
+    const val EXTRA_START_WIDGET = "startWidget"
+
+    /** Clave de `widgets` del widget de favoritos. Es contrato: no se renombra. */
+    const val FAVORITES_WIDGET_KEY = "widget_shortcuts"
+
     private val KNOWN = setOf(NAV, NOTIFICATION, WIDGET, SHORTCUT, UNKNOWN)
 
     /**
@@ -50,6 +59,17 @@ object MetricsSource {
      * mapa plano sin necesidad de anidar otro nivel.
      */
     fun entryKey(toolKey: String, source: String): String = "$toolKey.${normalize(source)}"
+
+    /**
+     * Clave de `widgets` a contar cuando la app se abre por deep link, o null si no
+     * corresponde contar ninguna.
+     *
+     * Solo cuenta el widget de favoritos. Las notificaciones, los widgets de agua y los
+     * deep links sin origen ya quedan registrados en `tool_entry` con su origen, y
+     * contarlos acá inflaba `widget_shortcuts` con aperturas que no venían del widget.
+     */
+    fun deepLinkWidgetKey(source: String?, widget: String?): String? =
+        if (source == WIDGET && widget == FAVORITES_WIDGET_KEY) FAVORITES_WIDGET_KEY else null
 }
 
 /**

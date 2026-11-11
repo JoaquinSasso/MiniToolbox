@@ -172,17 +172,62 @@ class UploadMetricsWorkerTest {
     }
 
     @Test
-    fun `tras agotar los intentos se descarta el lote y se desbloquea la cola`() = runTest {
+    fun `tras agotar los intentos se deja de reintentar pero el lote se conserva`() = runTest {
         markSchemaCurrent()
         seedPendingUsage("water")
 
         val (result, _) = runWorker(UploadOutcome.Transient(500, "boom"), runAttemptCount = 5)
 
-        assertEquals(ListenableWorker.Result.success(), result)
+        assertEquals(
+            "retry seguiría gastando batería en este trabajo",
+            ListenableWorker.Result.success(),
+            result
+        )
 
         val p = prefs()
-        assertEquals("", p[MetricsKeys.PENDING_BATCH_PAYLOAD_JSON])
-        assertEquals(1, p[MetricsKeys.DROPPED_BATCHES])
+        assertTrue(
+            "el lote debe quedar congelado para el próximo disparo",
+            p[MetricsKeys.PENDING_BATCH_PAYLOAD_JSON].orEmpty().isNotBlank()
+        )
+        assertTrue(p[MetricsKeys.PENDING_BATCH_ID].orEmpty().isNotBlank())
+        assertEquals(
+            "conservar el lote no es una pérdida",
+            0,
+            p[MetricsKeys.DROPPED_BATCHES] ?: 0
+        )
+    }
+
+    /**
+     * Regresión: tras agotar los intentos el lote se borraba sin commitSent y se reenviaba
+     * con un batch_id nuevo. Si el servidor había persistido el original (respuesta
+     * perdida), la deduplicación no lo detectaba y los agregados se contaban dos veces.
+     */
+    @Test
+    fun `el reenvio tras agotar los intentos usa el mismo batch_id`() = runTest {
+        markSchemaCurrent()
+        seedPendingUsage("water", count = 3)
+
+        runWorker(UploadOutcome.Transient(null, "timeout"), runAttemptCount = 5)
+        val frozenId = prefs()[MetricsKeys.PENDING_BATCH_ID].orEmpty()
+
+        val (result, fake) = runWorker(UploadOutcome.Success)
+
+        assertEquals(ListenableWorker.Result.success(), result)
+        val sent = org.json.JSONObject(fake.lastPayload.orEmpty())
+        assertEquals(
+            "un id nuevo esquivaría la deduplicación del backend",
+            frozenId,
+            sent.getString("batch_id")
+        )
+        assertEquals(
+            3,
+            sent.getJSONArray("items").getJSONObject(0).getJSONObject("tools").getInt("water")
+        )
+        assertTrue(
+            "tras el envío confirmado no queda nada pendiente",
+            com.joasasso.minitoolbox.metrics.storage.AggregatesRepository(context)
+                .buildDeltasSinceLastSent().isEmpty()
+        )
     }
 
     @Test

@@ -40,9 +40,10 @@ Este documento define la semántica exacta de los contadores utilizados en el si
 
 ### `tools`
 - **Qué mide:** Aperturas de herramientas.
-- **Cuándo incrementa:** En el `NavGraph`, cuando la ruta actual cambia a una que pertenece a una herramienta (`NavGraph.kt:69-78`). Un debouncer descarta repeticiones de la misma herramienta dentro de los 5 segundos (`TOOL_USAGE_METRIC_COOLDOWN_MS`).
-- **Limitación:** Pasar de una subpantalla a otra de la misma herramienta (por ejemplo, de la lista de Pomodoro al detalle) vuelve a contar si pasaron más de 5 segundos. Está en el backlog como `tool-count-per-route`.
+- **Cuándo incrementa:** En el `NavGraph`, al entrar a una herramienta desde fuera de ella (`NavGraph.kt:69-82`, `ToolRoutes.visitToCount`). Moverse entre subpantallas de la misma herramienta (lista y detalle de Pomodoro, agua y estadísticas) no vuelve a contar. Pasar por una pantalla que no es herramienta, como Categorías, cierra la visita: volver a entrar cuenta otra vez. Un debouncer descarta además repeticiones de la misma herramienta dentro de los 5 segundos (`TOOL_USAGE_METRIC_COOLDOWN_MS`).
+- **Limitación histórica:** Con `schema_version` 4 o anterior se comparaba la ruta, no la herramienta. Pasar de una subpantalla a otra de la misma herramienta volvía a contar si habían pasado más de 5 segundos (infla sobre todo `pomodoro`, `water` y `meetings`), y volver a la misma herramienta después de pasar por Categorías no contaba si la ruta era idéntica a la de la última herramienta. Los dos efectos van en sentidos opuestos, así que el corte en `schema_version` 5 no tiene una dirección fija por herramienta.
 - **Estructura:** Mapa de `tool_id` -> `count`.
+- **Clave `about`:** Acerca de está en `ToolRegistry` pero no es una herramienta. Hasta `schema_version` 4 sumaba en `tools`, `tools_dau` y `tool_entry`; desde `schema_version` 5 no cuenta (`ToolRoutes.usageKey`). Excluirla al analizar datos anteriores. El backend la sigue aceptando (`EXTRA_KNOWN_TOOLS`) para los clientes viejos.
 - **Nota:** No mide tiempo de permanencia, solo intención de uso.
 - **Clave:** Desde la v1.3.2 proviene de `Tool.metricsKey`, un identificador estable e independiente de la ruta de navegación. Con la migración a navegación type-safe, las subpantallas se unifican bajo la clave principal de su herramienta: `pomodoro_list` y `pomodoro/detail` reportan bajo `pomodoro`, `water_stats` bajo `water`, y las subtelas de divisor de gastos bajo `meetings`.
 - **Herramientas retiradas (2026-10-30):** Se eliminaron del catálogo de la app las herramientas `zodiac_sign`, `multiverse_me`, `quick_calcs`, `basic_phrases` (cuya clave histórica en el backend era `quotes`), `countries_info`, `percentage`, `coin_flip`, `todo`, `age_calculator`, `countdown`, `guess_capital`, `decimal_binary`, `password_generator` y `dice`. Sus claves se conservan en `TOOL_ROUTE_MAP` del backend y en `TOOL_CATALOG` del dashboard para mantener la lectura de datos históricos, pero dejan de recibir eventos a partir de las versiones posteriores a este cambio.
@@ -83,9 +84,10 @@ Este documento define la semántica exacta de los contadores utilizados en el si
 - **Claves:**
   - `widget_water_normal`, `widget_water_mini`: botones de sumar y quitar agua (`AguaCallback.kt`).
   - `widget_flashlight`, `widget_flashlight_mini`: encender o apagar la linterna.
-  - `widget_shortcuts`: se cuenta en `MainActivity` para **cualquier** apertura con ruta de inicio, incluidas las que vienen de notificaciones. No mide solo el widget de favoritos (backlog: `widget-shortcuts-mislabel`).
+  - `widget_shortcuts`: toques en una herramienta del widget de favoritos. Se cuenta en `MainActivity` solo si el Intent trae origen `widget` y la marca `startWidget` que pone `FavoriteToolsWidget` (`MetricsSource.deepLinkWidgetKey`). Las aperturas desde notificaciones y desde los widgets de agua no suman acá: quedan en `tool_entry` con su origen.
 - **Limitación histórica:** Desde `22f6c43` (24/09/2025) hasta la rama `fix/water-widget-metrics-optout`, quitar agua desde el widget sumaba la métrica aunque el usuario hubiera desactivado las métricas. Como hasta la rama `fix/upload-respects-optout` el envío tampoco revisaba el opt-out, esos toques pudieron llegar al servidor.
-- **Uso correcto:** Comparar el uso entre widgets de agua y de linterna. `widget_shortcuts` no sirve para medir el widget de favoritos.
+- **Limitación histórica:** Con `schema_version` 4 o anterior, `widget_shortcuts` sumaba **cualquier** apertura con ruta de inicio, incluidas las notificaciones de Agua y Pomodoro y los widgets de agua. Desde `schema_version` 5 (rama `fix/widget-shortcuts-source`, primera versión publicada después de 1.4.0) mide solo el widget de favoritos. La serie se parte en esa versión y los valores bajan; como el backend no guarda `schema_version`, en Firestore el corte solo se ubica por la fecha del release.
+- **Uso correcto:** Comparar el uso entre widgets de agua y de linterna. `widget_shortcuts` mide el widget de favoritos solo en datos de `schema_version` 5 en adelante.
 
 ### `ads` (retirada)
 - **Qué medía:** Impresiones de anuncios (banner, intersticial, rewarded).
@@ -99,13 +101,14 @@ Este documento define la semántica exacta de los contadores utilizados en el si
 
 ### `schema_version`
 - **Qué es:** Versión del formato del payload enviado por el cliente.
-- **Valores:** `1` (v1.3.2 inicial), `2` (agrega `tools_dau`), `3` (agrega `tool_entry` y `retention`), `4` (quita `ads`).
+- **Valores:** `1` (v1.3.2 inicial), `2` (agrega `tools_dau`), `3` (agrega `tool_entry` y `retention`), `4` (quita `ads`), `5` (`widgets.widget_shortcuts` cuenta solo el widget de favoritos; `tools`, `tools_dau` y `tool_entry` cuentan por visita a la herramienta y no por ruta, y no cuentan `about`; `client_health.dropped_batches` deja de sumar errores transitorios).
 - **Nota:** El backend hoy no persiste este número; viaja en el payload pero no se guarda en Firestore.
 - **Para qué sirve:** Separar datos históricos si alguna vez cambia la semántica de un campo. Es imposible de agregar retroactivamente: sin este número, un cambio de significado mezcla para siempre los datos viejos con los nuevos.
 
 ### `client_health`
 - **Qué mide:** Salud del propio pipeline de envío en el dispositivo.
 - **Campos:** `dropped_batches`, `sanitized_keys`, `consecutive_failures`.
+- **`dropped_batches`:** Lotes descartados sin envío confirmado. Suma 1 cuando el servidor rechaza un lote de forma permanente y el saneo no lo corrige (o se agotan los intentos de ese rechazo). Los errores transitorios no suman: tras agotar los reintentos el lote se conserva con el mismo `batch_id` y se reenvía en el próximo disparo. **Limitación histórica:** hasta `schema_version` 4, agotar los reintentos transitorios borraba el lote y sumaba 1; el lote se reenviaba con otro `batch_id`, así que ese contador sobrestima las pérdidas y los agregados pueden tener doble conteo si el servidor había persistido el original.
 - **Para qué sirve:** Detectar dispositivos con problemas de envío. Sin esto, un dispositivo que dejó de reportar es indistinguible de uno que no se usa.
 - **Nota:** No forma parte de los agregados diarios; se registra a nivel de lote.
 
@@ -136,6 +139,16 @@ Desactivar las métricas en Acerca de corta el registro y el envío. Se cancelan
 
 ---
 
+## Nota sobre las builds debug
+
+Las builds debug envían al mismo endpoint que producción y sus datos se suman a los mismos agregados. Es una decisión del autor (10/11/2026): la build que usa a diario en su teléfono es debug y representa una parte grande del uso de la app, así que descartarla quitaría datos reales.
+
+- **Sesgo:** con pocos usuarios activos, el dispositivo del autor pesa mucho en todos los contadores, y su uso no es el de un usuario típico (prueba herramientas nuevas, entra a pantallas de desarrollo). Cualquier cifra pública tiene que aclararlo.
+- **No se puede separar:** el payload no lleva `build_type` y el backend no lo guarda. Para separar algún día haría falta agregarlo en los dos lados; hacia atrás no es recuperable.
+- **Claves de prueba:** `dev/DevInspector.kt` puede generar `metricTest` y `metricsTest`. No están en `KNOWN_TOOLS` del backend, así que se guardan como `other`; excluir `other` al analizar herramientas.
+
+---
+
 ## Nota sobre zonas horarias
 
 El campo `day` se calcula con el **reloj local del dispositivo** (`SimpleDateFormat("yyyy-MM-dd")` sin zona fija). Un mismo día agrupa hasta 24 husos distintos.
@@ -148,6 +161,6 @@ Es tolerable para conteos diarios, pero invalida cualquier análisis horario y c
 Para cualquier cifra pública (README, Portfolio, LinkedIn), se debe priorizar:
 1. **Google Play Console** para "Instalaciones Totales" y "Calificaciones".
 2. **`daily_active`** para "Usuarios Activos" (solo serie post 17/08/2026).
-3. **`tools_dau`** para "Funcionalidades más populares", con `tools` como medida de intensidad. Si solo se dispone de `tools` (por ejemplo, en el export Markdown del dashboard), aclarar que son aperturas y no personas.
+3. **`tools_dau`** para "Funcionalidades más populares", con `tools` como medida de intensidad. Si solo se dispone de `tools` (por ejemplo, en un export Markdown generado antes de que incluyera `tools_dau`), aclarar que son aperturas y no personas.
 
 **Nunca utilizar `versions_first_seen` como equivalente a "Usuarios" sin aclarar la semántica de actualización.**

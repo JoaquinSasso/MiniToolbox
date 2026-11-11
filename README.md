@@ -87,7 +87,7 @@ Single Gradle module (`:app`) by design; see [DECISIONS.md](DECISIONS.md). The f
 
 ## Testing and CI
 
-- **296 JVM unit tests** (1 skipped), run with `./gradlew testDebugUnitTest`. They use JUnit 4, Robolectric where a `Context` or DataStore is needed, `kotlinx-coroutines-test` and Mockito. They cover the metrics pipeline, ViewModels, and the pure engines (minesweeper, debt settlement, unit conversion, team partitioning, AR math). Conventions are in [docs/testing.md](docs/testing.md).
+- **320 JVM unit tests** (1 skipped), run with `./gradlew testDebugUnitTest`. They use JUnit 4, Robolectric where a `Context` or DataStore is needed, `kotlinx-coroutines-test` and Mockito. They cover the metrics pipeline, ViewModels, and the pure engines (minesweeper, debt settlement, unit conversion, team partitioning, AR math). Conventions are in [docs/testing.md](docs/testing.md).
 - **Not covered:** there are no UI or instrumented tests, no coverage measurement, and the backend has no tests.
 - **[Android CI](.github/workflows/android.yml):** unit tests, `assembleDebug` and `lintDebug` on every push and pull request to `master`. Lint runs against a baseline of inherited issues; new ones are fixed, not added to it.
 - **[Backend CI](.github/workflows/backend.yml):** `npm ci`, `npm run lint`, `npm run build`.
@@ -98,7 +98,7 @@ The full list, with file and line evidence, is in [docs/backlog.md](docs/backlog
 
 - No dependency injection; tests swap dependencies through `@VisibleForTesting` hooks.
 - The app uses full `protobuf-java`; the migration to Lite is planned in an [ADR](docs/decisions/protobuf-lite-migration.md) but not done.
-- Debug builds send metrics to the production endpoint, and the payload does not say which build sent it.
+- Debug builds send metrics to the production endpoint on purpose (the author's everyday build is a debug build), and the payload does not say which build sent it. See the [glossary](docs/metrics-glossary.en.md).
 - The instruments drawn on `Canvas` (compass, level, ruler, magnifier) have no accessibility semantics.
 - CI does not build a release APK, so R8 problems only show up locally.
 

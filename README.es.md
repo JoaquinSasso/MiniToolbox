@@ -87,7 +87,7 @@ Un solo módulo de Gradle (`:app`), por decisión; ver [DECISIONS.md](DECISIONS.
 
 ## Tests y CI
 
-- **296 tests unitarios en la JVM** (1 omitido), con `./gradlew testDebugUnitTest`. Usan JUnit 4, Robolectric donde hace falta un `Context` o DataStore, `kotlinx-coroutines-test` y Mockito. Cubren el pipeline de métricas, los ViewModels y los motores puros (buscaminas, liquidación de deudas, conversión de unidades, armado de equipos, matemática AR). Las convenciones están en [docs/testing.md](docs/testing.md).
+- **320 tests unitarios en la JVM** (1 omitido), con `./gradlew testDebugUnitTest`. Usan JUnit 4, Robolectric donde hace falta un `Context` o DataStore, `kotlinx-coroutines-test` y Mockito. Cubren el pipeline de métricas, los ViewModels y los motores puros (buscaminas, liquidación de deudas, conversión de unidades, armado de equipos, matemática AR). Las convenciones están en [docs/testing.md](docs/testing.md).
 - **Lo que no está cubierto:** no hay tests de UI ni instrumentados, no se mide la cobertura y el backend no tiene tests.
 - **[Android CI](.github/workflows/android.yml):** tests unitarios, `assembleDebug` y `lintDebug` en cada push y pull request a `master`. El lint corre contra un baseline de issues heredados; los nuevos se corrigen, no se agregan.
 - **[Backend CI](.github/workflows/backend.yml):** `npm ci`, `npm run lint`, `npm run build`.
@@ -98,7 +98,7 @@ La lista completa, con evidencia de archivo y línea, está en [docs/backlog.md]
 
 - No hay inyección de dependencias; los tests reemplazan dependencias con hooks `@VisibleForTesting`.
 - La app usa `protobuf-java` completo; la migración a Lite está planificada en un [ADR](docs/decisions/protobuf-lite-migration.md) pero no se hizo.
-- Las builds debug envían métricas al endpoint de producción, y el payload no indica qué build lo envió.
+- Las builds debug envían métricas al endpoint de producción a propósito (la build de uso diario del autor es debug), y el payload no indica qué build lo envió. Ver el [glosario](docs/metrics-glossary.md).
 - Los instrumentos dibujados con `Canvas` (brújula, nivel, regla, lupa) no tienen semántica de accesibilidad.
 - El CI no compila un APK release, así que los problemas de R8 solo aparecen localmente.
 
