@@ -100,13 +100,14 @@ This document defines the exact meaning of the counters in MiniToolbox's own tel
 
 ### `schema_version`
 - **What it is:** Version of the payload format sent by the client.
-- **Values:** `1` (initial v1.3.2), `2` (adds `tools_dau`), `3` (adds `tool_entry` and `retention`), `4` (removes `ads`), `5` (`widgets.widget_shortcuts` counts the favorites widget only).
+- **Values:** `1` (initial v1.3.2), `2` (adds `tools_dau`), `3` (adds `tool_entry` and `retention`), `4` (removes `ads`), `5` (`widgets.widget_shortcuts` counts the favorites widget only; `tools`, `tools_dau` and `tool_entry` count per tool visit instead of per route, and do not count `about`; `client_health.dropped_batches` no longer counts transient errors).
 - **Note:** The backend does not persist this number today; it travels in the payload but is not stored in Firestore.
 - **What it is for:** Separating historical data if a field's meaning ever changes. It cannot be added retroactively: without this number, a change in meaning mixes old and new data forever.
 
 ### `client_health`
 - **What it measures:** Health of the upload pipeline itself on the device.
 - **Fields:** `dropped_batches`, `sanitized_keys`, `consecutive_failures`.
+- **`dropped_batches`:** Batches discarded without a confirmed upload. It adds 1 when the server permanently rejects a batch and sanitizing does not fix it (or the attempts for that rejection run out). Transient errors do not add: after the retries run out the batch is kept with the same `batch_id` and sent again on the next trigger. **Historical limitation:** up to `schema_version` 4, running out of transient retries deleted the batch and added 1; the batch was sent again with a different `batch_id`, so that counter overstates losses and aggregates may be double counted if the server had stored the original.
 - **What it is for:** Detecting devices with upload problems. Without it, a device that stopped reporting cannot be told apart from one that is not being used.
 - **Note:** It is not part of the daily aggregates; it is recorded per batch.
 

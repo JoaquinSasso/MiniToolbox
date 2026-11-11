@@ -157,10 +157,14 @@ class UploadMetricsWorker(appContext: Context, params: WorkerParameters) :
             is UploadOutcome.Transient -> {
                 recordFailure(ds, outcome.code ?: -1, outcome.cause)
                 if (runAttemptCount >= MAX_ATTEMPTS) {
-                    clearPending(ds)
-                    ds.edit { e ->
-                        e[MetricsKeys.DROPPED_BATCHES] = (e[MetricsKeys.DROPPED_BATCHES] ?: 0) + 1
-                    }
+                    // Se corta la cadena de reintentos de este trabajo, pero el lote queda
+                    // intacto, con el mismo batch_id. El próximo disparo lo reenvía y, si el
+                    // servidor ya lo había persistido (una respuesta perdida), la
+                    // deduplicación del backend evita el doble conteo. Antes se borraba sin
+                    // commitSent: se reconstruía con otro batch_id (posible doble conteo) y
+                    // sumaba dropped_batches por una pérdida que no ocurría. Si nunca se
+                    // confirma, la caducidad de MAX_PENDING_AGE_MS lo reconstruye.
+                    UploadScheduler.markDirty(ctx)
                     Result.success()
                 } else {
                     Result.retry()

@@ -101,13 +101,14 @@ Este documento define la semántica exacta de los contadores utilizados en el si
 
 ### `schema_version`
 - **Qué es:** Versión del formato del payload enviado por el cliente.
-- **Valores:** `1` (v1.3.2 inicial), `2` (agrega `tools_dau`), `3` (agrega `tool_entry` y `retention`), `4` (quita `ads`), `5` (`widgets.widget_shortcuts` cuenta solo el widget de favoritos).
+- **Valores:** `1` (v1.3.2 inicial), `2` (agrega `tools_dau`), `3` (agrega `tool_entry` y `retention`), `4` (quita `ads`), `5` (`widgets.widget_shortcuts` cuenta solo el widget de favoritos; `tools`, `tools_dau` y `tool_entry` cuentan por visita a la herramienta y no por ruta, y no cuentan `about`; `client_health.dropped_batches` deja de sumar errores transitorios).
 - **Nota:** El backend hoy no persiste este número; viaja en el payload pero no se guarda en Firestore.
 - **Para qué sirve:** Separar datos históricos si alguna vez cambia la semántica de un campo. Es imposible de agregar retroactivamente: sin este número, un cambio de significado mezcla para siempre los datos viejos con los nuevos.
 
 ### `client_health`
 - **Qué mide:** Salud del propio pipeline de envío en el dispositivo.
 - **Campos:** `dropped_batches`, `sanitized_keys`, `consecutive_failures`.
+- **`dropped_batches`:** Lotes descartados sin envío confirmado. Suma 1 cuando el servidor rechaza un lote de forma permanente y el saneo no lo corrige (o se agotan los intentos de ese rechazo). Los errores transitorios no suman: tras agotar los reintentos el lote se conserva con el mismo `batch_id` y se reenvía en el próximo disparo. **Limitación histórica:** hasta `schema_version` 4, agotar los reintentos transitorios borraba el lote y sumaba 1; el lote se reenviaba con otro `batch_id`, así que ese contador sobrestima las pérdidas y los agregados pueden tener doble conteo si el servidor había persistido el original.
 - **Para qué sirve:** Detectar dispositivos con problemas de envío. Sin esto, un dispositivo que dejó de reportar es indistinguible de uno que no se usa.
 - **Nota:** No forma parte de los agregados diarios; se registra a nivel de lote.
 
