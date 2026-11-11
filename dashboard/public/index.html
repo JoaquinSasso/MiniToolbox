@@ -236,7 +236,7 @@
           <details class="zero" id="zeroBox">
             <summary>Detectar herramientas sin uso en el rango</summary>
             <p style="font-size:12px; color:var(--muted); margin:8px 0 0">
-              Precargado con las 45 tools de tu código (Screen.kt). Editá la lista si hace falta — "about" queda marcada aparte, no como candidata a borrar.
+              Precargado con todas las claves del catálogo del dashboard, incluidas las de herramientas retiradas y las históricas (como <span class="mono">pomodoro_list</span>), que siempre aparecen sin uso. Editá la lista si hace falta — "about" queda marcada aparte, no como candidata a borrar. Si guardaste una lista antes, usá "Restaurar lista completa" para sumar las claves nuevas.
               <button class="btn" id="btnResetZero" style="padding:2px 8px; font-size:11px; margin-left:6px">Restaurar lista completa</button></p>
             <textarea id="zeroInput" placeholder="ar_ruler&#10;ruler&#10;compass&#10;…"></textarea>
             <div class="zero-list" id="zeroList"></div>
@@ -423,9 +423,15 @@
   const fmt=n=>Number(n||0).toLocaleString("es-AR");
   const pct=(n,d)=>d?((n/d)*100):0;
   const pctS=(n,d)=>d?((n/d)*100).toFixed(1)+"%":"—";
+  // Porcentaje numérico con un decimal (para el export); null si no hay total.
+  const shareOf=(n,d)=>d?Math.round(n/d*1000)/10:null;
 
   /* ---------- estado ---------- */
   let charts={}, lastData=null, lastRange=null, sortState={};
+  // Lo que el export necesita y no está en lastData: si los datos son demo y el
+  // estado operativo, que llega aparte (metricsAuth) y no depende del rango.
+  let lastIsDemo=false, lastAuth={status:"pending"};
+  const AUTH_MONTHS=3;
 
   /* ---------- tema ---------- */
   function cssVar(name){return getComputedStyle(document.documentElement).getPropertyValue(name).trim();}
@@ -563,7 +569,9 @@
     coin_flip:{name:"Cara o cruz"}, decimal_binary:{name:"Decimal ↔ binario"},
     text_binary:{name:"Texto ↔ binario"}, truco_scoreboard:{name:"Marcador de truco"},
     age_calculator:{name:"Calculadora de edad"}, zodiac_sign:{name:"Signo zodiacal"},
-    pomodoro_list:{name:"Pomodoro"}, bubble_level:{name:"Nivel de burbuja"},
+    pomodoro:{name:"Pomodoro"},
+    pomodoro_list:{name:"Pomodoro (clave histórica)",note:"clave anterior a la v1.3.2; desde entonces reporta como pomodoro"},
+    bubble_level:{name:"Nivel de burbuja"},
     percentage:{name:"Porcentajes"}, time_converter:{name:"Horas 12/24"},
     bmi_calculator:{name:"IMC"}, roman_numerals:{name:"Números romanos"},
     unit_converter:{name:"Conversor de unidades"}, password_generator:{name:"Generador de contraseñas"},
@@ -601,23 +609,37 @@
     return {last,prev,pct:Math.round((last-prev)/prev*100)};
   }
 
+  /* Valores de las tarjetas KPI. Los usan el render y el export. */
+  function kpiValues(a,daily){
+    const tv=ranked(a.agg.versions)[0], tl=ranked(a.agg.lang_primary)[0];
+    return {
+      opens:a.opens,
+      weekOverWeek:weekOverWeek(daily),
+      dailyActive:a.dailyActive,
+      firstSeen:a.firstSeenTotal,
+      distinctTools:Object.keys(a.agg.tools).length,
+      toolUses:totalOf(a.agg.tools),
+      toolDeviceDays:totalOf(a.agg.tools_dau),
+      topVersion:tv?{version:tv[0],count:tv[1],share:shareOf(tv[1],totalOf(a.agg.versions))}:null,
+      topLang:tl?{code:tl[0],name:langLabel(tl[0]).name,count:tl[1],share:shareOf(tl[1],totalOf(a.agg.lang_primary))}:null,
+    };
+  }
+
   function renderKpis(a,range){
-    const topVer=ranked(a.agg.versions)[0], topLang=ranked(a.agg.lang_primary)[0];
-    const toolsTotal=totalOf(a.agg.tools);
-    const distinctTools=Object.keys(a.agg.tools).length;
+    const k=kpiValues(a,lastData), w=k.weekOverWeek;
+    const wowCard=w
+      ? {l:"Semana vs anterior",
+         v:`<span style="color:${w.pct>0?"var(--pos)":w.pct<0?"var(--neg)":"var(--muted)"}">${w.pct>0?"+":""}${w.pct}%</span>`,
+         s:`${fmt(w.last)} contra ${fmt(w.prev)} aperturas`}
+      : {l:"Semana vs anterior",v:"—",s:"hacen falta 14 días"};
     const cards=[
-      {l:"Aperturas",v:fmt(a.opens),s:biasActive?`Total (sesgo +2 hasta ${BIAS_TO})`:"Total"},
-      (()=>{ const w=weekOverWeek(lastData);
-        if(!w)return {l:"Semana vs anterior",v:"—",s:"hacen falta 14 días"};
-        const sign=w.pct>0?"+":"";
-        const color=w.pct>0?"var(--pos)":w.pct<0?"var(--neg)":"var(--muted)";
-        return {l:"Semana vs anterior",v:`<span style="color:${color}">${sign}${w.pct}%</span>`,
-                s:`${fmt(w.last)} contra ${fmt(w.prev)} aperturas`};})(),
-      {l:"Disp. Activos",v:fmt(a.dailyActive),s:`DDAU (sin doble conteo)`},
-      {l:"Primeras vistas",v:fmt(a.firstSeenTotal),s:"versions_first_seen · no son instalaciones"},
-      {l:"Tools usadas",v:fmt(distinctTools),s:`${fmt(toolsTotal)} usos totales`},
-      {l:"Versión top",v:topVer?topVer[0]:"—",s:topVer?pctS(topVer[1],totalOf(a.agg.versions))+" del uso":""},
-      {l:"Idioma top",v:topLang?langLabel(topLang[0]).name:"—",s:topLang?langLabel(topLang[0]).code+" · "+pctS(topLang[1],totalOf(a.agg.lang_primary))+" de dispositivos":""},
+      {l:"Aperturas",v:fmt(k.opens),s:biasActive?`Total (sesgo +2 hasta ${BIAS_TO})`:"Total"},
+      wowCard,
+      {l:"Disp. Activos",v:fmt(k.dailyActive),s:`DDAU (sin doble conteo)`},
+      {l:"Primeras vistas",v:fmt(k.firstSeen),s:"versions_first_seen · no son instalaciones"},
+      {l:"Tools usadas",v:fmt(k.distinctTools),s:`${fmt(k.toolUses)} usos totales`},
+      {l:"Versión top",v:k.topVersion?k.topVersion.version:"—",s:k.topVersion?pctS(k.topVersion.count,totalOf(a.agg.versions))+" del uso":""},
+      {l:"Idioma top",v:k.topLang?k.topLang.name:"—",s:k.topLang?k.topLang.code+" · "+pctS(k.topLang.count,totalOf(a.agg.lang_primary))+" de dispositivos":""},
     ];
     $("#kpis").innerHTML=cards.map(c=>`
       <div class="kpi"><div class="k-label"><span>${c.l}</span></div>
@@ -638,15 +660,19 @@
     return out;
   }
 
-  function renderTrend(daily,gran,rangeDays){
+  function trendSeries(daily,gran,rangeDays){
     const g=resolveGranularity(gran,rangeDays);
     const {labels,data}=bucketOpens(daily,g);
+    // La media móvil sólo tiene sentido sobre datos diarios: agrupados por semana o
+    // mes el suavizado ya lo hace el propio agrupamiento.
+    return {granularity:g,labels,data,movingAverage7:g==="day"?movingAverage(data,7):null};
+  }
+
+  function renderTrend(daily,gran,rangeDays){
+    const {granularity:g,labels,data,movingAverage7:ma}=trendSeries(daily,gran,rangeDays);
     const label={day:"Aperturas por día",week:"Aperturas por semana",month:"Aperturas por mes"}[g];
     $("#trendMeta").textContent=`${labels.length} puntos · agrupado por ${({day:"día",week:"semana",month:"mes"})[g]}`;
     const acc=cssVar("--accent");
-    // La media móvil sólo tiene sentido sobre datos diarios: agrupados por semana o
-    // mes el suavizado ya lo hace el propio agrupamiento.
-    const ma=g==="day"?movingAverage(data,7):null;
     const datasets=[{label,data,borderColor:acc,backgroundColor:acc+"22",
         borderWidth:2,tension:.28,fill:true,pointRadius:labels.length>60?0:3,pointHoverRadius:5}];
     if(ma)datasets.push({label:"Media móvil 7 días",data:ma,borderColor:cssVar("--muted"),
@@ -684,38 +710,48 @@
   /* Área apilada al 100%: lo que importa no es cuánta gente hay cada día sino qué
      proporción migró. Es el número que decide cuándo se puede dejar de sostener una
      versión vieja, por ejemplo para retirar la autenticación por API key. */
-  function renderAdoption(daily){
+  function adoptionSeries(daily){
     const sorted=[...daily].sort((x,y)=>x.day<y.day?-1:1);
     const totals={};
     for(const r of sorted)for(const [v,n] of Object.entries(r.totals?.versions||{}))
       totals[v]=(totals[v]||0)+Number(n||0);
-
     const top=ranked(totals).slice(0,6).map(e=>e[0]);
-    const note=$("#adoptionNote");
-
-    if(!top.length||sorted.length<2){
-      if(charts.adoption){charts.adoption.destroy();charts.adoption=null;}
-      note.textContent="Sin datos suficientes para mostrar la adopción.";
-      return;
-    }
-
-    const labels=sorted.map(r=>r.day);
-    const colors=palette(top.length);
-    const datasets=top.map((v,i)=>({
-      label:v,
-      data:sorted.map(r=>{
+    if(!top.length||sorted.length<2)return null;
+    return {
+      labels:sorted.map(r=>r.day),
+      series:top.map(v=>({version:v,data:sorted.map(r=>{
         const byVer=r.totals?.versions||{};
         const dayTotal=Object.values(byVer).reduce((a,b)=>a+Number(b||0),0);
         if(!dayTotal)return null;
         return Number(byVer[v]||0)/dayTotal*100;
-      }),
+      })})),
+      others:Object.keys(totals).length-top.length,
+    };
+  }
+  function adoptionNote(ad){
+    if(!ad)return "Sin datos suficientes para mostrar la adopción.";
+    return ad.others>0
+      ? `Se muestran las ${ad.series.length} versiones con más actividad; hay ${ad.others} más con uso residual.`
+      : `Proporción diaria de dispositivos activos por versión.`;
+  }
+
+  function renderAdoption(daily){
+    const ad=adoptionSeries(daily);
+    $("#adoptionNote").textContent=adoptionNote(ad);
+    if(!ad){
+      if(charts.adoption){charts.adoption.destroy();charts.adoption=null;}
+      return;
+    }
+    const colors=palette(ad.series.length);
+    const datasets=ad.series.map((sr,i)=>({
+      label:sr.version,data:sr.data,
       borderColor:colors[i],backgroundColor:colors[i]+"55",
       borderWidth:1.5,fill:true,tension:.2,pointRadius:0,spanGaps:true
     }));
 
     charts.adoption=new Chart($("#chAdoption"),{
       type:"line",
-      data:{labels,datasets},
+      data:{labels:ad.labels,datasets},
       options:{responsive:true,maintainAspectRatio:false,animation:false,
         scales:{y:{stacked:true,beginAtZero:true,max:100,grid:{color:cssVar("--grid")},
                    ticks:{callback:v=>v+"%"}},
@@ -724,86 +760,60 @@
                  tooltip:{intersect:false,mode:"index",
                    callbacks:{label:c=>`${c.dataset.label}: ${c.raw==null?"–":c.raw.toFixed(1)+"%"}`}}}}
     });
-
-    const others=Object.keys(totals).length-top.length;
-    note.textContent=others>0
-      ? `Se muestran las ${top.length} versiones con más actividad; hay ${others} más con uso residual.`
-      : `Proporción diaria de dispositivos activos por versión.`;
   }
   /* ---------- retención: cruce antigüedad x intensidad ---------- */
   const RET_AGES=[["age0_6","0-6 días"],["age7_29","7-29 días"],["age30_89","30-89 días"],
                   ["age90_179","90-179 días"],["age180p","180+ días"]];
   const RET_INT=["d1","d2_3","d4_7","d8_14","d15_28"];
 
-  function renderRetention(a){
-    const ret=a.retention||{};
-    const tb=$("#tblRetention tbody");
-    const grand=Object.values(ret).reduce((s,byInt)=>s+totalOf(byInt),0);
+  function retentionTable(ret){
+    ret=ret||{};
+    const rows=RET_AGES.map(([key,label])=>{
+      const byInt=ret[key]||{};
+      const cells=RET_INT.map(i=>Number(byInt[i]||0));
+      return {age:key,label,cells,total:cells.reduce((sum,n)=>sum+n,0)};
+    });
+    const colTotals=RET_INT.map(i=>RET_AGES.reduce((sum,[k])=>sum+Number((ret[k]||{})[i]||0),0));
+    const grand=Object.values(ret).reduce((sum,byInt)=>sum+totalOf(byInt),0);
+    return {intensities:RET_INT,rows,colTotals,grand};
+  }
 
-    if(!grand){
+  function renderRetention(a){
+    const t=retentionTable(a.retention);
+    const tb=$("#tblRetention tbody");
+
+    if(!t.grand){
       tb.innerHTML=`<tr><td colspan="7" class="empty">Sin datos todavía. Esta métrica arranca con la versión 1.3.2.</td></tr>`;
       $("#retMeta").textContent="";
       return;
     }
-    $("#retMeta").textContent=`${fmt(grand)} marcas diarias`;
+    $("#retMeta").textContent=`${fmt(t.grand)} marcas diarias`;
 
-    const rows=RET_AGES.map(([key,label])=>{
-      const byInt=ret[key]||{};
-      const cells=RET_INT.map(i=>Number(byInt[i]||0));
-      const total=cells.reduce((s,n)=>s+n,0);
-      return `<tr><td>${label}</td>${cells.map(n=>
-        `<td class="num">${n?fmt(n):"–"}</td>`).join("")}<td class="num"><b>${fmt(total)}</b></td></tr>`;
-    });
-
-    const totals=RET_INT.map(i=>RET_AGES.reduce((s,[k])=>s+Number((ret[k]||{})[i]||0),0));
-    rows.push(`<tr><td><b>Total</b></td>${totals.map(n=>
-      `<td class="num"><b>${fmt(n)}</b></td>`).join("")}<td class="num"><b>${fmt(grand)}</b></td></tr>`);
+    const rows=t.rows.map(r=>`<tr><td>${r.label}</td>${r.cells.map(n=>
+        `<td class="num">${n?fmt(n):"–"}</td>`).join("")}<td class="num"><b>${fmt(r.total)}</b></td></tr>`);
+    rows.push(`<tr><td><b>Total</b></td>${t.colTotals.map(n=>
+      `<td class="num"><b>${fmt(n)}</b></td>`).join("")}<td class="num"><b>${fmt(t.grand)}</b></td></tr>`);
 
     tb.innerHTML=rows.join("");
   }
   /* ---------- salud del pipeline de envío ---------- */
-  function renderHealth(h){
-    const tb=$("#tblHealth tbody");
-    if(!h.batches){
-      $("#healthSummary").innerHTML=`<span style="color:var(--faint)">Sin datos de salud. Llega con la versión 1.3.2.</span>`;
-      tb.innerHTML=`<tr><td colspan="3" class="empty">Sin datos</td></tr>`;
-      return;
-    }
-
-    const rows=[
-      ["Lotes descartados en el dispositivo",h.withDropped,
-       "El cliente tuvo que tirar datos por rechazo permanente o por agotar reintentos."],
-      ["Claves corregidas por el sanitizador",h.withSanitized,
-       "El dispositivo tenía datos que el servidor habría rechazado."],
-      ["Fallos de envío consecutivos",h.withFailures,
-       "El dispositivo venía fallando al momento de enviar."],
-    ];
-
-    const worst=Math.max(h.withDropped,h.withSanitized,h.withFailures);
-    const pctWorst=Math.round(worst*100/h.batches);
-    $("#healthSummary").innerHTML= worst===0
-      ? `<span style="color:var(--pos)">Pipeline sano.</span> Ninguno de los ${fmt(h.batches)} lotes reporta problemas.`
-      : `<b>${pctWorst}%</b> de los ${fmt(h.batches)} lotes vienen de dispositivos que registraron algún problema de envío.`;
-
-    tb.innerHTML=rows.map(([label,n,tip])=>{
-      const pct=Math.round(n*100/h.batches);
-      const color=n===0?"var(--pos)":pct>=10?"var(--neg)":"var(--warn)";
-      return `<tr><td title="${tip}">${label}</td>
-        <td class="num">${fmt(n)}</td>
-        <td class="num" style="color:${color}">${pct}%</td></tr>`;
-    }).join("");
+  const HEALTH_ROWS=[
+    ["withDropped","Lotes descartados en el dispositivo",
+     "El cliente descartó un lote por un rechazo permanente que el saneo no corrigió. Hasta schema_version 4 también sumaba al agotar reintentos transitorios."],
+    ["withSanitized","Claves corregidas por el sanitizador",
+     "El dispositivo tenía datos que el servidor habría rechazado."],
+    ["withFailures","Fallos de envío consecutivos",
+     "El dispositivo venía fallando al momento de enviar."],
+  ];
+  function healthRows(h){
+    return HEALTH_ROWS.map(([key,label,tip])=>({key,label,tip,count:h[key],
+      pct:h.batches?Math.round(h[key]*100/h.batches):0}));
   }
-  /* ---------- lotes aceptados por versión ---------- */
-  async function renderAuth(){
-    let data;
-    try{ data=await apiGet("metricsAuth",{months:3}); }
-    catch(e){
-      $("#authSummary").innerHTML=`<span style="color:var(--faint)">Sin datos de lotes disponibles.</span>`;
-      $("#tblAuth tbody").innerHTML="";
-      $("#authMeta").textContent="";
-      return;
-    }
-
+  function healthWorstPct(h){
+    if(!h.batches)return 0;
+    return Math.round(Math.max(h.withDropped,h.withSanitized,h.withFailures)*100/h.batches);
+  }
+  function summarizeAuth(data){
     const byVersion={};
     let batches=0, withDropped=0, withSanitized=0, withFailures=0;
     for(const m of (data.months||[])){
@@ -815,56 +825,98 @@
         byVersion[v]=(byVersion[v]||0)+Number(counts.appcheck||0);
       }
     }
+    return {batches,withDropped,withSanitized,withFailures,
+      byVersion:Object.entries(byVersion).filter(([,n])=>n>0).sort((a,b)=>b[1]-a[1])};
+  }
 
-    renderHealth({batches,withDropped,withSanitized,withFailures});
+  function renderHealth(h){
+    const tb=$("#tblHealth tbody");
+    if(!h.batches){
+      $("#healthSummary").innerHTML=`<span style="color:var(--faint)">Sin datos de salud. Llega con la versión 1.3.2.</span>`;
+      tb.innerHTML=`<tr><td colspan="3" class="empty">Sin datos</td></tr>`;
+      return;
+    }
+    const worstPct=healthWorstPct(h);
+    $("#healthSummary").innerHTML= worstPct===0
+      ? `<span style="color:var(--pos)">Pipeline sano.</span> Ninguno de los ${fmt(h.batches)} lotes reporta problemas.`
+      : `<b>${worstPct}%</b> de los ${fmt(h.batches)} lotes vienen de dispositivos que registraron algún problema de envío.`;
 
-    $("#authMeta").textContent=batches?`${fmt(batches)} lotes · últimos 3 meses`:"";
-    if(!batches){
+    tb.innerHTML=healthRows(h).map(r=>{
+      const color=r.count===0?"var(--pos)":r.pct>=10?"var(--neg)":"var(--warn)";
+      return `<tr><td title="${r.tip}">${r.label}</td>
+        <td class="num">${fmt(r.count)}</td>
+        <td class="num" style="color:${color}">${r.pct}%</td></tr>`;
+    }).join("");
+  }
+  /* ---------- lotes aceptados por versión ---------- */
+  async function renderAuth(){
+    let data;
+    try{ data=await apiGet("metricsAuth",{months:AUTH_MONTHS}); }
+    catch(e){
+      lastAuth={status:"error",error:String(e?.message||e)};
+      $("#authSummary").innerHTML=`<span style="color:var(--faint)">Sin datos de lotes disponibles.</span>`;
+      $("#tblAuth tbody").innerHTML="";
+      $("#authMeta").textContent="";
+      return;
+    }
+
+    const h=summarizeAuth(data);
+    lastAuth={status:"ok",months:AUTH_MONTHS,...h};
+    renderHealth(h);
+
+    $("#authMeta").textContent=h.batches?`${fmt(h.batches)} lotes · últimos ${AUTH_MONTHS} meses`:"";
+    if(!h.batches){
       $("#authSummary").innerHTML=`<span style="color:var(--faint)">Todavía no se registraron lotes.</span>`;
       $("#tblAuth tbody").innerHTML=`<tr><td colspan="2" class="empty">Sin datos</td></tr>`;
       return;
     }
 
-    $("#authSummary").innerHTML=`<b>${fmt(batches)}</b> lotes aceptados en los últimos 3 meses.`;
-    const rows=Object.entries(byVersion).filter(([,n])=>n>0).sort((a,b)=>b[1]-a[1]);
-    $("#tblAuth tbody").innerHTML=rows.map(([v,n])=>`
+    $("#authSummary").innerHTML=`<b>${fmt(h.batches)}</b> lotes aceptados en los últimos ${AUTH_MONTHS} meses.`;
+    $("#tblAuth tbody").innerHTML=h.byVersion.map(([v,n])=>`
       <tr><td><span class="mono">${v}</span></td>
       <td class="num">${fmt(n)}</td></tr>`).join("");
   }
   /* ---------- alcance (DAU por herramienta) y origen de entrada ---------- */
-  function renderReach(a){
+  function reachRows(a){
     const dau=a.agg.tools_dau||{}, uses=a.agg.tools||{};
-    const rows=Object.keys(dau).map(k=>{
+    return Object.keys(dau).map(k=>{
       const d=Number(dau[k]||0), u=Number(uses[k]||0);
-      return [k,d,u,d>0?u/d:0];
-    }).sort((x,y)=>y[1]-x[1]);
+      return {tool:k,deviceDays:d,uses:u,usesPerDevice:d>0?u/d:null};
+    }).sort((x,y)=>y.deviceDays-x.deviceDays);
+  }
+  // La página muestra widget y acceso directo en una sola columna; el export los separa
+  // y agrega "unknown", que la página no muestra.
+  function entryRows(a){
+    return Object.entries(a.entryByTool||{}).map(([k,v])=>({tool:k,
+      nav:Number(v.nav||0),notification:Number(v.notification||0),widget:Number(v.widget||0),
+      shortcut:Number(v.shortcut||0),unknown:Number(v.unknown||0)}))
+      .sort((x,y)=>(y.nav+y.notification+y.widget+y.shortcut)-(x.nav+x.notification+x.widget+x.shortcut));
+  }
 
+  function renderReach(a){
+    const rows=reachRows(a);
     const tb=$("#tblReach tbody");
     if(!rows.length){
       tb.innerHTML=`<tr><td colspan="4" class="empty">Sin datos todavía. Esta métrica arranca con la versión 1.3.2.</td></tr>`;
       $("#reachMeta").textContent="";
     }else{
-      const totalDev=rows.reduce((s,r)=>s+r[1],0);
+      const totalDev=rows.reduce((sum,r)=>sum+r.deviceDays,0);
       $("#reachMeta").textContent=`${rows.length} herramientas · ${fmt(totalDev)} dispositivos-día`;
-      tb.innerHTML=rows.map(([k,d,u,r])=>`
-        <tr><td>${toolCell(k)}</td>
-        <td class="num">${fmt(d)}</td>
-        <td class="num">${fmt(u)}</td>
-        <td class="num">${r?r.toFixed(1):"–"}</td></tr>`).join("");
+      tb.innerHTML=rows.map(r=>`
+        <tr><td>${toolCell(r.tool)}</td>
+        <td class="num">${fmt(r.deviceDays)}</td>
+        <td class="num">${fmt(r.uses)}</td>
+        <td class="num">${r.usesPerDevice?r.usesPerDevice.toFixed(1):"–"}</td></tr>`).join("");
     }
 
-    const entry=a.entryByTool||{};
-    const eRows=Object.entries(entry).map(([k,v])=>[
-      k, Number(v.nav||0), Number(v.notification||0), Number(v.widget||0)+Number(v.shortcut||0)
-    ]).sort((x,y)=>(y[1]+y[2]+y[3])-(x[1]+x[2]+x[3]));
-
+    const eRows=entryRows(a);
     const tb2=$("#tblEntry tbody");
     tb2.innerHTML=eRows.length
-      ? eRows.map(([k,nav,noti,wid])=>`
-          <tr><td>${toolCell(k)}</td>
-          <td class="num">${fmt(nav)}</td>
-          <td class="num">${fmt(noti)}</td>
-          <td class="num">${fmt(wid)}</td></tr>`).join("")
+      ? eRows.map(r=>`
+          <tr><td>${toolCell(r.tool)}</td>
+          <td class="num">${fmt(r.nav)}</td>
+          <td class="num">${fmt(r.notification)}</td>
+          <td class="num">${fmt(r.widget+r.shortcut)}</td></tr>`).join("")
       : `<tr><td colspan="4" class="empty">Sin datos todavía. Esta métrica arranca con la versión 1.3.2.</td></tr>`;
   }
   /* ---------- tabla rankeada genérica ---------- */
@@ -880,20 +932,24 @@
       <td class="share"><div class="fill" style="width:${(v/max*100).toFixed(1)}%"></div><span>${pctS(v,total)}</span></td></tr>`).join("");
   }
   /* ---------- zero-use detector ---------- */
+  function parseZeroIds(raw){return String(raw||"").split(/[\s,]+/).map(x=>x.trim()).filter(Boolean);}
+  function zeroUseTools(map,ids){
+    const used=new Set(Object.keys(map||{}));
+    return {listed:ids.length,zero:ids.filter(id=>!used.has(id)).map(id=>{
+      const c=TOOL_CATALOG[id];
+      return {id,name:c?c.name:null,isUtility:!!c?.isUtility,note:c?.note||null};
+    })};
+  }
   function updateZeroList(map){
-    const raw=$("#zeroInput").value;
-    const ids=raw.split(/[\s,]+/).map(s=>s.trim()).filter(Boolean);
+    const ids=parseZeroIds($("#zeroInput").value);
     const box=$("#zeroList");
     if(!ids.length){box.innerHTML="";return;}
-    const used=new Set(Object.keys(map||{}));
-    const zero=ids.filter(id=>!used.has(id));
+    const {zero}=zeroUseTools(map,ids);
     if(!zero.length){box.innerHTML=`<div style="font-size:12px;color:var(--pos)">Todas las tools listadas registran al menos un uso.</div>`;return;}
-    const rows=zero.map(id=>{
-      const c=TOOL_CATALOG[id];
-      const label=c?c.name:id;
-      const cls=c?.isUtility?"chip util":"chip";
-      const suffix=c?.isUtility?" · utilidad":"";
-      return `<span class="${cls}" title="${id}${c?.note?" — "+c.note:""}">${label}${suffix}</span>`;
+    const rows=zero.map(z=>{
+      const cls=z.isUtility?"chip util":"chip";
+      const suffix=z.isUtility?" · utilidad":"";
+      return `<span class="${cls}" title="${z.id}${z.note?" — "+z.note:""}">${z.name||z.id}${suffix}</span>`;
     }).join("");
     box.innerHTML=`<div style="width:100%;font-size:12px;color:var(--muted);margin-bottom:4px">${zero.length} de ${ids.length} sin uso en el rango:</div>`+rows;
   }
@@ -915,19 +971,23 @@
     renderRankTable("#tblLangS",ranked(a.agg.lang_secondary),totalOf(a.agg.lang_secondary),false,langCell);
   }
   /* ---------- tabla diaria ---------- */
+  function dailyRows(daily){
+    return daily.map(r=>{
+      const t=r.totals||{};
+      return {day:r.day,appOpen:Number(t.app_open||0),dailyActive:Number(t.daily_active||0),
+        firstSeen:totalOf(t.versions_first_seen),topTools:ranked(t.tools).slice(0,3),
+        versions:ranked(t.versions),
+        updatedAt:(r.meta?.updatedAt||"").toString().slice(0,16).replace("T"," ")};
+    });
+  }
   function renderDaily(daily){
     const tb=$("#tblDaily tbody");
-    tb.innerHTML=daily.slice().reverse().map(r=>{
-      const t=r.totals||{};
-      const topTools=ranked(t.tools).slice(0,3).map(([k,v])=>`${k}:${v}`).join("  ");
-      const vers=ranked(t.versions).map(([k,v])=>`${k}:${v}`).join("  ");
-      return `<tr><td class="mono">${r.day}</td><td class="num">${fmt(t.app_open)}</td>
-        <td class="num">${fmt(t.daily_active)}</td>
-        <td class="num">${fmt(totalOf(t.versions_first_seen))}</td>
-        <td class="mono" style="color:var(--muted)">${topTools||"—"}</td>
-        <td class="mono" style="color:var(--muted)">${vers||"—"}</td>
-        <td style="color:var(--faint)">${(r.meta?.updatedAt||"").toString().slice(0,16).replace("T"," ")}</td></tr>`;
-    }).join("");
+    tb.innerHTML=dailyRows(daily).reverse().map(d=>`<tr><td class="mono">${d.day}</td><td class="num">${fmt(d.appOpen)}</td>
+        <td class="num">${fmt(d.dailyActive)}</td>
+        <td class="num">${fmt(d.firstSeen)}</td>
+        <td class="mono" style="color:var(--muted)">${d.topTools.map(([k,v])=>`${k}:${v}`).join("  ")||"—"}</td>
+        <td class="mono" style="color:var(--muted)">${d.versions.map(([k,v])=>`${k}:${v}`).join("  ")||"—"}</td>
+        <td style="color:var(--faint)">${d.updatedAt}</td></tr>`).join("");
   }
 
   /* ---------- carga principal ---------- */
@@ -958,6 +1018,8 @@
     }
     destroyCharts();
     lastData=daily;
+    lastIsDemo=isDemo;
+    lastAuth=isDemo?{status:"demo"}:{status:"pending"};
     updateBiasNotice(daily,isDemo);
     const a=aggregate(daily);
     renderKpis(a,lastRange);
@@ -974,63 +1036,183 @@
     renderDaily(daily);
   }
 
-  /* ================= EXPORT ================= */
+  /* ================= EXPORT =================
+     El export reproduce todas las secciones de la página con los mismos cálculos que
+     el render (kpiValues, trendSeries, adoptionSeries, reachRows, entryRows,
+     retentionTable, summarizeAuth, zeroUseTools, dailyRows). Si agregás una sección
+     a la página, agregala también acá. */
+  function rankedRows(map,nameOf){
+    const total=totalOf(map);
+    return ranked(map).map(([key,count])=>({key,name:nameOf?nameOf(key):null,count,share:shareOf(count,total)}));
+  }
+  const toolNameOf=id=>TOOL_CATALOG[id]?.name||null;
+
   function currentReport(){
-    const a=aggregate(lastData); const r=lastRange;
-    return {range:r,summary:{opens:a.opens,dailyActive:a.dailyActive,versionsFirstSeen:a.firstSeenTotal,
-      daysWithData:a.daysWithData,distinctTools:Object.keys(a.agg.tools).length,
-      toolInteractions:totalOf(a.agg.tools),toolDeviceDays:totalOf(a.agg.tools_dau)},
-      agg:a.agg,entryByTool:a.entryByTool,entryBySource:a.entryBySource,retention:a.retention,
-      daily:lastData.map(d=>[d.day,Number(d.totals?.app_open||0),Number(d.totals?.daily_active||0)])};
+    const a=aggregate(lastData), r=lastRange;
+    const ops=lastAuth.status==="ok"
+      ? {...lastAuth,worstPct:healthWorstPct(lastAuth),health:healthRows(lastAuth)}
+      : {...lastAuth};
+    return {
+      generatedAt:new Date().toISOString(),
+      range:r,
+      source:lastIsDemo?"demo":"api",
+      warnings:{demo:lastIsDemo,historicalBias:biasActive?{from:BIAS_FROM,to:BIAS_TO}:null},
+      daysWithData:a.daysWithData,
+      kpis:kpiValues(a,lastData),
+      trend:trendSeries(lastData,$("#granularity").value,r.days),
+      tools:{total:totalOf(a.agg.tools),ranking:rankedRows(a.agg.tools,toolNameOf),
+        zeroUse:zeroUseTools(a.agg.tools,parseZeroIds($("#zeroInput").value))},
+      languages:{primary:rankedRows(a.agg.lang_primary,c=>langLabel(c).name),
+        secondary:rankedRows(a.agg.lang_secondary,c=>langLabel(c).name)},
+      versions:{active:rankedRows(a.agg.versions),firstSeen:rankedRows(a.agg.versions_first_seen),
+        adoption:adoptionSeries(lastData)},
+      widgets:rankedRows(a.agg.widgets),
+      reach:reachRows(a).map(x=>({...x,name:toolNameOf(x.tool)})),
+      entry:{byTool:entryRows(a).map(x=>({...x,name:toolNameOf(x.tool)})),bySource:rankedRows(a.entryBySource)},
+      operations:ops,
+      retention:retentionTable(a.retention),
+      daily:dailyRows(lastData),
+      raw:{agg:a.agg,entryByTool:a.entryByTool,entryBySource:a.entryBySource,retention:a.retention,
+        daily:lastData},
+    };
   }
-  function mdTable(title,entries,total){
-    if(!entries.length)return `### ${title}\n_(sin datos)_\n`;
-    let s=`### ${title}\n| Clave | Cuenta | % |\n|---|--:|--:|\n`;
-    for(const[k,v]of entries)s+=`| ${k} | ${v} | ${pctS(v,total)} |\n`;
-    return s;
+
+  const mdEsc=v=>String(v??"").replace(/\|/g,"\\|");
+  const pctTxt=v=>v==null?"—":`${v.toFixed(1)}%`;
+  function mdGrid(title,headers,rows,numCols=[]){
+    if(!rows.length)return `### ${title}\n_(sin datos)_\n`;
+    const head=`| ${headers.map(mdEsc).join(" | ")} |`;
+    const sep=`|${headers.map((_,i)=>numCols.includes(i)?"--:":"---").join("|")}|`;
+    return `### ${title}\n${head}\n${sep}\n${rows.map(row=>`| ${row.map(mdEsc).join(" | ")} |`).join("\n")}\n`;
   }
-  function mdRetention(ret){
-    const title="### Retención (retention: antigüedad × días activos en 28)";
-    const total=RET_AGES.reduce((s,[k])=>s+totalOf((ret||{})[k]),0);
-    if(!total)return `${title}\n_(sin datos)_\n`;
-    let s=`${title}\n| Antigüedad | ${RET_INT.join(" | ")} | Total |\n|---|${RET_INT.map(()=>"--:").join("|")}|--:|\n`;
-    for(const[key,label]of RET_AGES){
-      const byInt=(ret||{})[key]||{};
-      const cells=RET_INT.map(i=>Number(byInt[i]||0));
-      s+=`| ${label} | ${cells.join(" | ")} | ${cells.reduce((a,b)=>a+b,0)} |\n`;
-    }
-    return s;
-  }
+  const withName=(name,key)=>name?`${name} (\`${key}\`)`:`\`${key}\``;
+
   function buildMarkdown(){
-    const R=currentReport(), a=R.agg;
-    const L=[];
+    const R=currentReport(), k=R.kpis, L=[];
+    const per={day:"día",week:"semana",month:"mes"};
+    const perHead={day:"Día",week:"Semana (lunes)",month:"Mes"};
+
     L.push(`# MiniToolbox — Métricas`);
-    L.push(`Rango: ${R.range.from} → ${R.range.to} (${R.range.days} días) · Generado: ${new Date().toISOString().slice(0,16).replace("T"," ")}`);
-    L.push(`\n## Resumen`);
-    L.push(`- Aperturas de la app (app_open): ${R.summary.opens}`);
-    L.push(`- Dispositivos-día activos (daily_active): ${R.summary.dailyActive}`);
-    L.push(`- Primeras vistas por versión (versions_first_seen): ${R.summary.versionsFirstSeen}. No son instalaciones: suman 1 por cada versión que pasa por un dispositivo.`);
-    L.push(`- Días con datos: ${R.summary.daysWithData} de ${R.range.days}`);
-    L.push(`- Herramientas distintas usadas: ${R.summary.distinctTools}`);
-    L.push(`- Aperturas de herramientas (tools): ${R.summary.toolInteractions}. Son aperturas, no personas.`);
-    L.push(`- Dispositivos-día con alguna herramienta (suma de tools_dau): ${R.summary.toolDeviceDays}`);
+    L.push(`Rango: ${R.range.from} → ${R.range.to} (${R.range.days} días) · Generado: ${R.generatedAt.slice(0,16).replace("T"," ")} UTC · Fuente: ${R.source==="demo"?"**datos de demostración**":"API (metricsDaily)"}`);
+    if(R.warnings.demo)L.push(`\n> **Datos de demostración.** No hay API key configurada: estos números son simulados y no describen la app.`);
+    if(R.warnings.historicalBias)L.push(`\n> **Sesgo en datos históricos.** Toda la serie desde el inicio (${R.warnings.historicalBias.from}) hasta la corrección del ${R.warnings.historicalBias.to} contiene un doble conteo sistemático (la primera apertura diaria de cada usuario sumaba +2), y este rango incluye días de ese período.`);
     L.push(`\n> Contadores, no usuarios. Las builds debug reportan al mismo endpoint, así que el dispositivo del autor está incluido. Semántica de cada campo: docs/metrics-glossary.md.`);
-    L.push(`\n## Tablas`);
-    L.push(mdTable("Aperturas por herramienta (tools)",ranked(a.tools),totalOf(a.tools)));
-    L.push(mdTable("Dispositivos-día por herramienta (tools_dau)",ranked(a.tools_dau),totalOf(a.tools_dau)));
-    L.push(mdTable("Aperturas por origen (tool_entry)",ranked(R.entryBySource),totalOf(R.entryBySource)));
-    const entryPairs={};
-    for(const[tool,bySource]of Object.entries(R.entryByTool||{}))
-      for(const[src,n]of Object.entries(bySource||{}))entryPairs[`${tool}.${src}`]=Number(n||0);
-    L.push(mdTable("Aperturas por herramienta y origen (tool_entry)",ranked(entryPairs),totalOf(entryPairs)));
-    L.push(mdRetention(R.retention));
-    L.push(mdTable("Idiomas principales (lang_primary)",ranked(a.lang_primary),totalOf(a.lang_primary)));
-    L.push(mdTable("Idiomas secundarios (lang_secondary)",ranked(a.lang_secondary),totalOf(a.lang_secondary)));
-    L.push(mdTable("Dispositivos-día por versión (versions)",ranked(a.versions),totalOf(a.versions)));
-    L.push(mdTable("Primeras vistas por versión (versions_first_seen, no son instalaciones)",ranked(a.versions_first_seen),totalOf(a.versions_first_seen)));
-    L.push(mdTable("Widgets (widgets)",ranked(a.widgets),totalOf(a.widgets)));
-    L.push(`\n## Por día\n| Día | app_open | daily_active |\n|---|--:|--:|`);
-    for(const[d,o,da]of R.daily)L.push(`| ${d} | ${o} | ${da} |`);
+
+    // ---- KPIs
+    const w=k.weekOverWeek;
+    L.push(`\n## Resumen`);
+    L.push(`- Aperturas de la app (app_open): ${k.opens}${R.warnings.historicalBias?` (incluye el sesgo +2 hasta ${R.warnings.historicalBias.to})`:""}`);
+    L.push(`- Últimos 7 días contra los 7 anteriores (app_open): ${w?`${w.pct>0?"+":""}${w.pct}% (${w.last} contra ${w.prev})`:"— (hacen falta 14 días de datos y aperturas en la semana anterior)"}`);
+    L.push(`- Dispositivos-día activos (daily_active): ${k.dailyActive}`);
+    L.push(`- Primeras vistas por versión (versions_first_seen): ${k.firstSeen}. No son instalaciones: suman 1 por cada versión que pasa por un dispositivo.`);
+    L.push(`- Días con datos: ${R.daysWithData} de ${R.range.days}`);
+    L.push(`- Herramientas distintas usadas: ${k.distinctTools}`);
+    L.push(`- Aperturas de herramientas (tools): ${k.toolUses}. Son aperturas, no personas.`);
+    L.push(`- Dispositivos-día con alguna herramienta (suma de tools_dau): ${k.toolDeviceDays}`);
+    L.push(`- Versión con más dispositivos-día: ${k.topVersion?`${k.topVersion.version} (${pctTxt(k.topVersion.share)})`:"—"}`);
+    L.push(`- Idioma principal más frecuente: ${k.topLang?`${k.topLang.name} (${k.topLang.code}, ${pctTxt(k.topLang.share)} de los dispositivos-día)`:"—"}`);
+
+    // ---- 01
+    const T=R.trend;
+    L.push(`\n## 01 · Aperturas en el tiempo`);
+    L.push(`Agrupado por ${per[T.granularity]} (selector de la página) · ${T.labels.length} puntos.\n`);
+    L.push(mdGrid(`Aperturas por ${per[T.granularity]} (app_open)`,
+      T.movingAverage7?[perHead[T.granularity],"Aperturas","Media móvil 7 días"]:[perHead[T.granularity],"Aperturas"],
+      T.labels.map((l,i)=>T.movingAverage7
+        ?[l,T.data[i],T.movingAverage7[i]==null?"—":T.movingAverage7[i].toFixed(1)]
+        :[l,T.data[i]]),
+      [1,2]));
+
+    // ---- 02
+    L.push(`\n## 02 · Uso de herramientas`);
+    L.push(`${R.tools.ranking.length} herramientas · ${R.tools.total} aperturas.\n`);
+    L.push(mdGrid("Aperturas por herramienta (tools)",["Herramienta","Clave","Aperturas","%"],
+      R.tools.ranking.map(t=>[t.name||"—",t.key,t.count,pctTxt(t.share)]),[2,3]));
+    const Z=R.tools.zeroUse;
+    L.push(`### Herramientas sin uso en el rango`);
+    if(!Z.listed)L.push(`_(la lista del detector está vacía)_\n`);
+    else if(!Z.zero.length)L.push(`Las ${Z.listed} herramientas de la lista del detector registran al menos un uso.\n`);
+    else{
+      L.push(`${Z.zero.length} de las ${Z.listed} herramientas de la lista del detector (editable en la página) no registran uso:`);
+      for(const z of Z.zero)L.push(`- ${withName(z.name,z.id)}${z.isUtility?" · utilidad":""}${z.note?` — ${z.note}`:""}`);
+      L.push("");
+    }
+
+    // ---- 03
+    L.push(`\n## 03 · Idiomas`);
+    L.push(mdGrid("Idioma principal del dispositivo (lang_primary, dispositivos-día)",["Idioma","Código","Cuenta","%"],
+      R.languages.primary.map(x=>[x.name,x.key,x.count,pctTxt(x.share)]),[2,3]));
+    L.push(mdGrid("Idioma secundario (lang_secondary)",["Idioma","Código","Cuenta","%"],
+      R.languages.secondary.map(x=>[x.name,x.key,x.count,pctTxt(x.share)]),[2,3]));
+
+    // ---- 04
+    L.push(`\n## 04 · Versiones`);
+    L.push(mdGrid("Versiones activas (versions, dispositivos-día)",["Versión","Dispositivos-día","%"],
+      R.versions.active.map(x=>[x.key,x.count,pctTxt(x.share)]),[1,2]));
+    L.push(mdGrid("Primeras vistas por versión (versions_first_seen, no son instalaciones)",["Versión","Primeras vistas","%"],
+      R.versions.firstSeen.map(x=>[x.key,x.count,pctTxt(x.share)]),[1,2]));
+    const AD=R.versions.adoption;
+    if(!AD)L.push(`### Adopción en el tiempo\n_(sin datos suficientes)_\n`);
+    else{
+      L.push(mdGrid("Adopción en el tiempo (% de los dispositivos activos de cada día, por versión)",
+        ["Día",...AD.series.map(x=>x.version)],
+        AD.labels.map((d,i)=>[d,...AD.series.map(x=>x.data[i]==null?"—":x.data[i].toFixed(1)+"%")]),
+        AD.series.map((_,i)=>i+1)));
+      L.push(adoptionNote(AD));
+    }
+
+    // ---- 05
+    L.push(`\n## 05 · Widgets`);
+    L.push(mdGrid("Toques en widgets (widgets)",["Clave","Toques","%"],
+      R.widgets.map(x=>[x.key,x.count,pctTxt(x.share)]),[1,2]));
+
+    // ---- 06
+    L.push(`\n## 06 · Alcance y origen`);
+    L.push(mdGrid("Alcance por herramienta (tools_dau)",["Herramienta","Clave","Dispositivos-día","Aperturas","Aperturas por dispositivo-día"],
+      R.reach.map(x=>[x.name||"—",x.tool,x.deviceDays,x.uses,x.usesPerDevice==null?"—":x.usesPerDevice.toFixed(1)]),[2,3,4]));
+    L.push(mdGrid("Origen de las aperturas por herramienta (tool_entry)",["Herramienta","Clave","App (nav)","Notificación","Widget","Acceso directo","Sin origen"],
+      R.entry.byTool.map(x=>[x.name||"—",x.tool,x.nav,x.notification,x.widget,x.shortcut,x.unknown]),[2,3,4,5,6]));
+    L.push(`En la página, la columna Widget suma widget y acceso directo, y "sin origen" no se muestra.\n`);
+    L.push(mdGrid("Aperturas por origen (tool_entry)",["Origen","Aperturas","%"],
+      R.entry.bySource.map(x=>[x.key,x.count,pctTxt(x.share)]),[1,2]));
+
+    // ---- 07
+    const O=R.operations;
+    L.push(`\n## 07 · Estado operativo`);
+    if(O.status==="demo")L.push(`_(no disponible con datos de demostración: requiere la API)_`);
+    else if(O.status==="pending")L.push(`_(seguía cargando al exportar: volvé a exportar en unos segundos)_`);
+    else if(O.status==="error")L.push(`_(sin datos de lotes disponibles: ${O.error})_`);
+    else{
+      L.push(`Últimos ${O.months} meses, independiente del rango elegido. ${O.batches} lotes aceptados con App Check.\n`);
+      if(O.batches){
+        L.push(O.worstPct===0
+          ? `Pipeline sano: ninguno de los ${O.batches} lotes reporta problemas.\n`
+          : `${O.worstPct}% de los ${O.batches} lotes vienen de dispositivos que registraron algún problema de envío.\n`);
+        L.push(mdGrid("Salud del envío",["Indicador","Lotes","%","Qué significa"],
+          O.health.map(h=>[h.label,h.count,`${h.pct}%`,h.tip]),[1,2]));
+        L.push(`Cuenta lotes de dispositivos con el indicador, no suma los contadores: son acumulados de por vida del dispositivo y cada lote repite el mismo total. Un dispositivo que envía más seguido pesa más en estos porcentajes.\n`);
+        L.push(mdGrid("Lotes aceptados por versión",["Versión","Lotes"],O.byVersion.map(([v,n])=>[v,n]),[1]));
+      }
+    }
+
+    // ---- 08
+    const RT=R.retention;
+    L.push(`\n## 08 · Retención`);
+    if(!RT.grand)L.push(`_(sin datos: la métrica arranca con la versión 1.3.2)_`);
+    else{
+      L.push(`${RT.grand} marcas diarias. Días activos en los últimos 28, cruzados con la antigüedad del dispositivo. Los dispositivos nuevos aparecen siempre en los tramos bajos (la ventana tarda 28 días en madurar).\n`);
+      L.push(mdGrid("Retención (retention)",["Antigüedad","1 día","2-3","4-7","8-14","15-28","Total"],
+        [...RT.rows.map(x=>[x.label,...x.cells,x.total]),["Total",...RT.colTotals,RT.grand]],[1,2,3,4,5,6]));
+    }
+
+    // ---- 09
+    L.push(`\n## 09 · Detalle diario`);
+    L.push(mdGrid("Por día",["Día","app_open","daily_active","Primeras vistas","Herramientas (top 3)","Versiones","Actualizado"],
+      R.daily.map(d=>[d.day,d.appOpen,d.dailyActive,d.firstSeen,
+        d.topTools.map(([key,v])=>`${key}:${v}`).join(" ")||"—",
+        d.versions.map(([key,v])=>`${key}:${v}`).join(" ")||"—",
+        d.updatedAt||"—"]),[1,2,3]));
+    L.push(`El JSON (raw.daily) y el CSV traen además los mapas completos de cada día.`);
     return L.join("\n");
   }
   function buildJSON(){return JSON.stringify(currentReport(),null,1);}
@@ -1061,7 +1243,7 @@
   /* ================= DEMO DATA ================= */
   function demoDaily(from,to){
     const tools=["ar_ruler","meetings","ruler","water","compass","flashlight","magnifier","minesweeper",
-      "pomodoro_list","bubble_level","qr_generator","guess_flag","light_meter","age_calculator","zodiac_sign","truco_scoreboard"];
+      "pomodoro","bubble_level","qr_generator","guess_flag","light_meter","age_calculator","zodiac_sign","truco_scoreboard"];
     const weights=[24,22,17,15,13,12,9,8,6,5,4,4,3,3,2,2];
     const langsP={es:78,en:16,pt:4,fr:2}, langsS={en:40,es:30,pt:8}, vers={"1.2.0":10,"1.3.0":26,"1.4.0":64};
     const fs={"1.3.0":1,"1.4.0":2}, widgets={water:18,flashlight:11,favorites:6};
