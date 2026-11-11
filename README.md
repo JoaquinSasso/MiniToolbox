@@ -87,7 +87,7 @@ Single Gradle module (`:app`) by design; see [DECISIONS.md](DECISIONS.md). The f
 
 ## Testing and CI
 
-- **296 JVM unit tests** (1 skipped), run with `./gradlew testDebugUnitTest`. They use JUnit 4, Robolectric where a `Context` or DataStore is needed, `kotlinx-coroutines-test` and Mockito. They cover the metrics pipeline, ViewModels, and the pure engines (minesweeper, debt settlement, unit conversion, team partitioning, AR math). Conventions are in [docs/testing.md](docs/testing.md).
+- **320 JVM unit tests** (1 skipped), run with `./gradlew testDebugUnitTest`. They use JUnit 4, Robolectric where a `Context` or DataStore is needed, `kotlinx-coroutines-test` and Mockito. They cover the metrics pipeline, ViewModels, and the pure engines (minesweeper, debt settlement, unit conversion, team partitioning, AR math). Conventions are in [docs/testing.md](docs/testing.md).
 - **Not covered:** there are no UI or instrumented tests, no coverage measurement, and the backend has no tests.
 - **[Android CI](.github/workflows/android.yml):** unit tests, `assembleDebug` and `lintDebug` on every push and pull request to `master`. Lint runs against a baseline of inherited issues; new ones are fixed, not added to it.
 - **[Backend CI](.github/workflows/backend.yml):** `npm ci`, `npm run lint`, `npm run build`.
