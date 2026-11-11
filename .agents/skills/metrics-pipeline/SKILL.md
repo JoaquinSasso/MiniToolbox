@@ -31,7 +31,6 @@ description: >-
 
 ## Sesgos conocidos (no los empeores; si los corregís, actualizá el glosario)
 
-- `about` está en `ToolRegistry` y cuenta como herramienta.
 - Las builds debug envían al endpoint de producción y el payload no lleva `build_type`. `dev/DevInspector.kt` genera claves de prueba (`metricTest`, `metricsTest`).
 - El dashboard rotula `versions_first_seen` como "Instalaciones nuevas", y eso contradice el glosario.
 - Detalle y estado de cada uno: `docs/backlog.md`.

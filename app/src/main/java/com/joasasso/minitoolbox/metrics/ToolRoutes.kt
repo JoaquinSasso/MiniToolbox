@@ -3,6 +3,7 @@ package com.joasasso.minitoolbox.metrics
 import com.joasasso.minitoolbox.nav.Screen
 import com.joasasso.minitoolbox.tools.Tool
 import com.joasasso.minitoolbox.tools.ToolRegistry
+import com.joasasso.minitoolbox.utils.isCatalogTool
 
 /**
  * Traduce una ruta de navegación o destino Screen a la herramienta del registry que le corresponde.
@@ -67,6 +68,15 @@ object ToolRoutes {
      * Clave de métrica estable para ese destino Screen, o null si no corresponde registrar nada.
      */
     fun metricsKey(screen: Screen): String? = findToolByScreen(screen)?.metricsKey
+
+    /**
+     * Clave con la que una visita a [route] cuenta en `tools`, o null si no cuenta.
+     *
+     * A diferencia de [metricsKey], excluye las entradas del registry que no son
+     * herramientas del catálogo ([isCatalogTool]): hoy, Acerca de. Siguen en el registry
+     * por la navegación y para que [metricsKey] resuelva sus claves históricas.
+     */
+    fun usageKey(route: String?): String? = findTool(route)?.takeIf(::isCatalogTool)?.metricsKey
 
     /**
      * Clave a contar al llegar a un destino cuya clave es [nextKey], o null si no se cuenta.

@@ -580,7 +580,7 @@
     compass:{name:"Brújula"}, todo:{name:"To-Do list"}, events:{name:"Eventos importantes"},
     compound_interest:{name:"Interés compuesto"}, scoreboard:{name:"Marcador de equipos"},
     magnifier:{name:"Lupa"}, ar_ruler:{name:"Regla AR"}, minesweeper:{name:"Buscaminas"},
-    about:{name:"Acerca de",isUtility:true,note:"marcada para ocultar de métricas en el código, pero igual registra uso"},
+    about:{name:"Acerca de",isUtility:true,note:"no es una herramienta: deja de registrar uso desde schema_version 5; excluirla al analizar datos anteriores"},
   };
   const TOOL_CATALOG_IDS=Object.keys(TOOL_CATALOG).sort();
   function toolCell(id){

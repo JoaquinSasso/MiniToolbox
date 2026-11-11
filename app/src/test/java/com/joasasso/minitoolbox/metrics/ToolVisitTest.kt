@@ -18,7 +18,7 @@ class ToolVisitTest {
         var current: String? = null
         val counted = mutableListOf<String>()
         for (route in routes) {
-            val key = ToolRoutes.metricsKey(route)
+            val key = ToolRoutes.usageKey(route)
             ToolRoutes.visitToCount(current, key)?.let { counted += it }
             current = key
         }
@@ -66,6 +66,16 @@ class ToolVisitTest {
             listOf("water", "pomodoro"),
             countedKeys(Screen.Water.route, Screen.PomodoroList.route)
         )
+    }
+
+    @Test
+    fun `acerca de no cuenta como herramienta y cierra la visita`() {
+        assertEquals(
+            listOf("water", "water"),
+            countedKeys(Screen.Water.route, Screen.About.route, Screen.Water.route)
+        )
+        // Sigue resolviendo su clave histórica, para leer datos viejos.
+        assertEquals("about", ToolRoutes.metricsKey(Screen.About.route))
     }
 
     @Test

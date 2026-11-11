@@ -68,7 +68,7 @@ fun MiniToolboxNavGraph(navController: NavHostController) {
 
     LaunchedEffect(backStackEntry?.destination?.route) {
         val route = backStackEntry?.destination?.route ?: return@LaunchedEffect
-        val key = ToolRoutes.metricsKey(route)
+        val key = ToolRoutes.usageKey(route)
         val toCount = ToolRoutes.visitToCount(currentToolKey, key)
         currentToolKey = key
         if (toCount != null) {
