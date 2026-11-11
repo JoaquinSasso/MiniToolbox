@@ -206,17 +206,15 @@ Las categorías del catálogo (Medir, Esenciales, Organizar, Generar, Jugar) no 
 
 ## 6. Persistencia
 
-**14 instancias de `preferencesDataStore`.** Trece están en `data/` y una en `metrics/storage/MetricsDataStore.kt`, aislada a propósito por pertenecer a la telemetría.
+**11 instancias de `preferencesDataStore`.** Diez están en `data/` y una en `metrics/storage/MetricsDataStore.kt`, aislada a propósito por pertenecer a la telemetría.
 
 - `PomodoroDataStore.kt` declara dos: `pomodoro_state` y `pomodoro_settings`. La segunda es un remanente y no debe usarse en código nuevo.
-- Tres no tienen referencias: `BMIDataStore.kt`, `EventsDataStore.kt` y `vCardDataStore.kt`. Están en el ítem `dead-code` del backlog.
 
 **SharedPreferences** se usa donde hace falta lectura síncrona o por herencia:
 
 - Pomodoro: `AlarmState`, `PomodoroSchedulePrefs` y parte de `PomodoroDataStore.kt`.
 - Telemetría: el interruptor de métricas y la marca de `dailyOpenOnce` (`Metrics.kt`), y la última programación (`UploadScheduler`).
 - `ScoreboardDataStore.kt`, pese al nombre.
-- `RachasDataStore.kt`, sin uso.
 
 **Archivos huérfanos en dispositivos que actualizan.** Al quitar el modo PRO quedaron archivos que nadie lee (ítem `orphan-monetization-storage` del backlog).
 
@@ -240,7 +238,7 @@ Una discrepancia entre el código y este documento es un bug de documentación. 
 
 | Dato | Comando | Valor |
 |---|---|---|
-| DataStores | `git grep "by preferencesDataStore" -- app/src/main/java \| wc -l` | 14 |
+| DataStores | `git grep "by preferencesDataStore" -- app/src/main/java \| wc -l` | 11 |
 | Destinos en `Screen` | `grep -c "@SerialName" app/src/main/java/com/joasasso/minitoolbox/nav/Screen.kt` | 27 |
 | Destinos en el `NavGraph` | `grep -c "composable<" app/src/main/java/com/joasasso/minitoolbox/NavGraph.kt` | 27 |
 | Entradas de `ToolRegistry` | `grep -c "Tool(" app/src/main/java/com/joasasso/minitoolbox/tools/ToolRegistry.kt` | 19 |
