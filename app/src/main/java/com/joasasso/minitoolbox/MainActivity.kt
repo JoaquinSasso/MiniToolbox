@@ -33,7 +33,6 @@ import com.joasasso.minitoolbox.ui.utils.LockScreenOrientationIfAllowed
 
 class MainActivity : AppCompatActivity() {
 
-    private var startRouteState: String? = null
     // bridge para comunicar onNewIntent -> Compose
     private var pushStartRoute: ((String?) -> Unit)? = null
 
@@ -41,12 +40,14 @@ class MainActivity : AppCompatActivity() {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         supportActionBar?.hide()
-        startRouteState = intent?.getStringExtra(Screen.EXTRA_START_ROUTE_JSON)
+        val startRouteState = intent?.getStringExtra(Screen.EXTRA_START_ROUTE_JSON)
             ?: intent?.getStringExtra("startRoute")
 
-        val initialTarget = startRouteState
-            ?.let { Screen.fromJson(it) ?: Screen.fromRouteString(it) }
-            ?.takeIf { it != Screen.Categories }
+        // Destino pedido por el intent de arranque (widget, notificación, atajo). Se
+        // resuelve antes de setContent para que el NavHost arranque directamente en él.
+        // Si la Activity se recrea, NavController restaura su propia pila.
+        val initialTarget = if (savedInstanceState == null) parseStartRoute(startRouteState) else null
+        if (initialTarget != null) recordEntrySource(intent)
 
         val isMetricsConfigured = MetricsConfig.isConfigured
         Log.d("Metrics", "metrics configured: $isMetricsConfigured")
@@ -90,42 +91,36 @@ class MainActivity : AppCompatActivity() {
 
             MiniToolboxTheme {
                 val navController = rememberNavController()
-                // Estado Compose de la ruta inicial
-                var startRoute by rememberSaveable { mutableStateOf(startRouteState) }
+                // Rutas que llegan por onNewIntent con la Activity ya creada. La del
+                // arranque ya se aplicó como pila inicial del NavHost.
+                var startRoute by rememberSaveable { mutableStateOf<String?>(null) }
 
                 // Exponer el setter al Activity (onNewIntent lo usa)
                 DisposableEffect(Unit) {
                     pushStartRoute = { newRoute -> startRoute = newRoute }
                     onDispose { pushStartRoute = null }
                 }
-                MiniToolboxNavGraph(navController = navController)
+                MiniToolboxNavGraph(
+                    navController = navController,
+                    initialDestination = initialTarget
+                )
 
                 // Time to full display: la pantalla que el usuario pidió está sola en
-                // pantalla (sin transición en curso). Desde un widget no alcanza con el
-                // primer frame, que muestra el catálogo antes de navegar.
+                // pantalla, sin transición en curso.
                 val visibleEntries by navController.visibleEntries.collectAsState()
                 ReportDrawnWhen {
-                    val entry = visibleEntries.singleOrNull() ?: return@ReportDrawnWhen false
-                    val target = initialTarget
-                    if (target == null) {
-                        entry.destination.hasRoute(Screen.Categories::class)
-                    } else {
-                        entry.destination.hasRoute(target::class)
-                    }
+                    val destination = visibleEntries.singleOrNull()?.destination
+                        ?: return@ReportDrawnWhen false
+                    initialTarget == null || destination.hasRoute(initialTarget::class)
                 }
 
                 LaunchedEffect(startRoute) {
                     val raw = startRoute
                     if (!raw.isNullOrBlank()) {
-                        val targetScreen = Screen.fromJson(raw) ?: Screen.fromRouteString(raw)
-                        if (targetScreen != null && targetScreen != Screen.Categories) {
+                        val targetScreen = parseStartRoute(raw)
+                        if (targetScreen != null) {
                             try {
-                                val source = intent?.getStringExtra(MetricsSource.EXTRA_START_SOURCE)
-                                PendingEntrySource.set(source)
-                                MetricsSource.deepLinkWidgetKey(
-                                    source,
-                                    intent?.getStringExtra(MetricsSource.EXTRA_START_WIDGET)
-                                )?.let { widgetUse(applicationContext, it) }
+                                recordEntrySource(intent)
 
                                 navController.popBackStack<Screen.Categories>(inclusive = false)
 
@@ -145,6 +140,23 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    /** Destino de un extra de arranque; `null` si falta, es inválido o es el catálogo. */
+    private fun parseStartRoute(raw: String?): Screen? {
+        if (raw.isNullOrBlank()) return null
+        return (Screen.fromJson(raw) ?: Screen.fromRouteString(raw))
+            ?.takeIf { it != Screen.Categories }
+    }
+
+    /** Atribuye la próxima visita al origen del intent y cuenta el uso del widget. */
+    private fun recordEntrySource(intent: Intent?) {
+        val source = intent?.getStringExtra(MetricsSource.EXTRA_START_SOURCE)
+        PendingEntrySource.set(source)
+        MetricsSource.deepLinkWidgetKey(
+            source,
+            intent?.getStringExtra(MetricsSource.EXTRA_START_WIDGET)
+        )?.let { widgetUse(applicationContext, it) }
     }
 
     override fun onNewIntent(intent: Intent) {
