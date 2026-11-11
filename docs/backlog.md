@@ -27,7 +27,7 @@ Las líneas citan el estado de `master @ 58105f5` (2026-10-02). Antes de trabaja
 
 ## P1: calidad de código, build y CI
 
-- [ ] `lint-hidden-errors`: el baseline oculta errores (`LocalContextGetResourceValueCall` y `NonObservableLocale`) y tiene entradas obsoletas. Evidencia: `app/lint-baseline.xml`; se ve con lint sin baseline. Hecho: errores corregidos y baseline regenerado.
+- [ ] `lint-hidden-errors`: el baseline oculta errores: 9 `LocalContextGetResourceValueCall` y 1 `NonObservableLocale`. Evidencia: `app/lint-baseline.xml` (`grep -c 'id="LocalContextGetResourceValueCall"'`); se ve con lint sin baseline. Hecho: errores corregidos y sus entradas borradas del baseline.
 - [ ] `countries-main-thread`: el loader del dataset de países en `GuessFlagScreen` no cierra el `InputStream` ni cachea el resultado. Evidencia: `GuessFlagScreen.kt:275`. Hecho: un `CountriesRepository` con `Dispatchers.IO`, `.use {}` y caché.
 - [ ] `baseline-profile-invalid`: el profile está escrito a mano y referencia clases inexistentes. Evidencia: `app/src/main/baseline-prof.txt:32-34`. Hecho: módulo `:baselineprofile` generado con Macrobenchmark y un número de arranque en frío medido. El build type `benchmark` y `scripts/measure-cold-start.sh` ya existen (`docs/arranque-en-frio-postmortem.md`).
 - [ ] `backend-tests`: el backend no tiene tests, aunque `metrics-fixtures/keys.json:2` dice que los hay. Evidencia: `backend/functions/package.json` (sin script `test`). Hecho: vitest sobre `validate.ts` consumiendo `keys.json`, ejecutado en `backend.yml`.
