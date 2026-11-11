@@ -4,7 +4,10 @@ import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.util.Log
+import androidx.activity.compose.ReportDrawnWhen
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.collectAsState
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.runtime.DisposableEffect
@@ -40,6 +43,10 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.hide()
         startRouteState = intent?.getStringExtra(Screen.EXTRA_START_ROUTE_JSON)
             ?: intent?.getStringExtra("startRoute")
+
+        val initialTarget = startRouteState
+            ?.let { Screen.fromJson(it) ?: Screen.fromRouteString(it) }
+            ?.takeIf { it != Screen.Categories }
 
         val isMetricsConfigured = MetricsConfig.isConfigured
         Log.d("Metrics", "metrics configured: $isMetricsConfigured")
@@ -92,6 +99,20 @@ class MainActivity : AppCompatActivity() {
                     onDispose { pushStartRoute = null }
                 }
                 MiniToolboxNavGraph(navController = navController)
+
+                // Time to full display: la pantalla que el usuario pidió está sola en
+                // pantalla (sin transición en curso). Desde un widget no alcanza con el
+                // primer frame, que muestra el catálogo antes de navegar.
+                val visibleEntries by navController.visibleEntries.collectAsState()
+                ReportDrawnWhen {
+                    val entry = visibleEntries.singleOrNull() ?: return@ReportDrawnWhen false
+                    val target = initialTarget
+                    if (target == null) {
+                        entry.destination.hasRoute(Screen.Categories::class)
+                    } else {
+                        entry.destination.hasRoute(target::class)
+                    }
+                }
 
                 LaunchedEffect(startRoute) {
                     val raw = startRoute
