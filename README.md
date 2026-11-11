@@ -40,7 +40,7 @@ Usage metrics are aggregated on the device and only daily counters leave it.
 - **Dashboard:** static site on Firebase Hosting ([`dashboard/public/`](dashboard/public)) that reads through the Cloud Functions.
 - **Privacy:** no device or user ID is sent. Each batch carries a random UUID used only for deduplication. Retention is bucketed on the device, so the server receives one of 25 categories instead of a usage history.
 
-The limits are documented too: with only a handful of active devices per day, a daily aggregate can describe a single person, so "aggregated" does not mean "anonymous". The exact meaning and known biases of each counter are in the [metrics glossary](docs/metrics-glossary.md).
+The limits are documented too: with only a handful of active devices per day, a daily aggregate can describe a single person, so "aggregated" does not mean "anonymous". The exact meaning and known biases of each counter are in the [metrics glossary](docs/metrics-glossary.en.md).
 
 ### Pomodoro alarm that rings with the screen off
 
