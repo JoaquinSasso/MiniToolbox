@@ -38,9 +38,6 @@ Las líneas citan el estado de `master @ 58105f5` (2026-10-02). Antes de trabaja
 - [ ] `ar-ruler-typo`: el nombre en inglés de la regla AR dice "Aumented Reality Ruler". Evidencia: `app/src/main/res/values/strings_tools.xml:18`. Hecho: "Augmented Reality Ruler".
 - [ ] `accessibility`: los instrumentos dibujados con `Canvas` no tienen semántica. Evidencia: `git grep -n "semantics"` devuelve un solo uso (`ui/components/Stepper.kt:35`). Hecho: `semantics` en brújula, nivel, regla y lupa, verificado con TalkBack.
 
-## P2: documentación
-
-- [ ] `performance-doc`: `docs/performance_tests.md` atribuye las mediciones a Protobuf Lite, pero la app usa `protobuf-java`. Hecho: benchmark reproducible en el repo y documento regenerado.
 
 ## Producto (requiere decisión del autor)
 
