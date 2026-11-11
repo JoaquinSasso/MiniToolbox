@@ -22,7 +22,6 @@ glance = "1.2.0"
 material = "1.14.0"
 media3Session = "1.11.1"
 navigationCompose = "2.10.1"
-protobufJava = "4.36.2"
 cameraX = "1.6.2"
 reorderable = "3.1.0"
 sceneview = "4.37.0"
@@ -74,7 +73,6 @@ kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-t
 material = { module = "com.google.android.material:material", version.ref = "material" }
 # Sin version.ref a proposito: la version la fija el BOM de Compose.
 material3 = { module = "androidx.compose.material3:material3" }
-protobuf-java = { module = "com.google.protobuf:protobuf-java", version.ref = "protobufJava" }
 
 androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "cameraX" }
 androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "cameraX" }

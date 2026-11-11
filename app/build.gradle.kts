@@ -123,10 +123,6 @@ android {
     }
 }
 
-configurations.configureEach {
-    exclude(group = "com.google.protobuf", module = "protobuf-javalite")
-}
-
 dependencies {
     // 1) Compose BOM for version alignment
     implementation(platform(libs.androidx.compose.bom))
@@ -161,8 +157,6 @@ dependencies {
     //Funcionalidades
     implementation(libs.compose.qr.code)
 
-    //Librerias para manejar datasets
-    implementation(libs.protobuf.java)
     implementation(libs.kotlinx.serialization.json)
 
     // 7) Testing

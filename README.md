@@ -64,9 +64,11 @@ ARCore with SceneView. The measurement math is extracted from the UI into `ArRul
 
 The [bubble level](app/src/main/java/com/joasasso/minitoolbox/tools/herramientas/instrumentos/BubbleLevelScreen.kt) reads `TYPE_ROTATION_VECTOR`, a quaternion, converts it to a rotation matrix and takes the device's "up" vector from it. It does not use the Euler angles from `getOrientation()`, which hit gimbal lock when the phone stands upright. The same vector tells the level whether the phone is lying flat, in portrait or in landscape, and it switches mode on its own.
 
-### Offline countries dataset
+### Countries for the flag game
 
-The flag game reads its 206 countries from a 23 KB Protobuf binary in `assets/`, with no network access. The dataset was first parsed as JSON (Moshi, then Gson) and moved to Protobuf in `03cdf3f`. The load-time comparison in [docs/performance_tests.md](docs/performance_tests.md) is not quoted here because it was measured with Protobuf Lite, while the app uses full `protobuf-java`, and there is no benchmark in the repo to reproduce it.
+The game needs three things per country: the Spanish name, the English name and the flag. They live in a list in code, [`FlagCountries.kt`](app/src/main/java/com/joasasso/minitoolbox/data/FlagCountries.kt), with 206 entries of ISO code and both names. The flag is built from the code: each letter maps to its Unicode regional indicator.
+
+It used to read a 23 KB Protobuf binary in `assets/` with nine fields per country, inherited from a country-info tool removed in `d4660f1`. That dataset pulled in full `protobuf-java`, 2,503 lines of generated code and an R8 `-keep` rule. Replacing it took the release APK from 43,419,437 to 43,005,351 bytes (`assembleRelease` before and after the change). Before Protobuf, the dataset was JSON (Moshi, then Gson) until `03cdf3f`.
 
 ## What the usage data says
 
@@ -82,7 +84,7 @@ Single Gradle module (`:app`) by design; see [DECISIONS.md](DECISIONS.md). The f
 
 - **UI:** Jetpack Compose with Material 3 (expressive APIs from the alpha Compose BOM), Navigation Compose with type-safe routes, and Glance for widgets.
 - **State:** MVVM is being adopted progressively. Eleven `ViewModel`s exposing `StateFlow` already back the water reminder, expense splitter, unit converter, minesweeper, flag game, AR ruler, team generator and the catalog. Older tools still keep state inside the Composable and are migrated when touched.
-- **Persistence:** Preferences DataStore behind repositories. The countries dataset for the flag game is a Protobuf binary in `assets/`, read offline.
+- **Persistence:** Preferences DataStore behind repositories.
 - **Concurrency:** Kotlin coroutines and Flow, WorkManager for uploads.
 
 ## Testing and CI
@@ -97,7 +99,6 @@ Single Gradle module (`:app`) by design; see [DECISIONS.md](DECISIONS.md). The f
 The full list, with file and line evidence, is in [docs/backlog.md](docs/backlog.md). The main ones:
 
 - No dependency injection; tests swap dependencies through `@VisibleForTesting` hooks.
-- The app uses full `protobuf-java`; the migration to Lite is planned in an [ADR](docs/decisions/protobuf-lite-migration.md) but not done.
 - Debug builds send metrics to the production endpoint on purpose (the author's everyday build is a debug build), and the payload does not say which build sent it. See the [glossary](docs/metrics-glossary.en.md).
 - The instruments drawn on `Canvas` (compass, level, ruler, magnifier) have no accessibility semantics.
 - CI does not build a release APK, so R8 problems only show up locally.

@@ -46,7 +46,6 @@ flowchart TD
     subgraph Data [Datos]
         DS[("Preferences DataStore (14)")]
         SP[("SharedPreferences")]
-        PB["assets/countries_dataset.pb<br/>(Protobuf)"]
     end
 
     VMS -.-> VM
@@ -59,7 +58,6 @@ flowchart TD
     AR --> DS
     WM --> DS
     GW --> DS
-    LSS -.-> PB
     GW -->|widgetUse| MET
 ```
 
@@ -218,7 +216,7 @@ Las categorías del catálogo (Medir, Esenciales, Organizar, Generar, Jugar) no 
 
 **Archivos huérfanos en dispositivos que actualizan.** Al quitar el modo PRO quedaron archivos que nadie lee (ítem `orphan-monetization-storage` del backlog).
 
-**Dataset de países.** `assets/countries_dataset.pb`, leído con `protobuf-java` completo. La migración a Lite está en un [ADR pendiente](decisions/protobuf-lite-migration.md).
+**Países del juego de banderas.** Una lista en código, `data/FlagCountries.kt`: 206 países con código ISO y nombre en español y en inglés. La bandera se arma con el código. No hay assets ni protobuf.
 
 ---
 

@@ -25,10 +25,7 @@
 # Mantener metadata de genéricos y anotaciones
 -keepattributes Signature, RuntimeVisibleAnnotations, RuntimeVisibleParameterAnnotations, EnclosingMethod, InnerClasses
 
-# protobuf-java (versión completa) resuelve los accesores de los mensajes
-# generados por reflexión, así que el código generado no puede ofuscarse.
-# El resto de data/ no usa reflexión: @Serializable trae sus propias reglas
-# en kotlinx-serialization y lo demás se serializa a mano con org.json.
--keep class com.joasasso.minitoolbox.data.CountryOuterClass { *; }
--keep class com.joasasso.minitoolbox.data.CountryOuterClass$* { *; }
+# data/ no necesita reglas propias: no usa reflexión. Las clases @Serializable
+# traen sus reglas en kotlinx-serialization y el resto se serializa a mano con
+# org.json.
 

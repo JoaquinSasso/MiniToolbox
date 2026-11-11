@@ -46,7 +46,6 @@ flowchart TD
     subgraph Data [Data]
         DS[("Preferences DataStore (14)")]
         SP[("SharedPreferences")]
-        PB["assets/countries_dataset.pb<br/>(Protobuf)"]
     end
 
     VMS -.-> VM
@@ -59,7 +58,6 @@ flowchart TD
     AR --> DS
     WM --> DS
     GW --> DS
-    LSS -.-> PB
     GW -->|widgetUse| MET
 ```
 
@@ -218,7 +216,7 @@ Package names are in Spanish. The catalog categories (Measure, Essentials, Organ
 
 **Orphan files on updated devices.** Removing the PRO mode left files that nothing reads (`orphan-monetization-storage` backlog item).
 
-**Countries dataset.** `assets/countries_dataset.pb`, read with full `protobuf-java`. The migration to Lite is in a [pending ADR](decisions/protobuf-lite-migration.md) (Spanish).
+**Countries for the flag game.** A list in code, `data/FlagCountries.kt`: 206 countries with ISO code and Spanish and English names. The flag is built from the code. No assets and no protobuf.
 
 ---
 
