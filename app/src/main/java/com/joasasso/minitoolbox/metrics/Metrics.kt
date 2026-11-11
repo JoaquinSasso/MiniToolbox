@@ -37,17 +37,25 @@ fun isMetricsEnabled(context: Context): Boolean {
 
 /**
  * Cambia el estado global de métricas.
- * Si se habilita, agenda un envío oportunista (por si había datos acumulados).
- * Si se deshabilita, no borra datos locales (compliance mínima) pero deja de registrar/subir.
+ *
+ * Al deshabilitar se deja de registrar y de enviar: se cancelan los envíos encolados y
+ * se descarta todo lo acumulado que no se envió (decisión del autor), así que
+ * reactivarlas no sube datos de antes del opt-out. El worker repite el chequeo por si
+ * un envío ya estaba en curso. Al habilitar se agenda un envío oportunista.
  */
 fun setMetricsEnabled(context: Context, enabled: Boolean) {
     val ctx = context.applicationContext
     val sp = ctx.getSharedPreferences(METRICS_SP, Context.MODE_PRIVATE)
     sp.edit { putBoolean(KEY_ENABLED, enabled) }
     if (enabled) {
-        // Si vuelven a habilitar, intentamos enviar lo acumulado
         UploadScheduler.markDirty(ctx)
         UploadScheduler.maybeSchedule(ctx, MetricsConfig.endpoint)
+    } else {
+        UploadScheduler.cancelPending(ctx)
+        io {
+            // Si se reactivó antes de que esto corra, no se descartan eventos nuevos.
+            if (!isMetricsEnabled(ctx)) ctx.repo().discardUnsent()
+        }
     }
 }
 

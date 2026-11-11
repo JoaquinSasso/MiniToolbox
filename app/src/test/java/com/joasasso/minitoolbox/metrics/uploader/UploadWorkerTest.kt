@@ -82,6 +82,16 @@ class UploadMetricsWorkerTest {
     @After
     fun tearDown() {
         UploadMetricsWorker.uploaderFactory = null
+        setMetricsPref(true)
+    }
+
+    /**
+     * Escribe la preferencia directamente: setMetricsEnabled lanza el descarte en una
+     * corrutina propia, y lo que se prueba acá es que el worker no dependa de ella.
+     */
+    private fun setMetricsPref(enabled: Boolean) {
+        context.getSharedPreferences("metrics_prefs", Context.MODE_PRIVATE)
+            .edit().putBoolean("enabled", enabled).commit()
     }
 
     private suspend fun runWorker(
@@ -358,5 +368,49 @@ class UploadMetricsWorkerTest {
         val payload = fake.lastPayload.orEmpty()
         assertTrue(payload.contains("schema_version"))
         assertTrue(payload.contains("client_health"))
+    }
+
+    @Test
+    fun `con las metricas desactivadas no se envia nada y se descarta lo pendiente`() = runTest {
+        markSchemaCurrent()
+        seedPendingUsage("water")
+        // Un lote congelado de antes del opt-out tampoco puede salir.
+        context.metricsDataStore.edit {
+            it[MetricsKeys.PENDING_BATCH_ID] = "b"
+            it[MetricsKeys.PENDING_BATCH_PAYLOAD_JSON] = "{\"items\":[]}"
+        }
+        setMetricsPref(false)
+
+        val (result, fake) = runWorker(UploadOutcome.Success)
+
+        assertEquals(ListenableWorker.Result.success(), result)
+        assertEquals("el opt-out tiene que cortar el envío", 0, fake.calls)
+        assertEquals("", prefs()[MetricsKeys.PENDING_BATCH_PAYLOAD_JSON])
+        assertTrue(
+            com.joasasso.minitoolbox.metrics.storage.AggregatesRepository(context)
+                .buildDeltasSinceLastSent().isEmpty()
+        )
+    }
+
+    @Test
+    fun `al reactivar solo se envia lo registrado despues del opt-out`() = runTest {
+        markSchemaCurrent()
+        val repo = com.joasasso.minitoolbox.metrics.storage.AggregatesRepository(context)
+        repeat(3) { repo.incrementToolUse("water") }
+
+        setMetricsPref(false)
+        runWorker(UploadOutcome.Success)
+
+        setMetricsPref(true)
+        repo.incrementToolUse("water")
+        repo.incrementToolUse("compass")
+
+        val (_, fake) = runWorker(UploadOutcome.Success)
+
+        assertEquals(1, fake.calls)
+        val tools = org.json.JSONObject(fake.lastPayload.orEmpty())
+            .getJSONArray("items").getJSONObject(0).getJSONObject("tools")
+        assertEquals("los 3 usos previos al opt-out no deben viajar", 1, tools.getInt("water"))
+        assertEquals(1, tools.getInt("compass"))
     }
 }

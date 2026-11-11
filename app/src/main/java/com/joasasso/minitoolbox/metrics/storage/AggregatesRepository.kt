@@ -483,7 +483,43 @@ class AggregatesRepository(private val context: Context) {
         }
     }
 
+    /**
+     * Descarta todo lo que no se envió: marca los contadores actuales como enviados y
+     * borra el lote congelado, sin llamar al backend.
+     *
+     * Se usa al desactivar las métricas. Después de esto [buildDeltasSinceLastSent]
+     * devuelve vacío, así que reactivarlas no sube nada registrado antes. Los contadores
+     * siguen en el dispositivo (son la base contra la que se calculan los deltas
+     * futuros), pero nunca salen de él. Lectura y escritura en un único `edit {}`.
+     */
+    suspend fun discardUnsent() {
+        context.metricsDataStore.edit { e ->
+            for ((current, sent) in CURRENT_TO_SENT) {
+                val value = e[current]
+                if (value == null) e.remove(sent) else e[sent] = value
+            }
+            e[MetricsKeys.PENDING_BATCH_ID] = ""
+            e[MetricsKeys.PENDING_BATCH_PAYLOAD_JSON] = ""
+            e[MetricsKeys.PENDING_BATCH_CREATED_AT] = 0L
+        }
+    }
+
     companion object {
         private const val TAG = "AggregatesRepo"
+
+        /** Cada contador local con su espejo de "ya enviado". */
+        private val CURRENT_TO_SENT = listOf(
+            MetricsKeys.APP_OPEN_COUNT_BY_DAY to MetricsKeys.SENT_APP_OPEN_BY_DAY,
+            MetricsKeys.DAILY_ACTIVE_BY_DAY to MetricsKeys.SENT_DAILY_ACTIVE_BY_DAY,
+            MetricsKeys.TOOL_USE_BY_DAY_JSON to MetricsKeys.SENT_TOOL_USE_BY_DAY_JSON,
+            MetricsKeys.TOOL_DAU_BY_DAY_JSON to MetricsKeys.SENT_TOOL_DAU_BY_DAY_JSON,
+            MetricsKeys.TOOL_ENTRY_BY_DAY_JSON to MetricsKeys.SENT_TOOL_ENTRY_BY_DAY_JSON,
+            MetricsKeys.RETENTION_BY_DAY_JSON to MetricsKeys.SENT_RETENTION_BY_DAY_JSON,
+            MetricsKeys.VERSION_DAU_BY_DAY_JSON to MetricsKeys.SENT_VERSION_DAU_BY_DAY_JSON,
+            MetricsKeys.VERSION_FIRST_SEEN_BY_DAY_JSON to MetricsKeys.SENT_VERSION_FIRST_SEEN_BY_DAY_JSON,
+            MetricsKeys.LANG_PRIMARY_BY_DAY_JSON to MetricsKeys.SENT_LANG_PRIMARY_BY_DAY_JSON,
+            MetricsKeys.LANG_SECONDARY_BY_DAY_JSON to MetricsKeys.SENT_LANG_SECONDARY_BY_DAY_JSON,
+            MetricsKeys.WIDGET_USE_BY_DAY_JSON to MetricsKeys.SENT_WIDGET_USE_BY_DAY_JSON
+        )
     }
 }

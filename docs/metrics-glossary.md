@@ -84,7 +84,7 @@ Este documento define la semántica exacta de los contadores utilizados en el si
   - `widget_water_normal`, `widget_water_mini`: botones de sumar y quitar agua (`AguaCallback.kt`).
   - `widget_flashlight`, `widget_flashlight_mini`: encender o apagar la linterna.
   - `widget_shortcuts`: se cuenta en `MainActivity` para **cualquier** apertura con ruta de inicio, incluidas las que vienen de notificaciones. No mide solo el widget de favoritos (backlog: `widget-shortcuts-mislabel`).
-- **Limitación histórica:** Desde `22f6c43` (24/09/2025) hasta la rama `fix/water-widget-metrics-optout`, quitar agua desde el widget sumaba la métrica aunque el usuario hubiera desactivado las métricas. Como el envío tampoco revisa el opt-out (backlog: `upload-ignores-optout`), esos toques pudieron llegar al servidor.
+- **Limitación histórica:** Desde `22f6c43` (24/09/2025) hasta la rama `fix/water-widget-metrics-optout`, quitar agua desde el widget sumaba la métrica aunque el usuario hubiera desactivado las métricas. Como hasta la rama `fix/upload-respects-optout` el envío tampoco revisaba el opt-out, esos toques pudieron llegar al servidor.
 - **Uso correcto:** Comparar el uso entre widgets de agua y de linterna. `widget_shortcuts` no sirve para medir el widget de favoritos.
 
 ### `ads` (retirada)
@@ -124,6 +124,15 @@ Este documento define la semántica exacta de los contadores utilizados en el si
 - **Cuándo incrementa:** Una vez por día por dispositivo, junto con `versions`. `lang_secondary` solo cuenta si el segundo idioma es distinto del primero.
 - **Nota:** Como con `versions`, la suma de `lang_primary` en un período da los dispositivos-día de ese período.
 - **Uso correcto:** Priorizar traducciones y soporte local.
+
+---
+
+## Nota sobre el opt-out
+
+Desactivar las métricas en Acerca de corta el registro y el envío. Se cancelan los envíos encolados y lo acumulado que no se había enviado se descarta: se marca como enviado sin enviarlo (`AggregatesRepository.discardUnsent`), así que reactivarlas sube solo lo registrado después. El worker repite el chequeo antes de enviar, por si ya estaba encolado.
+
+- **Limitación histórica:** hasta la rama `fix/upload-respects-optout`, el envío no revisaba el opt-out. Lo acumulado antes de desactivar se subía igual, y en cada salida de la app se encolaba un envío.
+- **Límite conocido:** si un envío ya estaba en vuelo (la petición HTTP salió) cuando el usuario desactiva, ese lote llega al servidor.
 
 ---
 
