@@ -146,6 +146,7 @@ flowchart TD
 - `About` figura en `ToolRegistry` solo para conservar su clave de métricas; no aparece en el catálogo.
 - `DevMetrics` es una pantalla de diagnóstico interna, sin entrada en el catálogo.
 - No hay accesos directos de launcher (`ShortcutManagerCompat`): `MetricsSource.SHORTCUT` existe pero nunca se emite.
+- Arranque en frío con destino: `MainActivity` resuelve `EXTRA_START_ROUTE_JSON` antes de `setContent` y `prepareStartBackStack` (`NavGraph.kt`) arma la pila `[Categories, destino]` antes de la primera composición de `NavHost`. El catálogo no se compone y no hay animación. Con la Activity ya creada, el destino llega por `onNewIntent` y se navega con animación. Ver `docs/arranque-en-frio-postmortem.md`.
 
 ---
 

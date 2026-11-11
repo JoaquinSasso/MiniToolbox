@@ -2,6 +2,7 @@
 package com.joasasso.minitoolbox
 
 import android.app.Activity
+import android.util.Log
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -16,7 +17,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import androidx.navigation.NavGraph
 import androidx.navigation.NavHostController
+import androidx.navigation.createGraph
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -55,7 +62,10 @@ import com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua.AguaStatis
 import com.joasasso.minitoolbox.utils.ToolDebouncer
 
 @Composable
-fun MiniToolboxNavGraph(navController: NavHostController) {
+fun MiniToolboxNavGraph(
+    navController: NavHostController,
+    initialDestination: Screen? = null
+) {
     val animationDuration = 280
     val context = LocalContext.current
 
@@ -86,9 +96,166 @@ fun MiniToolboxNavGraph(navController: NavHostController) {
         if (!popped) (context as? Activity)?.finish()
     }
 
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current) {
+        "MiniToolboxNavGraph necesita un ViewModelStoreOwner"
+    }
+
+    // El grafo se arma una sola vez y fuera de NavHost, y junto con él se fija la pila
+    // inicial antes de la primera composición de NavHost (ver prepareStartBackStack).
+    val graph = remember(navController) {
+        navController.createGraph(startDestination = Screen.Categories) {
+            composable<Screen.Categories> {
+                CategoriesScreen(
+                    tools = ToolRegistry.tools,
+                    onToolClick = { tool -> navController.navigate(tool.screen) },
+                    onNavigateToAbout = { navController.navigate(Screen.About) }
+                )
+            }
+
+            composable<Screen.GroupSelector> {
+                GroupSelectorScreen(onBack = onBackSmart)
+            }
+            composable<Screen.TrucoScoreboard> {
+                TrucoScoreBoardScreen(onBack = onBackSmart)
+            }
+            composable<Screen.PomodoroList> {
+                PomodoroTimersListScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenTimer = { timer ->
+                        navController.navigate(Screen.PomodoroDetail(timerId = timer.id))
+                    }
+                )
+            }
+            composable<Screen.PomodoroDetail> { backStackEntry ->
+                val detail = backStackEntry.toRoute<Screen.PomodoroDetail>()
+                PomodoroScreen(timerId = detail.timerId, onBack = { navController.popBackStack() })
+            }
+            composable<Screen.BubbleLevel> {
+                BubbleLevelScreen(onBack = onBackSmart)
+            }
+            composable<Screen.UnitConverter> {
+                ConversorUnidadesScreen(onBack = onBackSmart)
+            }
+            composable<Screen.QrGenerator> {
+                GeneradorQrScreen(onBack = onBackSmart)
+            }
+            composable<Screen.Ruler> {
+                ReglaScreen(onBack = onBackSmart)
+            }
+            composable<Screen.LightMeter> {
+                LightSensorScreen(onBack = onBackSmart)
+            }
+            composable<Screen.Flashlight> {
+                FlashScreen(onBack = onBackSmart)
+            }
+            composable<Screen.Water> {
+                AguaReminderScreen(
+                    onBack = onBackSmart,
+                    onShowEstadisticas = {
+                        navController.navigate(Screen.WaterStats)
+                    }
+                )
+            }
+            composable<Screen.WaterStats> {
+                AguaStatisticsScreen(onBack = onBackSmart)
+            }
+            composable<Screen.SelectorWheel> {
+                OptionSelectorScreen(onBack = onBackSmart)
+            }
+            composable<Screen.GuessFlag> {
+                AdivinaBanderaScreen(onBack = onBackSmart)
+            }
+            composable<Screen.Meetings> {
+                ReunionesScreen(
+                    onBack = onBackSmart,
+                    onCrearReunion = { navController.navigate(Screen.MeetingCreate) },
+                    onReunionClick = { reunion ->
+                        navController.navigate(Screen.MeetingDetail(reunionId = reunion.id))
+                    }
+                )
+            }
+            composable<Screen.MeetingCreate> {
+                CrearReunionScreen(
+                    onBack = onBackSmart,
+                    onReunionCreada = { reunionId ->
+                        navController.navigate(Screen.MeetingDetail(reunionId = reunionId)) {
+                            popUpTo<Screen.Meetings> {
+                                inclusive = false
+                            }
+                        }
+                    }
+                )
+            }
+            composable<Screen.MeetingDetail> { backStackEntry ->
+                val detail = backStackEntry.toRoute<Screen.MeetingDetail>()
+                DetallesReunionScreen(
+                    onBack = onBackSmart,
+                    reunionId = detail.reunionId,
+                    onEditarGasto = { idReunion, idGasto ->
+                        navController.navigate(Screen.ExpenseEdit(reunionId = idReunion, gastoId = idGasto))
+                    },
+                    onAgregarGasto = { idReunion ->
+                        navController.navigate(Screen.ExpenseAdd(reunionId = idReunion))
+                    }
+                )
+            }
+            composable<Screen.ExpenseEdit> { _ ->
+                EditarGastoScreen(
+                    onBack = onBackSmart
+                )
+            }
+            composable<Screen.ExpenseAdd> { _ ->
+                AgregarGastoScreen(
+                    onBack = onBackSmart
+                )
+            }
+            composable<Screen.Compass> {
+                BrujulaScreen(onBack = onBackSmart)
+            }
+            composable<Screen.Scoreboard> {
+                MarcadorEquiposScreen(onBack = onBackSmart)
+            }
+            composable<Screen.Magnifier> {
+                MagnifierScreen(onBack = onBackSmart)
+            }
+            composable<Screen.ArRuler> {
+                ArRulerSceneViewScreen(onBack = onBackSmart)
+            }
+            composable<Screen.About> {
+                val licensesTitle = stringResource(R.string.about_licenses_button)
+                AboutScreen(
+                    onBack = onBackSmart,
+                    onOpenLicenses = {
+                        com.google.android.gms.oss.licenses.OssLicensesMenuActivity.setActivityTitle(
+                            licensesTitle
+                        )
+                        context.startActivity(
+                            android.content.Intent(context, com.google.android.gms.oss.licenses.OssLicensesMenuActivity::class.java)
+                        )
+                    },
+                    onOpenDevTools = { navController.navigate(Screen.DevMetrics) }
+                )
+            }
+            composable<Screen.DevMetrics> {
+                MetricsDiagnosticsScreen(onBack = onBackSmart)
+            }
+            composable<Screen.Minesweeper> {
+                MinesweeperScreen(onBack = onBackSmart)
+            }
+        }.also { builtGraph ->
+            navController.prepareStartBackStack(
+                lifecycleOwner = lifecycleOwner,
+                viewModelStore = viewModelStoreOwner.viewModelStore,
+                graph = builtGraph,
+                initialDestination = initialDestination
+            )
+        }
+    }
+
     NavHost(
         navController = navController,
-        startDestination = Screen.Categories,
+        graph = graph,
         enterTransition = {
             slideIntoContainer(
                 AnimatedContentTransitionScope.SlideDirection.Start,
@@ -130,144 +297,36 @@ fun MiniToolboxNavGraph(navController: NavHostController) {
                 animationSpec = tween(animationDuration, easing = FastOutSlowInEasing)
             )
         }
-    ) {
-        composable<Screen.Categories> {
-            CategoriesScreen(
-                tools = ToolRegistry.tools,
-                onToolClick = { tool -> navController.navigate(tool.screen) },
-                onNavigateToAbout = { navController.navigate(Screen.About) }
-            )
-        }
+    )
+}
 
-        composable<Screen.GroupSelector> {
-            GroupSelectorScreen(onBack = onBackSmart)
-        }
-        composable<Screen.TrucoScoreboard> {
-            TrucoScoreBoardScreen(onBack = onBackSmart)
-        }
-        composable<Screen.PomodoroList> {
-            PomodoroTimersListScreen(
-                onBack = { navController.popBackStack() },
-                onOpenTimer = { timer ->
-                    navController.navigate(Screen.PomodoroDetail(timerId = timer.id))
-                }
-            )
-        }
-        composable<Screen.PomodoroDetail> { backStackEntry ->
-            val detail = backStackEntry.toRoute<Screen.PomodoroDetail>()
-            PomodoroScreen(timerId = detail.timerId, onBack = { navController.popBackStack() })
-        }
-        composable<Screen.BubbleLevel> {
-            BubbleLevelScreen(onBack = onBackSmart)
-        }
-        composable<Screen.UnitConverter> {
-            ConversorUnidadesScreen(onBack = onBackSmart)
-        }
-        composable<Screen.QrGenerator> {
-            GeneradorQrScreen(onBack = onBackSmart)
-        }
-        composable<Screen.Ruler> {
-            ReglaScreen(onBack = onBackSmart)
-        }
-        composable<Screen.LightMeter> {
-            LightSensorScreen(onBack = onBackSmart)
-        }
-        composable<Screen.Flashlight> {
-            FlashScreen(onBack = onBackSmart)
-        }
-        composable<Screen.Water> {
-            AguaReminderScreen(
-                onBack = onBackSmart,
-                onShowEstadisticas = {
-                    navController.navigate(Screen.WaterStats)
-                }
-            )
-        }
-        composable<Screen.WaterStats> {
-            AguaStatisticsScreen(onBack = onBackSmart)
-        }
-        composable<Screen.SelectorWheel> {
-            OptionSelectorScreen(onBack = onBackSmart)
-        }
-        composable<Screen.GuessFlag> {
-            AdivinaBanderaScreen(onBack = onBackSmart)
-        }
-        composable<Screen.Meetings> {
-            ReunionesScreen(
-                onBack = onBackSmart,
-                onCrearReunion = { navController.navigate(Screen.MeetingCreate) },
-                onReunionClick = { reunion ->
-                    navController.navigate(Screen.MeetingDetail(reunionId = reunion.id))
-                }
-            )
-        }
-        composable<Screen.MeetingCreate> {
-            CrearReunionScreen(
-                onBack = onBackSmart,
-                onReunionCreada = { reunionId ->
-                    navController.navigate(Screen.MeetingDetail(reunionId = reunionId)) {
-                        popUpTo<Screen.Meetings> {
-                            inclusive = false
-                        }
-                    }
-                }
-            )
-        }
-        composable<Screen.MeetingDetail> { backStackEntry ->
-            val detail = backStackEntry.toRoute<Screen.MeetingDetail>()
-            DetallesReunionScreen(
-                onBack = onBackSmart,
-                reunionId = detail.reunionId,
-                onEditarGasto = { idReunion, idGasto ->
-                    navController.navigate(Screen.ExpenseEdit(reunionId = idReunion, gastoId = idGasto))
-                },
-                onAgregarGasto = { idReunion ->
-                    navController.navigate(Screen.ExpenseAdd(reunionId = idReunion))
-                }
-            )
-        }
-        composable<Screen.ExpenseEdit> { _ ->
-            EditarGastoScreen(
-                onBack = onBackSmart
-            )
-        }
-        composable<Screen.ExpenseAdd> { _ ->
-            AgregarGastoScreen(
-                onBack = onBackSmart
-            )
-        }
-        composable<Screen.Compass> {
-            BrujulaScreen(onBack = onBackSmart)
-        }
-        composable<Screen.Scoreboard> {
-            MarcadorEquiposScreen(onBack = onBackSmart)
-        }
-        composable<Screen.Magnifier> {
-            MagnifierScreen(onBack = onBackSmart)
-        }
-        composable<Screen.ArRuler> {
-            ArRulerSceneViewScreen(onBack = onBackSmart)
-        }
-        composable<Screen.About> {
-            val licensesTitle = stringResource(R.string.about_licenses_button)
-            AboutScreen(
-                onBack = onBackSmart,
-                onOpenLicenses = {
-                    com.google.android.gms.oss.licenses.OssLicensesMenuActivity.setActivityTitle(
-                        licensesTitle
-                    )
-                    context.startActivity(
-                        android.content.Intent(context, com.google.android.gms.oss.licenses.OssLicensesMenuActivity::class.java)
-                    )
-                },
-                onOpenDevTools = { navController.navigate(Screen.DevMetrics) }
-            )
-        }
-        composable<Screen.DevMetrics> {
-            MetricsDiagnosticsScreen(onBack = onBackSmart)
-        }
-        composable<Screen.Minesweeper> {
-            MinesweeperScreen(onBack = onBackSmart)
+/**
+ * Fija la pila inicial antes de que [NavHost] se componga por primera vez.
+ *
+ * Con un destino inicial (widget, notificación, atajo) la pila queda como
+ * `[Categories, destino]`: el primer frame ya muestra la herramienta, sin componer el
+ * catálogo ni animar la transición, y "atrás" sigue volviendo al catálogo.
+ * Si la Activity se recrea, [NavHostController] restaura su propia pila al fijar el
+ * grafo y quien llama debe pasar `initialDestination = null`.
+ *
+ * NavHost vuelve a fijar el mismo grafo, el mismo lifecycle owner y el mismo
+ * ViewModelStore: con las mismas instancias, NavController no reinicia la pila.
+ */
+internal fun NavHostController.prepareStartBackStack(
+    lifecycleOwner: LifecycleOwner,
+    viewModelStore: ViewModelStore,
+    graph: NavGraph,
+    initialDestination: Screen?
+) {
+    setLifecycleOwner(lifecycleOwner)
+    setViewModelStore(viewModelStore)
+    setGraph(graph, null)
+    if (initialDestination != null && initialDestination != Screen.Categories) {
+        try {
+            navigate(initialDestination)
+        } catch (e: IllegalArgumentException) {
+            // Destino sin pantalla registrada en el grafo: se queda en el catálogo.
+            Log.e("Navigation", "Destino inicial inválido: $initialDestination", e)
         }
     }
 }

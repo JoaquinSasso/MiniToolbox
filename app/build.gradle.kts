@@ -71,6 +71,15 @@ android {
             }
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
+        // Igual que release (R8, sin debuggable) pero firmada con la clave de debug y
+        // profileable, para medir arranque en un dispositivo. No envía métricas: el
+        // endpoint vacío deja MetricsConfig.isConfigured en false.
+        create("benchmark") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += listOf("release")
+            buildConfigField("String", "METRICS_ENDPOINT", "\"\"")
+        }
     }
 
     compileOptions {
@@ -90,6 +99,10 @@ android {
         // de test en lugar de duplicarlas, para que no puedan desincronizarse.
         getByName("test") {
             resources.srcDir("../metrics-fixtures")
+        }
+        // La build de benchmark usa la misma variante de App Check que release.
+        getByName("benchmark") {
+            java.srcDir("src/release/java")
         }
     }
 
@@ -215,6 +228,7 @@ dependencies {
     // --- Firebase App Check ---
     implementation(platform(libs.firebase.bom))
     releaseImplementation(libs.firebase.appcheck.playintegrity)
+    "benchmarkImplementation"(libs.firebase.appcheck.playintegrity)
     debugImplementation(libs.firebase.appcheck.debug)
 }
 

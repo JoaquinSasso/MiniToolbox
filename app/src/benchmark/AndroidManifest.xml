@@ -1,0 +1,6 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <!-- Permite medir con simpleperf/Perfetto y am start sin que la app sea debuggable. -->
+        <profileable android:shell="true" />
+    </application>
+</manifest>
