@@ -9,6 +9,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.joasasso.minitoolbox.metrics.MetricsContract
+import com.joasasso.minitoolbox.metrics.isMetricsEnabled
 import com.joasasso.minitoolbox.metrics.storage.AggregatesRepository
 import com.joasasso.minitoolbox.metrics.storage.MetricsKeys
 import com.joasasso.minitoolbox.metrics.storage.MetricsSanitizer
@@ -49,6 +50,16 @@ class UploadMetricsWorker(appContext: Context, params: WorkerParameters) :
 
         val repo = AggregatesRepository(ctx)
         val ds = ctx.metricsDataStore
+
+        // Opt-out: no se envía nada, ni lo acumulado antes de desactivar. Se descarta
+        // acá también (además de en setMetricsEnabled) por si un trabajo ya encolado
+        // arranca después de que el usuario desactivó las métricas.
+        if (!isMetricsEnabled(ctx)) {
+            repo.discardUnsent()
+            UploadScheduler.clearDirty(ctx)
+            return@withContext Result.success()
+        }
+
         val prefs = ds.data.first()
 
         var batchId = prefs[MetricsKeys.PENDING_BATCH_ID].orEmpty()

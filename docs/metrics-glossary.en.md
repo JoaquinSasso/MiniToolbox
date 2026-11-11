@@ -83,7 +83,7 @@ This document defines the exact meaning of the counters in MiniToolbox's own tel
   - `widget_water_normal`, `widget_water_mini`: the add and remove water buttons (`AguaCallback.kt`).
   - `widget_flashlight`, `widget_flashlight_mini`: turning the flashlight on or off.
   - `widget_shortcuts`: counted in `MainActivity` for **any** open with a start route, including those coming from notifications. It does not measure the favorites widget alone (backlog: `widget-shortcuts-mislabel`).
-- **Historical limitation:** From `22f6c43` (2025-09-24) until the `fix/water-widget-metrics-optout` branch, removing water from the widget added to the metric even when the user had turned metrics off. Since uploads do not check the opt-out either (backlog: `upload-ignores-optout`), those taps may have reached the server.
+- **Historical limitation:** From `22f6c43` (2025-09-24) until the `fix/water-widget-metrics-optout` branch, removing water from the widget added to the metric even when the user had turned metrics off. Since uploads did not check the opt-out either until the `fix/upload-respects-optout` branch, those taps may have reached the server.
 - **Correct use:** Compare usage between the water and flashlight widgets. `widget_shortcuts` cannot be used to measure the favorites widget.
 
 ### `ads` (retired)
@@ -123,6 +123,15 @@ This document defines the exact meaning of the counters in MiniToolbox's own tel
 - **When it increments:** Once per device per day, together with `versions`. `lang_secondary` only counts if the second language differs from the first.
 - **Note:** As with `versions`, the sum of `lang_primary` over a period gives the device-days for that period.
 - **Correct use:** Prioritize translations and local support.
+
+---
+
+## Note on the opt-out
+
+Turning metrics off in About stops both recording and uploading. Queued uploads are cancelled and anything recorded but not yet sent is discarded: it is marked as sent without sending it (`AggregatesRepository.discardUnsent`), so turning metrics back on uploads only what is recorded afterwards. The worker checks again before sending, in case it was already queued.
+
+- **Historical limitation:** until the `fix/upload-respects-optout` branch, uploads did not check the opt-out. Data recorded before turning metrics off was still sent, and an upload was queued every time the app went to the background.
+- **Known limit:** if an upload was already in flight (the HTTP request had left) when the user turns metrics off, that batch reaches the server.
 
 ---
 

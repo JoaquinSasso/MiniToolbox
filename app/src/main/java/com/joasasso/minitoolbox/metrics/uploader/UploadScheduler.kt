@@ -15,6 +15,7 @@ import com.joasasso.minitoolbox.metrics.storage.AggregatesRepository
 import com.joasasso.minitoolbox.metrics.storage.MetricsKeys
 import com.joasasso.minitoolbox.metrics.storage.metricsDataStore
 import com.joasasso.minitoolbox.metrics.MetricsConfig
+import com.joasasso.minitoolbox.metrics.isMetricsEnabled
 import kotlinx.coroutines.flow.first
 import android.util.Log
 import java.io.IOException
@@ -22,6 +23,8 @@ import java.time.Duration
 
 object UploadScheduler {
     private const val SP_NAME = "metrics_upload_prefs"
+    private const val WORK_ONE_SHOT = "metrics_upload_one_shot"
+    private const val WORK_EXIT_FLUSH = "metrics_upload_exit_flush"
     private const val KEY_DIRTY = "dirty"
     private const val KEY_LAST_ENQUEUED_MS = "last_enqueued_ms"
 
@@ -43,6 +46,7 @@ object UploadScheduler {
     /** Programación “lenta” respetando ventana mínima, batería, etc. */
     fun maybeSchedule(ctx: Context, endpoint: String) {
         if (endpoint.isBlank()) return
+        if (!isMetricsEnabled(ctx)) return
         val p = prefs(ctx)
         if (!p.getBoolean(KEY_DIRTY, false)) return
 
@@ -62,11 +66,11 @@ object UploadScheduler {
             .setInitialDelay(INITIAL_DELAY)
             .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, BACKOFF)
             .setInputData(data)
-            .addTag("metrics_upload_one_shot")
+            .addTag(WORK_ONE_SHOT)
             .build()
 
         WorkManager.getInstance(ctx).enqueueUniqueWork(
-            "metrics_upload_one_shot",
+            WORK_ONE_SHOT,
             ExistingWorkPolicy.KEEP,
             req
         )
@@ -76,6 +80,7 @@ object UploadScheduler {
     /** Encola un envío inmediato (expedited con fallback). Ideal para gatillos por cota. */
     fun enqueueNowExpedited(ctx: Context, endpoint: String) {
         if (endpoint.isBlank()) return
+        if (!isMetricsEnabled(ctx)) return
 
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -88,15 +93,23 @@ object UploadScheduler {
             .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
             .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, BACKOFF)
             .setInputData(data)
-            .addTag("metrics_upload_exit_flush")
+            .addTag(WORK_EXIT_FLUSH)
             .build()
 
         // REPLACE para que, si se dispara varias veces, quede el último
         WorkManager.getInstance(ctx).enqueueUniqueWork(
-            "metrics_upload_exit_flush",
+            WORK_EXIT_FLUSH,
             ExistingWorkPolicy.REPLACE,
             req
         )
+    }
+
+    /** Cancela los envíos ya encolados. Se usa al desactivar las métricas. */
+    fun cancelPending(ctx: Context) {
+        val wm = WorkManager.getInstance(ctx)
+        wm.cancelUniqueWork(WORK_ONE_SHOT)
+        wm.cancelUniqueWork(WORK_EXIT_FLUSH)
+        clearDirty(ctx)
     }
 
     // --------- UMBRALES (cotas) ---------
@@ -132,6 +145,7 @@ object UploadScheduler {
     suspend fun maybeFlushOnThreshold(ctx: Context, thresholds: FlushThreshold = FlushThreshold()) {
         val endpoint = MetricsConfig.endpoint
         if (endpoint.isBlank()) return
+        if (!isMetricsEnabled(ctx)) return
 
         // Si ya hay payload congelado, enviarlo directamente.
         // Salvo que venga fallando: insistir con envíos expedited ante un backend caído
