@@ -11,7 +11,6 @@ Las líneas citan el estado de `master @ 58105f5` (2026-10-02). Antes de trabaja
 
 ## P1: calidad de datos de telemetría
 
-- [ ] `dashboard-export`: el export Markdown omite `daily_active`, `tools_dau`, `tool_entry` y `retention`, y rotula `versions_first_seen` como "Instalaciones nuevas". Evidencia: `dashboard/public/index.html:271,622,1011-1032`. Hecho: export completo, con rótulos alineados al glosario.
 - [ ] `dashboard-metricsauth-rewrite`: el dashboard pide `/api/metricsAuth`, pero Hosting no tiene ese rewrite y la ruta cae en `**` (devuelve `index.html`), así que el panel de lotes muestra "Sin datos" en producción. No se probó contra el sitio desplegado. Evidencia: `dashboard/public/index.html:799` contra `dashboard/firebase.json:5-30`. Hecho: rewrite agregado y panel con datos en el sitio desplegado.
 
 ## P1: calidad de código, build y CI

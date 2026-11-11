@@ -32,7 +32,6 @@ description: >-
 ## Sesgos conocidos (no los empeores; si los corregís, actualizá el glosario)
 
 - Las builds debug envían al endpoint de producción a propósito (decisión del autor: su uso diario es en debug) y el payload no lleva `build_type`, así que no se pueden separar. `dev/DevInspector.kt` genera claves de prueba (`metricTest`, `metricsTest`), que el backend guarda como `other`. Detalle en el glosario, "Nota sobre las builds debug".
-- El dashboard rotula `versions_first_seen` como "Instalaciones nuevas", y eso contradice el glosario.
 - Detalle y estado de cada uno: `docs/backlog.md`.
 
 ## Interpretar datos exportados

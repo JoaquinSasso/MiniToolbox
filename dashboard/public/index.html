@@ -263,11 +263,11 @@
 
   <section class="section">
     <div class="section-head"><span class="eyebrow">04</span><h2>Versiones</h2>
-      <span class="meta">Adopción y nuevas instalaciones</span></div>
+      <span class="meta">Adopción y primeras vistas por versión</span></div>
     <div class="grid g2">
       <div class="card pad"><h3 style="margin:0 0 10px; font-size:13px; color:var(--muted)">Versiones activas</h3>
         <div class="chart-wrap pie"><canvas id="chVersions"></canvas></div></div>
-      <div class="card pad"><h3 style="margin:0 0 10px; font-size:13px; color:var(--muted)">Instalaciones nuevas por versión</h3>
+      <div class="card pad"><h3 style="margin:0 0 10px; font-size:13px; color:var(--muted)">Primeras vistas por versión <span style="font-weight:400">(no son instalaciones)</span></h3>
         <div class="chart-wrap pie"><canvas id="chFirstSeen"></canvas></div></div>
     </div>
     <div class="card pad" style="margin-top:16px">
@@ -381,7 +381,7 @@
       <summary style="cursor:pointer; color:var(--muted)">Ver tabla diaria</summary>
       <div style="max-height:420px; overflow:auto; margin-top:12px">
         <table id="tblDaily"><thead><tr>
-          <th>Día</th><th class="num">Aperturas</th><th class="num">Activos</th><th class="num">Nuevas</th>
+          <th>Día</th><th class="num">Aperturas</th><th class="num">Activos</th><th class="num" title="versions_first_seen: no son instalaciones">1.ª vista</th>
           <th>Tools (top)</th><th>Versiones</th><th>Actualizado</th>
         </tr></thead><tbody></tbody></table>
       </div>
@@ -491,7 +491,7 @@
     const entryByTool={}, entryBySource={};
     // retention[antiguedad][intensidad]: se acumula la tabla cruzada completa.
     const retention={};
-    let opens=0,dailyActive=0,newInstalls=0,daysWithData=0;
+    let opens=0,dailyActive=0,firstSeenTotal=0,daysWithData=0;
     for(const r of daily){
       const t=r.totals||{};
       const o=Number(t.app_open||0); opens+=o;
@@ -511,8 +511,8 @@
         sumInto(retention[age],byInt);
       }
     }
-    newInstalls=totalOf(agg.versions_first_seen);
-    return {agg,entryByTool,entryBySource,retention,opens,dailyActive,newInstalls,daysWithData};
+    firstSeenTotal=totalOf(agg.versions_first_seen);
+    return {agg,entryByTool,entryBySource,retention,opens,dailyActive,firstSeenTotal,daysWithData};
   }
   function bucketOpens(daily,gran){
     const buckets={};
@@ -614,7 +614,7 @@
         return {l:"Semana vs anterior",v:`<span style="color:${color}">${sign}${w.pct}%</span>`,
                 s:`${fmt(w.last)} contra ${fmt(w.prev)} aperturas`};})(),
       {l:"Disp. Activos",v:fmt(a.dailyActive),s:`DDAU (sin doble conteo)`},
-      {l:"Instalaciones",v:fmt(a.newInstalls),s:"por first-seen"},
+      {l:"Primeras vistas",v:fmt(a.firstSeenTotal),s:"versions_first_seen · no son instalaciones"},
       {l:"Tools usadas",v:fmt(distinctTools),s:`${fmt(toolsTotal)} usos totales`},
       {l:"Versión top",v:topVer?topVer[0]:"—",s:topVer?pctS(topVer[1],totalOf(a.agg.versions))+" del uso":""},
       {l:"Idioma top",v:topLang?langLabel(topLang[0]).name:"—",s:topLang?langLabel(topLang[0]).code+" · "+pctS(topLang[1],totalOf(a.agg.lang_primary))+" de dispositivos":""},
@@ -977,14 +977,28 @@
   /* ================= EXPORT ================= */
   function currentReport(){
     const a=aggregate(lastData); const r=lastRange;
-    return {range:r,summary:{opens:a.opens,newInstalls:a.newInstalls,daysWithData:a.daysWithData,
-      distinctTools:Object.keys(a.agg.tools).length,toolInteractions:totalOf(a.agg.tools)},agg:a.agg,
-      dailyOpens:lastData.map(d=>[d.day,Number(d.totals?.app_open||0)])};
+    return {range:r,summary:{opens:a.opens,dailyActive:a.dailyActive,versionsFirstSeen:a.firstSeenTotal,
+      daysWithData:a.daysWithData,distinctTools:Object.keys(a.agg.tools).length,
+      toolInteractions:totalOf(a.agg.tools),toolDeviceDays:totalOf(a.agg.tools_dau)},
+      agg:a.agg,entryByTool:a.entryByTool,entryBySource:a.entryBySource,retention:a.retention,
+      daily:lastData.map(d=>[d.day,Number(d.totals?.app_open||0),Number(d.totals?.daily_active||0)])};
   }
   function mdTable(title,entries,total){
     if(!entries.length)return `### ${title}\n_(sin datos)_\n`;
     let s=`### ${title}\n| Clave | Cuenta | % |\n|---|--:|--:|\n`;
     for(const[k,v]of entries)s+=`| ${k} | ${v} | ${pctS(v,total)} |\n`;
+    return s;
+  }
+  function mdRetention(ret){
+    const title="### Retención (retention: antigüedad × días activos en 28)";
+    const total=RET_AGES.reduce((s,[k])=>s+totalOf((ret||{})[k]),0);
+    if(!total)return `${title}\n_(sin datos)_\n`;
+    let s=`${title}\n| Antigüedad | ${RET_INT.join(" | ")} | Total |\n|---|${RET_INT.map(()=>"--:").join("|")}|--:|\n`;
+    for(const[key,label]of RET_AGES){
+      const byInt=(ret||{})[key]||{};
+      const cells=RET_INT.map(i=>Number(byInt[i]||0));
+      s+=`| ${label} | ${cells.join(" | ")} | ${cells.reduce((a,b)=>a+b,0)} |\n`;
+    }
     return s;
   }
   function buildMarkdown(){
@@ -993,29 +1007,40 @@
     L.push(`# MiniToolbox — Métricas`);
     L.push(`Rango: ${R.range.from} → ${R.range.to} (${R.range.days} días) · Generado: ${new Date().toISOString().slice(0,16).replace("T"," ")}`);
     L.push(`\n## Resumen`);
-    L.push(`- Aperturas totales: ${R.summary.opens}`);
-    L.push(`- Instalaciones nuevas (first-seen): ${R.summary.newInstalls}`);
+    L.push(`- Aperturas de la app (app_open): ${R.summary.opens}`);
+    L.push(`- Dispositivos-día activos (daily_active): ${R.summary.dailyActive}`);
+    L.push(`- Primeras vistas por versión (versions_first_seen): ${R.summary.versionsFirstSeen}. No son instalaciones: suman 1 por cada versión que pasa por un dispositivo.`);
     L.push(`- Días con datos: ${R.summary.daysWithData} de ${R.range.days}`);
     L.push(`- Herramientas distintas usadas: ${R.summary.distinctTools}`);
-    L.push(`- Interacciones con herramientas: ${R.summary.toolInteractions}`);
+    L.push(`- Aperturas de herramientas (tools): ${R.summary.toolInteractions}. Son aperturas, no personas.`);
+    L.push(`- Dispositivos-día con alguna herramienta (suma de tools_dau): ${R.summary.toolDeviceDays}`);
+    L.push(`\n> Contadores, no usuarios. Las builds debug reportan al mismo endpoint, así que el dispositivo del autor está incluido. Semántica de cada campo: docs/metrics-glossary.md.`);
     L.push(`\n## Tablas`);
-    L.push(mdTable("Herramientas (uso, desc)",ranked(a.tools),totalOf(a.tools)));
-    L.push(mdTable("Idiomas principales",ranked(a.lang_primary),totalOf(a.lang_primary)));
-    L.push(mdTable("Idiomas secundarios",ranked(a.lang_secondary),totalOf(a.lang_secondary)));
-    L.push(mdTable("Versiones activas",ranked(a.versions),totalOf(a.versions)));
-    L.push(mdTable("Instalaciones nuevas por versión",ranked(a.versions_first_seen),totalOf(a.versions_first_seen)));
-    L.push(mdTable("Widgets",ranked(a.widgets),totalOf(a.widgets)));
-    L.push(`\n## Aperturas por día\n| Día | Aperturas |\n|---|--:|`);
-    for(const[d,v]of R.dailyOpens)L.push(`| ${d} | ${v} |`);
+    L.push(mdTable("Aperturas por herramienta (tools)",ranked(a.tools),totalOf(a.tools)));
+    L.push(mdTable("Dispositivos-día por herramienta (tools_dau)",ranked(a.tools_dau),totalOf(a.tools_dau)));
+    L.push(mdTable("Aperturas por origen (tool_entry)",ranked(R.entryBySource),totalOf(R.entryBySource)));
+    const entryPairs={};
+    for(const[tool,bySource]of Object.entries(R.entryByTool||{}))
+      for(const[src,n]of Object.entries(bySource||{}))entryPairs[`${tool}.${src}`]=Number(n||0);
+    L.push(mdTable("Aperturas por herramienta y origen (tool_entry)",ranked(entryPairs),totalOf(entryPairs)));
+    L.push(mdRetention(R.retention));
+    L.push(mdTable("Idiomas principales (lang_primary)",ranked(a.lang_primary),totalOf(a.lang_primary)));
+    L.push(mdTable("Idiomas secundarios (lang_secondary)",ranked(a.lang_secondary),totalOf(a.lang_secondary)));
+    L.push(mdTable("Dispositivos-día por versión (versions)",ranked(a.versions),totalOf(a.versions)));
+    L.push(mdTable("Primeras vistas por versión (versions_first_seen, no son instalaciones)",ranked(a.versions_first_seen),totalOf(a.versions_first_seen)));
+    L.push(mdTable("Widgets (widgets)",ranked(a.widgets),totalOf(a.widgets)));
+    L.push(`\n## Por día\n| Día | app_open | daily_active |\n|---|--:|--:|`);
+    for(const[d,o,da]of R.daily)L.push(`| ${d} | ${o} | ${da} |`);
     return L.join("\n");
   }
   function buildJSON(){return JSON.stringify(currentReport(),null,1);}
   function buildCSV(){
-    const head=["day","app_open","tools","versions","versions_first_seen","lang_primary","lang_secondary","widgets","updatedAt"];
+    const head=["day","app_open","daily_active","tools","tools_dau","tool_entry","retention","versions","versions_first_seen","lang_primary","lang_secondary","widgets","updatedAt"];
     const esc=s=>`"${String(s).replace(/"/g,'""')}"`;
     const lines=[head.join(",")];
     for(const r of lastData){const t=r.totals||{};
-      lines.push([r.day,t.app_open??0,JSON.stringify(t.tools??{}),
+      lines.push([r.day,t.app_open??0,t.daily_active??0,JSON.stringify(t.tools??{}),
+        JSON.stringify(t.tools_dau??{}),JSON.stringify(t.tool_entry??{}),JSON.stringify(t.retention??{}),
         JSON.stringify(t.versions??{}),JSON.stringify(t.versions_first_seen??{}),
         JSON.stringify(t.lang_primary??{}),JSON.stringify(t.lang_secondary??{}),
         JSON.stringify(t.widgets??{}),r.meta?.updatedAt??""].map(esc).join(","));}

@@ -161,6 +161,6 @@ Es tolerable para conteos diarios, pero invalida cualquier análisis horario y c
 Para cualquier cifra pública (README, Portfolio, LinkedIn), se debe priorizar:
 1. **Google Play Console** para "Instalaciones Totales" y "Calificaciones".
 2. **`daily_active`** para "Usuarios Activos" (solo serie post 17/08/2026).
-3. **`tools_dau`** para "Funcionalidades más populares", con `tools` como medida de intensidad. Si solo se dispone de `tools` (por ejemplo, en el export Markdown del dashboard), aclarar que son aperturas y no personas.
+3. **`tools_dau`** para "Funcionalidades más populares", con `tools` como medida de intensidad. Si solo se dispone de `tools` (por ejemplo, en un export Markdown generado antes de que incluyera `tools_dau`), aclarar que son aperturas y no personas.
 
 **Nunca utilizar `versions_first_seen` como equivalente a "Usuarios" sin aclarar la semántica de actualización.**

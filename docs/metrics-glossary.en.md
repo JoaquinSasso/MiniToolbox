@@ -160,6 +160,6 @@ This is acceptable for daily counts, but it rules out any hourly analysis and an
 For any public figure (README, portfolio, LinkedIn), prefer:
 1. **Google Play Console** for "Total installs" and "Ratings".
 2. **`daily_active`** for "Active users" (series only exists from 2026-08-17).
-3. **`tools_dau`** for "Most popular features", with `tools` as the intensity measure. If only `tools` is available (for example, in the dashboard's Markdown export), state that the figures are opens, not people.
+3. **`tools_dau`** for "Most popular features", with `tools` as the intensity measure. If only `tools` is available (for example, in a Markdown export generated before it included `tools_dau`), state that the figures are opens, not people.
 
 **Never use `versions_first_seen` as an equivalent of "Users" without explaining the update semantics.**
