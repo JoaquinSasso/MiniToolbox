@@ -31,7 +31,6 @@ description: >-
 
 ## Sesgos conocidos (no los empeores; si los corregís, actualizá el glosario)
 
-- `NavGraph.kt` compara la ruta y no la herramienta: navegar entre subpantallas de una misma herramienta vuelve a contar `toolUse` (si pasaron más de 5 s).
 - `about` está en `ToolRegistry` y cuenta como herramienta.
 - Las builds debug envían al endpoint de producción y el payload no lleva `build_type`. `dev/DevInspector.kt` genera claves de prueba (`metricTest`, `metricsTest`).
 - El dashboard rotula `versions_first_seen` como "Instalaciones nuevas", y eso contradice el glosario.

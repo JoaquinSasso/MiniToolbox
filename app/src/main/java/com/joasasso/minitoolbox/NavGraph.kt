@@ -12,6 +12,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -60,18 +61,23 @@ fun MiniToolboxNavGraph(navController: NavHostController) {
 
     val metricsDebouncer = remember { ToolDebouncer(cooldownMs = TOOL_USAGE_METRIC_COOLDOWN_MS) }
 
-    var lastRoute by remember { mutableStateOf<String?>(null) }
+    // Herramienta en la que está el usuario (null fuera de una). Es saveable para que
+    // recrear la Activity no cuente otra visita a la misma herramienta.
+    var currentToolKey by rememberSaveable { mutableStateOf<String?>(null) }
     val backStackEntry by navController.currentBackStackEntryAsState()
 
     LaunchedEffect(backStackEntry?.destination?.route) {
         val route = backStackEntry?.destination?.route ?: return@LaunchedEffect
-        val tool = ToolRoutes.findTool(route)
-        if (route != lastRoute && tool != null) {
-            if (metricsDebouncer.canExecute(tool.metricsKey)) {
-                toolUse(context, tool.metricsKey, PendingEntrySource.consume())
+        val key = ToolRoutes.metricsKey(route)
+        val toCount = ToolRoutes.visitToCount(currentToolKey, key)
+        currentToolKey = key
+        if (toCount != null) {
+            // El origen se consume en toda visita nueva, aunque el debouncer la descarte,
+            // para que no se atribuya a la herramienta siguiente.
+            val source = PendingEntrySource.consume()
+            if (metricsDebouncer.canExecute(toCount)) {
+                toolUse(context, toCount, source)
             }
-
-            lastRoute = route
         }
     }
 

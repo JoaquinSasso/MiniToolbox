@@ -40,8 +40,8 @@ Este documento define la semántica exacta de los contadores utilizados en el si
 
 ### `tools`
 - **Qué mide:** Aperturas de herramientas.
-- **Cuándo incrementa:** En el `NavGraph`, cuando la ruta actual cambia a una que pertenece a una herramienta (`NavGraph.kt:69-78`). Un debouncer descarta repeticiones de la misma herramienta dentro de los 5 segundos (`TOOL_USAGE_METRIC_COOLDOWN_MS`).
-- **Limitación:** Pasar de una subpantalla a otra de la misma herramienta (por ejemplo, de la lista de Pomodoro al detalle) vuelve a contar si pasaron más de 5 segundos. Está en el backlog como `tool-count-per-route`.
+- **Cuándo incrementa:** En el `NavGraph`, al entrar a una herramienta desde fuera de ella (`NavGraph.kt:69-82`, `ToolRoutes.visitToCount`). Moverse entre subpantallas de la misma herramienta (lista y detalle de Pomodoro, agua y estadísticas) no vuelve a contar. Pasar por una pantalla que no es herramienta, como Categorías, cierra la visita: volver a entrar cuenta otra vez. Un debouncer descarta además repeticiones de la misma herramienta dentro de los 5 segundos (`TOOL_USAGE_METRIC_COOLDOWN_MS`).
+- **Limitación histórica:** Con `schema_version` 4 o anterior se comparaba la ruta, no la herramienta. Pasar de una subpantalla a otra de la misma herramienta volvía a contar si habían pasado más de 5 segundos (infla sobre todo `pomodoro`, `water` y `meetings`), y volver a la misma herramienta después de pasar por Categorías no contaba si la ruta era idéntica a la de la última herramienta. Los dos efectos van en sentidos opuestos, así que el corte en `schema_version` 5 no tiene una dirección fija por herramienta.
 - **Estructura:** Mapa de `tool_id` -> `count`.
 - **Nota:** No mide tiempo de permanencia, solo intención de uso.
 - **Clave:** Desde la v1.3.2 proviene de `Tool.metricsKey`, un identificador estable e independiente de la ruta de navegación. Con la migración a navegación type-safe, las subpantallas se unifican bajo la clave principal de su herramienta: `pomodoro_list` y `pomodoro/detail` reportan bajo `pomodoro`, `water_stats` bajo `water`, y las subtelas de divisor de gastos bajo `meetings`.

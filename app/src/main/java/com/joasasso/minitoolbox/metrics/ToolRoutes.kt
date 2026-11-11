@@ -67,4 +67,17 @@ object ToolRoutes {
      * Clave de métrica estable para ese destino Screen, o null si no corresponde registrar nada.
      */
     fun metricsKey(screen: Screen): String? = findToolByScreen(screen)?.metricsKey
+
+    /**
+     * Clave a contar al llegar a un destino cuya clave es [nextKey], o null si no se cuenta.
+     *
+     * Un uso es entrar a una herramienta desde fuera de ella. Moverse entre sus
+     * subpantallas (lista y detalle de Pomodoro, agua y estadísticas) no vuelve a contarla.
+     * Pasar por una pantalla que no es herramienta (Categorías) cierra la visita, así que
+     * volver a entrar sí cuenta.
+     *
+     * @param previousKey clave de la herramienta en la que estaba el usuario, o null.
+     */
+    fun visitToCount(previousKey: String?, nextKey: String?): String? =
+        if (nextKey != null && nextKey != previousKey) nextKey else null
 }

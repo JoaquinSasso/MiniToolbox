@@ -40,8 +40,8 @@ This document defines the exact meaning of the counters in MiniToolbox's own tel
 
 ### `tools`
 - **What it measures:** Tool opens.
-- **When it increments:** In the `NavGraph`, when the current route changes to one that belongs to a tool (`NavGraph.kt:69-78`). A debouncer drops repeats of the same tool within 5 seconds (`TOOL_USAGE_METRIC_COOLDOWN_MS`).
-- **Limitation:** Moving between sub-screens of the same tool (for example, from the Pomodoro list to the detail) counts again if more than 5 seconds have passed. Tracked in the backlog as `tool-count-per-route`.
+- **When it increments:** In the `NavGraph`, when the user enters a tool from outside it (`NavGraph.kt:69-82`, `ToolRoutes.visitToCount`). Moving between sub-screens of the same tool (Pomodoro list and detail, water and statistics) does not count again. Going through a screen that is not a tool, such as Categories, ends the visit: entering again counts again. A debouncer also drops repeats of the same tool within 5 seconds (`TOOL_USAGE_METRIC_COOLDOWN_MS`).
+- **Historical limitation:** With `schema_version` 4 or earlier the route was compared, not the tool. Moving between sub-screens of the same tool counted again if more than 5 seconds had passed (mostly inflating `pomodoro`, `water` and `meetings`), and returning to the same tool after going through Categories did not count when the route matched the last tool's route. The two effects go in opposite directions, so the break at `schema_version` 5 has no fixed direction per tool.
 - **Structure:** Map of `tool_id` -> `count`.
 - **Note:** It does not measure time spent, only intent to use.
 - **Key:** Since v1.3.2 it comes from `Tool.metricsKey`, a stable identifier independent of the navigation route. With the migration to type-safe navigation, sub-screens report under their tool's main key: `pomodoro_list` and `pomodoro/detail` report as `pomodoro`, `water_stats` as `water`, and the expense splitter sub-screens as `meetings`.
