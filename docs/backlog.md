@@ -11,7 +11,7 @@ Las líneas citan el estado de `master @ 58105f5` (2026-10-02). Antes de trabaja
 
 ## P1: calidad de datos de telemetría
 
-- [ ] `dashboard-metricsauth-rewrite`: el dashboard pide `/api/metricsAuth`, pero Hosting no tiene ese rewrite y la ruta cae en `**` (devuelve `index.html`), así que el panel de lotes muestra "Sin datos" en producción. No se probó contra el sitio desplegado. Evidencia: `dashboard/public/index.html:799` contra `dashboard/firebase.json:5-30`. Hecho: rewrite agregado y panel con datos en el sitio desplegado.
+- [ ] `dashboard-metricsauth-rewrite`: el rewrite de `/api/metricsAuth` ya está en `dashboard/firebase.json`, pero falta desplegar Hosting (`firebase deploy --only hosting` desde `dashboard/`, manual) y comprobar que el panel de lotes muestra datos en el sitio desplegado. Antes del rewrite la ruta caía en `**` y devolvía `index.html`. Hecho: panel con datos en el sitio desplegado.
 
 ## P1: calidad de código, build y CI
 

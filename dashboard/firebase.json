@@ -18,6 +18,13 @@
 				}
 			},
 			{
+				"source": "/api/metricsAuth",
+				"function": {
+					"functionId": "metricsAuth",
+					"region": "us-central1"
+				}
+			},
+			{
 				"source": "/api/ingest",
 				"function": {
 					"functionId": "ingest",
