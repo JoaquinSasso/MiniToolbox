@@ -8,7 +8,6 @@ Las líneas citan el estado de `master @ 58105f5` (2026-10-02). Antes de trabaja
 ## P0: corregir antes del próximo release
 
 - [ ] `backend-read-credential`: la lectura ya acepta solo `READ_METRICS_API_KEY`, pero esa clave no se rotó y `ingest` no tiene rate limiting. Evidencia: `isReadAuthorized` en `backend/functions/src/index.ts`; `ingest` no limita por origen. Hecho: clave de lectura rotada (con el dashboard reconfigurado) y rate limiting en `ingest`.
-- [ ] `receiver-uncaught-exceptions`: hay `try/finally` sin `catch` en scopes ad-hoc dentro de receivers; una excepción mata el proceso. Evidencia: `PomodoroAlarmReceiver.kt:149-155` (`stopPomodoro`). Los receivers de agua ya tienen `catch` (verificado el 2026-11-10). Hecho: `catch` con log que re-lanza `CancellationException`.
 
 ## P1: calidad de datos de telemetría
 
@@ -28,7 +27,7 @@ Las líneas citan el estado de `master @ 58105f5` (2026-10-02). Antes de trabaja
 - [ ] `backend-tests`: el backend no tiene tests, aunque `metrics-fixtures/keys.json:2` dice que los hay. Evidencia: `backend/functions/package.json` (sin script `test`). Hecho: vitest sobre `validate.ts` consumiendo `keys.json`, ejecutado en `backend.yml`.
 - [ ] `ci-release-build`: CI no compila release con R8. Evidencia: `.github/workflows/android.yml`. Hecho: un job `assembleRelease`.
 - [ ] `coverage`: no hay medición de cobertura. Hecho: Kover con reporte en el CI.
-- [ ] `app-scope`: hay 11 `CoroutineScope(...)` ad-hoc y el `appScope` es privado. Evidencia: `utils/MiniToolboxApp.kt:23`, `git grep -n "CoroutineScope("`. Hecho: un scope de aplicación inyectable, usado en receivers, widgets y métricas.
+- [ ] `app-scope`: hay 17 `CoroutineScope(...)` ad-hoc (`git grep -n "CoroutineScope(" -- app/src/main`, 2026-11-10; incluye el de `utils/ReceiverWork.kt`) y el `appScope` es privado. Evidencia: `utils/MiniToolboxApp.kt:23`. Hecho: un scope de aplicación inyectable, usado en receivers, widgets y métricas.
 - [ ] `dependency-injection`: hooks `@VisibleForTesting` globales en lugar de DI. Evidencia: `metrics/Metrics.kt:61-90`. Hecho: Hilt (o un contenedor manual) y hooks eliminados.
 - [ ] `agp10-optouts`: 7 flags que AGP 10 elimina, y plugin `kotlin-android` deprecado. Evidencia: `gradle.properties:26-34`. Hecho: Kotlin integrado en AGP y el build sin esos flags.
 - [ ] `unused-deps-keep-rules`: dependencias sin uso directo y una regla `-keep` sobre un paquete entero. Evidencia: `app/build.gradle.kts:175,184,210`, `app/proguard-rules.pro:41`. Hecho: dependencias quitadas tras revisar `:app:dependencies` y reglas acotadas, con `assembleRelease` funcionando.

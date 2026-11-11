@@ -12,6 +12,7 @@ import androidx.core.content.ContextCompat
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.data.PomodoroStateRepository
 import com.joasasso.minitoolbox.nav.Screen
+import com.joasasso.minitoolbox.utils.launchReceiverWork
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -146,12 +147,8 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
             ContextCompat.getSystemService(app, NotificationManager::class.java)
                 ?.cancel(NOTIF_ID_ALARM_SILENT)
             AlarmState.setActive(app, false)
-            CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
-                try {
-                    PomodoroStateRepository(app).clearPhase()
-                } finally {
-                    pendingResult?.finish()
-                }
+            launchReceiverWork(TAG, onDone = { pendingResult?.finish() }) {
+                PomodoroStateRepository(app).clearPhase()
             }
         }
 
@@ -208,12 +205,8 @@ class PomodoroAlarmReceiver : BroadcastReceiver() {
                     Screen.PomodoroDetail.createRoute(pending.config.id)
                 )
                 PomodoroSchedulePrefs.clear(app)
-                CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
-                    try {
-                        PomodoroStateRepository(app).clearPhase()
-                    } finally {
-                        pendingResult?.finish()
-                    }
+                launchReceiverWork(TAG, onDone = { pendingResult?.finish() }) {
+                    PomodoroStateRepository(app).clearPhase()
                 }
             }
         }
