@@ -188,8 +188,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    implementation(libs.kotlin.reflect)
-
     // Camera
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
@@ -197,7 +195,6 @@ dependencies {
 
     //AR Camera
     implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.fragment.ktx)
 
     // --- AR / SceneView ---
     implementation(libs.arsceneview)
@@ -206,11 +203,6 @@ dependencies {
     //Pomodoro Media
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.session)
-
-    //Proveedor único de ListenableFuture
-    implementation(libs.guava.android)
-
-    implementation(libs.androidx.media)
 
     implementation(libs.reorderable)
 
