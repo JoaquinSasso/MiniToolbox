@@ -13,7 +13,6 @@ Las líneas citan el estado de `master @ 58105f5` (2026-10-02). Antes de trabaja
 
 - [ ] `dashboard-metricsauth-rewrite`: el rewrite de `/api/metricsAuth` ya está en `dashboard/firebase.json`, pero falta desplegar Hosting (`firebase deploy --only hosting` desde `dashboard/`, manual) y comprobar que el panel de lotes muestra datos en el sitio desplegado. Antes del rewrite la ruta caía en `**` y devolvía `index.html`. Hecho: panel con datos en el sitio desplegado.
 - [ ] `entry-source-leak`: si el deep link apunta a la herramienta en la que ya está el usuario (por ejemplo, tocar el widget de Agua con Agua abierta), `launchSingleTop` no cambia la ruta, el `LaunchedEffect` del NavGraph no corre y el origen queda pendiente: se atribuye a la próxima herramienta que se abra navegando. Evidencia: `MainActivity.kt:103,112`, `NavGraph.kt:69,77`. Hecho: el origen pendiente se descarta (o se consume) cuando la navegación no cambia de destino, con test.
-- [ ] `dashboard-pomodoro-key`: `TOOL_CATALOG` del dashboard no tiene la clave actual `pomodoro` (desde v1.3.2 la herramienta reporta como `pomodoro`), solo la histórica `pomodoro_list`. La página y el export la muestran sin nombre, y el detector de herramientas sin uso marca "Pomodoro" (`pomodoro_list`) como sin uso aunque se use. Es la única clave de `ToolMetricsKeysTest.expectedKeys` que falta. Evidencia: `dashboard/public/index.html:572`. Hecho: `pomodoro` en el catálogo y `pomodoro_list` marcada como histórica.
 
 ## P1: calidad de código, build y CI
 
