@@ -139,6 +139,16 @@ Desactivar las métricas en Acerca de corta el registro y el envío. Se cancelan
 
 ---
 
+## Nota sobre las builds debug
+
+Las builds debug envían al mismo endpoint que producción y sus datos se suman a los mismos agregados. Es una decisión del autor (10/11/2026): la build que usa a diario en su teléfono es debug y representa una parte grande del uso de la app, así que descartarla quitaría datos reales.
+
+- **Sesgo:** con pocos usuarios activos, el dispositivo del autor pesa mucho en todos los contadores, y su uso no es el de un usuario típico (prueba herramientas nuevas, entra a pantallas de desarrollo). Cualquier cifra pública tiene que aclararlo.
+- **No se puede separar:** el payload no lleva `build_type` y el backend no lo guarda. Para separar algún día haría falta agregarlo en los dos lados; hacia atrás no es recuperable.
+- **Claves de prueba:** `dev/DevInspector.kt` puede generar `metricTest` y `metricsTest`. No están en `KNOWN_TOOLS` del backend, así que se guardan como `other`; excluir `other` al analizar herramientas.
+
+---
+
 ## Nota sobre zonas horarias
 
 El campo `day` se calcula con el **reloj local del dispositivo** (`SimpleDateFormat("yyyy-MM-dd")` sin zona fija). Un mismo día agrupa hasta 24 husos distintos.

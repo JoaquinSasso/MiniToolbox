@@ -98,7 +98,7 @@ La lista completa, con evidencia de archivo y línea, está en [docs/backlog.md]
 
 - No hay inyección de dependencias; los tests reemplazan dependencias con hooks `@VisibleForTesting`.
 - La app usa `protobuf-java` completo; la migración a Lite está planificada en un [ADR](docs/decisions/protobuf-lite-migration.md) pero no se hizo.
-- Las builds debug envían métricas al endpoint de producción, y el payload no indica qué build lo envió.
+- Las builds debug envían métricas al endpoint de producción a propósito (la build de uso diario del autor es debug), y el payload no indica qué build lo envió. Ver el [glosario](docs/metrics-glossary.md).
 - Los instrumentos dibujados con `Canvas` (brújula, nivel, regla, lupa) no tienen semántica de accesibilidad.
 - El CI no compila un APK release, así que los problemas de R8 solo aparecen localmente.
 

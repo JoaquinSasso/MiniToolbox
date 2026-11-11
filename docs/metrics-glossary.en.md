@@ -138,6 +138,16 @@ Turning metrics off in About stops both recording and uploading. Queued uploads 
 
 ---
 
+## Note on debug builds
+
+Debug builds send to the same endpoint as production and their data adds to the same aggregates. This is the author's decision (2026-11-10): the build they use every day on their phone is a debug build and accounts for a large share of the app's usage, so discarding it would remove real data.
+
+- **Bias:** with few active users, the author's device weighs heavily on every counter, and its usage is not a typical user's (trying new tools, opening development screens). Any public figure has to say so.
+- **Cannot be separated:** the payload does not carry `build_type` and the backend does not store it. Separating it some day would require adding it on both sides; it cannot be recovered for past data.
+- **Test keys:** `dev/DevInspector.kt` can generate `metricTest` and `metricsTest`. They are not in the backend's `KNOWN_TOOLS`, so they are stored as `other`; exclude `other` when analyzing tools.
+
+---
+
 ## Note on time zones
 
 The `day` field is computed with the **device's local clock** (`SimpleDateFormat("yyyy-MM-dd")` with no fixed zone). A single day groups up to 24 different time zones.

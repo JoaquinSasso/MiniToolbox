@@ -98,7 +98,7 @@ The full list, with file and line evidence, is in [docs/backlog.md](docs/backlog
 
 - No dependency injection; tests swap dependencies through `@VisibleForTesting` hooks.
 - The app uses full `protobuf-java`; the migration to Lite is planned in an [ADR](docs/decisions/protobuf-lite-migration.md) but not done.
-- Debug builds send metrics to the production endpoint, and the payload does not say which build sent it.
+- Debug builds send metrics to the production endpoint on purpose (the author's everyday build is a debug build), and the payload does not say which build sent it. See the [glossary](docs/metrics-glossary.en.md).
 - The instruments drawn on `Canvas` (compass, level, ruler, magnifier) have no accessibility semantics.
 - CI does not build a release APK, so R8 problems only show up locally.
 
