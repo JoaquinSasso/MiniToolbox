@@ -150,17 +150,6 @@
         errorLine1="    android:width=&quot;512dp&quot;"
         errorLine2="                   ~~~~~">
         <location
-            file="src/main/res/drawable/noise_generator.xml"
-            line="2"
-            column="20"/>
-    </issue>
-
-    <issue
-        id="VectorRaster"
-        message="Limit vector icons sizes to 200×200 to keep icon drawing fast; see https://developer.android.com/studio/write/vector-asset-studio#when for more"
-        errorLine1="    android:width=&quot;512dp&quot;"
-        errorLine2="                   ~~~~~">
-        <location
             file="src/main/res/drawable/ruler_triangle.xml"
             line="2"
             column="20"/>
@@ -1389,61 +1378,6 @@
 
     <issue
         id="UnusedResources"
-        message="The resource `R.drawable.noise_generator` appears to be unused"
-        errorLine1="&lt;vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
-        errorLine2="^">
-        <location
-            file="src/main/res/drawable/noise_generator.xml"
-            line="1"
-            column="1"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.noise_notif_title` appears to be unused"
-        errorLine1="    &lt;string name=&quot;noise_notif_title&quot;>Playing noise&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/noise_generator_strings.xml"
-            line="3"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.noise_notif_toggle` appears to be unused"
-        errorLine1="    &lt;string name=&quot;noise_notif_toggle&quot;>Pause/Resume&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/noise_generator_strings.xml"
-            line="4"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.noise_notif_stop` appears to be unused"
-        errorLine1="    &lt;string name=&quot;noise_notif_stop&quot;>Stop&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/noise_generator_strings.xml"
-            line="5"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.noise_channel_name` appears to be unused"
-        errorLine1="    &lt;string name=&quot;noise_channel_name&quot;>Noise for relaxation&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/noise_generator_strings.xml"
-            line="6"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
         message="The resource `R.string.pomodoro_start` appears to be unused"
         errorLine1="    &lt;string name=&quot;pomodoro_start&quot;>Start&lt;/string>"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
@@ -1714,28 +1648,6 @@
         <location
             file="src/main/res/values/strings_auxiliar_screens.xml"
             line="15"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.tool_noise_generator` appears to be unused"
-        errorLine1="    &lt;string name=&quot;tool_noise_generator&quot;>Noise Generator&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings_tools.xml"
-            line="33"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.sum_tool_noise_generator` appears to be unused"
-        errorLine1="    &lt;string name=&quot;sum_tool_noise_generator&quot;>White/pink/brown noise&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/tool_sum.xml"
-            line="35"
             column="13"/>
     </issue>
 
