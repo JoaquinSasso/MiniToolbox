@@ -331,7 +331,7 @@ class UploadMetricsWorker(appContext: Context, params: WorkerParameters) :
          * Es imposible de agregar retroactivamente: sin esto, un cambio de significado
          * mezcla para siempre los datos viejos con los nuevos.
          */
-        private const val PAYLOAD_SCHEMA_VERSION = 4
+        private const val PAYLOAD_SCHEMA_VERSION = 5
 
         /** Intentos antes de descartar un lote y desbloquear la cola. */
         private const val MAX_ATTEMPTS = 5

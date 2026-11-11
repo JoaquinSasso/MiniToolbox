@@ -82,9 +82,10 @@ This document defines the exact meaning of the counters in MiniToolbox's own tel
 - **Keys:**
   - `widget_water_normal`, `widget_water_mini`: the add and remove water buttons (`AguaCallback.kt`).
   - `widget_flashlight`, `widget_flashlight_mini`: turning the flashlight on or off.
-  - `widget_shortcuts`: counted in `MainActivity` for **any** open with a start route, including those coming from notifications. It does not measure the favorites widget alone (backlog: `widget-shortcuts-mislabel`).
+  - `widget_shortcuts`: taps on a tool in the favorites widget. Counted in `MainActivity` only when the Intent carries the `widget` source and the `startWidget` marker set by `FavoriteToolsWidget` (`MetricsSource.deepLinkWidgetKey`). Opens from notifications and from the water widgets do not add here: they are recorded in `tool_entry` with their source.
 - **Historical limitation:** From `22f6c43` (2025-09-24) until the `fix/water-widget-metrics-optout` branch, removing water from the widget added to the metric even when the user had turned metrics off. Since uploads did not check the opt-out either until the `fix/upload-respects-optout` branch, those taps may have reached the server.
-- **Correct use:** Compare usage between the water and flashlight widgets. `widget_shortcuts` cannot be used to measure the favorites widget.
+- **Historical limitation:** With `schema_version` 4 or earlier, `widget_shortcuts` counted **any** open with a start route, including the water and Pomodoro notifications and the water widgets. From `schema_version` 5 (`fix/widget-shortcuts-source` branch, first release after 1.4.0) it measures the favorites widget only. The series breaks at that version and values drop; since the backend does not store `schema_version`, the break can only be located in Firestore by the release date.
+- **Correct use:** Compare usage between the water and flashlight widgets. `widget_shortcuts` measures the favorites widget only in data from `schema_version` 5 onwards.
 
 ### `ads` (retired)
 - **What it measured:** Ad impressions (banner, interstitial, rewarded).
@@ -98,7 +99,7 @@ This document defines the exact meaning of the counters in MiniToolbox's own tel
 
 ### `schema_version`
 - **What it is:** Version of the payload format sent by the client.
-- **Values:** `1` (initial v1.3.2), `2` (adds `tools_dau`), `3` (adds `tool_entry` and `retention`), `4` (removes `ads`).
+- **Values:** `1` (initial v1.3.2), `2` (adds `tools_dau`), `3` (adds `tool_entry` and `retention`), `4` (removes `ads`), `5` (`widgets.widget_shortcuts` counts the favorites widget only).
 - **Note:** The backend does not persist this number today; it travels in the payload but is not stored in Firestore.
 - **What it is for:** Separating historical data if a field's meaning ever changes. It cannot be added retroactively: without this number, a change in meaning mixes old and new data forever.
 

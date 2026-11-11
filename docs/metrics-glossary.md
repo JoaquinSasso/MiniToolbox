@@ -83,9 +83,10 @@ Este documento define la semántica exacta de los contadores utilizados en el si
 - **Claves:**
   - `widget_water_normal`, `widget_water_mini`: botones de sumar y quitar agua (`AguaCallback.kt`).
   - `widget_flashlight`, `widget_flashlight_mini`: encender o apagar la linterna.
-  - `widget_shortcuts`: se cuenta en `MainActivity` para **cualquier** apertura con ruta de inicio, incluidas las que vienen de notificaciones. No mide solo el widget de favoritos (backlog: `widget-shortcuts-mislabel`).
+  - `widget_shortcuts`: toques en una herramienta del widget de favoritos. Se cuenta en `MainActivity` solo si el Intent trae origen `widget` y la marca `startWidget` que pone `FavoriteToolsWidget` (`MetricsSource.deepLinkWidgetKey`). Las aperturas desde notificaciones y desde los widgets de agua no suman acá: quedan en `tool_entry` con su origen.
 - **Limitación histórica:** Desde `22f6c43` (24/09/2025) hasta la rama `fix/water-widget-metrics-optout`, quitar agua desde el widget sumaba la métrica aunque el usuario hubiera desactivado las métricas. Como hasta la rama `fix/upload-respects-optout` el envío tampoco revisaba el opt-out, esos toques pudieron llegar al servidor.
-- **Uso correcto:** Comparar el uso entre widgets de agua y de linterna. `widget_shortcuts` no sirve para medir el widget de favoritos.
+- **Limitación histórica:** Con `schema_version` 4 o anterior, `widget_shortcuts` sumaba **cualquier** apertura con ruta de inicio, incluidas las notificaciones de Agua y Pomodoro y los widgets de agua. Desde `schema_version` 5 (rama `fix/widget-shortcuts-source`, primera versión publicada después de 1.4.0) mide solo el widget de favoritos. La serie se parte en esa versión y los valores bajan; como el backend no guarda `schema_version`, en Firestore el corte solo se ubica por la fecha del release.
+- **Uso correcto:** Comparar el uso entre widgets de agua y de linterna. `widget_shortcuts` mide el widget de favoritos solo en datos de `schema_version` 5 en adelante.
 
 ### `ads` (retirada)
 - **Qué medía:** Impresiones de anuncios (banner, intersticial, rewarded).
@@ -99,7 +100,7 @@ Este documento define la semántica exacta de los contadores utilizados en el si
 
 ### `schema_version`
 - **Qué es:** Versión del formato del payload enviado por el cliente.
-- **Valores:** `1` (v1.3.2 inicial), `2` (agrega `tools_dau`), `3` (agrega `tool_entry` y `retention`), `4` (quita `ads`).
+- **Valores:** `1` (v1.3.2 inicial), `2` (agrega `tools_dau`), `3` (agrega `tool_entry` y `retention`), `4` (quita `ads`), `5` (`widgets.widget_shortcuts` cuenta solo el widget de favoritos).
 - **Nota:** El backend hoy no persiste este número; viaja en el payload pero no se guarda en Firestore.
 - **Para qué sirve:** Separar datos históricos si alguna vez cambia la semántica de un campo. Es imposible de agregar retroactivamente: sin este número, un cambio de significado mezcla para siempre los datos viejos con los nuevos.
 

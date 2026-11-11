@@ -99,10 +99,12 @@ class MainActivity : AppCompatActivity() {
                         val targetScreen = Screen.fromJson(raw) ?: Screen.fromRouteString(raw)
                         if (targetScreen != null && targetScreen != Screen.Categories) {
                             try {
-                                PendingEntrySource.set(
-                                    intent?.getStringExtra(MetricsSource.EXTRA_START_SOURCE)
-                                )
-                                widgetUse(applicationContext, "widget_shortcuts")
+                                val source = intent?.getStringExtra(MetricsSource.EXTRA_START_SOURCE)
+                                PendingEntrySource.set(source)
+                                MetricsSource.deepLinkWidgetKey(
+                                    source,
+                                    intent?.getStringExtra(MetricsSource.EXTRA_START_WIDGET)
+                                )?.let { widgetUse(applicationContext, it) }
 
                                 navController.popBackStack<Screen.Categories>(inclusive = false)
 

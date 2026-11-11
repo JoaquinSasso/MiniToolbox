@@ -14,7 +14,7 @@ description: >-
 1. **Eventos.** `metrics/Metrics.kt` es la fachada: `appOpen`, `dailyOpenOnce`, `toolUse` y `widgetUse`. (`adImpression` se retiró con los anuncios; ver `ads` en el glosario.) Cada evento corre fire-and-forget en `Dispatchers.IO` y respeta el opt-out (`isMetricsEnabled`).
 2. **Persistencia.** `metrics/storage/AggregatesRepository.kt` acumula contadores por día en `metricsDataStore` (`storage/MetricsDataStore.kt`), como mapas JSON dentro de Preferences.
 3. **Agendado.** `metrics/uploader/UploadScheduler.kt` encola `OneTimeWorkRequest` únicos (`maybeSchedule`, `enqueueNowExpedited` en `ON_STOP`, `maybeFlushOnThreshold`). No es un trabajo periódico.
-4. **Envío.** `metrics/uploader/UploadMetricsWorker.kt` arma el payload (`PAYLOAD_SCHEMA_VERSION = 4`), lo congela como lote pendiente con un `batch_id` y lo envía con `MetricsUploader.kt`, que agrega el header `X-Firebase-AppCheck`. La respuesta se clasifica en `UploadOutcome`: Success, PermanentReject, AuthError o Transient.
+4. **Envío.** `metrics/uploader/UploadMetricsWorker.kt` arma el payload (`PAYLOAD_SCHEMA_VERSION = 5`), lo congela como lote pendiente con un `batch_id` y lo envía con `MetricsUploader.kt`, que agrega el header `X-Firebase-AppCheck`. La respuesta se clasifica en `UploadOutcome`: Success, PermanentReject, AuthError o Transient.
 5. **Ingesta.** `backend/functions/src/index.ts`, función `ingest`. Valida y sanea con `validate.ts`, deduplica por `batch_id` (`metrics_ingest_batches`) e incrementa `metrics_daily/{mes}/days/{día}`. Solo acepta App Check: sin token válido responde 401 y loguea `ingest_unauthorized`. Registra cada lote en `metrics_ingest_logs` y los lotes aceptados y la salud del cliente en el rollup `metrics_auth`.
 6. **Lectura.** Las funciones `metricsDaily`, `metricsSummary` y `metricsAuth` requieren el header `X-API-Key` con `READ_METRICS_API_KEY` (la clave de escritura ya no existe). El dashboard (`dashboard/public/index.html`) las consume y guarda la URL y la clave en `localStorage`. Sin clave, muestra datos de demostración.
 
@@ -31,7 +31,6 @@ description: >-
 
 ## Sesgos conocidos (no los empeores; si los corregís, actualizá el glosario)
 
-- `MainActivity.kt` llama `widgetUse("widget_shortcuts")` para **cualquier** deep link, incluidas las notificaciones.
 - `NavGraph.kt` compara la ruta y no la herramienta: navegar entre subpantallas de una misma herramienta vuelve a contar `toolUse` (si pasaron más de 5 s).
 - `about` está en `ToolRegistry` y cuenta como herramienta.
 - Las builds debug envían al endpoint de producción y el payload no lleva `build_type`. `dev/DevInspector.kt` genera claves de prueba (`metricTest`, `metricsTest`).
