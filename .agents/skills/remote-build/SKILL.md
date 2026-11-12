@@ -109,14 +109,19 @@ Ojo con el tamaño: el APK debug pesa unos 140 MB. Guardalo fuera del repo (por 
 
 El teléfono se instala por uno de dos caminos, en este orden:
 
-1. **En casa, depuración inalámbrica desde JOAPC.** Si el teléfono ya está emparejado con el `adb` de JOAPC:
+1. **En casa (LAN, alias `joapc`): depuración inalámbrica siempre desde el `adb` de JOAPC.** Es la regla: estando en la red local no se conecta el `adb` de la notebook al teléfono por Wi-Fi. Motivos: el APK ya está en JOAPC (se evita mover unos 140 MB) y en la prueba de esta skill el enlace Wi-Fi notebook-teléfono falló (ping 100 % perdido, transferencia cortada a los 12 MB) mientras JOAPC alcanzaba al teléfono sin pérdida.
+
+   Requisito: el `adb` de JOAPC tiene su propia clave, así que hay que emparejarlo **una vez** (`adb pair`, con el código de la pantalla "Vincular dispositivo" del teléfono; lo escribe el autor). Si `connect` falla con el teléfono visible por mDNS, probablemente falta ese emparejamiento: no lo intentes por tu cuenta, pasá al camino 2 y avisale al autor. El emparejamiento queda guardado en el teléfono y en JOAPC: no hace falta repetirlo en cada instalación.
+
+   **Detección automática.** El puerto de conexión cambia cada vez que se reactiva la depuración inalámbrica o se reinicia el teléfono. Se detecta por mDNS desde la **notebook** (el `adb` de JOAPC no lo ve por mDNS; la notebook sí) y se usa desde JOAPC. El `adb` de JOAPC pierde la conexión al cerrarse cada sesión SSH, así que conectar e instalar van **en el mismo `ssh`**:
    ```bash
-   ssh -n joapc 'C:\Users\nico_\AppData\Local\Android\Sdk\platform-tools\adb.exe devices'
+   HP=$(~/Android/Sdk/platform-tools/adb mdns services | awk '/_adb-tls-connect/{print $3}')   # ip:puerto del teléfono
+   J='C:\Users\nico_\AppData\Local\Android\Sdk\platform-tools\adb.exe'
+   ssh -n joapc "$J connect $HP && $J -s $HP install -r $M\\app\\build\\outputs\\apk\\debug\\app-debug.apk"
    ```
-   Si lista el teléfono como `device`, instalá desde JOAPC sin traer nada:
-   ```bash
-   ssh -n joapc "C:\Users\nico_\AppData\Local\Android\Sdk\platform-tools\adb.exe install -r $M\\app\\build\\outputs\\apk\\debug\\app-debug.apk"
-   ```
+   Si `HP` queda vacío (el teléfono no anuncia el servicio: depuración inalámbrica apagada, Wi-Fi dormido o fuera de la red), pasá al camino 2. Una corrida real tardó 12,7 s en instalar (`Performing Streamed Install` / `Success`). Verificá después con `dumpsys package com.joasasso.minitoolbox` (`versionName`, `lastUpdateTime`) en vez de dar por buena solo la salida de `install`.
+
+   Si `connect` o `install` falla con el teléfono ya emparejado, probablemente se durmió: pedile al autor que lo desbloquee y reintentá una vez.
 2. **Fallback (falla lo anterior, no estás en casa o el teléfono no aparece): traer el APK e instalar desde la notebook** con el teléfono por cable. El `adb` de la notebook no está en el `PATH`:
    ```bash
    ~/Android/Sdk/platform-tools/adb devices
@@ -137,10 +142,12 @@ Verificado al escribir la skill (rama `docs/skill-remote-build`, `master @ 3bfc2
 - SSH con clave a `joapc` y `joapc-ts`.
 - Sincronización por `tar` y `assembleDebug` en la copia de JOAPC por LAN: `BUILD SUCCESSFUL`.
 - Traer el APK con `scp`.
+- Instalación por Wi-Fi desde el `adb` de JOAPC en LAN: `Success` y `versionName=1.4.1` confirmado en el teléfono (Pixel 8).
 
 **No** verificado:
 
 - Borrado de archivos versionados (`git ls-files -d`).
 - Cualquier tarea que no sea `assembleDebug` en JOAPC (`testDebugUnitTest`, `lintDebug`, `assembleRelease`, `bundleRelease`) y el firmado con `keystore.properties`.
 - El build por Tailscale (solo se probó que el SSH responde).
-- La instalación con `adb`, inalámbrica o por cable: el teléfono no estaba conectado.
+- La instalación por cable desde la notebook (camino 2) y la depuración inalámbrica fuera de casa.
+- El `adb` inalámbrico directo notebook-teléfono: falló en la prueba (enlace Wi-Fi notebook-teléfono sin respuesta), por eso la regla es usar JOAPC en LAN.
