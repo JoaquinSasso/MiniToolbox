@@ -15,11 +15,9 @@
     <string name="stepper_content_desc">Quantity selector</string>
     <string name="stepper_decrease">Decrease</string>
     <string name="stepper_increase">Increase</string>
-    <string name="favorites_reorder_info">Reorder your favorite tools by dragging them. The order will affect the shortcuts widget.</string>
     <string name="name">Name</string>
     <string name="color">Color</string>
     <string name="edit">Edit</string>
     <string name="information">Information</string>
     <string name="onboarding_dismiss">Dismiss hint</string>
-    <string name="onboarding_got_it">Got it</string>
 </resources>

@@ -159,17 +159,3 @@ fun widgetUse(context: Context, widgetType: String) = io {
     ctx.repo().incrementWidgetUse(widgetType)
     scheduleIfEnabled(ctx)
 }
-
-/**
- * NUEVO: Heartbeat diario de versión/idiomas sin contar "app open".
- * Útil para procesos que no abren la app (p.ej., widgets/foreground services).
- * No agenda upload por sí mismo (evita tráfico innecesario), pero puedes activarlo si quieres.
- */
-fun versionHeartbeat(context: Context) = io {
-    val ctx = context.applicationContext
-    if (!isMetricsEnabled(ctx)) return@io
-    // Requiere agregar el wrapper público en AggregatesRepository (ver sección 2)
-    ctx.repo().dailyVersionAndLangHeartbeat()
-    // Opcional: descomenta si deseas forzar envío oportunista:
-    // scheduleIfEnabled(ctx)
-}

@@ -276,11 +276,6 @@ class AggregatesRepository(private val context: Context) {
         }
     }
 
-    // Wrapper público para marcar versión/idiomas sin incrementar appOpen
-    suspend fun dailyVersionAndLangHeartbeat() {
-        ensureDailyVersionAndLangMarks()
-    }
-
     // ----------------------------------
     // Lecturas
     // ----------------------------------
