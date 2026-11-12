@@ -10,6 +10,8 @@ Este archivo se carga en todas las conversaciones. Los procedimientos largos viv
 
 ## Comandos (Windows, PowerShell, desde la raíz)
 
+En la notebook con Ubuntu los comandos pesados de Gradle no se corren acá: se delegan a la PC de escritorio con la skill `remote-build`.
+
 | Para qué | Comando |
 |---|---|
 | Verificación completa (lo mismo que corre el CI) | `.\gradlew.bat assembleDebug testDebugUnitTest lintDebug` |
@@ -71,6 +73,7 @@ Este archivo se carga en todas las conversaciones. Los procedimientos largos viv
 | `tool-catalog-change` | Al agregar, quitar, renombrar o fusionar una herramienta |
 | `mvvm-screen` | Al migrar una pantalla a ViewModel o crear una herramienta nueva |
 | `release` | Al preparar una versión para Google Play |
+| `remote-build` | Si trabajás desde la notebook con Ubuntu (`hostname` = `JOANOTEBOOK`): antes de correr Gradle (build, lint, tests) o instalar la app en el teléfono |
 
 ## Trampas conocidas
 
