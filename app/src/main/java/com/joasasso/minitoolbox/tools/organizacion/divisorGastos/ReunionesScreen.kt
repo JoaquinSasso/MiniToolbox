@@ -61,9 +61,11 @@ fun ReunionesScreen(
 
     Scaffold(
         topBar = {
-            TopBarReusable(stringResource(R.string.tool_expense_splitter), onBack) {
-                showInfo = true
-            }
+            TopBarReusable(
+                title = stringResource(R.string.tool_expense_splitter),
+                onBack = onBack,
+                onShowInfo = { showInfo = true }
+            )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onCrearReunion) {

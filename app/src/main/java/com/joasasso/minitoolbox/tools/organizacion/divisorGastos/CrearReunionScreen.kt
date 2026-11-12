@@ -83,9 +83,11 @@ fun CrearReunionScreen(
 
     Scaffold(
         topBar = {
-            TopBarReusable(stringResource(R.string.create_meeting_screen), onBack) {
-                showInfo = true
-            }
+            TopBarReusable(
+                title = stringResource(R.string.create_meeting_screen),
+                onBack = onBack,
+                onShowInfo = { showInfo = true }
+            )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         bottomBar = {
