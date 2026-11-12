@@ -20,6 +20,13 @@ internal val KEY_POR_VASO = intPreferencesKey("agua_ml_por_vaso")
 internal val KEY_NOTIF_ACTIVAS = intPreferencesKey("agua_notif_activas")
 internal val KEY_FRECUENCIA_MIN = intPreferencesKey("agua_notif_frecuencia_min")
 internal val KEY_CANTIDADES_RAPIDAS = stringPreferencesKey("agua_cantidades_rapidas")
+internal val KEY_HORA_INICIO_MIN = intPreferencesKey("agua_notif_hora_inicio_min")
+internal val KEY_HORA_FIN_MIN = intPreferencesKey("agua_notif_hora_fin_min")
+internal val KEY_PAUSAR_AL_CUMPLIR = intPreferencesKey("agua_notif_pausar_al_cumplir")
+
+/** Horario en que se permiten recordatorios, en minutos desde la medianoche: 8:00 a 22:00. */
+const val HORA_INICIO_DEFAULT_MIN = 8 * 60
+const val HORA_FIN_DEFAULT_MIN = 22 * 60
 
 /** Cantidades extra que se ofrecen como atajos debajo del botón principal, si el usuario no las cambió. */
 val CANTIDADES_RAPIDAS_DEFAULT = listOf(150, 500)
@@ -109,6 +116,17 @@ suspend fun Context.guardarNotificacionesActivas(activo: Boolean) {
 
 suspend fun Context.guardarCantidadesRapidas(cantidades: List<Int>) {
     aguaDataStore.edit { it[KEY_CANTIDADES_RAPIDAS] = cantidades.joinToString(",") }
+}
+
+suspend fun Context.guardarHorarioRecordatorio(inicioMin: Int, finMin: Int) {
+    aguaDataStore.edit {
+        it[KEY_HORA_INICIO_MIN] = inicioMin
+        it[KEY_HORA_FIN_MIN] = finMin
+    }
+}
+
+suspend fun Context.guardarPausarAlCumplir(pausar: Boolean) {
+    aguaDataStore.edit { it[KEY_PAUSAR_AL_CUMPLIR] = if (pausar) 1 else 0 }
 }
 
 suspend fun Context.guardarFrecuenciaMinutos(min: Int) {

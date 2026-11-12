@@ -107,4 +107,42 @@ class AguaMathTest {
         assertEquals(180, AguaMath.frecuenciaMasCercana(210))
         assertEquals(180, AguaMath.frecuenciaMasCercana(240))
     }
+
+    @Test
+    fun dentroDeHorario_horarioNormalExcluyeElFin() {
+        val inicio = 8 * 60
+        val fin = 22 * 60
+        assertFalse(AguaMath.dentroDeHorario(7 * 60 + 59, inicio, fin))
+        assertTrue(AguaMath.dentroDeHorario(8 * 60, inicio, fin))
+        assertTrue(AguaMath.dentroDeHorario(21 * 60 + 59, inicio, fin))
+        assertFalse(AguaMath.dentroDeHorario(22 * 60, inicio, fin))
+        assertFalse(AguaMath.dentroDeHorario(3 * 60, inicio, fin))
+    }
+
+    @Test
+    fun dentroDeHorario_cruzaMedianoche() {
+        val inicio = 22 * 60
+        val fin = 6 * 60
+        assertTrue(AguaMath.dentroDeHorario(23 * 60, inicio, fin))
+        assertTrue(AguaMath.dentroDeHorario(2 * 60, inicio, fin))
+        assertFalse(AguaMath.dentroDeHorario(12 * 60, inicio, fin))
+    }
+
+    @Test
+    fun dentroDeHorario_inicioIgualAFinEsTodoElDia() {
+        assertTrue(AguaMath.dentroDeHorario(3 * 60, 9 * 60, 9 * 60))
+    }
+
+    @Test
+    fun debeRecordar_respetaHorarioYPausaAlCumplir() {
+        val mediodia = 12 * 60
+        val noche = 23 * 60
+        val inicio = 8 * 60
+        val fin = 22 * 60
+        assertTrue(AguaMath.debeRecordar(mediodia, inicio, fin, true, 500, 2000, 250))
+        assertFalse(AguaMath.debeRecordar(noche, inicio, fin, true, 500, 2000, 250))
+        // Meta cumplida: con pausa no avisa, sin pausa sí
+        assertFalse(AguaMath.debeRecordar(mediodia, inicio, fin, true, 2000, 2000, 250))
+        assertTrue(AguaMath.debeRecordar(mediodia, inicio, fin, false, 2000, 2000, 250))
+    }
 }

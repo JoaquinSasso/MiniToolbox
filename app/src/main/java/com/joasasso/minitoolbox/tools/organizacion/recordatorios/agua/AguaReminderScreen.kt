@@ -1,6 +1,8 @@
 package com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua
 
 import android.Manifest
+import android.content.Intent
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.Spring
@@ -30,6 +32,7 @@ import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.NotificationsOff
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Settings
@@ -50,6 +53,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -76,6 +80,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -110,20 +115,27 @@ fun AguaReminderScreen(
     val removedText = stringResource(R.string.water_removed_feedback)
     val resetText = stringResource(R.string.water_reset_feedback)
     val undoText = stringResource(R.string.water_undo)
-    val deniedText = stringResource(R.string.notif_permission_denied)
+
+    // Estado real del sistema, no solo la preferencia guardada: el usuario puede bloquear las
+    // notificaciones desde Ajustes de Android y el switch no se entera.
+    fun notificacionesPermitidas() = NotificationManagerCompat.from(context).areNotificationsEnabled()
+    var notifPermitidas by remember { mutableStateOf(notificacionesPermitidas()) }
 
     val notifLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
-        if (!granted) {
-            scope.launch { snackbarHostState.showSnackbar(deniedText) }
-        }
+        notifPermitidas = notificacionesPermitidas()
+        // Solo se activa con permiso: antes el switch quedaba encendido aunque se rechazara
+        if (granted) viewModel.toggleNotificaciones(true)
     }
 
-    // Al volver a primer plano, verificar si cambió la fecha (medianoche)
+    // Al volver a primer plano, verificar si cambió la fecha (medianoche) y el permiso
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) viewModel.verificarFecha()
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.verificarFecha()
+                notifPermitidas = notificacionesPermitidas()
+            }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
@@ -266,12 +278,29 @@ fun AguaReminderScreen(
             onPorVaso = viewModel::guardarPorVaso,
             onCantidadesRapidas = viewModel::guardarCantidadesRapidas,
             onNotificaciones = { activar ->
-                if (activar && NotificationPermission.shouldRequest(context)) {
-                    notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                when {
+                    !activar -> viewModel.toggleNotificaciones(false)
+                    NotificationPermission.shouldRequest(context) ->
+                        notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    // Bloqueadas desde Ajustes de Android (o rechazadas dos veces): no se enciende
+                    // y el aviso de abajo explica por qué
+                    !notificacionesPermitidas() -> notifPermitidas = false
+                    else -> viewModel.toggleNotificaciones(true)
                 }
-                viewModel.toggleNotificaciones(activar)
             },
-            onFrecuencia = viewModel::guardarFrecuenciaMinutos
+            onFrecuencia = viewModel::guardarFrecuenciaMinutos,
+            onHorario = viewModel::guardarHorarioRecordatorio,
+            onPausarAlCumplir = viewModel::guardarPausarAlCumplir,
+            avisoPermiso = {
+                if (!notifPermitidas) {
+                    AvisoNotificacionesBloqueadas(onAbrirAjustes = {
+                        context.startActivity(
+                            Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                                .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                        )
+                    })
+                }
+            }
         )
     }
 
@@ -469,6 +498,33 @@ private fun AccionesRegistro(
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AvisoNotificacionesBloqueadas(onAbrirAjustes: () -> Unit) {
+    Surface(
+        color = MaterialTheme.colorScheme.errorContainer,
+        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+        shape = MaterialTheme.shapes.medium
+    ) {
+        Column(
+            modifier = Modifier.padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 4.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Filled.NotificationsOff, contentDescription = null)
+                Spacer(Modifier.width(12.dp))
+                Text(
+                    stringResource(R.string.water_notif_blocked),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            TextButton(onClick = onAbrirAjustes, modifier = Modifier.align(Alignment.End)) {
+                Text(stringResource(R.string.water_notif_open_settings))
             }
         }
     }

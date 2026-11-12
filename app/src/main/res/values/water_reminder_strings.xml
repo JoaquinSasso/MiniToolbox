@@ -48,7 +48,14 @@
     <string name="water_notif_interval">Every</string>
     <string name="water_interval_minutes">%1$d min</string>
     <string name="water_interval_hours">%1$s h</string>
-    <string name="notif_permission_denied">Notification permission was not granted.</string>
+    <string name="water_notif_window">Only between</string>
+    <string name="water_notif_window_and">and</string>
+    <string name="water_notif_window_start">Start time</string>
+    <string name="water_notif_window_end">End time</string>
+    <string name="water_notif_pause_goal">Pause once I reach my goal</string>
+    <string name="water_notif_pause_goal_hint">No more reminders until tomorrow</string>
+    <string name="water_notif_blocked">Notifications for MiniToolbox are blocked, so reminders will not arrive.</string>
+    <string name="water_notif_open_settings">Open settings</string>
 
     <string name="water_help_title">About the water reminder</string>
     <string name="water_help_line1">• Track the amount of water you drink daily.</string>
@@ -86,7 +93,8 @@
 
     <!-- Notification -->
     <string name="water_reminder_title">Time to drink water 💧</string>
-    <string name="water_reminder_content">You have drunk %1$.2fL out of %2$.2fL</string>
+    <string name="water_reminder_content">You have had %1$s L of %2$s L. %3$s to go.</string>
+    <string name="water_reminder_content_done">You have had %1$s L of %2$s L. You already reached your goal.</string>
     <string name="water_reminder_channel_name">Water Reminder</string>
     <string name="water_reminder_channel_description">Reminders to drink water throughout the day</string>
 

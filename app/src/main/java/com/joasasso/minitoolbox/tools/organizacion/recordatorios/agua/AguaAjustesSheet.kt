@@ -17,6 +17,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,6 +33,8 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -44,6 +47,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -51,15 +55,19 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.joasasso.minitoolbox.R
+import android.text.format.DateFormat
 import java.text.DecimalFormat
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import kotlin.math.roundToInt
 
 /**
  * Configuración de Agua: todo lo que se toca una vez y no tiene por qué ocupar la pantalla
  * del día. Cada cambio se guarda en el momento; no hay botón "Guardar".
  *
- * [extraRecordatorios] recibe lo que depende de permisos y alarmas (horario activo, estado del
- * permiso), que arma la pantalla porque necesita el launcher de permisos.
+ * [avisoPermiso] muestra el estado del permiso de notificaciones; lo arma la pantalla porque
+ * necesita el launcher de permisos y el ciclo de vida para enterarse si el usuario lo cambió.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,7 +79,9 @@ fun AguaAjustesSheet(
     onCantidadesRapidas: (List<Int>) -> Unit,
     onNotificaciones: (Boolean) -> Unit,
     onFrecuencia: (Int) -> Unit,
-    extraRecordatorios: @Composable ColumnScope.() -> Unit = {}
+    onHorario: (inicioMin: Int, finMin: Int) -> Unit,
+    onPausarAlCumplir: (Boolean) -> Unit,
+    avisoPermiso: @Composable ColumnScope.() -> Unit = {}
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -95,7 +105,12 @@ fun AguaAjustesSheet(
                 frecuenciaMinutos = uiState.frecuenciaMinutos,
                 onNotificaciones = onNotificaciones,
                 onFrecuencia = onFrecuencia,
-                extra = extraRecordatorios
+                horaInicioMin = uiState.horaInicioMin,
+                horaFinMin = uiState.horaFinMin,
+                onHorario = onHorario,
+                pausarAlCumplir = uiState.pausarAlCumplir,
+                onPausarAlCumplir = onPausarAlCumplir,
+                avisoPermiso = avisoPermiso
             )
         }
     }
@@ -270,42 +285,37 @@ private fun SeccionCantidadesRapidas(cantidades: List<Int>, onCantidadesRapidas:
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun SeccionRecordatorios(
     activas: Boolean,
     frecuenciaMinutos: Int,
     onNotificaciones: (Boolean) -> Unit,
     onFrecuencia: (Int) -> Unit,
-    extra: @Composable ColumnScope.() -> Unit
+    horaInicioMin: Int,
+    horaFinMin: Int,
+    onHorario: (Int, Int) -> Unit,
+    pausarAlCumplir: Boolean,
+    onPausarAlCumplir: (Boolean) -> Unit,
+    avisoPermiso: @Composable ColumnScope.() -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
+    // null: ningún reloj abierto; true: editando el inicio; false: editando el fin
+    var editandoInicio by rememberSaveable { mutableStateOf<Boolean?>(null) }
+
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(stringResource(R.string.water_notif_title), style = MaterialTheme.typography.titleMedium)
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 48.dp)
-                .toggleable(
-                    value = activas,
-                    role = Role.Switch,
-                    onValueChange = { nuevo ->
-                        haptic.performHapticFeedback(
-                            if (nuevo) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff
-                        )
-                        onNotificaciones(nuevo)
-                    }
-                ),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                stringResource(R.string.water_notif_enabled),
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.weight(1f)
-            )
-            Switch(checked = activas, onCheckedChange = null)
-        }
+        FilaSwitch(
+            texto = stringResource(R.string.water_notif_enabled),
+            activo = activas,
+            onCambio = { nuevo ->
+                haptic.performHapticFeedback(
+                    if (nuevo) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff
+                )
+                onNotificaciones(nuevo)
+            }
+        )
+        avisoPermiso()
         if (activas) {
             Text(
                 stringResource(R.string.water_notif_interval),
@@ -327,10 +337,107 @@ private fun SeccionRecordatorios(
                     }
                 }
             }
+
+            Text(
+                stringResource(R.string.water_notif_window),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.Center
+            ) {
+                AssistChip(
+                    onClick = { editandoInicio = true },
+                    label = { Text(formatearHora(horaInicioMin)) },
+                    leadingIcon = { Icon(Icons.Filled.Schedule, contentDescription = null) }
+                )
+                Text(
+                    stringResource(R.string.water_notif_window_and),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.align(Alignment.CenterVertically)
+                )
+                AssistChip(
+                    onClick = { editandoInicio = false },
+                    label = { Text(formatearHora(horaFinMin)) },
+                    leadingIcon = { Icon(Icons.Filled.Schedule, contentDescription = null) }
+                )
+            }
+
+            FilaSwitch(
+                texto = stringResource(R.string.water_notif_pause_goal),
+                detalle = stringResource(R.string.water_notif_pause_goal_hint),
+                activo = pausarAlCumplir,
+                onCambio = onPausarAlCumplir
+            )
         }
-        extra()
+    }
+
+    editandoInicio?.let { inicio ->
+        val actual = if (inicio) horaInicioMin else horaFinMin
+        val context = LocalContext.current
+        val estado = rememberTimePickerState(
+            initialHour = actual / 60,
+            initialMinute = actual % 60,
+            is24Hour = DateFormat.is24HourFormat(context)
+        )
+        AlertDialog(
+            onDismissRequest = { editandoInicio = null },
+            title = {
+                Text(
+                    stringResource(
+                        if (inicio) R.string.water_notif_window_start else R.string.water_notif_window_end
+                    )
+                )
+            },
+            text = { TimePicker(state = estado) },
+            confirmButton = {
+                TextButton(onClick = {
+                    val elegido = estado.hour * 60 + estado.minute
+                    if (inicio) onHorario(elegido, horaFinMin) else onHorario(horaInicioMin, elegido)
+                    editandoInicio = null
+                }) { Text(stringResource(R.string.accept)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { editandoInicio = null }) { Text(stringResource(R.string.cancel)) }
+            }
+        )
     }
 }
+
+@Composable
+private fun FilaSwitch(
+    texto: String,
+    activo: Boolean,
+    onCambio: (Boolean) -> Unit,
+    detalle: String? = null
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 48.dp)
+            .toggleable(value = activo, role = Role.Switch, onValueChange = onCambio),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(texto, style = MaterialTheme.typography.bodyLarge)
+            if (detalle != null) {
+                Text(
+                    detalle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+        Switch(checked = activo, onCheckedChange = null)
+    }
+}
+
+/** Hora en el formato corto del idioma del sistema (14:30 o 2:30 p. m.). */
+private fun formatearHora(minutoDelDia: Int): String =
+    LocalTime.of(minutoDelDia / 60, minutoDelDia % 60)
+        .format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
 
 @Composable
 private fun etiquetaFrecuencia(minutos: Int): String =

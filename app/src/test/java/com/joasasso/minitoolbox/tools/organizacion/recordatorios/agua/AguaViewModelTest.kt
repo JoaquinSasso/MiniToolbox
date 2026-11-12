@@ -7,13 +7,13 @@ import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.viewModelScope
 import androidx.test.core.app.ApplicationProvider
-import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.TestApplication
 import com.joasasso.minitoolbox.data.CANTIDADES_RAPIDAS_DEFAULT
 import com.joasasso.minitoolbox.data.DefaultAguaRepository
 import com.joasasso.minitoolbox.data.aguaDataStore
 import com.joasasso.minitoolbox.data.guardarAguaFecha
 import java.time.LocalDate
+import java.time.LocalTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
@@ -120,11 +120,11 @@ class AguaViewModelTest {
             assertEquals(AguaEvent.WaterAdded(250), addOchoAmDeferred.await())
 
             // Supongamos que había una notificación previa mostrando 0.25L
-            receiver.handleReminder(app, today = fecha)
+            receiver.handleReminder(app, today = fecha, ahora = LocalTime.of(8, 0))
             val notifOchoAm = shadowNotificationManager.getNotification(WATER_REMINDER_NOTIFICATION_ID)
             assertNotNull(notifOchoAm)
             assertEquals(
-                app.getString(R.string.water_reminder_content, 0.25f, 2.0f),
+                textoRecordatorio(app, consumido = 250, objetivo = 2000, mlPorVaso = 250),
                 notifOchoAm.extras.getCharSequence(Notification.EXTRA_TEXT)?.toString()
             )
 
@@ -144,11 +144,11 @@ class AguaViewModelTest {
             assertEquals(750, state.totalAgua)
 
             // 10:00 AM: Se dispara el recordatorio reprogramado y debe mostrar 0.75L de 2.00L
-            receiver.handleReminder(app, today = fecha)
+            receiver.handleReminder(app, today = fecha, ahora = LocalTime.of(10, 0))
             val notifDiezAm = shadowNotificationManager.getNotification(WATER_REMINDER_NOTIFICATION_ID)
             assertNotNull(notifDiezAm)
             assertEquals(
-                app.getString(R.string.water_reminder_content, 0.75f, 2.0f),
+                textoRecordatorio(app, consumido = 750, objetivo = 2000, mlPorVaso = 250),
                 notifDiezAm.extras.getCharSequence(Notification.EXTRA_TEXT)?.toString()
             )
         } finally {

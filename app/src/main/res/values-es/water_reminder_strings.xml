@@ -50,7 +50,14 @@
     <string name="water_notif_interval">Cada</string>
     <string name="water_interval_minutes">%1$d min</string>
     <string name="water_interval_hours">%1$s h</string>
-    <string name="notif_permission_denied">No se otorgó permiso para notificaciones.</string>
+    <string name="water_notif_window">Solo entre</string>
+    <string name="water_notif_window_and">y</string>
+    <string name="water_notif_window_start">Desde</string>
+    <string name="water_notif_window_end">Hasta</string>
+    <string name="water_notif_pause_goal">Pausar al cumplir la meta</string>
+    <string name="water_notif_pause_goal_hint">No te avisa más hasta mañana</string>
+    <string name="water_notif_blocked">Las notificaciones de MiniToolbox están bloqueadas, así que los recordatorios no van a llegar.</string>
+    <string name="water_notif_open_settings">Abrir ajustes</string>
 
     <string name="water_help_title">Sobre el recordatorio de agua</string>
     <string name="water_help_line1">• Lleva el control de la cantidad de agua que consumes a diario.</string>
@@ -88,7 +95,8 @@
 
     <!-- Notificacion -->
     <string name="water_reminder_title">Hora de beber agua 💧</string>
-    <string name="water_reminder_content">Has consumido %1$.2fL de %2$.2fL</string>
+    <string name="water_reminder_content">Llevas %1$s L de %2$s L. Te faltan %3$s.</string>
+    <string name="water_reminder_content_done">Llevas %1$s L de %2$s L. Ya cumpliste tu meta.</string>
     <string name="water_reminder_channel_name">Recordatorio de Agua</string>
     <string name="water_reminder_channel_description">Recordatorios para beber agua durante el día</string>
 

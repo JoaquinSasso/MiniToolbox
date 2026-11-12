@@ -14,40 +14,30 @@ import kotlinx.coroutines.flow.first
 
 class AgregarAguaCallback : ActionCallback {
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
-        val porVaso = context.flujoPorVaso().first()
-        context.incrementarAguaHoy(porVaso)
-
-        cancelarNotificacionAguaActiva(context)
-        actualizarWidgetAguaSuspend(context)
-
-        // Agregar uso a las métricas
-        val kind = WidgetWaterKindResolver.resolve(context, glanceId)
-        widgetUse(context, kind)
-
-        // Reprogramar el recordatorio de agua solo si las notificaciones están activas
-        if (context.flujoNotificacionesActivas().first()) {
-            val frecuenciaMinutos = context.flujoFrecuenciaMinutos().first()
-            programarRecordatorioAgua(context, frecuenciaMinutos)
-        }
+        cambiarAguaFueraDeLaApp(context, context.flujoPorVaso().first())
+        widgetUse(context, WidgetWaterKindResolver.resolve(context, glanceId))
     }
 }
 
 class QuitarAguaCallback : ActionCallback {
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
-        val porVaso = context.flujoPorVaso().first()
-        context.incrementarAguaHoy(-porVaso)
+        cambiarAguaFueraDeLaApp(context, -context.flujoPorVaso().first())
+        widgetUse(context, WidgetWaterKindResolver.resolve(context, glanceId))
+    }
+}
 
-        cancelarNotificacionAguaActiva(context)
-        actualizarWidgetAguaSuspend(context)
+/**
+ * Registra [delta] ml en el día de hoy desde fuera de la app (widget o notificación) y deja
+ * el resto en el mismo estado que si se hubiera hecho desde la pantalla: notificación visible
+ * cerrada, widgets actualizados y recordatorio reprogramado si está activo.
+ */
+suspend fun cambiarAguaFueraDeLaApp(context: Context, delta: Int) {
+    context.incrementarAguaHoy(delta)
 
-        // Agregar uso a las métricas
-        val kind = WidgetWaterKindResolver.resolve(context, glanceId)
-        widgetUse(context, kind)
+    cancelarNotificacionAguaActiva(context)
+    actualizarWidgetAguaSuspend(context)
 
-        // Reprogramar el recordatorio de agua solo si las notificaciones están activas
-        if (context.flujoNotificacionesActivas().first()) {
-            val frecuenciaMinutos = context.flujoFrecuenciaMinutos().first()
-            programarRecordatorioAgua(context, frecuenciaMinutos)
-        }
+    if (context.flujoNotificacionesActivas().first()) {
+        programarRecordatorioAgua(context, context.flujoFrecuenciaMinutos().first())
     }
 }

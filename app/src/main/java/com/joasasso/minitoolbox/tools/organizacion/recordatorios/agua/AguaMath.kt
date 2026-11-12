@@ -31,6 +31,35 @@ object AguaMath {
         FRECUENCIAS_MINUTOS.minBy { kotlin.math.abs(it - minutos) }
 
     /**
+     * true si [minutoDelDia] cae en el horario de recordatorios, con el fin excluido.
+     * Si [inicioMin] es mayor que [finMin] el horario cruza la medianoche (por ejemplo 22:00 a 6:00,
+     * para turnos de noche). Inicio igual a fin significa todo el día.
+     */
+    fun dentroDeHorario(minutoDelDia: Int, inicioMin: Int, finMin: Int): Boolean = when {
+        inicioMin == finMin -> true
+        inicioMin < finMin -> minutoDelDia in inicioMin until finMin
+        else -> minutoDelDia >= inicioMin || minutoDelDia < finMin
+    }
+
+    /**
+     * Decide si el recordatorio periódico debe mostrarse. La alarma sigue sonando a su ritmo;
+     * esto solo evita la notificación fuera de horario o cuando ya no aporta nada.
+     */
+    fun debeRecordar(
+        minutoDelDia: Int,
+        inicioMin: Int,
+        finMin: Int,
+        pausarAlCumplir: Boolean,
+        consumidoML: Int,
+        objetivoML: Int,
+        mlPorVaso: Int
+    ): Boolean {
+        if (!dentroDeHorario(minutoDelDia, inicioMin, finMin)) return false
+        if (pausarAlCumplir && objetivoAlcanzado(consumidoML, objetivoML, mlPorVaso)) return false
+        return true
+    }
+
+    /**
      * Calcula los mililitros por vaso necesarios para cubrir [objetivoML] en [vasos] tomas,
      * redondeando al mililitro entero más cercano dentro de los límites permitidos.
      */

@@ -5,7 +5,12 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.joasasso.minitoolbox.data.AguaRepository
 import com.joasasso.minitoolbox.data.DefaultAguaRepository
+import com.joasasso.minitoolbox.data.HORA_FIN_DEFAULT_MIN
+import com.joasasso.minitoolbox.data.HORA_INICIO_DEFAULT_MIN
 import com.joasasso.minitoolbox.data.KEY_CANTIDADES_RAPIDAS
+import com.joasasso.minitoolbox.data.KEY_HORA_FIN_MIN
+import com.joasasso.minitoolbox.data.KEY_HORA_INICIO_MIN
+import com.joasasso.minitoolbox.data.KEY_PAUSAR_AL_CUMPLIR
 import com.joasasso.minitoolbox.data.KEY_FRECUENCIA_MIN
 import com.joasasso.minitoolbox.data.KEY_NOTIF_ACTIVAS
 import com.joasasso.minitoolbox.data.KEY_OBJETIVO
@@ -34,6 +39,9 @@ data class AguaUiState(
     val notificacionesActivas: Boolean = false,
     val frecuenciaMinutos: Int = 30,
     val cantidadesRapidas: List<Int> = emptyList(),
+    val horaInicioMin: Int = HORA_INICIO_DEFAULT_MIN,
+    val horaFinMin: Int = HORA_FIN_DEFAULT_MIN,
+    val pausarAlCumplir: Boolean = true,
     val fecha: LocalDate = LocalDate.now(),
     val isLoading: Boolean = false
 )
@@ -80,6 +88,9 @@ class AguaViewModel @JvmOverloads constructor(
             notificacionesActivas = prefs[KEY_NOTIF_ACTIVAS] == 1,
             frecuenciaMinutos = prefs[KEY_FRECUENCIA_MIN] ?: 30,
             cantidadesRapidas = parsearCantidadesRapidas(prefs[KEY_CANTIDADES_RAPIDAS]),
+            horaInicioMin = prefs[KEY_HORA_INICIO_MIN] ?: HORA_INICIO_DEFAULT_MIN,
+            horaFinMin = prefs[KEY_HORA_FIN_MIN] ?: HORA_FIN_DEFAULT_MIN,
+            pausarAlCumplir = (prefs[KEY_PAUSAR_AL_CUMPLIR] ?: 1) == 1,
             fecha = fecha,
             isLoading = false
         )
@@ -211,6 +222,18 @@ class AguaViewModel @JvmOverloads constructor(
     fun guardarCantidadesRapidas(cantidades: List<Int>) {
         viewModelScope.launch {
             repository.guardarCantidadesRapidas(getApplication(), cantidades)
+        }
+    }
+
+    fun guardarHorarioRecordatorio(inicioMin: Int, finMin: Int) {
+        viewModelScope.launch {
+            repository.guardarHorarioRecordatorio(getApplication(), inicioMin, finMin)
+        }
+    }
+
+    fun guardarPausarAlCumplir(pausar: Boolean) {
+        viewModelScope.launch {
+            repository.guardarPausarAlCumplir(getApplication(), pausar)
         }
     }
 }
