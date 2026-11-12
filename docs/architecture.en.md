@@ -38,7 +38,7 @@ flowchart TD
 
     subgraph Background [Background work]
         PAS[PomodoroAlarmService]
-        AR["Water receivers<br/>WaterReminderReceiver, ResetAguaReceiver"]
+        AR["Water receivers<br/>WaterReminderReceiver, ResetAguaReceiver,<br/>AguaNotificacionAccionReceiver"]
         WM["WorkManager<br/>UploadMetricsWorker"]
         GW["Glance widgets (5)"]
     end

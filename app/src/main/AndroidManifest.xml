@@ -56,6 +56,11 @@
             android:name=".tools.organizacion.recordatorios.agua.ResetAguaReceiver"
             android:exported="false" />
 
+        <!-- Acción "+vaso" de la notificación de agua -->
+        <receiver
+            android:name=".tools.organizacion.recordatorios.agua.AguaNotificacionAccionReceiver"
+            android:exported="false" />
+
         <!-- Widget de agua -->
         <receiver
             android:name="com.joasasso.minitoolbox.widgets.AguaWidgetReceiver"

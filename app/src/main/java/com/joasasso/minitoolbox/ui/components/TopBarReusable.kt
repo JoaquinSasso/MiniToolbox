@@ -1,5 +1,6 @@
 package com.joasasso.minitoolbox.ui.components
 
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
@@ -19,7 +20,8 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 fun TopBarReusable(
     title: String,
     onBack: () -> Unit,
-    onShowInfo: (() -> Unit)? = null
+    onShowInfo: (() -> Unit)? = null,
+    actions: @Composable RowScope.() -> Unit = {}
 ) {
     val haptic = LocalHapticFeedback.current
 
@@ -31,6 +33,7 @@ fun TopBarReusable(
             }
         },
         actions = {
+            actions()
             if (onShowInfo != null) {
                 IconButton(onClick = {
                     onShowInfo()

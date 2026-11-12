@@ -1,33 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--Pantalla principal-->
-    <string name="water_goal_label">Meta diaria:</string>
-    <string name="water_add_title">Agregar agua</string>
+    <string name="water_liters_value">%1$s L</string>
+    <string name="water_of_goal">de %1$s L</string>
+    <plurals name="water_glasses_progress">
+        <item quantity="one">%1$d de %2$d vaso</item>
+        <item quantity="many">%1$d de %2$d vasos</item>
+        <item quantity="other">%1$d de %2$d vasos</item>
+    </plurals>
+    <string name="water_remaining_ml">Te faltan %1$d ml</string>
+    <string name="water_remaining_liters">Te faltan %1$s L</string>
+    <string name="water_goal_reached">Meta cumplida</string>
     <string name="water_add">+%1$d ml</string>
-    <string name="water_remove">-%1$d ml</string>
-    <string name="water_change_glass">Cambiar cantidad del vaso</string>
-    <string name="water_glasses_display">( %1$d / %2$d Vasos)</string>
-
-    <string name="water_notif_title">Recordatorio de agua</string>
-    <string name="water_notif_enabled">Notificaciones</string>
-    <string name="water_notif_freq">Frecuencia: %1$.1f hs</string>
-    <string name="notif_enabled_snackbar">Notificaciones activadas</string>
-    <string name="notif_disabled_snackbar">Notificaciones desactivadas</string>
-    <string name="notif_permission_denied">No se otorgó permiso para notificaciones.</string>
-
-    <string name="reset_content_desc">Resetear</string>
-    <string name="stats">Estadísticas</string>
-    <string name="stats_content_desc">Estadísticas</string>
+    <string name="water_remove_desc">Quitar %1$d ml</string>
     <string name="water_widget_hint">Puedes agregar el widget a tu pantalla de inicio para registrar tu consumo de agua más fácilmente.</string>
+    <string name="water_widget_add">Agregar widget a la pantalla de inicio</string>
 
-    <string name="glass_amount_title">Cantidad por vaso</string>
-    <string name="glass_amount_label">ml</string>
-    <string name="glasses_per_day_label">Vasos por día</string>
+    <string name="water_settings">Ajustes</string>
+    <string name="water_more_options">Más opciones</string>
+    <string name="water_help_menu">Ayuda</string>
+    <string name="water_reset_menu">Reiniciar el día</string>
+    <string name="water_reset_confirm_title">¿Reiniciar el día?</string>
+    <string name="water_reset_confirm_text">Se va a borrar lo que registraste hoy (%1$s L). Vas a poder deshacerlo desde el aviso que aparece abajo.</string>
+    <string name="water_reset_confirm">Reiniciar</string>
+    <string name="stats">Estadísticas</string>
+    <string name="water_undo">Deshacer</string>
+
+    <!--Ajustes-->
+    <string name="water_settings_goal">Meta diaria</string>
+    <string name="water_settings_goal_hint">Para un adulto se recomienda entre 1,5 y 3 L por día.</string>
+    <string name="water_settings_glass">Tamaño del vaso</string>
+    <string name="water_settings_glass_hint">Es lo que suma el botón principal, el widget y la notificación.</string>
+    <string name="water_settings_glass_value">%1$d ml</string>
+    <string name="water_settings_glass_label">Mililitros</string>
+    <plurals name="water_settings_glass_per_day">
+        <item quantity="one">Equivale a %1$d vaso por día</item>
+        <item quantity="many">Equivale a %1$d vasos por día</item>
+        <item quantity="other">Equivale a %1$d vasos por día</item>
+    </plurals>
+    <string name="water_settings_glass_error">Tiene que estar entre %1$d ml y %2$d ml</string>
+    <string name="water_settings_quick">Otras cantidades</string>
+    <string name="water_settings_quick_hint">Aparecen debajo del botón principal, por ejemplo para una taza o una botella.</string>
+    <string name="water_settings_quick_add">Agregar</string>
+    <string name="water_settings_quick_delete_desc">Eliminar %1$d ml</string>
+    <string name="water_settings_quick_dialog_title">Nueva cantidad</string>
+    <string name="water_notif_title">Recordatorios</string>
+    <string name="water_notif_enabled">Recordarme tomar agua</string>
+    <string name="water_notif_interval">Cada</string>
+    <string name="water_interval_minutes">%1$d min</string>
+    <string name="water_interval_hours">%1$s h</string>
+    <string name="water_notif_window">Solo entre</string>
+    <string name="water_notif_window_and">y</string>
+    <string name="water_notif_window_start">Desde</string>
+    <string name="water_notif_window_end">Hasta</string>
+    <string name="water_notif_pause_goal">Pausar al cumplir la meta</string>
+    <string name="water_notif_pause_goal_hint">No te avisa más hasta mañana</string>
+    <string name="water_notif_blocked">Las notificaciones de MiniToolbox están bloqueadas, así que los recordatorios no van a llegar.</string>
+    <string name="water_notif_open_settings">Abrir ajustes</string>
 
     <string name="water_help_title">Sobre el recordatorio de agua</string>
     <string name="water_help_line1">• Lleva el control de la cantidad de agua que consumes a diario.</string>
-    <string name="water_help_line2">• Puedes configurar tu meta diaria y la cantidad que sumas con cada botón.</string>
-    <string name="water_help_line3">• Si activas las notificaciones, la app te recordará tomar agua según el intervalo elegido.</string>
+    <string name="water_help_line2">• Desde Ajustes puedes cambiar tu meta diaria, el tamaño del vaso y otras cantidades rápidas.</string>
+    <string name="water_help_line3">• Si activas los recordatorios, la app te avisará según el intervalo elegido.</string>
     <string name="water_help_line4">• Todo se almacena localmente y no se comparte fuera de tu dispositivo.</string>
     <string name="water_help_line5">• Puedes agregar el widget a tu pantalla de inicio para ver tu progreso diario y sumar o restar agua rápidamente sin abrir la app.</string>
     <string name="water_help_line6">💧 Recomendación: un adulto debe consumir entre 1.5 y 3 litros de agua pura al día. La meta diaria sugerida es de 2 litros, pero puedes ajustarla según tus necesidades, actividad y clima.</string>
@@ -35,32 +69,41 @@
     <string name="water_zero_warning">Ya no hay agua</string>
     <string name="water_added_feedback">Agregaste %1$d ml 💧</string>
     <string name="water_removed_feedback">Quitaste %1$d ml 💧</string>
-    <string name="water_reset_feedback">¡Contador de agua reiniciado!</string>
+    <string name="water_reset_feedback">Día reiniciado</string>
 
     <!--Pantalla de estadisticas-->
-    <string name="water_statistics_screen_no_data">No hay datos</string>
-    <string name="water_statistics_ultimos7">Consumo últimos 7 días</string>
-    <string name="water_statistics_sin_registros">Sin registros guardados</string>
-    <string name="water_statistics_promedio">Promedio semanal: %1$.2fL/día</string>
-    <string name="water_statistics_mejor_dia">Mejor día: %1$s</string>
-    <string name="water_statistics_historial">Historial completo</string>
+    <string name="water_statistics_ultimos7">Últimos 7 días</string>
+    <string name="water_statistics_historial">Historial</string>
+    <string name="water_statistics_historial_hint">Toca un día para corregirlo.</string>
     <string name="water_statistics_historial_vacio">Aún no has registrado consumo de agua.</string>
+    <string name="water_stats_streak_current">Racha actual</string>
+    <string name="water_stats_streak_best">Mejor racha</string>
+    <string name="water_stats_average">Promedio diario</string>
+    <string name="water_stats_no_value">—</string>
+    <string name="water_stats_today">Hoy</string>
+    <string name="water_stats_goal_line">La línea punteada marca tu meta de %1$s L.</string>
+    <string name="water_stats_bar_desc">%1$s: %2$s L</string>
+    <plurals name="water_stats_days">
+        <item quantity="one">%1$d día</item>
+        <item quantity="many">%1$d días</item>
+        <item quantity="other">%1$d días</item>
+    </plurals>
 
     <string name="water_statistics_help_title">Sobre las estadísticas</string>
-    <string name="water_statistics_help_line1">• El gráfico muestra tu consumo diario: las barras en verde indican que alcanzaste o superaste tu objetivo, y las barras en rojo indican que no lo alcanzaste.</string>
-    <string name="water_statistics_help_line2">• En el historial, los litros consumidos aparecen en verde si ese día cumpliste tu meta, y en rojo si no.</string>
-    <string name="water_statistics_help_line3">• El promedio semanal se calcula sobre los últimos 7 días registrados.</string>
-    <string name="water_statistics_help_line4">• Todos los datos se guardan localmente en tu dispositivo.</string>
-    <string name="water_statistics_help_line5">• Puedes pulsar sobre cualquier día del historial para editar la cantidad de agua consumida.</string>
+    <string name="water_statistics_help_line1">• El gráfico muestra los últimos 7 días, incluso los días sin registros. Las barras de color y el check indican que cumpliste la meta; las grises, que no.</string>
+    <string name="water_statistics_help_line2">• La racha cuenta los días seguidos con la meta cumplida. Hoy no la corta mientras el día esté en curso.</string>
+    <string name="water_statistics_help_line3">• El promedio diario usa los últimos 7 días completos: no incluye hoy ni los días anteriores a tu primer registro.</string>
+    <string name="water_statistics_help_line4">• La meta cumplida se calcula con tu meta actual, también para los días pasados. Todos los datos se guardan en tu dispositivo.</string>
+    <string name="water_statistics_help_line5">• Puedes tocar cualquier día del historial para corregir la cantidad registrada.</string>
 
     <string name="water_edit_dialog_title">Editar consumo</string>
-    <string name="water_edit_amount_label">Cantidad (ml)</string>
+    <string name="water_edit_amount_label">Cantidad</string>
     <string name="water_edit_save">Guardar</string>
-    <string name="water_edit_hint">Toca para editar</string>
 
     <!-- Notificacion -->
     <string name="water_reminder_title">Hora de beber agua 💧</string>
-    <string name="water_reminder_content">Has consumido %1$.2fL de %2$.2fL</string>
+    <string name="water_reminder_content">Llevas %1$s L de %2$s L. Te faltan %3$s.</string>
+    <string name="water_reminder_content_done">Llevas %1$s L de %2$s L. Ya cumpliste tu meta.</string>
     <string name="water_reminder_channel_name">Recordatorio de Agua</string>
     <string name="water_reminder_channel_description">Recordatorios para beber agua durante el día</string>
 
