@@ -14,6 +14,7 @@
     <string name="water_add">+%1$d ml</string>
     <string name="water_remove_desc">Quitar %1$d ml</string>
     <string name="water_widget_hint">Puedes agregar el widget a tu pantalla de inicio para registrar tu consumo de agua más fácilmente.</string>
+    <string name="water_widget_add">Agregar widget a la pantalla de inicio</string>
 
     <string name="water_settings">Ajustes</string>
     <string name="water_more_options">Más opciones</string>

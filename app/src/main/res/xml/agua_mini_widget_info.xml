@@ -3,6 +3,7 @@
     android:minWidth="40dp"
     android:minHeight="40dp"
     android:updatePeriodMillis="0"
+    android:initialLayout="@layout/glance_default_loading_layout"
     android:resizeMode="none"
     android:widgetCategory="home_screen"
     android:description="@string/widget_mini_agua_desc"

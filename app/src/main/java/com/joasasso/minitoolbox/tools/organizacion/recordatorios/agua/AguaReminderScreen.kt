@@ -1,6 +1,8 @@
 package com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua
 
 import android.Manifest
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Intent
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -36,6 +38,7 @@ import androidx.compose.material.icons.filled.NotificationsOff
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularWavyProgressIndicator
@@ -47,6 +50,7 @@ import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -90,6 +94,7 @@ import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import com.joasasso.minitoolbox.utils.NotificationPermission
 import kotlinx.coroutines.launch
+import com.joasasso.minitoolbox.widgets.AguaWidgetReceiver
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -268,12 +273,7 @@ fun AguaReminderScreen(
                 mlPorVaso = uiState.mlPorVaso,
                 onClick = onShowEstadisticas
             )
-            Text(
-                stringResource(R.string.water_widget_hint),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
-            )
+            SugerenciaWidget()
         }
     }
 
@@ -534,5 +534,32 @@ private fun AvisoNotificacionesBloqueadas(onAbrirAjustes: () -> Unit) {
                 Text(stringResource(R.string.water_notif_open_settings))
             }
         }
+    }
+}
+
+/**
+ * Ofrece fijar el widget en la pantalla de inicio; si el launcher no lo permite, deja el texto
+ * de ayuda. No se oculta cuando ya hay un widget: getGlanceIds también devuelve ids huérfanos
+ * que el launcher reservó pero no muestra, y el botón desaparecería sin motivo.
+ */
+@Composable
+private fun SugerenciaWidget() {
+    val context = LocalContext.current
+    val appWidgetManager = AppWidgetManager.getInstance(context)
+    if (appWidgetManager.isRequestPinAppWidgetSupported) {
+        OutlinedButton(onClick = {
+            appWidgetManager.requestPinAppWidget(ComponentName(context, AguaWidgetReceiver::class.java), null, null)
+        }) {
+            Icon(Icons.Filled.Widgets, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(Modifier.width(8.dp))
+            Text(stringResource(R.string.water_widget_add))
+        }
+    } else {
+        Text(
+            stringResource(R.string.water_widget_hint),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
     }
 }

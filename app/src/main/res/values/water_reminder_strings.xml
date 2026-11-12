@@ -13,6 +13,7 @@
     <string name="water_add">+%1$d ml</string>
     <string name="water_remove_desc">Remove %1$d ml</string>
     <string name="water_widget_hint">You can add the widget to your home screen to track your water intake more easily.</string>
+    <string name="water_widget_add">Add widget to home screen</string>
 
     <string name="water_settings">Settings</string>
     <string name="water_more_options">More options</string>
