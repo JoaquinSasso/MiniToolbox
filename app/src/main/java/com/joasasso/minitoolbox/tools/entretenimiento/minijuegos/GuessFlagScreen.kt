@@ -71,7 +71,13 @@ fun AdivinaBanderaScreen(
     )
 
     Scaffold(
-        topBar = { TopBarReusable(stringResource(R.string.tool_guess_flag), onBack) { showInfo = true } },
+        topBar = {
+            TopBarReusable(
+                title = stringResource(R.string.tool_guess_flag),
+                onBack = onBack,
+                onShowInfo = { showInfo = true }
+            )
+        },
         bottomBar = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp),

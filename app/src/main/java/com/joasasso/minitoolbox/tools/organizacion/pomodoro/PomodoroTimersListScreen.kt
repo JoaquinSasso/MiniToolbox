@@ -108,8 +108,9 @@ fun PomodoroTimersListScreen(
         topBar = {
             TopBarReusable(
                 title = stringResource(R.string.tool_pomodoro_timer),
-                onBack = onBack
-            ) { showInfo = true }
+                onBack = onBack,
+                onShowInfo = { showInfo = true }
+            )
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(

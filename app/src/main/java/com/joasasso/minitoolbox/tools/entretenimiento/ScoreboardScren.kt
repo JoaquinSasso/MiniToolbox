@@ -103,9 +103,11 @@ fun MarcadorEquiposScreen(onBack: () -> Unit) {
 
     Scaffold(
         topBar = {
-            TopBarReusable(stringResource(R.string.tool_scoreboard), onBack) {
-                showInfo = true
-            }
+            TopBarReusable(
+                title = stringResource(R.string.tool_scoreboard),
+                onBack = onBack,
+                onShowInfo = { showInfo = true }
+            )
         },
         floatingActionButton = {
             Column(horizontalAlignment = Alignment.End) {
