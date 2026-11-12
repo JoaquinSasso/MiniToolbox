@@ -16,8 +16,12 @@ import java.time.LocalDate
 
 data class AguaStatisticsUiState(
     val historico: List<Pair<LocalDate, Int>> = emptyList(),
-    val promedioSemana: Int = 0,
-    val mejorDia: Pair<LocalDate, Int>? = null,
+    val semana: List<Pair<LocalDate, Int>> = emptyList(),
+    val hoy: LocalDate = LocalDate.now(),
+    /** null mientras no haya ningún día completo registrado. */
+    val promedioSemana: Int? = null,
+    val rachaActual: Int = 0,
+    val mejorRacha: Int = 0,
     val objetivoML: Int = 2000,
     val mlPorVaso: Int = 250,
     val isLoading: Boolean = false
@@ -34,12 +38,18 @@ class AguaStatisticsViewModel @JvmOverloads constructor(
         .map { prefs ->
             val rawEntries = prefs.asMap().mapKeys { (key, _) -> key.name }
             val historicoOrdenado = AguaMath.extraerHistoricoOrdenado(rawEntries)
+            val hoy = todayProvider()
+            val objetivo = prefs[KEY_OBJETIVO] ?: 2000
+            val porVaso = prefs[KEY_POR_VASO] ?: 250
             AguaStatisticsUiState(
                 historico = historicoOrdenado,
-                promedioSemana = AguaMath.calcularPromedioUltimos7Dias(historicoOrdenado),
-                mejorDia = AguaMath.encontrarMejorDia(historicoOrdenado),
-                objetivoML = prefs[KEY_OBJETIVO] ?: 2000,
-                mlPorVaso = prefs[KEY_POR_VASO] ?: 250,
+                semana = AguaMath.ultimosDias(historicoOrdenado, hoy),
+                hoy = hoy,
+                promedioSemana = AguaMath.promedioUltimaSemana(historicoOrdenado, hoy),
+                rachaActual = AguaMath.rachaActual(historicoOrdenado, hoy, objetivo, porVaso),
+                mejorRacha = AguaMath.mejorRacha(historicoOrdenado, objetivo, porVaso),
+                objetivoML = objetivo,
+                mlPorVaso = porVaso,
                 isLoading = false
             )
         }

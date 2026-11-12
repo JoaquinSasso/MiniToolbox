@@ -12,9 +12,7 @@
     <string name="water_remaining_liters">Te faltan %1$s L</string>
     <string name="water_goal_reached">Meta cumplida</string>
     <string name="water_add">+%1$d ml</string>
-    <string name="water_remove">-%1$d ml</string>
     <string name="water_remove_desc">Quitar %1$d ml</string>
-    <string name="water_glasses_display">( %1$d / %2$d Vasos)</string>
     <string name="water_widget_hint">Puedes agregar el widget a tu pantalla de inicio para registrar tu consumo de agua más fácilmente.</string>
 
     <string name="water_settings">Ajustes</string>
@@ -73,25 +71,33 @@
     <string name="water_reset_feedback">Día reiniciado</string>
 
     <!--Pantalla de estadisticas-->
-    <string name="water_statistics_screen_no_data">No hay datos</string>
-    <string name="water_statistics_ultimos7">Consumo últimos 7 días</string>
-    <string name="water_statistics_sin_registros">Sin registros guardados</string>
-    <string name="water_statistics_promedio">Promedio semanal: %1$.2fL/día</string>
-    <string name="water_statistics_mejor_dia">Mejor día: %1$s</string>
-    <string name="water_statistics_historial">Historial completo</string>
+    <string name="water_statistics_ultimos7">Últimos 7 días</string>
+    <string name="water_statistics_historial">Historial</string>
+    <string name="water_statistics_historial_hint">Toca un día para corregirlo.</string>
     <string name="water_statistics_historial_vacio">Aún no has registrado consumo de agua.</string>
+    <string name="water_stats_streak_current">Racha actual</string>
+    <string name="water_stats_streak_best">Mejor racha</string>
+    <string name="water_stats_average">Promedio diario</string>
+    <string name="water_stats_no_value">—</string>
+    <string name="water_stats_today">Hoy</string>
+    <string name="water_stats_goal_line">La línea punteada marca tu meta de %1$s L.</string>
+    <string name="water_stats_bar_desc">%1$s: %2$s L</string>
+    <plurals name="water_stats_days">
+        <item quantity="one">%1$d día</item>
+        <item quantity="many">%1$d días</item>
+        <item quantity="other">%1$d días</item>
+    </plurals>
 
     <string name="water_statistics_help_title">Sobre las estadísticas</string>
-    <string name="water_statistics_help_line1">• El gráfico muestra tu consumo diario: las barras en verde indican que alcanzaste o superaste tu objetivo, y las barras en rojo indican que no lo alcanzaste.</string>
-    <string name="water_statistics_help_line2">• En el historial, los litros consumidos aparecen en verde si ese día cumpliste tu meta, y en rojo si no.</string>
-    <string name="water_statistics_help_line3">• El promedio semanal se calcula sobre los últimos 7 días registrados.</string>
-    <string name="water_statistics_help_line4">• Todos los datos se guardan localmente en tu dispositivo.</string>
-    <string name="water_statistics_help_line5">• Puedes pulsar sobre cualquier día del historial para editar la cantidad de agua consumida.</string>
+    <string name="water_statistics_help_line1">• El gráfico muestra los últimos 7 días, incluso los días sin registros. Las barras de color y el check indican que cumpliste la meta; las grises, que no.</string>
+    <string name="water_statistics_help_line2">• La racha cuenta los días seguidos con la meta cumplida. Hoy no la corta mientras el día esté en curso.</string>
+    <string name="water_statistics_help_line3">• El promedio diario usa los últimos 7 días completos: no incluye hoy ni los días anteriores a tu primer registro.</string>
+    <string name="water_statistics_help_line4">• La meta cumplida se calcula con tu meta actual, también para los días pasados. Todos los datos se guardan en tu dispositivo.</string>
+    <string name="water_statistics_help_line5">• Puedes tocar cualquier día del historial para corregir la cantidad registrada.</string>
 
     <string name="water_edit_dialog_title">Editar consumo</string>
-    <string name="water_edit_amount_label">Cantidad (ml)</string>
+    <string name="water_edit_amount_label">Cantidad</string>
     <string name="water_edit_save">Guardar</string>
-    <string name="water_edit_hint">Toca para editar</string>
 
     <!-- Notificacion -->
     <string name="water_reminder_title">Hora de beber agua 💧</string>

@@ -73,8 +73,10 @@ class AguaStatisticsViewModelTest {
 
         val state = model.uiState.first { !it.isLoading }
         assertTrue(state.historico.isEmpty())
-        assertEquals(0, state.promedioSemana)
-        assertNull(state.mejorDia)
+        assertNull(state.promedioSemana)
+        assertEquals(0, state.rachaActual)
+        assertEquals(0, state.mejorRacha)
+        assertEquals(7, state.semana.size)
         assertEquals(2000, state.objetivoML)
         assertEquals(250, state.mlPorVaso)
 
@@ -90,14 +92,17 @@ class AguaStatisticsViewModelTest {
         app.guardarObjetivo(2250)
         app.guardarPorVaso(285)
 
-        val model = AguaStatisticsViewModel(app, DefaultAguaRepository)
+        val model = AguaStatisticsViewModel(app, DefaultAguaRepository, todayProvider = { LocalDate.of(2026, 10, 3) })
         vm = model
         mantenerSuscripto(model.uiState)
 
         val state = model.uiState.first { !it.isLoading && it.historico.size == 2 }
         assertEquals(listOf(dia1 to 1500, dia2 to 2500), state.historico)
         assertEquals(2000, state.promedioSemana)
-        assertEquals(dia2 to 2500, state.mejorDia)
+        // Meta de 2250: solo el día 2 la cumple
+        assertEquals(1, state.rachaActual)
+        assertEquals(1, state.mejorRacha)
+        assertEquals(LocalDate.of(2026, 10, 3), state.semana.last().first)
         assertEquals(2250, state.objetivoML)
         assertEquals(285, state.mlPorVaso)
 
@@ -123,8 +128,9 @@ class AguaStatisticsViewModelTest {
         advanceUntilIdle()
 
         val updated = model.uiState.first { it.historico.firstOrNull()?.second == 1995 }
-        assertEquals(1995, updated.promedioSemana)
-        assertEquals(fecha to 1995, updated.mejorDia)
+        // Del 3/10 (primer registro) al 9/10 hay 7 días completos; los 6 sin registro valen 0: 1995 / 7
+        assertEquals(285, updated.promedioSemana)
+        assertEquals(1, updated.mejorRacha)
         assertEquals(1995, DefaultAguaRepository.flujoAguaFecha(app, fecha).first())
 
         model.viewModelScope.cancel()

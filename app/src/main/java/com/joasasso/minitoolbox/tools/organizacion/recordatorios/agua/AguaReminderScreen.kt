@@ -261,6 +261,13 @@ fun AguaReminderScreen(
                     viewModel.agregarAgua(delta)
                 }
             )
+            ResumenSemana(
+                semana = uiState.semana,
+                hoy = uiState.fecha,
+                objetivoML = uiState.objetivoML,
+                mlPorVaso = uiState.mlPorVaso,
+                onClick = onShowEstadisticas
+            )
             Text(
                 stringResource(R.string.water_widget_hint),
                 style = MaterialTheme.typography.bodySmall,

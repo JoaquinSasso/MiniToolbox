@@ -85,17 +85,71 @@ class AguaMathTest {
     }
 
     @Test
-    fun calcularPromedioYMejorDia_conVacioYConMasDeSieteRegistros() {
-        assertEquals(0, AguaMath.calcularPromedioUltimos7Dias(emptyList()))
-        assertNull(AguaMath.encontrarMejorDia(emptyList()))
+    fun ultimosDias_rellenaConCeroLosDiasSinRegistro() {
+        val hoy = LocalDate.of(2026, 11, 12)
+        val historico = listOf(hoy.minusDays(10) to 3000, hoy.minusDays(3) to 1500, hoy to 500)
+        val semana = AguaMath.ultimosDias(historico, hoy)
+        assertEquals(7, semana.size)
+        assertEquals(hoy.minusDays(6), semana.first().first)
+        assertEquals(hoy to 500, semana.last())
+        assertEquals(listOf(0, 0, 0, 1500, 0, 0, 500), semana.map { it.second })
+    }
 
+    @Test
+    fun promedioUltimaSemana_excluyeHoyYLosDiasAntesDelPrimerRegistro() {
+        val hoy = LocalDate.of(2026, 11, 12)
+        assertNull(AguaMath.promedioUltimaSemana(emptyList(), hoy))
+        // Solo hay registro de hoy: todavía no hay días completos
+        assertNull(AguaMath.promedioUltimaSemana(listOf(hoy to 2000), hoy))
+        // Empezó hace 3 días; uno de ellos sin registro cuenta como 0: (1500 + 0 + 3000) / 3
+        val historico = listOf(hoy.minusDays(3) to 1500, hoy.minusDays(1) to 3000, hoy to 9000)
+        assertEquals(1500, AguaMath.promedioUltimaSemana(historico, hoy))
+    }
+
+    @Test
+    fun promedioUltimaSemana_ignoraRegistrosDeHaceMasDeSieteDias() {
+        val hoy = LocalDate.of(2026, 11, 12)
+        val historico = (1..20).map { hoy.minusDays(it.toLong()) to (if (it <= 7) 2000 else 100) }
+        assertEquals(2000, AguaMath.promedioUltimaSemana(historico, hoy))
+    }
+
+    @Test
+    fun rachaActual_hoyEnCursoNoCortaLaRacha() {
+        val hoy = LocalDate.of(2026, 11, 12)
+        val historico = listOf(
+            hoy.minusDays(4) to 2000,
+            hoy.minusDays(3) to 500, // corta
+            hoy.minusDays(2) to 2000,
+            hoy.minusDays(1) to 2100,
+            hoy to 300
+        )
+        assertEquals(2, AguaMath.rachaActual(historico, hoy, 2000, 250))
+        // Si hoy también se cumple, suma
+        assertEquals(3, AguaMath.rachaActual(historico.dropLast(1) + (hoy to 2000), hoy, 2000, 250))
+    }
+
+    @Test
+    fun rachaActual_unDiaSinRegistroCortaLaRacha() {
+        val hoy = LocalDate.of(2026, 11, 12)
+        val historico = listOf(hoy.minusDays(3) to 2000, hoy.minusDays(1) to 2000)
+        assertEquals(1, AguaMath.rachaActual(historico, hoy, 2000, 250))
+        assertEquals(0, AguaMath.rachaActual(emptyList(), hoy, 2000, 250))
+    }
+
+    @Test
+    fun mejorRacha_cuentaSoloDiasConsecutivos() {
         val base = LocalDate.of(2026, 10, 1)
-        // 8 días: el día 0 tiene 100 ml y no debe entrar en los últimos 7 (todos de 2000 ml)
-        val historico = listOf(base to 100) + (1..7).map { base.plusDays(it.toLong()) to 2000 }
-        assertEquals(2000, AguaMath.calcularPromedioUltimos7Dias(historico))
-
-        val conPico = historico + (base.plusDays(8) to 2750)
-        assertEquals(base.plusDays(8) to 2750, AguaMath.encontrarMejorDia(conPico))
+        val historico = listOf(
+            base to 2000,
+            base.plusDays(1) to 2000,
+            base.plusDays(2) to 2000,
+            base.plusDays(4) to 2000, // hueco el día 3
+            base.plusDays(5) to 2000,
+            base.plusDays(6) to 100,
+            base.plusDays(7) to 2000
+        )
+        assertEquals(3, AguaMath.mejorRacha(historico, 2000, 250))
+        assertEquals(0, AguaMath.mejorRacha(emptyList(), 2000, 250))
     }
 
     @Test

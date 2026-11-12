@@ -138,21 +138,67 @@ object AguaMath {
     }
 
     /**
-     * Calcula el promedio en ml de los últimos 7 registros del historial ordenado por fecha.
+     * Últimos [n] días de calendario hasta [hoy] inclusive, del más viejo al más nuevo.
+     * Los días sin registro valen 0: antes se tomaban los últimos 7 registros y los días
+     * sin agua desaparecían del gráfico.
      */
-    fun calcularPromedioUltimos7Dias(historicoOrdenado: List<Pair<LocalDate, Int>>): Int {
-        val ultimos7 = historicoOrdenado.takeLast(7)
-        return if (ultimos7.isNotEmpty()) {
-            ultimos7.map { it.second }.average().roundToInt()
-        } else {
-            0
+    fun ultimosDias(historico: List<Pair<LocalDate, Int>>, hoy: LocalDate, n: Int = 7): List<Pair<LocalDate, Int>> {
+        val porFecha = historico.toMap()
+        return (n - 1 downTo 0).map { atras ->
+            val fecha = hoy.minusDays(atras.toLong())
+            fecha to (porFecha[fecha] ?: 0)
         }
     }
 
     /**
-     * Devuelve el registro con mayor consumo de agua, o null si el historial está vacío.
+     * Promedio diario de los 7 días completos anteriores a [hoy]; hoy queda afuera porque
+     * está en curso. Los días sin registro cuentan como 0, salvo los anteriores al primer
+     * registro: quien empezó a usar la herramienta hace 3 días no arrastra 4 días en 0.
+     * Devuelve null si todavía no hay ningún día completo.
      */
-    fun encontrarMejorDia(historico: List<Pair<LocalDate, Int>>): Pair<LocalDate, Int>? {
-        return historico.maxByOrNull { it.second }
+    fun promedioUltimaSemana(historico: List<Pair<LocalDate, Int>>, hoy: LocalDate): Int? {
+        val primero = historico.minOfOrNull { it.first } ?: return null
+        val porFecha = historico.toMap()
+        val dias = (1..7).map { hoy.minusDays(it.toLong()) }.filter { !it.isBefore(primero) }
+        if (dias.isEmpty()) return null
+        return dias.map { porFecha[it] ?: 0 }.average().roundToInt()
+    }
+
+    /**
+     * Días seguidos con la meta cumplida que terminan hoy o, si hoy todavía no se cumplió,
+     * ayer: el día en curso no corta la racha. Usa la meta actual para todos los días, porque
+     * el historial no guarda la meta que había en cada fecha.
+     */
+    fun rachaActual(historico: List<Pair<LocalDate, Int>>, hoy: LocalDate, objetivoML: Int, mlPorVaso: Int): Int {
+        val porFecha = historico.toMap()
+        // Sin registro no hay racha: además corta el recorrido aunque la meta fuera 0
+        fun cumplio(fecha: LocalDate): Boolean =
+            porFecha[fecha]?.let { objetivoAlcanzado(it, objetivoML, mlPorVaso) } ?: false
+
+        var dia = if (cumplio(hoy)) hoy else hoy.minusDays(1)
+        var racha = 0
+        while (cumplio(dia)) {
+            racha++
+            dia = dia.minusDays(1)
+        }
+        return racha
+    }
+
+    /** Racha más larga de días de calendario seguidos con la meta cumplida. */
+    fun mejorRacha(historico: List<Pair<LocalDate, Int>>, objetivoML: Int, mlPorVaso: Int): Int {
+        var mejor = 0
+        var actual = 0
+        var anterior: LocalDate? = null
+        for ((fecha, ml) in historico.sortedBy { it.first }) {
+            if (objetivoAlcanzado(ml, objetivoML, mlPorVaso)) {
+                actual = if (anterior != null && fecha == anterior.plusDays(1)) actual + 1 else 1
+                anterior = fecha
+                mejor = maxOf(mejor, actual)
+            } else {
+                actual = 0
+                anterior = null
+            }
+        }
+        return mejor
     }
 }

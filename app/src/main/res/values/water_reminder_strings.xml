@@ -11,9 +11,7 @@
     <string name="water_remaining_liters">%1$s L to go</string>
     <string name="water_goal_reached">Goal reached</string>
     <string name="water_add">+%1$d ml</string>
-    <string name="water_remove">-%1$d ml</string>
     <string name="water_remove_desc">Remove %1$d ml</string>
-    <string name="water_glasses_display">( %1$d / %2$d Glasses)</string>
     <string name="water_widget_hint">You can add the widget to your home screen to track your water intake more easily.</string>
 
     <string name="water_settings">Settings</string>
@@ -71,25 +69,32 @@
     <string name="water_reset_feedback">Today was reset</string>
 
     <!--Statistics screen-->
-    <string name="water_statistics_screen_no_data">No data</string>
-    <string name="water_statistics_ultimos7">Last 7 days of water consumption</string>
-    <string name="water_statistics_sin_registros">No saved records</string>
-    <string name="water_statistics_promedio">Weekly average: %1$.2fL/day</string>
-    <string name="water_statistics_mejor_dia">Best day: %1$s</string>
-    <string name="water_statistics_historial">Full history</string>
+    <string name="water_statistics_ultimos7">Last 7 days</string>
+    <string name="water_statistics_historial">History</string>
+    <string name="water_statistics_historial_hint">Tap a day to correct it.</string>
     <string name="water_statistics_historial_vacio">You haven\'t logged any water intake yet.</string>
+    <string name="water_stats_streak_current">Current streak</string>
+    <string name="water_stats_streak_best">Best streak</string>
+    <string name="water_stats_average">Daily average</string>
+    <string name="water_stats_no_value">—</string>
+    <string name="water_stats_today">Today</string>
+    <string name="water_stats_goal_line">The dashed line marks your %1$s L goal.</string>
+    <string name="water_stats_bar_desc">%1$s: %2$s L</string>
+    <plurals name="water_stats_days">
+        <item quantity="one">%1$d day</item>
+        <item quantity="other">%1$d days</item>
+    </plurals>
 
     <string name="water_statistics_help_title">About the statistics</string>
-    <string name="water_statistics_help_line1">• The chart shows your daily intake: green bars indicate you reached or exceeded your goal, red bars mean you didn\'t.</string>
-    <string name="water_statistics_help_line2">• In the history, the liters consumed appear in green if you met your goal that day, or red if not.</string>
-    <string name="water_statistics_help_line3">• The weekly average is based on your last 7 recorded days.</string>
-    <string name="water_statistics_help_line4">• All data is stored locally on your device.</string>
-    <string name="water_statistics_help_line5">• Tap any day in the history to edit the recorded water intake.</string>
+    <string name="water_statistics_help_line1">• The chart shows the last 7 days, including days with no records. Colored bars and a check mean you reached your goal; gray bars mean you did not.</string>
+    <string name="water_statistics_help_line2">• The streak counts consecutive days with the goal reached. Today does not break it while the day is still going.</string>
+    <string name="water_statistics_help_line3">• The daily average uses the last 7 full days: it leaves out today and the days before your first record.</string>
+    <string name="water_statistics_help_line4">• Whether a day met the goal is based on your current goal, including past days. All data stays on your device.</string>
+    <string name="water_statistics_help_line5">• Tap any day in the history to correct the recorded amount.</string>
 
-    <string name="water_edit_dialog_title">Edit consumption</string>
-    <string name="water_edit_amount_label">Amount (ml)</string>
+    <string name="water_edit_dialog_title">Edit intake</string>
+    <string name="water_edit_amount_label">Amount</string>
     <string name="water_edit_save">Save</string>
-    <string name="water_edit_hint">Tap to edit</string>
 
     <!-- Notification -->
     <string name="water_reminder_title">Time to drink water 💧</string>

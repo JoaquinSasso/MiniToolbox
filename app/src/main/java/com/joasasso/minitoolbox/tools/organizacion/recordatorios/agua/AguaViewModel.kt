@@ -42,6 +42,8 @@ data class AguaUiState(
     val horaInicioMin: Int = HORA_INICIO_DEFAULT_MIN,
     val horaFinMin: Int = HORA_FIN_DEFAULT_MIN,
     val pausarAlCumplir: Boolean = true,
+    /** Últimos 7 días de calendario, para el resumen de la pantalla. */
+    val semana: List<Pair<LocalDate, Int>> = emptyList(),
     val fecha: LocalDate = LocalDate.now(),
     val isLoading: Boolean = false
 )
@@ -91,6 +93,10 @@ class AguaViewModel @JvmOverloads constructor(
             horaInicioMin = prefs[KEY_HORA_INICIO_MIN] ?: HORA_INICIO_DEFAULT_MIN,
             horaFinMin = prefs[KEY_HORA_FIN_MIN] ?: HORA_FIN_DEFAULT_MIN,
             pausarAlCumplir = (prefs[KEY_PAUSAR_AL_CUMPLIR] ?: 1) == 1,
+            semana = AguaMath.ultimosDias(
+                AguaMath.extraerHistoricoOrdenado(prefs.asMap().mapKeys { (key, _) -> key.name }),
+                fecha
+            ),
             fecha = fecha,
             isLoading = false
         )
