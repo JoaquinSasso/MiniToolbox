@@ -44,7 +44,6 @@ Las líneas citan el estado de `master @ 58105f5` (2026-10-02). Antes de trabaja
 - [ ] `auto-backup`: el manifest no declara `allowBackup` ni `dataExtractionRules`, y los XML de reglas son plantillas sin usar. Evidencia: `AndroidManifest.xml`, `res/xml/data_extraction_rules.xml`. Hecho: una decisión explícita sobre qué se respalda (como mínimo, excluir el estado de métricas).
 - [ ] `ar-ruler-typo`: el nombre en inglés de la regla AR dice "Aumented Reality Ruler". Evidencia: `app/src/main/res/values/strings_tools.xml:18`. Hecho: "Augmented Reality Ruler".
 - [ ] `accessibility`: los instrumentos dibujados con `Canvas` no tienen semántica. Evidencia: `git grep -n "semantics"` devuelve un solo uso (`ui/components/Stepper.kt:35`). Hecho: `semantics` en brújula, nivel, regla y lupa, verificado con TalkBack.
-- [ ] `topbar-help-dialog-loop`: en varias pantallas se pasa el bloque de ayuda como trailing lambda a `TopBarReusable`, asignándose al parámetro `actions` (`@Composable RowScope.() -> Unit`) en vez de `onShowInfo`; esto ejecuta `showInfo = true` durante la recomposición, abriendo el diálogo de ayuda automáticamente al entrar y reabriéndose en bucle al intentar cerrarlo. Evidencia: `ScoreboardScren.kt:106`, `OptionSelectorScreen.kt:73`, `GuessFlagScreen.kt:74`, `PomodoroTimersListScreen.kt:109-112`. Hecho: pasar `onShowInfo` como parámetro con nombre en todas las pantallas afectadas y verificar que el diálogo no se abra al inicio.
 
 
 ## Producto (requiere decisión del autor)
