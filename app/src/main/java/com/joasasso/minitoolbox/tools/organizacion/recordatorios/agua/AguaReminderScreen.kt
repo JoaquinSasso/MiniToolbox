@@ -1,91 +1,90 @@
 package com.joasasso.minitoolbox.tools.organizacion.recordatorios.agua
 
 import android.Manifest
-import android.app.AlarmManager
-import android.app.PendingIntent
-import android.content.Context
-import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Canvas
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.BarChart
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.RestartAlt
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DividerDefaults
+import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Switch
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
-import com.joasasso.minitoolbox.utils.NotificationPermission
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.glance.appwidget.GlanceAppWidgetManager
-import androidx.glance.appwidget.state.updateAppWidgetState
-import androidx.glance.appwidget.updateAll
-import androidx.glance.state.PreferencesGlanceStateDefinition
 import com.joasasso.minitoolbox.R
-import com.joasasso.minitoolbox.data.flujoAguaHoy
-import com.joasasso.minitoolbox.data.flujoObjetivo
-import com.joasasso.minitoolbox.data.flujoPorVaso
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
-import com.joasasso.minitoolbox.widgets.AguaMiniWidget
-import com.joasasso.minitoolbox.widgets.AguaWidget
-import android.util.Log
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.first
+import com.joasasso.minitoolbox.utils.NotificationPermission
 import kotlinx.coroutines.launch
-import java.util.Calendar
-import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -101,79 +100,64 @@ fun AguaReminderScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    var showInfo by remember { mutableStateOf(false) }
-    var showDialogVaso by remember { mutableStateOf(false) }
+    var showInfo by rememberSaveable { mutableStateOf(false) }
+    var showAjustes by rememberSaveable { mutableStateOf(false) }
+    var showConfirmReset by rememberSaveable { mutableStateOf(false) }
+    var showMenu by remember { mutableStateOf(false) }
 
-    // Lista de valores posibles para la frecuencia en minutos
-    val minutosList = listOf(30, 60, 90, 120, 150, 180, 210, 240)
-
-    // Helper para buscar el índice más cercano si el valor no está en la lista
-    fun closestIndex(values: List<Int>, target: Int): Int =
-        values.withIndex().minByOrNull { kotlin.math.abs(it.value - target) }?.index ?: 0
-
-    var sliderIndex by remember(uiState.frecuenciaMinutos) {
-        val exact = minutosList.indexOf(uiState.frecuenciaMinutos)
-        mutableIntStateOf(if (exact >= 0) exact else closestIndex(minutosList, uiState.frecuenciaMinutos))
-    }
-
-    // Strings para el snackbar
     val zeroWarning = stringResource(R.string.water_zero_warning)
     val addedText = stringResource(R.string.water_added_feedback)
     val removedText = stringResource(R.string.water_removed_feedback)
     val resetText = stringResource(R.string.water_reset_feedback)
+    val undoText = stringResource(R.string.water_undo)
     val deniedText = stringResource(R.string.notif_permission_denied)
 
-    // --- Lanzador de permiso de notificaciones ---
     val notifLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         if (!granted) {
-            scope.launch {
-                snackbarHostState.showSnackbar(deniedText)
-            }
+            scope.launch { snackbarHostState.showSnackbar(deniedText) }
         }
     }
 
-    // Al volver a primer plano, verificar reactivamente si cambió de fecha (medianoche)
+    // Al volver a primer plano, verificar si cambió la fecha (medianoche)
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                viewModel.verificarFecha()
-            }
+            if (event == Lifecycle.Event.ON_RESUME) viewModel.verificarFecha()
         }
         lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    /**
+     * Cada snackbar se lanza en su propia corrutina: si el colector esperara a que termine,
+     * tres toques seguidos encolarían tres avisos de 4 s y el "Deshacer" llegaría tarde.
+     */
+    fun mostrarAviso(mensaje: String, onDeshacer: (() -> Unit)? = null) {
+        scope.launch {
+            snackbarHostState.currentSnackbarData?.dismiss()
+            val resultado = snackbarHostState.showSnackbar(
+                message = mensaje,
+                actionLabel = if (onDeshacer != null) undoText else null,
+                // Con acción, 4 s no alcanzan para leer y reaccionar: el aviso dura 10 s
+                duration = if (onDeshacer != null) SnackbarDuration.Long else SnackbarDuration.Short
+            )
+            if (resultado == SnackbarResult.ActionPerformed) onDeshacer?.invoke()
         }
     }
 
-    // Observar eventos de un solo disparo emitidos por el ViewModel
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
             when (event) {
-                is AguaEvent.ShowZeroWarning -> {
-                    snackbarHostState.currentSnackbarData?.dismiss()
-                    snackbarHostState.showSnackbar(zeroWarning)
+                is AguaEvent.ShowZeroWarning -> mostrarAviso(zeroWarning)
+                is AguaEvent.WaterAdded -> mostrarAviso(addedText.format(event.cantidad)) {
+                    viewModel.deshacerCambio(event.cantidad)
                 }
-                is AguaEvent.WaterAdded -> {
-                    snackbarHostState.currentSnackbarData?.dismiss()
-                    snackbarHostState.showSnackbar(addedText.format(event.cantidad))
+                is AguaEvent.WaterRemoved -> mostrarAviso(removedText.format(event.cantidad)) {
+                    viewModel.deshacerCambio(-event.cantidad)
                 }
-                is AguaEvent.WaterRemoved -> {
-                    snackbarHostState.currentSnackbarData?.dismiss()
-                    snackbarHostState.showSnackbar(removedText.format(event.cantidad))
-                }
-                is AguaEvent.WaterReset -> {
-                    snackbarHostState.currentSnackbarData?.dismiss()
-                    snackbarHostState.showSnackbar(resetText)
-                }
-                is AguaEvent.NotifEnabled -> {
-                    snackbarHostState.currentSnackbarData?.dismiss()
-                    snackbarHostState.showSnackbar(context.getString(R.string.notif_enabled_snackbar))
-                }
-                is AguaEvent.NotifDisabled -> {
-                    snackbarHostState.currentSnackbarData?.dismiss()
-                    snackbarHostState.showSnackbar(context.getString(R.string.notif_disabled_snackbar))
+                is AguaEvent.WaterReset -> mostrarAviso(resetText) {
+                    viewModel.deshacerReset(event.anterior)
                 }
             }
         }
@@ -186,263 +170,141 @@ fun AguaReminderScreen(
         viewModel.scheduleMidnightCheck()
     }
 
+    // Vibración distinta al cruzar la meta, no al abrir la pantalla con la meta ya cumplida
+    val alcanzado = !uiState.isLoading &&
+        AguaMath.objetivoAlcanzado(uiState.totalAgua, uiState.objetivoML, uiState.mlPorVaso)
+    var alcanzadoAnterior by remember { mutableStateOf<Boolean?>(null) }
+    LaunchedEffect(alcanzado, uiState.isLoading) {
+        if (uiState.isLoading) return@LaunchedEffect
+        if (alcanzadoAnterior == false && alcanzado) {
+            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+        }
+        alcanzadoAnterior = alcanzado
+    }
+
     Scaffold(
-        topBar = { TopBarReusable(stringResource(R.string.tool_water_reminder), onBack, { showInfo = true }) },
+        topBar = {
+            TopBarReusable(
+                title = stringResource(R.string.tool_water_reminder),
+                onBack = onBack,
+                actions = {
+                    IconButton(onClick = onShowEstadisticas) {
+                        Icon(Icons.Filled.BarChart, contentDescription = stringResource(R.string.stats))
+                    }
+                    IconButton(onClick = { showAjustes = true }) {
+                        Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.water_settings))
+                    }
+                    Box {
+                        IconButton(onClick = { showMenu = true }) {
+                            Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.water_more_options))
+                        }
+                        DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.water_reset_menu)) },
+                                leadingIcon = { Icon(Icons.Filled.RestartAlt, contentDescription = null) },
+                                enabled = uiState.totalAgua > 0,
+                                onClick = {
+                                    showMenu = false
+                                    showConfirmReset = true
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.water_help_menu)) },
+                                leadingIcon = {
+                                    Icon(Icons.AutoMirrored.Filled.HelpOutline, contentDescription = null)
+                                },
+                                onClick = {
+                                    showMenu = false
+                                    showInfo = true
+                                }
+                            )
+                        }
+                    }
+                }
+            )
+        },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp, Alignment.Top),
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(Modifier.height(16.dp))
-            val glassesConsumed = AguaMath.calcularVasosConsumidos(uiState.totalAgua, uiState.mlPorVaso)
-            val glassesGoal = AguaMath.calcularVasosObjetivo(uiState.objetivoML, uiState.mlPorVaso)
-            val glassesText = stringResource(R.string.water_glasses_display, glassesConsumed, glassesGoal)
+            ProgresoHoy(
+                totalML = uiState.totalAgua,
+                objetivoML = uiState.objetivoML,
+                mlPorVaso = uiState.mlPorVaso,
+                alcanzado = alcanzado
+            )
+            AccionesRegistro(
+                totalML = uiState.totalAgua,
+                mlPorVaso = uiState.mlPorVaso,
+                cantidadesRapidas = uiState.cantidadesRapidas,
+                onCambio = { delta ->
+                    haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                    viewModel.agregarAgua(delta)
+                }
+            )
             Text(
-                "${(uiState.totalAgua / 1000f).let { "%.2f".format(it) }} L / ${(uiState.objetivoML / 1000f).let { "%.2f".format(it) }} L $glassesText",
-                fontSize = 20.sp
+                stringResource(R.string.water_widget_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
             )
-            // --- Visual de progreso ---
-            AguaLevelBar(uiState.totalAgua, uiState.objetivoML)
-
-            // --- Selector de objetivo ---
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("${context.getString(R.string.water_goal_label)} ${(uiState.objetivoML / 1000f).let { "%.2f".format(it) }}L", fontSize = 16.sp)
-                Spacer(Modifier.width(6.dp))
-
-                var lastSliderValue by remember(uiState.objetivoML) { mutableFloatStateOf(uiState.objetivoML.toFloat()) }
-                Slider(
-                    value = (lastSliderValue / 1000f),
-                    onValueChange = { valor ->
-                        val step = 0.25f
-                        val newValue = (valor / step).roundToInt() * step
-                        val newObjetivo = (newValue * 1000).roundToInt()
-                        if (newObjetivo.toFloat() != lastSliderValue) {
-                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            lastSliderValue = newObjetivo.toFloat()
-                        }
-                    },
-                    onValueChangeFinished = {
-                        viewModel.guardarObjetivo(lastSliderValue.roundToInt())
-                    },
-                    valueRange = 1.5f..3f,
-                    steps = ((3f - 1.5f) / 0.25f).toInt() - 1,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Button(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        viewModel.agregarAgua(-uiState.mlPorVaso)
-                    }
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.water_loss),
-                        contentDescription = stringResource(R.string.water_remove),
-                        Modifier.size(18.dp)
-                    )
-                    Spacer(Modifier.width(6.dp))
-                    Text("-${uiState.mlPorVaso} ml", fontSize = 18.sp)
-                }
-                Spacer(Modifier.width(32.dp))
-                Button(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        viewModel.agregarAgua(uiState.mlPorVaso)
-                    }
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.water_full),
-                        contentDescription = stringResource(R.string.water_add),
-                        Modifier.size(18.dp)
-                    )
-                    Spacer(Modifier.width(6.dp))
-                    Text("+${uiState.mlPorVaso} ml", fontSize = 18.sp)
-                }
-            }
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Button(
-                    onClick = { showDialogVaso = true },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-                ) { Text(stringResource(R.string.water_change_glass)) }
-            }
-
-            // --- Area de Notificaciones ---
-            HorizontalDivider(
-                Modifier.padding(vertical = 10.dp),
-                DividerDefaults.Thickness,
-                DividerDefaults.color
-            )
-            Text(stringResource(R.string.water_notif_title), fontSize = 17.sp, color = MaterialTheme.colorScheme.primary)
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(stringResource(R.string.water_notif_enabled), fontSize = 16.sp)
-                Switch(
-                    checked = uiState.notificacionesActivas,
-                    onCheckedChange = { checked ->
-                        if (checked && NotificationPermission.shouldRequest(context)) {
-                            notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                        }
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        viewModel.toggleNotificaciones(checked)
-                    }
-                )
-            }
-            if (uiState.notificacionesActivas) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(stringResource(R.string.water_notif_freq, uiState.frecuenciaMinutos / 60f), fontSize = 16.sp)
-                    Slider(
-                        value = sliderIndex.toFloat(),
-                        onValueChange = { value ->
-                            sliderIndex = value.roundToInt().coerceIn(0, minutosList.size - 1)
-                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        },
-                        onValueChangeFinished = {
-                            val minutosSeleccionados = minutosList[sliderIndex]
-                            viewModel.guardarFrecuenciaMinutos(minutosSeleccionados)
-                        },
-                        valueRange = 0f..(minutosList.size - 1).toFloat(),
-                        steps = minutosList.size - 2,
-                        modifier = Modifier.width(200.dp)
-                    )
-                }
-            }
-            Spacer(Modifier.weight(1f))
-
-            // --- Reset y estadísticas ---
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Button(
-                    onClick = {
-                        viewModel.resetear()
-                    }
-                ) {
-                    Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.reset_content_desc))
-                    Spacer(Modifier.width(6.dp))
-                    Text(stringResource(R.string.reset_content_desc))
-                }
-                Spacer(Modifier.width(8.dp))
-                Button(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onShowEstadisticas()
-                    }
-                ) {
-                    Icon(Icons.Filled.BarChart, contentDescription = stringResource(R.string.stats_content_desc))
-                    Spacer(Modifier.width(6.dp))
-                    Text(stringResource(R.string.stats))
-                }
-            }
-            Spacer(Modifier.height(16.dp))
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(stringResource(R.string.water_widget_hint))
-            }
         }
     }
 
-    // --- Cambiar cantidad del vaso (por ml o por vasos diarios) ---
-    if (showDialogVaso) {
-        var tempMl by remember(uiState.mlPorVaso) { mutableStateOf(uiState.mlPorVaso.toString()) }
-        var tempVasos by remember(uiState.mlPorVaso, uiState.objetivoML) {
-            mutableStateOf(
-                AguaMath.calcularVasosObjetivo(uiState.objetivoML, uiState.mlPorVaso).toString()
-            )
-        }
-        AlertDialog(
-            onDismissRequest = { showDialogVaso = false },
-            title = { Text(stringResource(R.string.glass_amount_title)) },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    OutlinedTextField(
-                        value = tempMl,
-                        onValueChange = { input ->
-                            val digits = input.filter { c -> c.isDigit() }
-                            tempMl = digits
-                            digits.toIntOrNull()?.takeIf { it > 0 }?.let { mlVal ->
-                                tempVasos = AguaMath.calcularVasosObjetivo(uiState.objetivoML, mlVal).toString()
-                            }
-                        },
-                        label = { Text(stringResource(R.string.glass_amount_label)) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                    )
-                    OutlinedTextField(
-                        value = tempVasos,
-                        onValueChange = { input ->
-                            val digits = input.filter { c -> c.isDigit() }
-                            tempVasos = digits
-                            digits.toIntOrNull()?.takeIf { it > 0 }?.let { vasosVal ->
-                                tempMl = AguaMath.calcularMlPorVasoSegunVasos(uiState.objetivoML, vasosVal).toString()
-                            }
-                        },
-                        label = { Text(stringResource(R.string.glasses_per_day_label)) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                    )
+    if (showAjustes) {
+        AguaAjustesSheet(
+            uiState = uiState,
+            onDismiss = { showAjustes = false },
+            onObjetivo = viewModel::guardarObjetivo,
+            onPorVaso = viewModel::guardarPorVaso,
+            onCantidadesRapidas = viewModel::guardarCantidadesRapidas,
+            onNotificaciones = { activar ->
+                if (activar && NotificationPermission.shouldRequest(context)) {
+                    notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                 }
+                viewModel.toggleNotificaciones(activar)
+            },
+            onFrecuencia = viewModel::guardarFrecuenciaMinutos
+        )
+    }
+
+    if (showConfirmReset) {
+        AlertDialog(
+            onDismissRequest = { showConfirmReset = false },
+            icon = { Icon(Icons.Filled.RestartAlt, contentDescription = null) },
+            title = { Text(stringResource(R.string.water_reset_confirm_title)) },
+            text = {
+                Text(stringResource(R.string.water_reset_confirm_text, AguaFormat.litros(uiState.totalAgua)))
             },
             confirmButton = {
                 TextButton(onClick = {
-                    val newValue = tempMl.toIntOrNull()
-                        ?: tempVasos.toIntOrNull()?.takeIf { it > 0 }?.let {
-                            AguaMath.calcularMlPorVasoSegunVasos(uiState.objetivoML, it)
-                        }
-                    newValue?.let { ml ->
-                        viewModel.guardarPorVaso(ml.coerceIn(AguaMath.MIN_ML_POR_VASO, AguaMath.MAX_ML_POR_VASO))
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        showDialogVaso = false
-                    }
-                }) { Text(stringResource(R.string.accept)) }
+                    showConfirmReset = false
+                    haptic.performHapticFeedback(HapticFeedbackType.Reject)
+                    viewModel.resetear()
+                }) { Text(stringResource(R.string.water_reset_confirm)) }
             },
             dismissButton = {
-                TextButton(onClick = {
-                    showDialogVaso = false
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                }) { Text(stringResource(R.string.cancel)) }
+                TextButton(onClick = { showConfirmReset = false }) { Text(stringResource(R.string.cancel)) }
             }
         )
     }
 
-    //Menú de ayuda con información sobre la tool
     if (showInfo) {
         AlertDialog(
             onDismissRequest = { showInfo = false },
             title = { Text(stringResource(R.string.water_help_title)) },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(
+                    modifier = Modifier.verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     Text(stringResource(R.string.water_help_line1))
                     Text(stringResource(R.string.water_help_line2))
                     Text(stringResource(R.string.water_help_line3))
@@ -452,176 +314,162 @@ fun AguaReminderScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = {
-                    showInfo = false
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                }) { Text(stringResource(R.string.close)) }
+                TextButton(onClick = { showInfo = false }) { Text(stringResource(R.string.close)) }
             }
         )
     }
-
 }
 
-/** Funcion para dibujar la barra de progreso de consumo de agua, debe llamarse dentro de Scaffold*/
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-    fun AguaLevelBar(ml: Int, objetivo: Int) {
-        val colorFondo = MaterialTheme.colorScheme.surfaceBright
-        val colorProgreso = MaterialTheme.colorScheme.primary
-        val colorClaro = MaterialTheme.colorScheme.onSurfaceVariant
-        val colorOscuro = MaterialTheme.colorScheme.onPrimary
-        val grosor = 38.dp
+private fun ProgresoHoy(totalML: Int, objetivoML: Int, mlPorVaso: Int, alcanzado: Boolean) {
+    val fraccion = if (objetivoML > 0) (totalML / objetivoML.toFloat()).coerceIn(0f, 1f) else 1f
+    val progreso by animateFloatAsState(
+        targetValue = fraccion,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow),
+        label = "progresoAgua"
+    )
+    val colorProgreso = if (alcanzado) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary
+    val stroke = with(LocalDensity.current) { Stroke(width = 12.dp.toPx(), cap = StrokeCap.Round) }
 
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier.semantics(mergeDescendants = true) {}
+    ) {
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(grosor)
+                .fillMaxWidth(0.8f)
+                .widthIn(max = 320.dp)
+                .aspectRatio(1f),
+            contentAlignment = Alignment.Center
         ) {
-            val frac = (ml / objetivo.toFloat()).coerceIn(0f, 1f)
-
-            // Fondo
-            Canvas(modifier = Modifier.matchParentSize()) {
-                drawRoundRect(
-                    color = colorFondo,
-                    size = size,
-                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(18f, 18f)
+            CircularWavyProgressIndicator(
+                progress = { progreso },
+                modifier = Modifier.fillMaxSize(),
+                color = colorProgreso,
+                // surfaceContainerHighest: con secondaryContainer el riel y el progreso eran dos tonos casi iguales
+                trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                stroke = stroke,
+                trackStroke = stroke,
+                wavelength = 48.dp
+            )
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    stringResource(R.string.water_liters_value, AguaFormat.litros(totalML)),
+                    style = MaterialTheme.typography.displayMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    stringResource(R.string.water_of_goal, AguaFormat.litros(objetivoML)),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(8.dp))
+                val vasosObjetivo = AguaMath.calcularVasosObjetivo(objetivoML, mlPorVaso)
+                Text(
+                    pluralStringResource(
+                        R.plurals.water_glasses_progress,
+                        vasosObjetivo,
+                        AguaMath.calcularVasosConsumidos(totalML, mlPorVaso),
+                        vasosObjetivo
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+        }
 
-            // Progreso
-            Canvas(modifier = Modifier.matchParentSize()) {
-                drawRoundRect(
-                    color = colorProgreso,
-                    size = androidx.compose.ui.geometry.Size(width = size.width * frac, height = size.height),
-                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(18f, 18f)
+        if (alcanzado) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Filled.CheckCircle,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.tertiary
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    stringResource(R.string.water_goal_reached),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.tertiary
                 )
             }
-
-            // Texto de porcentaje
-            val porcentaje = (frac * 100).roundToInt()
-            val textColor = if (frac > 0.9f) colorOscuro else colorClaro
-
+        } else {
+            val faltan = (objetivoML - totalML).coerceAtLeast(0)
             Text(
-                text = "$porcentaje%",
-                color = textColor,
-                fontSize = 14.sp,
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .padding(end = 8.dp)
+                if (AguaFormat.usaLitros(faltan)) {
+                    stringResource(R.string.water_remaining_liters, AguaFormat.litros(faltan))
+                } else {
+                    stringResource(R.string.water_remaining_ml, faltan)
+                },
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
     }
+}
 
-/**Funcion para re/programar el recordatorio de agua cada vez que cambia el progreso de consumo de agua*/
-fun programarRecordatorioAgua(
-    context: Context,
-    frecuenciaMinutos: Int
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun AccionesRegistro(
+    totalML: Int,
+    mlPorVaso: Int,
+    cantidadesRapidas: List<Int>,
+    onCambio: (Int) -> Unit
 ) {
-    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
-    val intent = Intent(context, WaterReminderReceiver::class.java).apply {
-        putExtra("frecuencia_minutos", frecuenciaMinutos)
-    }
-
-    val pendingIntent = PendingIntent.getBroadcast(
-        context, 101,
-        intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-    )
-
-    val triggerTime = System.currentTimeMillis() + frecuenciaMinutos * 60 * 1000L
-
-    alarmManager.cancel(pendingIntent) // Cancela cualquier alarma previa
-    alarmManager.setInexactRepeating(
-        AlarmManager.RTC_WAKEUP,
-        triggerTime,
-        frecuenciaMinutos * 60 * 1000L,
-        pendingIntent
-    )
-}
-
-
-/**Funcion para cancelar el recordatorio de agua cuando se desactivan las notificaciones*/
-fun cancelarRecordatorioAgua(context: Context) {
-    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-    val intent = Intent(context, WaterReminderReceiver::class.java)
-    val pendingIntent = PendingIntent.getBroadcast(
-        context, 101,
-        intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-    )
-    alarmManager.cancel(pendingIntent)
-    cancelarNotificacionAguaActiva(context)
-}
-
-/**Funcion suspendida para actualizar el progreso del consumo de agua en el widget desde la app*/
-suspend fun actualizarWidgetAguaSuspend(context: Context) {
-    try {
-        val agua = context.flujoAguaHoy().first()
-        val objetivo = context.flujoObjetivo().first()
-        val porVaso = context.flujoPorVaso().first()
-
-        val glanceManager = GlanceAppWidgetManager(context)
-
-        // Actualiza AguaWidget (el largo)
-        val idsLargos = glanceManager.getGlanceIds(AguaWidget::class.java)
-        idsLargos.forEach { glanceId ->
-            updateAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId) { prefs ->
-                prefs.toMutablePreferences().apply {
-                    this[AguaWidget.KEY_AGUA] = agua
-                    this[AguaWidget.KEY_OBJETIVO] = objetivo
-                    this[AguaWidget.KEY_POR_VASO] = porVaso
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Restar es una corrección, no la acción del día: va chico y tonal, a la izquierda del principal
+            FilledTonalIconButton(
+                onClick = { onCambio(-mlPorVaso) },
+                enabled = totalML > 0,
+                modifier = Modifier.size(56.dp)
+            ) {
+                Icon(
+                    Icons.Filled.Remove,
+                    contentDescription = stringResource(R.string.water_remove_desc, mlPorVaso)
+                )
+            }
+            Button(
+                onClick = { onCambio(mlPorVaso) },
+                modifier = Modifier
+                    .heightIn(min = 56.dp)
+                    .widthIn(min = 180.dp),
+                contentPadding = PaddingValues(horizontal = 28.dp, vertical = 12.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.water_full),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.water_add, mlPorVaso), style = MaterialTheme.typography.titleMedium)
+            }
+        }
+        if (cantidadesRapidas.isNotEmpty()) {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)) {
+                cantidadesRapidas.forEach { ml ->
+                    key("rapida-$ml") {
+                        SuggestionChip(
+                            onClick = { onCambio(ml) },
+                            label = { Text(stringResource(R.string.water_add, ml)) },
+                            icon = {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.water_drop),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                        )
+                    }
                 }
             }
         }
-        AguaWidget().updateAll(context)
-
-        // Actualiza AguaMiniWidget (el compacto)
-        val idsMini = glanceManager.getGlanceIds(AguaMiniWidget::class.java)
-        idsMini.forEach { glanceId ->
-            updateAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId) { prefs ->
-                prefs.toMutablePreferences().apply {
-                    this[AguaMiniWidget.KEY_AGUA] = agua
-                    this[AguaMiniWidget.KEY_OBJETIVO] = objetivo
-                    this[AguaMiniWidget.KEY_POR_VASO] = porVaso
-                }
-            }
-        }
-        AguaMiniWidget().updateAll(context)
-    } catch (e: Exception) {
-        if (e is CancellationException) throw e
-        Log.e("AguaReminder", "Error al actualizar widget de agua", e)
     }
-}
-
-/**Funcion para actualizar el progreso del consumo de agua en el widget desde la app*/
-fun actualizarWidgetAgua(context: Context) {
-    CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
-        actualizarWidgetAguaSuspend(context)
-    }
-}
-
-
-fun programarResetAguaDiario(context: Context) {
-    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-    val intent = Intent(context, ResetAguaReceiver::class.java)
-    val pendingIntent = PendingIntent.getBroadcast(
-        context, 0, intent,
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-    )
-
-    val calendar = Calendar.getInstance().apply {
-        timeInMillis = System.currentTimeMillis()
-        set(Calendar.HOUR_OF_DAY, 0)
-        set(Calendar.MINUTE, 1)
-        set(Calendar.SECOND, 0)
-        set(Calendar.MILLISECOND, 0)
-        if (before(Calendar.getInstance())) {
-            add(Calendar.DAY_OF_MONTH, 1)
-        }
-    }
-
-    alarmManager.setRepeating(
-        AlarmManager.RTC_WAKEUP,
-        calendar.timeInMillis,
-        AlarmManager.INTERVAL_DAY,
-        pendingIntent
-    )
 }

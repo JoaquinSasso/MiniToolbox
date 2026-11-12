@@ -5,11 +5,13 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.joasasso.minitoolbox.data.AguaRepository
 import com.joasasso.minitoolbox.data.DefaultAguaRepository
+import com.joasasso.minitoolbox.data.KEY_CANTIDADES_RAPIDAS
 import com.joasasso.minitoolbox.data.KEY_FRECUENCIA_MIN
 import com.joasasso.minitoolbox.data.KEY_NOTIF_ACTIVAS
 import com.joasasso.minitoolbox.data.KEY_OBJETIVO
 import com.joasasso.minitoolbox.data.KEY_POR_VASO
 import com.joasasso.minitoolbox.data.keyFecha
+import com.joasasso.minitoolbox.data.parsearCantidadesRapidas
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -31,6 +33,7 @@ data class AguaUiState(
     val mlPorVaso: Int = 250,
     val notificacionesActivas: Boolean = false,
     val frecuenciaMinutos: Int = 30,
+    val cantidadesRapidas: List<Int> = emptyList(),
     val fecha: LocalDate = LocalDate.now(),
     val isLoading: Boolean = false
 )
@@ -39,9 +42,8 @@ sealed interface AguaEvent {
     data object ShowZeroWarning : AguaEvent
     data class WaterAdded(val cantidad: Int) : AguaEvent
     data class WaterRemoved(val cantidad: Int) : AguaEvent
-    data object WaterReset : AguaEvent
-    data object NotifEnabled : AguaEvent
-    data object NotifDisabled : AguaEvent
+    /** [anterior] permite deshacer el reinicio desde el snackbar. */
+    data class WaterReset(val anterior: Int) : AguaEvent
 }
 
 class AguaViewModel @JvmOverloads constructor(
@@ -77,6 +79,7 @@ class AguaViewModel @JvmOverloads constructor(
             mlPorVaso = prefs[KEY_POR_VASO] ?: 250,
             notificacionesActivas = prefs[KEY_NOTIF_ACTIVAS] == 1,
             frecuenciaMinutos = prefs[KEY_FRECUENCIA_MIN] ?: 30,
+            cantidadesRapidas = parsearCantidadesRapidas(prefs[KEY_CANTIDADES_RAPIDAS]),
             fecha = fecha,
             isLoading = false
         )
@@ -105,44 +108,63 @@ class AguaViewModel @JvmOverloads constructor(
     fun agregarAgua(cantidad: Int) {
         viewModelScope.launch {
             val fecha = obtenerFechaActiva()
-            val (anterior, _) = repository.incrementarAguaFecha(getApplication(), fecha, cantidad)
+            val (anterior, nuevo) = repository.incrementarAguaFecha(getApplication(), fecha, cantidad)
             if (anterior == 0 && cantidad < 0) {
                 _eventChannel.send(AguaEvent.ShowZeroWarning)
                 return@launch
             }
+            sincronizarTrasCambioDeConsumo()
 
-            cancelarNotificacionAguaActiva(getApplication())
-            actualizarWidgetAguaSuspend(getApplication())
-
-            val prefs = repository.flujoAguaPreferences(getApplication()).first()
-            if (prefs[KEY_NOTIF_ACTIVAS] == 1) {
-                val frecuencia = prefs[KEY_FRECUENCIA_MIN] ?: 30
-                programarRecordatorioAgua(getApplication(), frecuencia)
-            }
-
-            val event = if (cantidad > 0) {
-                AguaEvent.WaterAdded(cantidad)
+            // El repositorio no baja de 0: con 100 ml y -250 se quitan 100, y eso es lo que deshace el snackbar
+            val real = nuevo - anterior
+            val event = if (real > 0) {
+                AguaEvent.WaterAdded(real)
             } else {
-                AguaEvent.WaterRemoved(kotlin.math.abs(cantidad))
+                AguaEvent.WaterRemoved(-real)
             }
             _eventChannel.send(event)
+        }
+    }
+
+    /**
+     * Revierte un [agregarAgua] desde el snackbar. No emite evento: el usuario ya ve el cambio
+     * en el indicador y otro snackbar encima del que acaba de tocar sería ruido.
+     */
+    fun deshacerCambio(cantidad: Int) {
+        viewModelScope.launch {
+            val fecha = obtenerFechaActiva()
+            repository.incrementarAguaFecha(getApplication(), fecha, -cantidad)
+            sincronizarTrasCambioDeConsumo()
         }
     }
 
     fun resetear() {
         viewModelScope.launch {
             val fecha = obtenerFechaActiva()
+            val anterior = repository.flujoAguaFecha(getApplication(), fecha).first()
             repository.guardarAguaFecha(getApplication(), fecha, 0)
-            cancelarNotificacionAguaActiva(getApplication())
-            actualizarWidgetAguaSuspend(getApplication())
+            sincronizarTrasCambioDeConsumo()
+            _eventChannel.send(AguaEvent.WaterReset(anterior))
+        }
+    }
 
-            val prefs = repository.flujoAguaPreferences(getApplication()).first()
-            if (prefs[KEY_NOTIF_ACTIVAS] == 1) {
-                val frecuencia = prefs[KEY_FRECUENCIA_MIN] ?: 30
-                programarRecordatorioAgua(getApplication(), frecuencia)
-            }
+    /** Restaura el consumo que había antes de [resetear]. */
+    fun deshacerReset(anterior: Int) {
+        viewModelScope.launch {
+            val fecha = obtenerFechaActiva()
+            repository.guardarAguaFecha(getApplication(), fecha, anterior.coerceAtLeast(0))
+            sincronizarTrasCambioDeConsumo()
+        }
+    }
 
-            _eventChannel.send(AguaEvent.WaterReset)
+    /** La notificación visible queda desactualizada, el widget también, y el próximo recordatorio se corre. */
+    private suspend fun sincronizarTrasCambioDeConsumo() {
+        cancelarNotificacionAguaActiva(getApplication())
+        actualizarWidgetAguaSuspend(getApplication())
+        val prefs = repository.flujoAguaPreferences(getApplication()).first()
+        if (prefs[KEY_NOTIF_ACTIVAS] == 1) {
+            val frecuencia = prefs[KEY_FRECUENCIA_MIN] ?: 30
+            programarRecordatorioAgua(getApplication(), frecuencia)
         }
     }
 
@@ -150,13 +172,7 @@ class AguaViewModel @JvmOverloads constructor(
         if (objetivo == uiState.value.objetivoML) return
         viewModelScope.launch {
             repository.guardarObjetivo(getApplication(), objetivo)
-            cancelarNotificacionAguaActiva(getApplication())
-            actualizarWidgetAguaSuspend(getApplication())
-            val prefs = repository.flujoAguaPreferences(getApplication()).first()
-            if (prefs[KEY_NOTIF_ACTIVAS] == 1) {
-                val frecuencia = prefs[KEY_FRECUENCIA_MIN] ?: 30
-                programarRecordatorioAgua(getApplication(), frecuencia)
-            }
+            sincronizarTrasCambioDeConsumo()
         }
     }
 
@@ -175,10 +191,8 @@ class AguaViewModel @JvmOverloads constructor(
                 val prefs = repository.flujoAguaPreferences(getApplication()).first()
                 val frecuencia = prefs[KEY_FRECUENCIA_MIN] ?: 30
                 programarRecordatorioAgua(getApplication(), frecuencia)
-                _eventChannel.send(AguaEvent.NotifEnabled)
             } else {
                 cancelarRecordatorioAgua(getApplication())
-                _eventChannel.send(AguaEvent.NotifDisabled)
             }
         }
     }
@@ -191,6 +205,12 @@ class AguaViewModel @JvmOverloads constructor(
             if (prefs[KEY_NOTIF_ACTIVAS] == 1) {
                 programarRecordatorioAgua(getApplication(), minutos)
             }
+        }
+    }
+
+    fun guardarCantidadesRapidas(cantidades: List<Int>) {
+        viewModelScope.launch {
+            repository.guardarCantidadesRapidas(getApplication(), cantidades)
         }
     }
 }

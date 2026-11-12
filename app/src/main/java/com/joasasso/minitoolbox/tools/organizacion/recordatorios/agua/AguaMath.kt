@@ -12,7 +12,23 @@ object AguaMath {
 
     const val MIN_ML_POR_VASO = 50
     const val MAX_ML_POR_VASO = 1500
+    const val MIN_OBJETIVO_ML = 1000
+    const val MAX_OBJETIVO_ML = 5000
+    const val PASO_OBJETIVO_ML = 250
+    const val MAX_CANTIDADES_RAPIDAS = 3
+
+    /** Intervalos que ofrece la UI para el recordatorio, en minutos. */
+    val FRECUENCIAS_MINUTOS = listOf(30, 60, 90, 120, 180)
+
     private val DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
+    /**
+     * Intervalo de [FRECUENCIAS_MINUTOS] más cercano a [minutos]. Las versiones anteriores
+     * permitían guardar 150, 210 o 240, que ya no se ofrecen: la UI marca el más próximo.
+     * En un empate gana el menor, que es el que avisa más seguido.
+     */
+    fun frecuenciaMasCercana(minutos: Int): Int =
+        FRECUENCIAS_MINUTOS.minBy { kotlin.math.abs(it - minutos) }
 
     /**
      * Calcula los mililitros por vaso necesarios para cubrir [objetivoML] en [vasos] tomas,

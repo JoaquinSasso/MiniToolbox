@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.test.core.app.ApplicationProvider
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.TestApplication
+import com.joasasso.minitoolbox.data.CANTIDADES_RAPIDAS_DEFAULT
 import com.joasasso.minitoolbox.data.DefaultAguaRepository
 import com.joasasso.minitoolbox.data.aguaDataStore
 import com.joasasso.minitoolbox.data.guardarAguaFecha
@@ -110,9 +111,8 @@ class AguaViewModelTest {
             val receiver = WaterReminderReceiver()
 
             // Activar notificaciones (objetivo por defecto 2000 ml)
-            val notifEnabledDeferred = async(UnconfinedTestDispatcher(testScheduler)) { model.events.first() }
             model.toggleNotificaciones(true)
-            assertEquals(AguaEvent.NotifEnabled, notifEnabledDeferred.await())
+            model.uiState.first { it.notificacionesActivas }
 
             // 8:00 AM: El usuario toma 0.25L (250 ml)
             val addOchoAmDeferred = async(UnconfinedTestDispatcher(testScheduler)) { model.events.first() }
@@ -196,7 +196,7 @@ class AguaViewModelTest {
 
         val state = model.uiState.first { it.totalAgua == 0 }
         assertEquals(0, state.totalAgua)
-        assertEquals(AguaEvent.WaterReset, eventDeferred.await())
+        assertEquals(AguaEvent.WaterReset(anterior = 500), eventDeferred.await())
 
         model.viewModelScope.cancel()
     }
@@ -264,7 +264,7 @@ class AguaViewModelTest {
     }
 
     @Test
-    fun toggleNotificaciones_actualizaEstadoYEmiteEvento() = runTest {
+    fun toggleNotificaciones_actualizaEstado() = runTest {
         val dateFlow = MutableStateFlow(LocalDate.of(2026, 10, 2))
         val model = AguaViewModel(app, DefaultAguaRepository, dateFlowOverride = dateFlow)
         vm = model
@@ -272,22 +272,97 @@ class AguaViewModelTest {
 
         model.uiState.first { !it.isLoading }
 
-        val event1Deferred = async(UnconfinedTestDispatcher(testScheduler)) { model.events.first() }
         model.toggleNotificaciones(true)
         advanceUntilIdle()
-        val event1 = event1Deferred.await()
-        assertEquals(AguaEvent.NotifEnabled, event1)
-        val stateActivo = model.uiState.first { it.notificacionesActivas }
-        assertTrue(stateActivo.notificacionesActivas)
+        assertTrue(model.uiState.first { it.notificacionesActivas }.notificacionesActivas)
 
-        val event2Deferred = async(UnconfinedTestDispatcher(testScheduler)) { model.events.first() }
         model.toggleNotificaciones(false)
         advanceUntilIdle()
-        val event2 = event2Deferred.await()
-        assertEquals(AguaEvent.NotifDisabled, event2)
-        val stateInactivo = model.uiState.first { !it.notificacionesActivas }
-        assertTrue(!stateInactivo.notificacionesActivas)
+        assertTrue(!model.uiState.first { !it.notificacionesActivas }.notificacionesActivas)
 
+        model.viewModelScope.cancel()
+    }
+
+    @Test
+    fun deshacerCambio_revierteLoAgregado() = runTest {
+        val dateFlow = MutableStateFlow(LocalDate.of(2026, 10, 2))
+        val model = AguaViewModel(app, DefaultAguaRepository, dateFlowOverride = dateFlow)
+        vm = model
+        mantenerSuscripto(model.uiState)
+        model.uiState.first { !it.isLoading }
+
+        val eventDeferred = async(UnconfinedTestDispatcher(testScheduler)) { model.events.first() }
+        model.agregarAgua(500)
+        assertEquals(AguaEvent.WaterAdded(500), eventDeferred.await())
+        model.uiState.first { it.totalAgua == 500 }
+
+        model.deshacerCambio(500)
+        advanceUntilIdle()
+
+        assertEquals(0, model.uiState.first { it.totalAgua == 0 }.totalAgua)
+        model.viewModelScope.cancel()
+    }
+
+    @Test
+    fun quitarMasDeLoQueHay_emiteLoQueRealmenteSeQuito() = runTest {
+        val fecha = LocalDate.of(2026, 10, 2)
+        val dateFlow = MutableStateFlow(fecha)
+        app.guardarAguaFecha(fecha, 100)
+        val model = AguaViewModel(app, DefaultAguaRepository, dateFlowOverride = dateFlow)
+        vm = model
+        mantenerSuscripto(model.uiState)
+        model.uiState.first { !it.isLoading && it.totalAgua == 100 }
+
+        val eventDeferred = async(UnconfinedTestDispatcher(testScheduler)) { model.events.first() }
+        model.agregarAgua(-250)
+
+        // Deshacer tiene que devolver 100 ml, no 250
+        assertEquals(AguaEvent.WaterRemoved(100), eventDeferred.await())
+        model.deshacerCambio(-100)
+        advanceUntilIdle()
+        assertEquals(100, model.uiState.first { it.totalAgua == 100 }.totalAgua)
+        model.viewModelScope.cancel()
+    }
+
+    @Test
+    fun deshacerReset_restauraElConsumoAnterior() = runTest {
+        val fecha = LocalDate.of(2026, 10, 2)
+        val dateFlow = MutableStateFlow(fecha)
+        app.guardarAguaFecha(fecha, 1250)
+        val model = AguaViewModel(app, DefaultAguaRepository, dateFlowOverride = dateFlow)
+        vm = model
+        mantenerSuscripto(model.uiState)
+        model.uiState.first { !it.isLoading && it.totalAgua == 1250 }
+
+        val eventDeferred = async(UnconfinedTestDispatcher(testScheduler)) { model.events.first() }
+        model.resetear()
+        val event = eventDeferred.await() as AguaEvent.WaterReset
+        model.uiState.first { it.totalAgua == 0 }
+
+        model.deshacerReset(event.anterior)
+        advanceUntilIdle()
+
+        assertEquals(1250, model.uiState.first { it.totalAgua == 1250 }.totalAgua)
+        model.viewModelScope.cancel()
+    }
+
+    @Test
+    fun cantidadesRapidas_usanDefaultYPersistenCambios() = runTest {
+        val dateFlow = MutableStateFlow(LocalDate.of(2026, 10, 2))
+        val model = AguaViewModel(app, DefaultAguaRepository, dateFlowOverride = dateFlow)
+        vm = model
+        mantenerSuscripto(model.uiState)
+
+        assertEquals(CANTIDADES_RAPIDAS_DEFAULT, model.uiState.first { !it.isLoading }.cantidadesRapidas)
+
+        model.guardarCantidadesRapidas(listOf(330))
+        advanceUntilIdle()
+        assertEquals(listOf(330), model.uiState.first { it.cantidadesRapidas == listOf(330) }.cantidadesRapidas)
+
+        // Lista vacía: el usuario quitó todas, no se vuelve al default
+        model.guardarCantidadesRapidas(emptyList())
+        advanceUntilIdle()
+        assertEquals(emptyList<Int>(), model.uiState.first { it.cantidadesRapidas.isEmpty() }.cantidadesRapidas)
         model.viewModelScope.cancel()
     }
 }

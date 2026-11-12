@@ -1,33 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--Pantalla principal-->
-    <string name="water_goal_label">Meta diaria:</string>
-    <string name="water_add_title">Agregar agua</string>
+    <string name="water_liters_value">%1$s L</string>
+    <string name="water_of_goal">de %1$s L</string>
+    <plurals name="water_glasses_progress">
+        <item quantity="one">%1$d de %2$d vaso</item>
+        <item quantity="many">%1$d de %2$d vasos</item>
+        <item quantity="other">%1$d de %2$d vasos</item>
+    </plurals>
+    <string name="water_remaining_ml">Te faltan %1$d ml</string>
+    <string name="water_remaining_liters">Te faltan %1$s L</string>
+    <string name="water_goal_reached">Meta cumplida</string>
     <string name="water_add">+%1$d ml</string>
     <string name="water_remove">-%1$d ml</string>
-    <string name="water_change_glass">Cambiar cantidad del vaso</string>
+    <string name="water_remove_desc">Quitar %1$d ml</string>
     <string name="water_glasses_display">( %1$d / %2$d Vasos)</string>
-
-    <string name="water_notif_title">Recordatorio de agua</string>
-    <string name="water_notif_enabled">Notificaciones</string>
-    <string name="water_notif_freq">Frecuencia: %1$.1f hs</string>
-    <string name="notif_enabled_snackbar">Notificaciones activadas</string>
-    <string name="notif_disabled_snackbar">Notificaciones desactivadas</string>
-    <string name="notif_permission_denied">No se otorgó permiso para notificaciones.</string>
-
-    <string name="reset_content_desc">Resetear</string>
-    <string name="stats">Estadísticas</string>
-    <string name="stats_content_desc">Estadísticas</string>
     <string name="water_widget_hint">Puedes agregar el widget a tu pantalla de inicio para registrar tu consumo de agua más fácilmente.</string>
 
-    <string name="glass_amount_title">Cantidad por vaso</string>
-    <string name="glass_amount_label">ml</string>
-    <string name="glasses_per_day_label">Vasos por día</string>
+    <string name="water_settings">Ajustes</string>
+    <string name="water_more_options">Más opciones</string>
+    <string name="water_help_menu">Ayuda</string>
+    <string name="water_reset_menu">Reiniciar el día</string>
+    <string name="water_reset_confirm_title">¿Reiniciar el día?</string>
+    <string name="water_reset_confirm_text">Se va a borrar lo que registraste hoy (%1$s L). Vas a poder deshacerlo desde el aviso que aparece abajo.</string>
+    <string name="water_reset_confirm">Reiniciar</string>
+    <string name="stats">Estadísticas</string>
+    <string name="water_undo">Deshacer</string>
+
+    <!--Ajustes-->
+    <string name="water_settings_goal">Meta diaria</string>
+    <string name="water_settings_goal_hint">Para un adulto se recomienda entre 1,5 y 3 L por día.</string>
+    <string name="water_settings_glass">Tamaño del vaso</string>
+    <string name="water_settings_glass_hint">Es lo que suma el botón principal, el widget y la notificación.</string>
+    <string name="water_settings_glass_value">%1$d ml</string>
+    <string name="water_settings_glass_label">Mililitros</string>
+    <plurals name="water_settings_glass_per_day">
+        <item quantity="one">Equivale a %1$d vaso por día</item>
+        <item quantity="many">Equivale a %1$d vasos por día</item>
+        <item quantity="other">Equivale a %1$d vasos por día</item>
+    </plurals>
+    <string name="water_settings_glass_error">Tiene que estar entre %1$d ml y %2$d ml</string>
+    <string name="water_settings_quick">Otras cantidades</string>
+    <string name="water_settings_quick_hint">Aparecen debajo del botón principal, por ejemplo para una taza o una botella.</string>
+    <string name="water_settings_quick_add">Agregar</string>
+    <string name="water_settings_quick_delete_desc">Eliminar %1$d ml</string>
+    <string name="water_settings_quick_dialog_title">Nueva cantidad</string>
+    <string name="water_notif_title">Recordatorios</string>
+    <string name="water_notif_enabled">Recordarme tomar agua</string>
+    <string name="water_notif_interval">Cada</string>
+    <string name="water_interval_minutes">%1$d min</string>
+    <string name="water_interval_hours">%1$s h</string>
+    <string name="notif_permission_denied">No se otorgó permiso para notificaciones.</string>
 
     <string name="water_help_title">Sobre el recordatorio de agua</string>
     <string name="water_help_line1">• Lleva el control de la cantidad de agua que consumes a diario.</string>
-    <string name="water_help_line2">• Puedes configurar tu meta diaria y la cantidad que sumas con cada botón.</string>
-    <string name="water_help_line3">• Si activas las notificaciones, la app te recordará tomar agua según el intervalo elegido.</string>
+    <string name="water_help_line2">• Desde Ajustes puedes cambiar tu meta diaria, el tamaño del vaso y otras cantidades rápidas.</string>
+    <string name="water_help_line3">• Si activas los recordatorios, la app te avisará según el intervalo elegido.</string>
     <string name="water_help_line4">• Todo se almacena localmente y no se comparte fuera de tu dispositivo.</string>
     <string name="water_help_line5">• Puedes agregar el widget a tu pantalla de inicio para ver tu progreso diario y sumar o restar agua rápidamente sin abrir la app.</string>
     <string name="water_help_line6">💧 Recomendación: un adulto debe consumir entre 1.5 y 3 litros de agua pura al día. La meta diaria sugerida es de 2 litros, pero puedes ajustarla según tus necesidades, actividad y clima.</string>
@@ -35,7 +63,7 @@
     <string name="water_zero_warning">Ya no hay agua</string>
     <string name="water_added_feedback">Agregaste %1$d ml 💧</string>
     <string name="water_removed_feedback">Quitaste %1$d ml 💧</string>
-    <string name="water_reset_feedback">¡Contador de agua reiniciado!</string>
+    <string name="water_reset_feedback">Día reiniciado</string>
 
     <!--Pantalla de estadisticas-->
     <string name="water_statistics_screen_no_data">No hay datos</string>

@@ -21,6 +21,7 @@ interface AguaRepository {
     suspend fun guardarPorVaso(context: Context, valor: Int)
     suspend fun guardarNotificacionesActivas(context: Context, activo: Boolean)
     suspend fun guardarFrecuenciaMinutos(context: Context, min: Int)
+    suspend fun guardarCantidadesRapidas(context: Context, cantidades: List<Int>)
 }
 
 object DefaultAguaRepository : AguaRepository {
@@ -65,4 +66,7 @@ object DefaultAguaRepository : AguaRepository {
 
     override suspend fun guardarFrecuenciaMinutos(context: Context, min: Int) =
         context.guardarFrecuenciaMinutos(min)
+
+    override suspend fun guardarCantidadesRapidas(context: Context, cantidades: List<Int>) =
+        context.guardarCantidadesRapidas(cantidades)
 }

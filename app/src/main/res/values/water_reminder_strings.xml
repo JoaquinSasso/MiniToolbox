@@ -1,33 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--Main screen-->
-    <string name="water_goal_label">Daily goal:</string>
-    <string name="water_add_title">Add water</string>
+    <string name="water_liters_value">%1$s L</string>
+    <string name="water_of_goal">of %1$s L</string>
+    <plurals name="water_glasses_progress">
+        <item quantity="one">%1$d of %2$d glass</item>
+        <item quantity="other">%1$d of %2$d glasses</item>
+    </plurals>
+    <string name="water_remaining_ml">%1$d ml to go</string>
+    <string name="water_remaining_liters">%1$s L to go</string>
+    <string name="water_goal_reached">Goal reached</string>
     <string name="water_add">+%1$d ml</string>
     <string name="water_remove">-%1$d ml</string>
-    <string name="water_change_glass">Change glass amount</string>
+    <string name="water_remove_desc">Remove %1$d ml</string>
     <string name="water_glasses_display">( %1$d / %2$d Glasses)</string>
-
-    <string name="water_notif_title">Water reminder</string>
-    <string name="water_notif_enabled">Notifications</string>
-    <string name="water_notif_freq">Frequency: %1$.1f hrs</string>
-    <string name="notif_enabled_snackbar">Notifications enabled</string>
-    <string name="notif_disabled_snackbar">Notifications disabled</string>
-    <string name="notif_permission_denied">Notification permission was not granted.</string>
-
-    <string name="reset_content_desc">Reset</string>
-    <string name="stats">Statistics</string>
-    <string name="stats_content_desc">Statistics</string>
     <string name="water_widget_hint">You can add the widget to your home screen to track your water intake more easily.</string>
 
-    <string name="glass_amount_title">Glass amount</string>
-    <string name="glass_amount_label">ml</string>
-    <string name="glasses_per_day_label">Glasses per day</string>
+    <string name="water_settings">Settings</string>
+    <string name="water_more_options">More options</string>
+    <string name="water_help_menu">Help</string>
+    <string name="water_reset_menu">Reset today</string>
+    <string name="water_reset_confirm_title">Reset today?</string>
+    <string name="water_reset_confirm_text">This clears what you logged today (%1$s L). You can undo it from the message that shows up below.</string>
+    <string name="water_reset_confirm">Reset</string>
+    <string name="stats">Statistics</string>
+    <string name="water_undo">Undo</string>
+
+    <!--Settings-->
+    <string name="water_settings_goal">Daily goal</string>
+    <string name="water_settings_goal_hint">Adults are advised to drink 1.5 to 3 L a day.</string>
+    <string name="water_settings_glass">Glass size</string>
+    <string name="water_settings_glass_hint">This is what the main button, the widget and the notification add.</string>
+    <string name="water_settings_glass_value">%1$d ml</string>
+    <string name="water_settings_glass_label">Milliliters</string>
+    <plurals name="water_settings_glass_per_day">
+        <item quantity="one">That is %1$d glass a day</item>
+        <item quantity="other">That is %1$d glasses a day</item>
+    </plurals>
+    <string name="water_settings_glass_error">Must be %1$d ml to %2$d ml</string>
+    <string name="water_settings_quick">Other amounts</string>
+    <string name="water_settings_quick_hint">Shown below the main button, for example for a cup or a bottle.</string>
+    <string name="water_settings_quick_add">Add</string>
+    <string name="water_settings_quick_delete_desc">Delete %1$d ml</string>
+    <string name="water_settings_quick_dialog_title">New amount</string>
+    <string name="water_notif_title">Reminders</string>
+    <string name="water_notif_enabled">Remind me to drink water</string>
+    <string name="water_notif_interval">Every</string>
+    <string name="water_interval_minutes">%1$d min</string>
+    <string name="water_interval_hours">%1$s h</string>
+    <string name="notif_permission_denied">Notification permission was not granted.</string>
 
     <string name="water_help_title">About the water reminder</string>
     <string name="water_help_line1">• Track the amount of water you drink daily.</string>
-    <string name="water_help_line2">• You can set your daily goal and the amount added per button press.</string>
-    <string name="water_help_line3">• If you enable notifications, the app will remind you to drink water based on the chosen interval.</string>
+    <string name="water_help_line2">• In Settings you can change your daily goal, the glass size and other quick amounts.</string>
+    <string name="water_help_line3">• If you turn on reminders, the app will notify you at the chosen interval.</string>
     <string name="water_help_line4">• All data is stored locally and never shared outside your device.</string>
     <string name="water_help_line5">• You can add the widget to your home screen to see your daily progress and quickly add/remove water without opening the app.</string>
     <string name="water_help_line6">💧 Tip: An adult should drink between 1.5 and 3 liters of pure water per day. The suggested goal is 2 liters, but you can adjust it based on your needs, activity level, and climate.</string>
@@ -35,7 +61,7 @@
     <string name="water_zero_warning">No water left</string>
     <string name="water_added_feedback">You added %1$d ml 💧</string>
     <string name="water_removed_feedback">You removed %1$d ml 💧</string>
-    <string name="water_reset_feedback">Water counter reset!</string>
+    <string name="water_reset_feedback">Today was reset</string>
 
     <!--Statistics screen-->
     <string name="water_statistics_screen_no_data">No data</string>

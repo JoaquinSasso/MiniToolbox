@@ -24,6 +24,7 @@ import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -220,7 +221,10 @@ fun AguaStatisticsScreen(
                         color = MaterialTheme.colorScheme.primary
                     )
 
-                    AguaLevelBar(currentMl, objetivoML)
+                    LinearProgressIndicator(
+                        progress = { if (objetivoML > 0) (currentMl / objetivoML.toFloat()).coerceIn(0f, 1f) else 1f },
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),

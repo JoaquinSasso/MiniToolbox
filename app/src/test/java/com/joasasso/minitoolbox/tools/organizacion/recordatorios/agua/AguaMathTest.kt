@@ -97,4 +97,14 @@ class AguaMathTest {
         val conPico = historico + (base.plusDays(8) to 2750)
         assertEquals(base.plusDays(8) to 2750, AguaMath.encontrarMejorDia(conPico))
     }
+
+    @Test
+    fun frecuenciaMasCercana_mapeaValoresViejosAlIntervaloOfrecido() {
+        assertEquals(30, AguaMath.frecuenciaMasCercana(30))
+        assertEquals(120, AguaMath.frecuenciaMasCercana(120))
+        // 150 queda a 30 de 120 y de 180: gana el menor
+        assertEquals(120, AguaMath.frecuenciaMasCercana(150))
+        assertEquals(180, AguaMath.frecuenciaMasCercana(210))
+        assertEquals(180, AguaMath.frecuenciaMasCercana(240))
+    }
 }

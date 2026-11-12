@@ -96,4 +96,11 @@ class AguaDataStoreTest {
         // El registro del día anterior se mantiene intacto
         assertEquals(1800, context.flujoAguaFecha(dia1).first())
     }
+
+    @Test
+    fun parsearCantidadesRapidas_toleraValoresInvalidos() {
+        assertEquals(CANTIDADES_RAPIDAS_DEFAULT, parsearCantidadesRapidas(null))
+        assertEquals(emptyList<Int>(), parsearCantidadesRapidas(""))
+        assertEquals(listOf(150, 500), parsearCantidadesRapidas("150, x,500,-3,0"))
+    }
 }
