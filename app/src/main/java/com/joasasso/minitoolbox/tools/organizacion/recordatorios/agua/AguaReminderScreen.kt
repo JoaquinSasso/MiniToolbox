@@ -388,7 +388,8 @@ private fun ProgresoHoy(totalML: Int, objetivoML: Int, mlPorVaso: Int, alcanzado
                 trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
                 stroke = stroke,
                 trackStroke = stroke,
-                wavelength = 48.dp
+                wavelength = 48.dp,
+                waveSpeed = 20.dp
             )
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
