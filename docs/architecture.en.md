@@ -24,14 +24,14 @@ flowchart TD
     subgraph UI [UI: Jetpack Compose]
         MA[MainActivity] --> MT[MiniToolboxTheme]
         MT --> NG[NavGraph]
-        NG --> VMS["Screens with a ViewModel<br/>catalog, water and stats,<br/>expense splitter (3), unit converter,<br/>minesweeper, AR ruler, team generator"]
-        NG --> LSS["Screens with local state<br/>Pomodoro, instruments, flashlight,<br/>QR, option selector, scoreboards, flags"]
+        NG --> VMS["Screens with a ViewModel<br/>catalog, water and stats,<br/>expense splitter (3), unit converter,<br/>minesweeper, flags, AR ruler, team generator"]
+        NG --> LSS["Screens with local state<br/>Pomodoro, instruments, flashlight,<br/>QR, option selector, scoreboards"]
         style VMS fill:#e1f5fe,stroke:#01579b,color:#000
         style LSS fill:#fff9c4,stroke:#fbc02d,color:#000
     end
 
     subgraph Logic [Logic and state]
-        VM["ViewModels (10)<br/>StateFlow"]
+        VM["ViewModels (11)<br/>StateFlow"]
         CS["Compose state<br/>remember / mutableStateOf"]
         MET["Emitter: metrics/Metrics.kt"]
     end
@@ -46,7 +46,6 @@ flowchart TD
     subgraph Data [Data]
         DS[("Preferences DataStore (14)")]
         SP[("SharedPreferences")]
-        PB["assets/countries_dataset.pb<br/>(Protobuf)"]
     end
 
     VMS -.-> VM
@@ -59,7 +58,6 @@ flowchart TD
     AR --> DS
     WM --> DS
     GW --> DS
-    LSS -.-> PB
     GW -->|widgetUse| MET
 ```
 
@@ -185,7 +183,7 @@ app/src/main/java/com/joasasso/minitoolbox/
 ├── tools/           # Tool, ToolCategory, ToolRegistry
 │   ├── entretenimiento/
 │   │   ├── aleatorio/      # Option selector
-│   │   └── minijuegos/     # Flags; minesweeper/ with engine and ViewModel
+│   │   └── minijuegos/     # Flags (ViewModel and FlagQuiz); minesweeper/ with engine and ViewModel
 │   ├── herramientas/
 │   │   ├── calculadoras/   # Unit converter (engine, parser, ViewModel)
 │   │   ├── generadores/    # QR, team generator
@@ -206,21 +204,19 @@ Package names are in Spanish. The catalog categories (Measure, Essentials, Organ
 
 ## 6. Persistence
 
-**14 `preferencesDataStore` instances.** Thirteen are in `data/` and one in `metrics/storage/MetricsDataStore.kt`, kept apart on purpose because it belongs to telemetry.
+**11 `preferencesDataStore` instances.** Ten are in `data/` and one in `metrics/storage/MetricsDataStore.kt`, kept apart on purpose because it belongs to telemetry.
 
 - `PomodoroDataStore.kt` declares two: `pomodoro_state` and `pomodoro_settings`. The second is a leftover and must not be used in new code.
-- Three have no references: `BMIDataStore.kt`, `EventsDataStore.kt` and `vCardDataStore.kt`. They are in the `dead-code` backlog item.
 
 **SharedPreferences** is used where a synchronous read is needed or for historical reasons:
 
 - Pomodoro: `AlarmState`, `PomodoroSchedulePrefs` and part of `PomodoroDataStore.kt`.
 - Telemetry: the metrics switch and the `dailyOpenOnce` marker (`Metrics.kt`), and the last scheduling time (`UploadScheduler`).
 - `ScoreboardDataStore.kt`, despite its name.
-- `RachasDataStore.kt`, unused.
 
 **Orphan files on updated devices.** Removing the PRO mode left files that nothing reads (`orphan-monetization-storage` backlog item).
 
-**Countries dataset.** `assets/countries_dataset.pb`, read with full `protobuf-java`. The migration to Lite is in a [pending ADR](decisions/protobuf-lite-migration.md) (Spanish).
+**Countries for the flag game.** A list in code, `data/FlagCountries.kt`: 206 countries with ISO code and Spanish and English names. The flag is built from the code. No assets and no protobuf.
 
 ---
 
@@ -240,11 +236,11 @@ A mismatch between the code and this document is a documentation bug. The counts
 
 | Figure | Command | Value |
 |---|---|---|
-| DataStores | `git grep "by preferencesDataStore" -- app/src/main/java \| wc -l` | 14 |
+| DataStores | `git grep "by preferencesDataStore" -- app/src/main/java \| wc -l` | 11 |
 | Destinations in `Screen` | `grep -c "@SerialName" app/src/main/java/com/joasasso/minitoolbox/nav/Screen.kt` | 27 |
 | Destinations in the `NavGraph` | `grep -c "composable<" app/src/main/java/com/joasasso/minitoolbox/NavGraph.kt` | 27 |
 | `ToolRegistry` entries | `grep -c "Tool(" app/src/main/java/com/joasasso/minitoolbox/tools/ToolRegistry.kt` | 19 |
-| ViewModels | `git ls-files "app/src/main/*ViewModel.kt" \| wc -l` | 10 |
+| ViewModels | `git ls-files "app/src/main/*ViewModel.kt" \| wc -l` | 11 |
 | Glance widgets | `git grep -l "GlanceAppWidget()" -- app/src/main/java \| wc -l` | 5 |
 
 A possible improvement is turning this table into a test that fails when a count changes, so the document cannot drift silently.

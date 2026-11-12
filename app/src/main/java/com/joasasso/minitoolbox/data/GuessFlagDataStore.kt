@@ -7,16 +7,24 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-private val Context.dataStore by preferencesDataStore("flag_game_prefs")
+// El nombre del archivo y la clave no cambian: los récords guardados se conservan.
+internal val Context.flagGameDataStore by preferencesDataStore("flag_game_prefs")
+private val BEST_SCORE = intPreferencesKey("best_score")
 
-object FlagGameDataStore {
-    private val BEST_SCORE = intPreferencesKey("best_score")
+interface FlagGameRepository {
+    fun bestScore(context: Context): Flow<Int>
 
-    fun getBestScore(context: Context): Flow<Int> {
-        return context.dataStore.data.map { prefs -> prefs[BEST_SCORE] ?: 0 }
-    }
+    /** Guarda [score] solo si supera el récord guardado. */
+    suspend fun recordScore(context: Context, score: Int)
+}
 
-    suspend fun setBestScore(context: Context, newScore: Int) {
-        context.dataStore.edit { prefs -> prefs[BEST_SCORE] = newScore }
+object DefaultFlagGameRepository : FlagGameRepository {
+    override fun bestScore(context: Context): Flow<Int> =
+        context.flagGameDataStore.data.map { prefs -> prefs[BEST_SCORE] ?: 0 }
+
+    override suspend fun recordScore(context: Context, score: Int) {
+        context.flagGameDataStore.edit { prefs ->
+            if (score > (prefs[BEST_SCORE] ?: 0)) prefs[BEST_SCORE] = score
+        }
     }
 }

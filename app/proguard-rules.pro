@@ -25,6 +25,7 @@
 # Mantener metadata de genéricos y anotaciones
 -keepattributes Signature, RuntimeVisibleAnnotations, RuntimeVisibleParameterAnnotations, EnclosingMethod, InnerClasses
 
-# Mantener tus modelos tal cual (nombres de clase y campos)
--keep class com.joasasso.minitoolbox.data.** { *; }
+# data/ no necesita reglas propias: no usa reflexión. Las clases @Serializable
+# traen sus reglas en kotlinx-serialization y el resto se serializa a mano con
+# org.json.
 
