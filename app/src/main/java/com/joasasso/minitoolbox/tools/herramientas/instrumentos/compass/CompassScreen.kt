@@ -350,7 +350,7 @@ private fun CompassDial(
         label = "readoutAlpha"
     )
     val bubbleColor by animateColorAsState(
-        targetValue = if (state.isTilted) colors.error else colors.primary,
+        targetValue = if (state.isTilted) colors.error else colors.outlineVariant,
         label = "bubbleColor"
     )
 
@@ -401,21 +401,19 @@ private fun CompassDial(
                 )
             }
 
-            // Nivel: aro guía y burbuja que se desplaza hacia el borde levantado.
-            val levelR = baseR * 0.36f
+            // Nivel: el aro interior es la burbuja. Con el teléfono plano queda concéntrico y
+            // se desplaza hacia el borde levantado al inclinarlo. Así no hay nada dibujado
+            // sobre la lectura central, que queda siempre adentro del aro.
+            val levelR = baseR * 0.50f
+            val maxShift = baseR * 0.20f
             drawCircle(
-                color = colors.outlineVariant,
+                color = bubbleColor,
                 radius = levelR,
-                center = center,
-                style = Stroke(width = baseR * 0.008f)
-            )
-            drawCircle(
-                color = bubbleColor.copy(alpha = 0.28f),
-                radius = baseR * 0.07f,
                 center = Offset(
-                    center.x + state.bubble.x * levelR,
-                    center.y + state.bubble.y * levelR
-                )
+                    center.x + state.bubble.x * maxShift,
+                    center.y + state.bubble.y * maxShift
+                ),
+                style = Stroke(width = baseR * 0.012f)
             )
 
             // Rumbo fijado: marca sobre el anillo y arco desde la línea de fe hasta ella,
