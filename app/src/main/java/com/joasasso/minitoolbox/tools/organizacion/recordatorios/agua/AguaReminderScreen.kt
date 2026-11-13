@@ -41,11 +41,10 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -72,11 +71,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -356,7 +353,6 @@ fun AguaReminderScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ProgresoHoy(totalML: Int, objetivoML: Int, mlPorVaso: Int, alcanzado: Boolean) {
     val fraccion = if (objetivoML > 0) (totalML / objetivoML.toFloat()).coerceIn(0f, 1f) else 1f
@@ -366,7 +362,6 @@ private fun ProgresoHoy(totalML: Int, objetivoML: Int, mlPorVaso: Int, alcanzado
         label = "progresoAgua"
     )
     val colorProgreso = if (alcanzado) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary
-    val stroke = with(LocalDensity.current) { Stroke(width = 12.dp.toPx(), cap = StrokeCap.Round) }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -380,16 +375,15 @@ private fun ProgresoHoy(totalML: Int, objetivoML: Int, mlPorVaso: Int, alcanzado
                 .aspectRatio(1f),
             contentAlignment = Alignment.Center
         ) {
-            CircularWavyProgressIndicator(
+            // Anillo liso, como el temporizador del reloj de Pixel: el arco se pinta con el progreso, sin ondas.
+            CircularProgressIndicator(
                 progress = { progreso },
                 modifier = Modifier.fillMaxSize(),
                 color = colorProgreso,
                 // surfaceContainerHighest: con secondaryContainer el riel y el progreso eran dos tonos casi iguales
                 trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                stroke = stroke,
-                trackStroke = stroke,
-                wavelength = 48.dp,
-                waveSpeed = 20.dp
+                strokeWidth = 12.dp,
+                strokeCap = StrokeCap.Round
             )
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
