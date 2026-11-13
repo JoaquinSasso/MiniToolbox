@@ -1,20 +1,35 @@
 package com.joasasso.minitoolbox.tools.herramientas.instrumentos.compass
 
-import android.content.Context
 import android.os.SystemClock
-import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Explore
+import androidx.compose.material.icons.outlined.GpsFixed
+import androidx.compose.material.icons.outlined.GpsNotFixed
+import androidx.compose.material.icons.outlined.ScreenRotation
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -25,125 +40,156 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.android.material.color.MaterialColors
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.data.ToolOnboardingKeys
+import com.joasasso.minitoolbox.ui.components.ToolOnboardingBanner
 import com.joasasso.minitoolbox.ui.components.ToolOnboardingCard
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
-import kotlin.math.sqrt
 
-// --- UI principal -------------------------------------------------------------
+/** Opacidad de la lectura cuando no es confiable (sin datos o teléfono inclinado). */
+private const val DIMMED_ALPHA = 0.38f
+
+private val DirectionNames = listOf(
+    R.string.compass_name_n, R.string.compass_name_ne, R.string.compass_name_e, R.string.compass_name_se,
+    R.string.compass_name_s, R.string.compass_name_sw, R.string.compass_name_w, R.string.compass_name_nw
+)
 
 @Composable
 fun BrujulaScreen(onBack: () -> Unit, viewModel: CompassViewModel = viewModel()) {
-    val context = LocalContext.current
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val red = Color(0xFFF5274E)
-    val onSurface = MaterialTheme.colorScheme.onSurface
-    var showInfo by remember { mutableStateOf(false) }
+    var showInfo by rememberSaveable { mutableStateOf(false) }
+    var calibrationDismissed by rememberSaveable { mutableStateOf(false) }
     val haptic = LocalHapticFeedback.current
-    val hasMagnetometer = state.isSupported
 
-    val animated by animateFloatAsState(
+    // Si la precisión se recupera, el aviso vuelve a estar disponible para la próxima caída.
+    LaunchedEffect(state.needsCalibration) {
+        if (!state.needsCalibration) calibrationDismissed = false
+    }
+
+    val dialHeading by animateFloatAsState(
         targetValue = state.continuousHeading,
-        animationSpec = tween(180, easing = FastOutSlowInEasing),
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioNoBouncy,
+            stiffness = Spring.StiffnessMediumLow
+        ),
         label = "compassRotation"
     )
 
-    TickHaptics(
-        headingDeg = animated,
-        majorStepDeg = 30f,
-        epsilonDeg = 3f,
-        cooldownMs = 350L
-    )
+    TickHaptics(headingDeg = dialHeading)
 
     Scaffold(
-        topBar = { TopBarReusable(stringResource(R.string.tool_compass), onBack, onShowInfo = {showInfo = true}) },
-        bottomBar = {
-            Column(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = if (state.hasReading) headingLabel(state.heading, context) else "—°",
-                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold),
-                    textAlign = TextAlign.Center
-                )
-                if (!hasMagnetometer) {
-                    Text(
-                        text = stringResource(R.string.compass_no_magnetometer),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+        topBar = {
+            TopBarReusable(
+                title = stringResource(R.string.tool_compass),
+                onBack = onBack,
+                onShowInfo = { showInfo = true }
+            )
+        }
+    ) { padding ->
+        if (!state.isSupported) {
+            UnsupportedContent(Modifier.padding(padding))
+        } else BoxWithConstraints(
+            Modifier
+                .padding(padding)
+                .fillMaxSize()
+        ) {
+            val isLandscape = maxWidth > maxHeight
+            val dial: @Composable (Modifier) -> Unit = { modifier ->
+                BoxWithConstraints(modifier, contentAlignment = Alignment.Center) {
+                    CompassDial(
+                        state = state,
+                        dialHeading = dialHeading,
+                        diameter = min(maxWidth, maxHeight) * 0.92f
                     )
                 }
             }
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            ToolOnboardingCard(
-                toolKey = ToolOnboardingKeys.COMPASS,
-                message = stringResource(R.string.compass_onboarding_hint),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            )
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                if (hasMagnetometer) {
-                    BoxWithConstraints(Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center) {
-                        val side = min(maxWidth, maxHeight) * 0.9f
-                        CompassDial(
-                            diameterDp = side,
-                            ringRotationDeg = -animated,   // el anillo gira opuesto al heading
-                            northColor = red,          // color para el norte y el triangulo
-                            tickColor = onSurface,
-                            ringColor = onSurface.copy(alpha = 0.25f)
-                        )
-                    }
-                } else {
-                    // Fallback simple cuando no hay magnetómetro
-                    Text(
-                        text = stringResource(R.string.compass_unsupported),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+            val info: @Composable ColumnScope.() -> Unit = {
+                ToolOnboardingCard(
+                    toolKey = ToolOnboardingKeys.COMPASS,
+                    message = stringResource(R.string.compass_onboarding_hint),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                ToolOnboardingBanner(
+                    visible = state.needsCalibration && !calibrationDismissed,
+                    message = stringResource(R.string.compass_calibration_message),
+                    onDismiss = { calibrationDismissed = true },
+                    icon = Icons.Outlined.ScreenRotation,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                AccuracyChip(
+                    accuracy = state.accuracy,
+                    onClick = { showInfo = true }
+                )
+                TiltWarning(visible = state.isTilted)
+            }
+
+            if (isLandscape) {
+                Row(Modifier.fillMaxSize()) {
+                    dial(
+                        Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                    )
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        content = info
+                    )
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    info()
+                    dial(
+                        Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
                     )
                 }
             }
         }
     }
+
     if (showInfo) {
         AlertDialog(
             onDismissRequest = { showInfo = false },
@@ -153,8 +199,6 @@ fun BrujulaScreen(onBack: () -> Unit, viewModel: CompassViewModel = viewModel())
                     Text(stringResource(R.string.compass_help_line1))
                     Text(stringResource(R.string.compass_help_line2))
                     Text(stringResource(R.string.compass_help_line3))
-                    Text(stringResource(R.string.compass_help_line4))
-                    Text(stringResource(R.string.compass_help_line5))
                 }
             },
             confirmButton = {
@@ -169,170 +213,265 @@ fun BrujulaScreen(onBack: () -> Unit, viewModel: CompassViewModel = viewModel())
     }
 }
 
-
-
-
-
 // --- Componentes --------------------------------------------------------------
+
 @Composable
-private fun CompassDial(
-    diameterDp: Dp,
-    ringRotationDeg: Float,         // el anillo gira en este ángulo
-    northColor: Color,
-    tickColor: Color,               // onSurface para líneas
-    ringColor: Color                // onSurface low alpha
-) {
-    val directions = listOf(stringResource(R.string.compass_north_abbr),
-        stringResource(R.string.compass_northeast_abbr),
-        stringResource(R.string.compass_east_abbr),
-        stringResource(R.string.compass_southeast_abbr),
-        stringResource(R.string.compass_south_abbr),
-        stringResource(R.string.compass_southwest_abbr),
-        stringResource(R.string.compass_west_abbr),
-        stringResource(R.string.compass_northwest_abbr))
-    val density = LocalDensity.current
-
-    Box(
-        modifier = Modifier.size(diameterDp),
-        contentAlignment = Alignment.Center
+private fun UnsupportedContent(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Canvas(Modifier.matchParentSize()) {
-            // Tamaño real del lienzo (px)
-            val w = this.size.width
-            val h = this.size.height
-            val cx = w / 2f
-            val cy = h / 2f
-            val baseR = kotlin.math.min(w, h) / 2f
-            val radiusOuter = baseR * 0.92f
-            val radiusTicks = baseR * 0.86f
+        Icon(
+            imageVector = Icons.Outlined.Explore,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(64.dp)
+        )
+        Text(
+            text = stringResource(R.string.compass_unsupported),
+            style = MaterialTheme.typography.titleMedium,
+            textAlign = TextAlign.Center
+        )
+        Text(
+            text = stringResource(R.string.compass_no_magnetometer),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+    }
+}
 
-            // --- Marcas: cada 5° (mayores cada 30°). Giran segun la orientacion ---
-            for (deg in 0 until 360 step 5) {
-                val isMajor = deg % 30 == 0
-                val len = if (isMajor) baseR * 0.22f else baseR * 0.12f
-                val stroke = if (isMajor) baseR * 0.024f else baseR * 0.012f
-
-                // 0° arriba → -90°
-                val angleDeg = deg + ringRotationDeg
-                val rad = Math.toRadians((angleDeg - 90f).toDouble())
-
-                val sx = cx + radiusTicks * cos(rad).toFloat()
-                val sy = cy + radiusTicks * sin(rad).toFloat()
-                val ex = cx + (radiusTicks - len) * cos(rad).toFloat()
-                val ey = cy + (radiusTicks - len) * sin(rad).toFloat()
-
-                val clr = if (deg == 0) northColor
-                else tickColor.copy(alpha = if (isMajor) 0.85f else 0.45f)
-
-                drawLine(
-                    color = clr,
-                    start = androidx.compose.ui.geometry.Offset(sx, sy),
-                    end = androidx.compose.ui.geometry.Offset(ex, ey),
-                    strokeWidth = stroke
-                )
-            }
-
-            // --- Aro exterior centrado ---
-            drawCircle(
-                color = ringColor,
-                radius = radiusOuter,
-                center = androidx.compose.ui.geometry.Offset(cx, cy),
-                style = Stroke(width = baseR * 0.04f)
+@Composable
+private fun AccuracyChip(accuracy: CompassAccuracy, onClick: () -> Unit) {
+    // Sin dato todavía: no se muestra un estado inventado.
+    if (accuracy == CompassAccuracy.Unknown) return
+    val isGood = accuracy == CompassAccuracy.High || accuracy == CompassAccuracy.Medium
+    val label = when (accuracy) {
+        CompassAccuracy.High -> R.string.compass_accuracy_high
+        CompassAccuracy.Medium -> R.string.compass_accuracy_medium
+        CompassAccuracy.Low -> R.string.compass_accuracy_low
+        else -> R.string.compass_accuracy_unreliable
+    }
+    val iconTint = if (isGood) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+    AssistChip(
+        onClick = onClick,
+        label = { Text(stringResource(label)) },
+        leadingIcon = {
+            Icon(
+                imageVector = if (isGood) Icons.Outlined.GpsFixed else Icons.Outlined.GpsNotFixed,
+                contentDescription = null,
+                modifier = Modifier.size(AssistChipDefaults.IconSize)
             )
+        },
+        colors = AssistChipDefaults.assistChipColors(leadingIconContentColor = iconTint)
+    )
+}
 
-            // --- Triángulo fijo arriba (equilátero, punta hacia abajo) ---
-            val offsetIn = baseR * 0.02f                  // pequeño margen hacia adentro del aro
-            val baseY = cy - radiusOuter + offsetIn       // base horizontal del triángulo
-            val hTri = baseR * 0.11f                      // altura del triángulo
-            val side = (2f * hTri / sqrt(3f))             // lado de equilátero: h = (√3/2)*lado
-
-            val leftX  = cx - side / 2f
-            val rightX = cx + side / 2f
-            val apexY  = baseY + hTri
-
-            val path = androidx.compose.ui.graphics.Path().apply {
-                moveTo(leftX, baseY)
-                lineTo(rightX, baseY)
-                lineTo(cx, apexY)
-                close()
-            }
-            drawPath(path = path, color = northColor)
-        }
-
-        // --- Letras: TRANSLADADAS con el anillo y SIEMPRE VERTICALES (sin rotación) ---
-        val step = 360f / directions.size
-        val labelRadiusPx = with(density) { diameterDp.toPx() / 2f } * 0.50f
-
-        directions.forEachIndexed { i, dir ->
-            val angleDeg = i * step + ringRotationDeg
-            val rad = Math.toRadians((angleDeg - 90f).toDouble())
-            val tx = (labelRadiusPx * cos(rad)).toFloat()
-            val ty = (labelRadiusPx * sin(rad)).toFloat()
-
+@Composable
+private fun TiltWarning(visible: Boolean) {
+    // Altura reservada para que el dial no salte cuando el aviso aparece y desaparece.
+    Box(Modifier.heightIn(min = 24.dp), contentAlignment = Alignment.Center) {
+        AnimatedVisibility(visible = visible, enter = fadeIn(), exit = fadeOut()) {
             Text(
-                text = dir,
-                fontSize = if (dir == "N") 32.sp else 20.sp, // respeta tus tamaños
-                fontWeight = if (dir == "N") FontWeight.Bold else FontWeight.Medium,
-                color = if (dir == "N") northColor else tickColor,
-                modifier = Modifier.graphicsLayer {
-                    // Partimos del centro del Box y trasladamos en px al perímetro
-                    translationX = tx
-                    translationY = ty
-                }
+                text = stringResource(R.string.compass_tilt_warning),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error,
+                textAlign = TextAlign.Center
             )
         }
     }
 }
 
-
-
-private fun headingLabel(angle: Float, context : Context): String {
-    val a = ((angle % 360f) + 360f) % 360f
-    val dir = when (a) {
-        in 337.5f..360f, in 0f..22.5f -> context.getString(R.string.compass_north_abbr)
-        in 22.5f..67.5f -> context.getString(R.string.compass_northeast_abbr)
-        in 67.5f..112.5f -> context.getString(R.string.compass_east_abbr)
-        in 112.5f..157.5f -> context.getString(R.string.compass_southeast_abbr)
-        in 157.5f..202.5f -> context.getString(R.string.compass_south_abbr)
-        in 202.5f..247.5f -> context.getString(R.string.compass_southwest_abbr)
-        in 247.5f..292.5f -> context.getString(R.string.compass_west_abbr)
-        else -> context.getString(R.string.compass_northwest_abbr)
+/**
+ * Rojo del norte armonizado con el `primary` del tema, igual que los colores de categoría:
+ * conserva la convención del norte en rojo sin romper el contraste en modo oscuro.
+ */
+@Composable
+private fun rememberNorthColor(): Color {
+    val scheme = MaterialTheme.colorScheme
+    val isLight = scheme.surface.luminance() > 0.5f
+    val primary = scheme.primary
+    return remember(primary, isLight) {
+        val harmonized = MaterialColors.harmonize(NORTH_SEED.toArgb(), primary.toArgb())
+        Color(MaterialColors.getColorRoles(harmonized, isLight).accent)
     }
-    return "${a.roundToInt()}° $dir"
+}
+
+private val NORTH_SEED = Color(0xFFE53935)
+
+@Composable
+private fun CompassDial(
+    state: CompassUiState,
+    dialHeading: Float,
+    diameter: Dp
+) {
+    val colors = MaterialTheme.colorScheme
+    val northColor = rememberNorthColor()
+    val density = LocalDensity.current
+    val ringRotation = -dialHeading // el anillo gira opuesto al rumbo
+
+    val headingInt = state.heading.roundToInt() % 360
+    val directionName = stringResource(DirectionNames[state.directionIndex])
+    val description = if (state.hasReading) {
+        pluralStringResource(R.plurals.compass_dial_description, headingInt, headingInt, directionName)
+    } else {
+        stringResource(R.string.tool_compass)
+    }
+    val readoutAlpha by animateFloatAsState(
+        targetValue = if (!state.hasReading || state.isTilted) DIMMED_ALPHA else 1f,
+        label = "readoutAlpha"
+    )
+    val bubbleColor by animateColorAsState(
+        targetValue = if (state.isTilted) colors.error else colors.primary,
+        label = "bubbleColor"
+    )
+
+    val cardinals = listOf(
+        stringResource(R.string.compass_north_abbr),
+        stringResource(R.string.compass_east_abbr),
+        stringResource(R.string.compass_south_abbr),
+        stringResource(R.string.compass_west_abbr)
+    )
+
+    Box(
+        modifier = Modifier
+            .size(diameter)
+            .clearAndSetSemantics { contentDescription = description },
+        contentAlignment = Alignment.Center
+    ) {
+        Canvas(Modifier.matchParentSize()) {
+            val center = Offset(size.width / 2f, size.height / 2f)
+            val baseR = size.minDimension / 2f
+
+            fun polar(radius: Float, angleDeg: Float): Offset {
+                val rad = Math.toRadians((angleDeg - 90f).toDouble())
+                return Offset(
+                    center.x + radius * cos(rad).toFloat(),
+                    center.y + radius * sin(rad).toFloat()
+                )
+            }
+
+            // Fondo tonal del dial.
+            drawCircle(color = colors.surfaceContainerHigh, radius = baseR, center = center)
+
+            // Marcas cada 5° (mayores cada 30°), giran con el rumbo.
+            for (deg in 0 until 360 step 5) {
+                val isMajor = deg % 30 == 0
+                val outer = baseR * 0.92f
+                val inner = outer - if (isMajor) baseR * 0.12f else baseR * 0.06f
+                val color = when {
+                    deg == 0 -> northColor
+                    isMajor -> colors.onSurface
+                    else -> colors.onSurfaceVariant.copy(alpha = 0.6f)
+                }
+                drawLine(
+                    color = color,
+                    start = polar(outer, deg + ringRotation),
+                    end = polar(inner, deg + ringRotation),
+                    strokeWidth = if (deg == 0) baseR * 0.03f else if (isMajor) baseR * 0.018f else baseR * 0.008f,
+                    cap = StrokeCap.Round
+                )
+            }
+
+            // Nivel: aro guía y burbuja que se desplaza hacia el borde levantado.
+            val levelR = baseR * 0.36f
+            drawCircle(
+                color = colors.outlineVariant,
+                radius = levelR,
+                center = center,
+                style = Stroke(width = baseR * 0.008f)
+            )
+            drawCircle(
+                color = bubbleColor.copy(alpha = 0.28f),
+                radius = baseR * 0.07f,
+                center = Offset(
+                    center.x + state.bubble.x * levelR,
+                    center.y + state.bubble.y * levelR
+                )
+            )
+
+            // Línea de fe fija: marca hacia dónde apunta el teléfono.
+            drawLine(
+                color = colors.primary,
+                start = Offset(center.x, center.y - baseR * 0.98f),
+                end = Offset(center.x, center.y - baseR * 0.74f),
+                strokeWidth = baseR * 0.035f,
+                cap = StrokeCap.Round
+            )
+        }
+
+        // Etiquetas cada 30°: puntos cardinales y grados. Se trasladan con el anillo y
+        // quedan siempre derechas para leerse sin girar la cabeza.
+        val labelRadiusPx = with(density) { diameter.toPx() / 2f } * 0.66f
+        for (deg in 0 until 360 step 30) {
+            val rad = Math.toRadians((deg + ringRotation - 90f).toDouble())
+            val cardinal = if (deg % 90 == 0) cardinals[deg / 90] else null
+            Text(
+                text = cardinal ?: deg.toString(),
+                style = if (cardinal != null) {
+                    MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                } else {
+                    MaterialTheme.typography.labelMedium
+                },
+                color = when {
+                    deg == 0 -> northColor
+                    cardinal != null -> colors.onSurface
+                    else -> colors.onSurfaceVariant
+                },
+                modifier = Modifier.graphicsLayer {
+                    translationX = (labelRadiusPx * cos(rad)).toFloat()
+                    translationY = (labelRadiusPx * sin(rad)).toFloat()
+                }
+            )
+        }
+
+        // Lectura central: rumbo en grande y nombre del punto cardinal.
+        Column(
+            modifier = Modifier.alpha(readoutAlpha),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = if (state.hasReading) "$headingInt°" else "—°",
+                style = if (diameter < 300.dp) {
+                    MaterialTheme.typography.displayMedium
+                } else {
+                    MaterialTheme.typography.displayLarge
+                },
+                color = colors.onSurface
+            )
+            Text(
+                text = if (state.hasReading) directionName else "",
+                style = MaterialTheme.typography.titleMedium,
+                color = colors.onSurfaceVariant
+            )
+        }
+    }
 }
 
 @Composable
 private fun TickHaptics(
     headingDeg: Float,
-    majorStepDeg: Float = 30f, // coincide con tus marcas largas
-    epsilonDeg: Float = 3f,    // margen de tolerancia ±3°
-    cooldownMs: Long = 350L    // antirebote temporal
+    majorStepDeg: Float = 30f,
+    epsilonDeg: Float = 3f,
+    cooldownMs: Long = 350L
 ) {
     val haptic = LocalHapticFeedback.current
-
-    fun norm(x: Float) = ((x % 360f) + 360f) % 360f
-    fun angDiff(a: Float, b: Float): Float {
-        var d = norm(a) - norm(b)
-        if (d > 180f) d -= 360f
-        if (d < -180f) d += 360f
-        return abs(d)
-    }
-
     val totalTicks = (360f / majorStepDeg).roundToInt()
     var lastIdx by remember { mutableStateOf<Int?>(null) }
     var lastTime by remember { mutableLongStateOf(0L) }
     var wasInside by remember { mutableStateOf(false) }
 
     LaunchedEffect(headingDeg) {
-        val a = norm(headingDeg)
+        val a = CompassMath.normalize(headingDeg)
         val idx = ((a / majorStepDeg).roundToInt() % totalTicks + totalTicks) % totalTicks
-        val tickAngle = idx * majorStepDeg
-        val inside = angDiff(a, tickAngle) <= epsilonDeg
+        val inside = abs(CompassMath.signedDelta(a, idx * majorStepDeg)) <= epsilonDeg
         val now = SystemClock.elapsedRealtime()
 
         if (inside && (!wasInside || idx != lastIdx) && (now - lastTime) >= cooldownMs) {
-            val type = if (idx == 0) HapticFeedbackType.LongPress   // Norte → fuerte
-            else HapticFeedbackType.TextHandleMove       // Ticks → suave
+            val type = if (idx == 0) HapticFeedbackType.LongPress else HapticFeedbackType.TextHandleMove
             haptic.performHapticFeedback(type)
             lastTime = now
             lastIdx = idx

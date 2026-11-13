@@ -1,35 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="compass_arrow_content_desc">Flecha brújula</string>
     <string name="compass_north_abbr">N</string>
-    <string name="compass_northeast_abbr">NE</string>
     <string name="compass_east_abbr">E</string>
-    <string name="compass_southeast_abbr">SE</string>
     <string name="compass_south_abbr">S</string>
-    <string name="compass_southwest_abbr">SO</string>
     <string name="compass_west_abbr">O</string>
-    <string name="compass_northwest_abbr">NO</string>
 
-    <string name="compass_label_n">%1$d° Norte</string>
-    <string name="compass_label_ne">%1$d° Noreste</string>
-    <string name="compass_label_e">%1$d° Este</string>
-    <string name="compass_label_se">%1$d° Sureste</string>
-    <string name="compass_label_s">%1$d° Sur</string>
-    <string name="compass_label_sw">%1$d° Suroeste</string>
-    <string name="compass_label_w">%1$d° Oeste</string>
-    <string name="compass_label_nw">%1$d° Noroeste</string>
+    <string name="compass_name_n">Norte</string>
+    <string name="compass_name_ne">Noreste</string>
+    <string name="compass_name_e">Este</string>
+    <string name="compass_name_se">Sureste</string>
+    <string name="compass_name_s">Sur</string>
+    <string name="compass_name_sw">Suroeste</string>
+    <string name="compass_name_w">Oeste</string>
+    <string name="compass_name_nw">Noroeste</string>
+
+    <plurals name="compass_dial_description">
+        <item quantity="one">Rumbo %1$d grado, %2$s</item>
+        <item quantity="many">Rumbo %1$d grados, %2$s</item>
+        <item quantity="other">Rumbo %1$d grados, %2$s</item>
+    </plurals>
+
+    <string name="compass_accuracy_high">Precisión: alta</string>
+    <string name="compass_accuracy_medium">Precisión: media</string>
+    <string name="compass_accuracy_low">Precisión: baja</string>
+    <string name="compass_accuracy_unreliable">Precisión: muy baja</string>
+    <string name="compass_calibration_message">La brújula perdió precisión. Mové el teléfono dibujando un 8 en el aire hasta que el indicador marque precisión alta.</string>
+    <string name="compass_tilt_warning">Sostené el teléfono horizontal para una lectura precisa</string>
 
     <string name="compass_help_title">Acerca de Brújula</string>
-    <string name="compass_help_line1">• Para qué sirve: Muestra una brújula digital que indica la dirección norte.</string>
-    <string name="compass_help_line2">• Usa los sensores del teléfono para detectar orientación y rotación.</string>
-    <string name="compass_help_line3">• El triángulo fijo de arriba marca hacia dónde apunta el teléfono; la N roja marca el norte magnético y el dial gira por debajo.</string>
-    <string name="compass_help_line4">• Las etiquetas N/NE/E/SE/S/SO/O/NO se desplazan por el anillo y permanecen verticales para una lectura clara.</string>
-    <string name="compass_help_line5">• Requiere magnetómetro; si el dispositivo no lo tiene, la brújula no está disponible.</string>
+    <string name="compass_help_line1">• Sostené el teléfono horizontal, con la pantalla hacia arriba. La línea de arriba marca hacia dónde apuntás y el número del centro es tu rumbo.</string>
+    <string name="compass_help_line2">• La N roja siempre apunta al norte magnético, que según dónde estés puede diferir unos grados del norte geográfico.</string>
+    <string name="compass_help_line3">• Si baja el indicador de precisión, mové el teléfono dibujando un 8 hasta que vuelva a marcar alta. Alejate de imanes, parlantes y objetos de metal.</string>
 
-    <string name="compass_mode_magnetic">Magnetico</string>
-    <string name="compass_mode_gps">GPS</string>
-
-    <string name="compass_onboarding_hint">Calibrá la brújula moviendo el dispositivo en forma de 8 en el aire si la orientación no es precisa.</string>
+    <string name="compass_onboarding_hint">Sostené el teléfono horizontal. La línea de arriba muestra hacia dónde apuntás.</string>
 
     <string name="compass_no_magnetometer">Este dispositivo no tiene magnetómetro.</string>
     <string name="compass_unsupported">La brújula no es compatible con este dispositivo.</string>
