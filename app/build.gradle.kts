@@ -123,10 +123,6 @@ android {
     }
 }
 
-configurations.configureEach {
-    exclude(group = "com.google.protobuf", module = "protobuf-javalite")
-}
-
 dependencies {
     // 1) Compose BOM for version alignment
     implementation(platform(libs.androidx.compose.bom))
@@ -161,8 +157,6 @@ dependencies {
     //Funcionalidades
     implementation(libs.compose.qr.code)
 
-    //Librerias para manejar datasets
-    implementation(libs.protobuf.java)
     implementation(libs.kotlinx.serialization.json)
 
     // 7) Testing
@@ -188,8 +182,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    implementation(libs.kotlin.reflect)
-
     // Camera
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
@@ -197,7 +189,6 @@ dependencies {
 
     //AR Camera
     implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.fragment.ktx)
 
     // --- AR / SceneView ---
     implementation(libs.arsceneview)
@@ -206,11 +197,6 @@ dependencies {
     //Pomodoro Media
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.session)
-
-    //Proveedor único de ListenableFuture
-    implementation(libs.guava.android)
-
-    implementation(libs.androidx.media)
 
     implementation(libs.reorderable)
 

@@ -64,9 +64,11 @@ ARCore con SceneView. La matemática de la medición está separada de la UI en 
 
 El [nivel burbuja](app/src/main/java/com/joasasso/minitoolbox/tools/herramientas/instrumentos/BubbleLevelScreen.kt) lee `TYPE_ROTATION_VECTOR`, que es un cuaternión, lo convierte en una matriz de rotación y saca de ella el vector "arriba" del dispositivo. No usa los ángulos de Euler de `getOrientation()`, que caen en gimbal lock cuando el teléfono está vertical. Ese mismo vector le indica al nivel si el teléfono está apoyado, en vertical o en horizontal, y el modo cambia solo.
 
-### Dataset de países sin conexión
+### Países del juego de banderas
 
-El juego de banderas lee sus 206 países de un binario Protobuf de 23 KB en `assets/`, sin acceso a la red. Al principio el dataset se parseaba como JSON (Moshi y después Gson) y pasó a Protobuf en `03cdf3f`. La comparación de tiempos de carga de [docs/performance_tests.md](docs/performance_tests.md) no se cita acá porque se midió con Protobuf Lite, mientras la app usa `protobuf-java` completo, y no hay un benchmark en el repo para reproducirla.
+El juego necesita tres datos por país: el nombre en español, el nombre en inglés y la bandera. Viven en una lista en código, [`FlagCountries.kt`](app/src/main/java/com/joasasso/minitoolbox/data/FlagCountries.kt), con 206 entradas de código ISO y los dos nombres. La bandera se arma con el código: cada letra pasa a su indicador regional Unicode.
+
+Antes leía un binario Protobuf de 23 KB en `assets/` con nueve campos por país, heredado de una herramienta de información de países que se quitó en `d4660f1`. Ese dataset arrastraba `protobuf-java` completo, 2.503 líneas de código generado y una regla `-keep` de R8. Al reemplazarlo, la APK release bajó de 43.419.437 a 43.005.351 bytes (`assembleRelease` antes y después del cambio). Antes de Protobuf, el dataset fue JSON (Moshi y después Gson) hasta `03cdf3f`.
 
 ## Qué dicen los datos de uso
 
@@ -81,13 +83,13 @@ Fuente: export Markdown del dashboard del 15/05/2026 al 10/11/2026 (180 días). 
 Un solo módulo de Gradle (`:app`), por decisión; ver [DECISIONS.md](DECISIONS.md). La descripción completa, con diagramas, está en [docs/architecture.md](docs/architecture.md).
 
 - **UI:** Jetpack Compose con Material 3 (las APIs expresivas del BOM alpha de Compose), Navigation Compose con rutas type-safe y Glance para los widgets.
-- **Estado:** MVVM, adoptado de forma progresiva. Diez `ViewModel` con `StateFlow` ya respaldan el recordatorio de agua, el divisor de gastos, el conversor de unidades, el buscaminas, la regla AR, el generador de equipos y el catálogo. Las herramientas más viejas todavía guardan el estado en el Composable y se migran cuando se las toca.
-- **Persistencia:** Preferences DataStore detrás de repositorios. El dataset de países del juego de banderas es un binario Protobuf en `assets/` y se lee sin conexión.
+- **Estado:** MVVM, adoptado de forma progresiva. Once `ViewModel` con `StateFlow` ya respaldan el recordatorio de agua, el divisor de gastos, el conversor de unidades, el buscaminas, el juego de banderas, la regla AR, el generador de equipos y el catálogo. Las herramientas más viejas todavía guardan el estado en el Composable y se migran cuando se las toca.
+- **Persistencia:** Preferences DataStore detrás de repositorios.
 - **Concurrencia:** corrutinas y Flow de Kotlin, WorkManager para los envíos.
 
 ## Tests y CI
 
-- **320 tests unitarios en la JVM** (1 omitido), con `./gradlew testDebugUnitTest`. Usan JUnit 4, Robolectric donde hace falta un `Context` o DataStore, `kotlinx-coroutines-test` y Mockito. Cubren el pipeline de métricas, los ViewModels y los motores puros (buscaminas, liquidación de deudas, conversión de unidades, armado de equipos, matemática AR). Las convenciones están en [docs/testing.md](docs/testing.md).
+- **342 tests unitarios en la JVM** (1 omitido), con `./gradlew testDebugUnitTest`. Usan JUnit 4, Robolectric donde hace falta un `Context` o DataStore, `kotlinx-coroutines-test` y Mockito. Cubren el pipeline de métricas, los ViewModels y los motores puros (buscaminas, liquidación de deudas, conversión de unidades, armado de equipos, matemática AR). Las convenciones están en [docs/testing.md](docs/testing.md).
 - **Lo que no está cubierto:** no hay tests de UI ni instrumentados, no se mide la cobertura y el backend no tiene tests.
 - **[Android CI](.github/workflows/android.yml):** tests unitarios, `assembleDebug` y `lintDebug` en cada push y pull request a `master`. El lint corre contra un baseline de issues heredados; los nuevos se corrigen, no se agregan.
 - **[Backend CI](.github/workflows/backend.yml):** `npm ci`, `npm run lint`, `npm run build`.
@@ -97,7 +99,6 @@ Un solo módulo de Gradle (`:app`), por decisión; ver [DECISIONS.md](DECISIONS.
 La lista completa, con evidencia de archivo y línea, está en [docs/backlog.md](docs/backlog.md). Las principales:
 
 - No hay inyección de dependencias; los tests reemplazan dependencias con hooks `@VisibleForTesting`.
-- La app usa `protobuf-java` completo; la migración a Lite está planificada en un [ADR](docs/decisions/protobuf-lite-migration.md) pero no se hizo.
 - Las builds debug envían métricas al endpoint de producción a propósito (la build de uso diario del autor es debug), y el payload no indica qué build lo envió. Ver el [glosario](docs/metrics-glossary.md).
 - Los instrumentos dibujados con `Canvas` (brújula, nivel, regla, lupa) no tienen semántica de accesibilidad.
 - El CI no compila un APK release, así que los problemas de R8 solo aparecen localmente.

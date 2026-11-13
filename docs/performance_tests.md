@@ -1,5 +1,7 @@
 # 📊 Pruebas de rendimiento - MiniToolbox
 
+> **Histórico.** El dataset de países ya no existe: el juego de banderas usa una lista en código (`app/src/main/java/com/joasasso/minitoolbox/data/FlagCountries.kt`) y protobuf se quitó del proyecto. Estas mediciones no tienen un benchmark en el repo que las reproduzca.
+
 Se realizaron pruebas de carga y parseo de un dataset local de países (~250 elementos) para evaluar distintas técnicas de serialización. El objetivo fue optimizar tiempos de carga para una experiencia de usuario fluida.
 
 ## 🔬 Entorno de prueba

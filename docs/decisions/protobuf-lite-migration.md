@@ -1,6 +1,6 @@
 # ADR 001: Migración a Protobuf-Lite
 
-*   **Estado:** Pendiente
+*   **Estado:** Descartada (2026-11-11). protobuf se quitó del proyecto: el único consumidor era el juego de banderas, que ahora usa una lista en código (`data/FlagCountries.kt`). Lo que sigue describe el plan original.
 *   **Fecha:** 2026-08-20
 *   **Contexto:** Se decidió utilizar `protobuf-java` completo inicialmente para facilitar la integración rápida con herramientas de backend y asegurar compatibilidad total durante la fase de prototipado. Sin embargo, para una aplicación de producción en Android, el impacto en el tamaño del APK y el uso de memoria por la reflexión hace necesaria la migración a la versión Lite.
 
