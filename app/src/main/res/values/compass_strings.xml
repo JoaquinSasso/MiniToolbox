@@ -26,12 +26,20 @@
     <string name="compass_calibration_message">The compass is losing accuracy. Move your phone in a figure-8 until the indicator shows high accuracy.</string>
     <string name="compass_tilt_warning">Hold the phone flat for an accurate reading</string>
 
+    <string name="compass_lock_bearing">Lock bearing</string>
+    <string name="compass_clear_bearing">Clear</string>
+    <string name="compass_target_bearing">Locked bearing: %1$d°</string>
+    <string name="compass_on_course">On course</string>
+    <string name="compass_turn_right">Turn right %1$d°</string>
+    <string name="compass_turn_left">Turn left %1$d°</string>
+
     <string name="compass_help_title">About the Compass</string>
     <string name="compass_help_line1">• Hold the phone flat, screen up. The line at the top marks where you are pointing, and the number in the center is your heading.</string>
     <string name="compass_help_line2">• The red N always points to magnetic north, which can differ from true north by a few degrees depending on where you are.</string>
     <string name="compass_help_line3">• If the accuracy indicator drops, move the phone in a figure-8 until it shows high again. Keep away from magnets, speakers and metal objects.</string>
+    <string name="compass_help_line4">• Tap Lock bearing to save the direction you are facing. The compass shows how far and which way to turn, and vibrates when you are back on course.</string>
 
-    <string name="compass_onboarding_hint">Hold the phone flat. The line at the top shows where you are pointing.</string>
+    <string name="compass_onboarding_hint">Hold the phone flat. Tap Lock bearing to keep a direction while you walk.</string>
 
     <string name="compass_no_magnetometer">This device has no magnetometer.</string>
     <string name="compass_unsupported">The compass is not supported on this device.</string>

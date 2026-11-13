@@ -2,6 +2,7 @@ package com.joasasso.minitoolbox.tools.herramientas.instrumentos.compass
 
 import android.app.Application
 import android.hardware.SensorManager
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.test.core.app.ApplicationProvider
 import com.joasasso.minitoolbox.TestApplication
@@ -20,6 +21,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -68,7 +70,7 @@ class CompassViewModelTest {
 
     @Test
     fun sinMagnetometro_estadoNoSoportado() = runTest {
-        val model = CompassViewModel(app, FakeCompassSensor(isAvailable = false))
+        val model = CompassViewModel(app, SavedStateHandle(), FakeCompassSensor(isAvailable = false))
         vm = model
         assertFalse(model.uiState.value.isSupported)
         assertFalse(model.uiState.value.hasReading)
@@ -77,7 +79,7 @@ class CompassViewModelTest {
     @Test
     fun lectura_actualizaRumboYDireccion() = runTest {
         val sensor = FakeCompassSensor()
-        val model = CompassViewModel(app, sensor)
+        val model = CompassViewModel(app, SavedStateHandle(), sensor)
         vm = model
         mantenerSuscripto(model.uiState)
 
@@ -93,7 +95,7 @@ class CompassViewModelTest {
     @Test
     fun pantallaRotada_corrigeElRumbo() = runTest {
         val sensor = FakeCompassSensor()
-        val model = CompassViewModel(app, sensor)
+        val model = CompassViewModel(app, SavedStateHandle(), sensor)
         vm = model
         mantenerSuscripto(model.uiState)
 
@@ -105,7 +107,7 @@ class CompassViewModelTest {
     @Test
     fun cruzarElNorte_rumboContinuoNoSalta() = runTest {
         val sensor = FakeCompassSensor()
-        val model = CompassViewModel(app, sensor)
+        val model = CompassViewModel(app, SavedStateHandle(), sensor)
         vm = model
         mantenerSuscripto(model.uiState)
 
@@ -119,7 +121,7 @@ class CompassViewModelTest {
     @Test
     fun telefonoParado_marcaInclinacion() = runTest {
         val sensor = FakeCompassSensor()
-        val model = CompassViewModel(app, sensor)
+        val model = CompassViewModel(app, SavedStateHandle(), sensor)
         vm = model
         mantenerSuscripto(model.uiState)
 
@@ -133,7 +135,7 @@ class CompassViewModelTest {
     @Test
     fun precisionBaja_pideCalibrarYAltaLoQuita() = runTest {
         val sensor = FakeCompassSensor()
-        val model = CompassViewModel(app, sensor)
+        val model = CompassViewModel(app, SavedStateHandle(), sensor)
         vm = model
         mantenerSuscripto(model.uiState)
 
@@ -148,11 +150,94 @@ class CompassViewModelTest {
     @Test
     fun sinSuscriptores_noRegistraSensores() = runTest {
         val sensor = FakeCompassSensor()
-        val model = CompassViewModel(app, sensor)
+        val model = CompassViewModel(app, SavedStateHandle(), sensor)
         vm = model
 
         assertEquals(0, sensor.subscribers)
         mantenerSuscripto(model.uiState)
         assertEquals(1, sensor.subscribers)
+    }
+
+    @Test
+    fun fijarRumbo_sinLectura_noHaceNada() = runTest {
+        val model = CompassViewModel(app, SavedStateHandle(), FakeCompassSensor())
+        vm = model
+        mantenerSuscripto(model.uiState)
+
+        model.lockBearing()
+
+        assertNull(model.uiState.value.targetBearing)
+    }
+
+    @Test
+    fun fijarRumbo_guardaElRumboRedondeadoYCalculaElDesvio() = runTest {
+        val sensor = FakeCompassSensor()
+        val handle = SavedStateHandle()
+        val model = CompassViewModel(app, handle, sensor)
+        vm = model
+        mantenerSuscripto(model.uiState)
+
+        sensor.readings.emit(flat(239.6f))
+        model.lockBearing()
+        assertEquals(240f, model.uiState.value.targetBearing!!, 0.001f)
+        assertTrue(model.uiState.value.isOnCourse)
+
+        // Mirando al norte, hay que girar 120° a la izquierda para volver a 240°.
+        sensor.readings.emit(flat(0f))
+        assertEquals(-120f, model.uiState.value.deviation!!, 0.001f)
+        assertFalse(model.uiState.value.isOnCourse)
+
+        // El rumbo fijado sobrevive a la muerte del proceso vía SavedStateHandle.
+        assertEquals(240f, handle.get<Float>(CompassViewModel.KEY_TARGET_BEARING)!!, 0.001f)
+    }
+
+    @Test
+    fun volverAlRumbo_emiteUnSoloEventoYNoAlFijar() = runTest {
+        val sensor = FakeCompassSensor()
+        val model = CompassViewModel(app, SavedStateHandle(), sensor)
+        vm = model
+        mantenerSuscripto(model.uiState)
+        val events = mutableListOf<CompassEvent>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.events.collect { events += it } }
+
+        sensor.readings.emit(flat(90f))
+        model.lockBearing()
+        sensor.readings.emit(flat(91f))
+        assertTrue("fijar el rumbo no debe vibrar", events.isEmpty())
+
+        // Desvío leve (dentro de la histéresis): no arma el aviso.
+        sensor.readings.emit(flat(97f))
+        sensor.readings.emit(flat(90f))
+        assertTrue(events.isEmpty())
+
+        // Se aleja y vuelve: un solo aviso, aunque siga en rumbo.
+        sensor.readings.emit(flat(130f))
+        sensor.readings.emit(flat(93f))
+        sensor.readings.emit(flat(90f))
+        assertEquals(listOf<CompassEvent>(CompassEvent.BackOnCourse), events)
+    }
+
+    @Test
+    fun quitarRumbo_limpiaElObjetivo() = runTest {
+        val sensor = FakeCompassSensor()
+        val model = CompassViewModel(app, SavedStateHandle(), sensor)
+        vm = model
+        mantenerSuscripto(model.uiState)
+
+        sensor.readings.emit(flat(10f))
+        model.lockBearing()
+        model.clearBearing()
+
+        assertNull(model.uiState.value.targetBearing)
+        assertNull(model.uiState.value.deviation)
+    }
+
+    @Test
+    fun rumboGuardado_seRestauraAlRecrearElViewModel() = runTest {
+        val handle = SavedStateHandle(mapOf(CompassViewModel.KEY_TARGET_BEARING to 45f))
+        val model = CompassViewModel(app, handle, FakeCompassSensor())
+        vm = model
+
+        assertEquals(45f, model.uiState.value.targetBearing!!, 0.001f)
     }
 }

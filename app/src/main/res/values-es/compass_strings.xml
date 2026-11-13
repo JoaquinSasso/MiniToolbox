@@ -27,12 +27,20 @@
     <string name="compass_calibration_message">La brújula perdió precisión. Mové el teléfono dibujando un 8 en el aire hasta que el indicador marque precisión alta.</string>
     <string name="compass_tilt_warning">Sostené el teléfono horizontal para una lectura precisa</string>
 
+    <string name="compass_lock_bearing">Fijar rumbo</string>
+    <string name="compass_clear_bearing">Quitar</string>
+    <string name="compass_target_bearing">Rumbo fijado: %1$d°</string>
+    <string name="compass_on_course">En rumbo</string>
+    <string name="compass_turn_right">Girá a la derecha %1$d°</string>
+    <string name="compass_turn_left">Girá a la izquierda %1$d°</string>
+
     <string name="compass_help_title">Acerca de Brújula</string>
     <string name="compass_help_line1">• Sostené el teléfono horizontal, con la pantalla hacia arriba. La línea de arriba marca hacia dónde apuntás y el número del centro es tu rumbo.</string>
     <string name="compass_help_line2">• La N roja siempre apunta al norte magnético, que según dónde estés puede diferir unos grados del norte geográfico.</string>
     <string name="compass_help_line3">• Si baja el indicador de precisión, mové el teléfono dibujando un 8 hasta que vuelva a marcar alta. Alejate de imanes, parlantes y objetos de metal.</string>
+    <string name="compass_help_line4">• Tocá Fijar rumbo para guardar la dirección en la que mirás. La brújula te indica cuánto y hacia qué lado girar, y vibra cuando volvés al rumbo.</string>
 
-    <string name="compass_onboarding_hint">Sostené el teléfono horizontal. La línea de arriba muestra hacia dónde apuntás.</string>
+    <string name="compass_onboarding_hint">Sostené el teléfono horizontal. Tocá Fijar rumbo para mantener una dirección mientras caminás.</string>
 
     <string name="compass_no_magnetometer">Este dispositivo no tiene magnetómetro.</string>
     <string name="compass_unsupported">La brújula no es compatible con este dispositivo.</string>

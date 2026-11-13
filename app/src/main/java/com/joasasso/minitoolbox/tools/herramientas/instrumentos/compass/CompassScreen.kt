@@ -1,6 +1,5 @@
 package com.joasasso.minitoolbox.tools.herramientas.instrumentos.compass
 
-import android.os.SystemClock
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
@@ -15,29 +14,34 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Explore
+import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.material.icons.outlined.GpsFixed
 import androidx.compose.material.icons.outlined.GpsNotFixed
 import androidx.compose.material.icons.outlined.ScreenRotation
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -48,6 +52,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
@@ -58,7 +63,10 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -72,7 +80,6 @@ import com.joasasso.minitoolbox.data.ToolOnboardingKeys
 import com.joasasso.minitoolbox.ui.components.ToolOnboardingBanner
 import com.joasasso.minitoolbox.ui.components.ToolOnboardingCard
 import com.joasasso.minitoolbox.ui.components.TopBarReusable
-import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
@@ -106,7 +113,14 @@ fun BrujulaScreen(onBack: () -> Unit, viewModel: CompassViewModel = viewModel())
         label = "compassRotation"
     )
 
-    TickHaptics(headingDeg = dialHeading)
+    // Única vibración de la brújula: confirma que el usuario volvió al rumbo fijado.
+    LaunchedEffect(viewModel) {
+        viewModel.events.collect { event ->
+            when (event) {
+                CompassEvent.BackOnCourse -> haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -134,7 +148,7 @@ fun BrujulaScreen(onBack: () -> Unit, viewModel: CompassViewModel = viewModel())
                     )
                 }
             }
-            val info: @Composable ColumnScope.() -> Unit = {
+            val status: @Composable ColumnScope.() -> Unit = {
                 ToolOnboardingCard(
                     toolKey = ToolOnboardingKeys.COMPASS,
                     message = stringResource(R.string.compass_onboarding_hint),
@@ -153,6 +167,13 @@ fun BrujulaScreen(onBack: () -> Unit, viewModel: CompassViewModel = viewModel())
                 )
                 TiltWarning(visible = state.isTilted)
             }
+            val bearing: @Composable () -> Unit = {
+                BearingPanel(
+                    state = state,
+                    onLock = viewModel::lockBearing,
+                    onClear = viewModel::clearBearing
+                )
+            }
 
             if (isLandscape) {
                 Row(Modifier.fillMaxSize()) {
@@ -167,9 +188,11 @@ fun BrujulaScreen(onBack: () -> Unit, viewModel: CompassViewModel = viewModel())
                             .fillMaxHeight()
                             .padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        content = info
-                    )
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        status()
+                        bearing()
+                    }
                 }
             } else {
                 Column(
@@ -179,12 +202,13 @@ fun BrujulaScreen(onBack: () -> Unit, viewModel: CompassViewModel = viewModel())
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    info()
+                    status()
                     dial(
                         Modifier
                             .weight(1f)
                             .fillMaxWidth()
                     )
+                    bearing()
                 }
             }
         }
@@ -199,6 +223,7 @@ fun BrujulaScreen(onBack: () -> Unit, viewModel: CompassViewModel = viewModel())
                     Text(stringResource(R.string.compass_help_line1))
                     Text(stringResource(R.string.compass_help_line2))
                     Text(stringResource(R.string.compass_help_line3))
+                    Text(stringResource(R.string.compass_help_line4))
                 }
             },
             confirmButton = {
@@ -393,6 +418,29 @@ private fun CompassDial(
                 )
             )
 
+            // Rumbo fijado: marca sobre el anillo y arco desde la línea de fe hasta ella,
+            // que muestra hacia qué lado y cuánto girar.
+            val target = state.targetBearing
+            if (target != null) {
+                val arcR = baseR * 0.96f
+                state.deviation?.let { deviation ->
+                    drawArc(
+                        color = colors.tertiary.copy(alpha = 0.45f),
+                        startAngle = -90f,
+                        sweepAngle = deviation,
+                        useCenter = false,
+                        topLeft = Offset(center.x - arcR, center.y - arcR),
+                        size = Size(arcR * 2f, arcR * 2f),
+                        style = Stroke(width = baseR * 0.035f, cap = StrokeCap.Round)
+                    )
+                }
+                drawCircle(
+                    color = colors.tertiary,
+                    radius = baseR * 0.045f,
+                    center = polar(arcR, target + ringRotation)
+                )
+            }
+
             // Línea de fe fija: marca hacia dónde apunta el teléfono.
             drawLine(
                 color = colors.primary,
@@ -452,30 +500,59 @@ private fun CompassDial(
 }
 
 @Composable
-private fun TickHaptics(
-    headingDeg: Float,
-    majorStepDeg: Float = 30f,
-    epsilonDeg: Float = 3f,
-    cooldownMs: Long = 350L
+private fun BearingPanel(
+    state: CompassUiState,
+    onLock: () -> Unit,
+    onClear: () -> Unit
 ) {
-    val haptic = LocalHapticFeedback.current
-    val totalTicks = (360f / majorStepDeg).roundToInt()
-    var lastIdx by remember { mutableStateOf<Int?>(null) }
-    var lastTime by remember { mutableLongStateOf(0L) }
-    var wasInside by remember { mutableStateOf(false) }
-
-    LaunchedEffect(headingDeg) {
-        val a = CompassMath.normalize(headingDeg)
-        val idx = ((a / majorStepDeg).roundToInt() % totalTicks + totalTicks) % totalTicks
-        val inside = abs(CompassMath.signedDelta(a, idx * majorStepDeg)) <= epsilonDeg
-        val now = SystemClock.elapsedRealtime()
-
-        if (inside && (!wasInside || idx != lastIdx) && (now - lastTime) >= cooldownMs) {
-            val type = if (idx == 0) HapticFeedbackType.LongPress else HapticFeedbackType.TextHandleMove
-            haptic.performHapticFeedback(type)
-            lastTime = now
-            lastIdx = idx
+    val target = state.targetBearing
+    if (target == null) {
+        Button(onClick = onLock, enabled = state.hasReading) {
+            Icon(
+                imageVector = Icons.Outlined.Flag,
+                contentDescription = null,
+                modifier = Modifier.size(ButtonDefaults.IconSize)
+            )
+            Spacer(Modifier.width(ButtonDefaults.IconSpacing))
+            Text(stringResource(R.string.compass_lock_bearing))
         }
-        wasInside = inside
+        return
+    }
+
+    val deviation = state.deviation
+    val deviationText = when {
+        deviation == null -> ""
+        state.isOnCourse -> stringResource(R.string.compass_on_course)
+        deviation > 0f -> stringResource(R.string.compass_turn_right, deviation.roundToInt())
+        else -> stringResource(R.string.compass_turn_left, (-deviation).roundToInt())
+    }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Column(
+            Modifier
+                .weight(1f)
+                .semantics { liveRegion = LiveRegionMode.Polite }
+        ) {
+            Text(
+                text = stringResource(R.string.compass_target_bearing, target.roundToInt()),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = deviationText,
+                style = MaterialTheme.typography.titleLarge,
+                color = if (state.isOnCourse) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.tertiary
+                }
+            )
+        }
+        OutlinedButton(onClick = onClear) {
+            Text(stringResource(R.string.compass_clear_bearing))
+        }
     }
 }
