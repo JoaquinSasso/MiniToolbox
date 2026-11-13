@@ -1,10 +1,6 @@
-package com.joasasso.minitoolbox.tools.herramientas.instrumentos
+package com.joasasso.minitoolbox.tools.herramientas.instrumentos.compass
 
 import android.content.Context
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
 import android.os.SystemClock
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -26,7 +22,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,7 +35,6 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -48,7 +42,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.LifecycleResumeEffect
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.data.ToolOnboardingKeys
 import com.joasasso.minitoolbox.ui.components.ToolOnboardingCard
@@ -59,119 +54,20 @@ import kotlin.math.roundToInt
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-// --- Helpers de heading -------------------------------------------------------
-
-@Composable
-private fun rememberSensorHeadingDeg(): Float? {
-    val ctx = LocalContext.current
-    val view = LocalView.current
-    var heading by remember { mutableStateOf<Float?>(null) }
-
-    // El azimut que da getOrientation es el del borde superior del teléfono en su orientación
-    // natural. Si la pantalla está rotada, el "frente" que ve el usuario es otro borde: se
-    // corrige sumando 90° por cada cuarto de vuelta de la pantalla.
-    fun screenHeading(azimuthRad: Float): Float {
-        val rotationQuarters = view.display?.rotation ?: 0
-        val deg = Math.toDegrees(azimuthRad.toDouble()).toFloat() + 90f * rotationQuarters
-        return ((deg % 360f) + 360f) % 360f
-    }
-
-    // Los sensores se registran solo en primer plano. Con DisposableEffect seguían activos con
-    // la app minimizada, porque la composición no se descarta al pasar a segundo plano.
-    LifecycleResumeEffect(Unit) {
-        val sm = ctx.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        val rot = sm.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
-            ?: sm.getDefaultSensor(Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR)
-
-        if (rot != null) {
-            // Camino 1: rotation-vector
-            val R = FloatArray(9)
-            val orient = FloatArray(3)
-            val listener = object : SensorEventListener {
-                override fun onSensorChanged(e: SensorEvent) {
-                    SensorManager.getRotationMatrixFromVector(R, e.values)
-                    SensorManager.getOrientation(R, orient)
-                    heading = screenHeading(orient[0])
-                }
-                override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
-            }
-            sm.registerListener(listener, rot, SensorManager.SENSOR_DELAY_UI)
-            onPauseOrDispose { sm.unregisterListener(listener) }
-        } else {
-            // Camino 2: ACC + MAG
-            val acc = sm.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-            val mag = sm.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
-            if (acc == null || mag == null) {
-                heading = null
-                onPauseOrDispose { }
-            } else {
-                val g = FloatArray(3)
-                val m = FloatArray(3)
-                var gOk = false
-                var mOk = false
-
-                fun lowPass(input: FloatArray, output: FloatArray?, alpha: Float = 0.15f): FloatArray {
-                    if (output == null) return input.copyOf()
-                    for (i in 0..2) output[i] = output[i] + alpha * (input[i] - output[i])
-                    return output
-                }
-
-                val R = FloatArray(9)
-                val I = FloatArray(9)
-                val orient = FloatArray(3)
-
-                val listener = object : SensorEventListener {
-                    override fun onSensorChanged(e: SensorEvent) {
-                        when (e.sensor.type) {
-                            Sensor.TYPE_ACCELEROMETER -> { lowPass(e.values.clone(), g); gOk = true }
-                            Sensor.TYPE_MAGNETIC_FIELD -> { lowPass(e.values.clone(), m); mOk = true }
-                        }
-                        if (gOk && mOk && SensorManager.getRotationMatrix(R, I, g, m)) {
-                            SensorManager.getOrientation(R, orient)
-                            heading = screenHeading(orient[0])
-                        }
-                    }
-                    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
-                }
-                sm.registerListener(listener, acc, SensorManager.SENSOR_DELAY_UI)
-                sm.registerListener(listener, mag, SensorManager.SENSOR_DELAY_UI)
-                onPauseOrDispose { sm.unregisterListener(listener) }
-            }
-        }
-    }
-    return heading
-}
-
-
 // --- UI principal -------------------------------------------------------------
 
 @Composable
-fun BrujulaScreen(onBack: () -> Unit) {
+fun BrujulaScreen(onBack: () -> Unit, viewModel: CompassViewModel = viewModel()) {
     val context = LocalContext.current
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
     val red = Color(0xFFF5274E)
     val onSurface = MaterialTheme.colorScheme.onSurface
     var showInfo by remember { mutableStateOf(false) }
     val haptic = LocalHapticFeedback.current
+    val hasMagnetometer = state.isSupported
 
-    // ¿Hay magnetómetro en el dispositivo?
-    val hasMagnetometer = remember {
-        val sm = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        sm.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) != null
-    }
-
-    // Heading de sensores (rot-vector o acc+mag)
-    val sensorHeading = rememberSensorHeadingDeg()
-
-    // Animación suave (si no hay dato, quedate en el último)
-    var last by remember { mutableFloatStateOf(0f) }
-    val target = sensorHeading ?: last
     val animated by animateFloatAsState(
-        targetValue = remember(target) {
-            val diff = ((target - last + 540f) % 360f) - 180f
-            val next = last + diff
-            last = next
-            next
-        },
+        targetValue = state.continuousHeading,
         animationSpec = tween(180, easing = FastOutSlowInEasing),
         label = "compassRotation"
     )
@@ -193,7 +89,7 @@ fun BrujulaScreen(onBack: () -> Unit) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = sensorHeading?.let { headingLabel(animated, context) } ?: "—°",
+                    text = if (state.hasReading) headingLabel(state.heading, context) else "—°",
                     style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold),
                     textAlign = TextAlign.Center
                 )
