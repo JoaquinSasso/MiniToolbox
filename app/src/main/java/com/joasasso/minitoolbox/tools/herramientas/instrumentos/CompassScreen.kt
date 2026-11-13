@@ -24,7 +24,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -41,6 +40,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.joasasso.minitoolbox.R
 import com.joasasso.minitoolbox.data.ToolOnboardingKeys
 import com.joasasso.minitoolbox.ui.components.ToolOnboardingCard
@@ -63,9 +64,21 @@ import kotlin.math.sqrt
 @Composable
 private fun rememberSensorHeadingDeg(): Float? {
     val ctx = LocalContext.current
+    val view = LocalView.current
     var heading by remember { mutableStateOf<Float?>(null) }
 
-    DisposableEffect(Unit) {
+    // El azimut que da getOrientation es el del borde superior del teléfono en su orientación
+    // natural. Si la pantalla está rotada, el "frente" que ve el usuario es otro borde: se
+    // corrige sumando 90° por cada cuarto de vuelta de la pantalla.
+    fun screenHeading(azimuthRad: Float): Float {
+        val rotationQuarters = view.display?.rotation ?: 0
+        val deg = Math.toDegrees(azimuthRad.toDouble()).toFloat() + 90f * rotationQuarters
+        return ((deg % 360f) + 360f) % 360f
+    }
+
+    // Los sensores se registran solo en primer plano. Con DisposableEffect seguían activos con
+    // la app minimizada, porque la composición no se descarta al pasar a segundo plano.
+    LifecycleResumeEffect(Unit) {
         val sm = ctx.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         val rot = sm.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
             ?: sm.getDefaultSensor(Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR)
@@ -78,21 +91,19 @@ private fun rememberSensorHeadingDeg(): Float? {
                 override fun onSensorChanged(e: SensorEvent) {
                     SensorManager.getRotationMatrixFromVector(R, e.values)
                     SensorManager.getOrientation(R, orient)
-                    var deg = Math.toDegrees(orient[0].toDouble()).toFloat()
-                    deg = ((deg % 360f) + 360f) % 360f
-                    heading = deg
+                    heading = screenHeading(orient[0])
                 }
                 override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
             }
             sm.registerListener(listener, rot, SensorManager.SENSOR_DELAY_UI)
-            onDispose { sm.unregisterListener(listener) }
+            onPauseOrDispose { sm.unregisterListener(listener) }
         } else {
             // Camino 2: ACC + MAG
             val acc = sm.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
             val mag = sm.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
             if (acc == null || mag == null) {
                 heading = null
-                onDispose { }
+                onPauseOrDispose { }
             } else {
                 val g = FloatArray(3)
                 val m = FloatArray(3)
@@ -117,16 +128,14 @@ private fun rememberSensorHeadingDeg(): Float? {
                         }
                         if (gOk && mOk && SensorManager.getRotationMatrix(R, I, g, m)) {
                             SensorManager.getOrientation(R, orient)
-                            var deg = Math.toDegrees(orient[0].toDouble()).toFloat()
-                            deg = ((deg % 360f) + 360f) % 360f
-                            heading = deg
+                            heading = screenHeading(orient[0])
                         }
                     }
                     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
                 }
                 sm.registerListener(listener, acc, SensorManager.SENSOR_DELAY_UI)
                 sm.registerListener(listener, mag, SensorManager.SENSOR_DELAY_UI)
-                onDispose { sm.unregisterListener(listener) }
+                onPauseOrDispose { sm.unregisterListener(listener) }
             }
         }
     }
@@ -190,7 +199,7 @@ fun BrujulaScreen(onBack: () -> Unit) {
                 )
                 if (!hasMagnetometer) {
                     Text(
-                        text = "Este dispositivo no tiene magnetómetro.",
+                        text = stringResource(R.string.compass_no_magnetometer),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -232,7 +241,7 @@ fun BrujulaScreen(onBack: () -> Unit) {
                 } else {
                     // Fallback simple cuando no hay magnetómetro
                     Text(
-                        text = "Brújula no soportada en este dispositivo",
+                        text = stringResource(R.string.compass_unsupported),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
