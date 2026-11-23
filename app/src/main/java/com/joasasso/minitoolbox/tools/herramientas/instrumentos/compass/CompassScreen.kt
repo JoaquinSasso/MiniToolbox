@@ -108,10 +108,14 @@ fun BrujulaScreen(onBack: () -> Unit, viewModel: CompassViewModel = viewModel())
         targetValue = state.continuousHeading,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioNoBouncy,
-            stiffness = Spring.StiffnessMediumLow
+            stiffness = Spring.StiffnessMedium
         ),
         label = "compassRotation"
     )
+    // Todo lo que se dibuja (anillo, marca del objetivo, arco, número y desvío) sale del mismo
+    // rumbo animado. Si el arco usara el rumbo del sensor, al girar rápido quedaría por
+    // delante o por detrás de la marca. La vibración sigue usando el rumbo real del ViewModel.
+    val shownState = state.displayedAt(dialHeading)
 
     // Única vibración de la brújula: confirma que el usuario volvió al rumbo fijado.
     LaunchedEffect(viewModel) {
@@ -142,7 +146,7 @@ fun BrujulaScreen(onBack: () -> Unit, viewModel: CompassViewModel = viewModel())
             val dial: @Composable (Modifier) -> Unit = { modifier ->
                 BoxWithConstraints(modifier, contentAlignment = Alignment.Center) {
                     CompassDial(
-                        state = state,
+                        state = shownState,
                         dialHeading = dialHeading,
                         diameter = min(maxWidth, maxHeight) * 0.92f
                     )
@@ -169,7 +173,7 @@ fun BrujulaScreen(onBack: () -> Unit, viewModel: CompassViewModel = viewModel())
             }
             val bearing: @Composable () -> Unit = {
                 BearingPanel(
-                    state = state,
+                    state = shownState,
                     onLock = viewModel::lockBearing,
                     onClear = viewModel::clearBearing
                 )

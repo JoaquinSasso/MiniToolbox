@@ -41,6 +41,13 @@ data class CompassUiState(
 
     val isOnCourse: Boolean
         get() = deviation?.let { abs(it) <= CompassMath.ON_COURSE_TOLERANCE_DEG } ?: false
+
+    /**
+     * El mismo estado visto desde el rumbo continuo que dibuja la UI (el animado), para que el
+     * número, el desvío y el arco coincidan con el anillo aunque la animación vaya atrasada.
+     */
+    fun displayedAt(continuousHeading: Float): CompassUiState =
+        copy(heading = CompassMath.normalize(continuousHeading))
 }
 
 sealed interface CompassEvent {

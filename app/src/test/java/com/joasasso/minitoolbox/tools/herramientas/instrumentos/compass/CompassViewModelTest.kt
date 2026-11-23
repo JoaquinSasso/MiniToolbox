@@ -233,6 +233,25 @@ class CompassViewModelTest {
     }
 
     @Test
+    fun displayedAt_elArcoTerminaEnLaMarcaAunqueLaAnimacionVayaAtrasada() {
+        // Caso reportado en el teléfono: el sensor ya marca 129° pero el anillo animado sigue
+        // en 180°, con el rumbo fijado en 180°. El arco tiene que medir 0°, no 51°.
+        val sensorState = CompassUiState(hasReading = true, heading = 129f, targetBearing = 180f)
+        assertEquals(0f, sensorState.displayedAt(180f).deviation!!, 0.001f)
+
+        // Invariante: el extremo del arco (desde la línea de fe, a 0°) cae en el mismo ángulo
+        // de pantalla que la marca del objetivo, que gira con el anillo (target - rumbo animado).
+        for (target in listOf(0f, 45f, 180f, 359f)) {
+            for (animated in listOf(-725f, -90f, 0f, 129.5f, 359f, 361f, 1080f)) {
+                val shown = sensorState.copy(targetBearing = target).displayedAt(animated)
+                val arcEnd = CompassMath.normalize(shown.deviation!!)
+                val marker = CompassMath.normalize(target - animated)
+                assertEquals("target=$target animated=$animated", marker, arcEnd, 0.01f)
+            }
+        }
+    }
+
+    @Test
     fun rumboGuardado_seRestauraAlRecrearElViewModel() = runTest {
         val handle = SavedStateHandle(mapOf(CompassViewModel.KEY_TARGET_BEARING to 45f))
         val model = CompassViewModel(app, handle, FakeCompassSensor())
