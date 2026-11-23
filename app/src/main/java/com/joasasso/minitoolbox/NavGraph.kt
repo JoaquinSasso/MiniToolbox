@@ -43,7 +43,7 @@ import com.joasasso.minitoolbox.tools.entretenimiento.minijuegos.minesweeper.Min
 import com.joasasso.minitoolbox.tools.herramientas.calculadoras.ConversorUnidadesScreen
 import com.joasasso.minitoolbox.tools.herramientas.generadores.GeneradorQrScreen
 import com.joasasso.minitoolbox.tools.herramientas.generadores.GroupSelectorScreen
-import com.joasasso.minitoolbox.tools.herramientas.instrumentos.BrujulaScreen
+import com.joasasso.minitoolbox.tools.herramientas.instrumentos.compass.BrujulaScreen
 import com.joasasso.minitoolbox.tools.herramientas.instrumentos.BubbleLevelScreen
 import com.joasasso.minitoolbox.tools.herramientas.instrumentos.FlashScreen
 import com.joasasso.minitoolbox.tools.herramientas.instrumentos.LightSensorScreen
