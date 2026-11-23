@@ -73,18 +73,47 @@ function isReadAuthorized(req: any): boolean {
 }
 
 /**
- * Verifica el token de Firebase App Check enviado por la app.
- * Devuelve false tanto si no vino token como si es invalido.
+ * Proteccion contra replay de App Check (docs/decisions/appcheck-replay-protection.md).
+ *
+ * Con false, un token ya consumido se acepta y solo se registra appcheck_replay.
+ * Los clientes anteriores a fix/ingest-appcheck-replay reusan el mismo token
+ * durante su vigencia (alrededor de una hora), asi que rechazar ahora les cortaria
+ * envios legitimos. Pasar a true cuando appcheck_replay en Cloud Logging venga solo
+ * de versiones viejas en proporcion aceptable: es un cambio de codigo a proposito,
+ * para que quede en el historial.
  */
-async function verifyAppCheck(req: any): Promise<boolean> {
+const REJECT_REPLAYED_APPCHECK = false;
+
+/** Resultado de verificar el token de App Check de un lote. */
+type AppCheckResult = "valid" | "invalid" | "replayed";
+
+/**
+ * Verifica el token de Firebase App Check enviado por la app y lo consume.
+ *
+ * Primero se verifica sin consumir: es una validacion local del JWT, asi que un
+ * token basura se rechaza sin llamar al backend de App Check. Despues se consume:
+ * cada token de uso limitado sirve para un solo lote, y eso es lo que limita el
+ * envio por origen sin guardar IPs ni identificadores (DECISIONS.md, seccion 3).
+ *
+ * Si la llamada de consumo falla (permisos de la cuenta de servicio, cuota o red),
+ * el lote se acepta: el token ya se valido, y un fallo de infraestructura no debe
+ * cortar la ingesta. Queda registrado como appcheck_consume_failed.
+ */
+async function verifyAppCheck(req: any): Promise<AppCheckResult> {
 	const token = readHeader(req, "X-Firebase-AppCheck");
-	if (!token) return false;
+	if (!token) return "invalid";
 	try {
 		await getAppCheck().verifyToken(token);
-		return true;
 	} catch (e) {
 		logger.warn("appcheck_invalid", { reason: (e as Error).message });
-		return false;
+		return "invalid";
+	}
+	try {
+		const consumed = await getAppCheck().verifyToken(token, { consume: true });
+		return consumed.alreadyConsumed ? "replayed" : "valid";
+	} catch (e) {
+		logger.error("appcheck_consume_failed", { reason: (e as Error).message });
+		return "valid";
 	}
 }
 
@@ -519,24 +548,37 @@ function topK(map: Record<string, number>, k: number) {
 
 // ------------ Functions ------------
 export const ingest = onRequest(
+	// Techo de costo, no un limite por origen. El valor no sale de una medicion del
+	// trafico: si las metricas de la funcion muestran requests rechazados por falta
+	// de instancias (el cliente recibe 429 y los reintenta como transitorios), subirlo.
+	{ maxInstances: 10 },
 	async (req, res) => {
 		try {
 			if (req.method !== "POST") {
 				sendJson(res, 405, { ok: false, error: "method_not_allowed" });
 				return;
 			}
+			const declaredVersion =
+				typeof req.body?.app_version === "string" ? req.body.app_version : null;
+
 			// Autenticacion: solo App Check. Las versiones anteriores a la 1.3.2, que
 			// enviaban una API key, se rechazan (docs/decisions/appcheck-only-ingest.md).
 			// ingest_unauthorized con app_version es la forma de medir cuantas quedan.
-			if (!(await verifyAppCheck(req))) {
-				logger.warn("ingest_unauthorized", {
-					app_version:
-						typeof req.body?.app_version === "string"
-							? req.body.app_version
-							: null,
-				});
+			const appCheck = await verifyAppCheck(req);
+			if (appCheck === "invalid") {
+				logger.warn("ingest_unauthorized", { app_version: declaredVersion });
 				sendJson(res, 401, { ok: false, error: "unauthorized" });
 				return;
+			}
+			if (appCheck === "replayed") {
+				logger.warn("appcheck_replay", {
+					app_version: declaredVersion,
+					rejected: REJECT_REPLAYED_APPCHECK,
+				});
+				if (REJECT_REPLAYED_APPCHECK) {
+					sendJson(res, 401, { ok: false, error: "unauthorized" });
+					return;
+				}
 			}
 
 			// Claves de herramienta no reconocidas en este lote. Se acumulan para

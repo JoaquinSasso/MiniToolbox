@@ -135,6 +135,7 @@ This document defines the exact meaning of the counters in MiniToolbox's own tel
 - **Status:** Ingest accepts App Check only (`docs/decisions/appcheck-only-ingest.md`, Spanish), so the field is no longer written to `metrics_ingest_batches` or `metrics_ingest_logs`.
 - **`metrics_auth` rollup:** Keeps its name and shape for continuity. Since the change, `appcheck` and `by_version.<version>.appcheck` mean accepted batches. Earlier months also have `api_key`, which remains in Firestore but `metricsAuth` no longer returns. For a total of accepted batches that also holds for those months, use `batches`.
 - **Rejected batches:** Not counted in Firestore. They show up in Cloud Logging as `ingest_unauthorized`, with the declared `app_version`.
+- **Reused tokens:** A batch with an already consumed App Check token is logged in Cloud Logging as `appcheck_replay`, with the `app_version` and the `rejected` field. While `rejected` is `false`, those batches are accepted and add to `metrics_auth` like any other (`docs/decisions/appcheck-replay-protection.md`, Spanish).
 
 ---
 

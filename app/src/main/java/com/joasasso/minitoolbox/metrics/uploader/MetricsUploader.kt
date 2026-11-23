@@ -54,12 +54,20 @@ interface MetricsUploader {
 /**
  * Implementación real sobre HttpURLConnection.
  *
- * Autenticación exclusivamente por Firebase App Check desde la 1.3.2.
+ * Autenticación exclusivamente por Firebase App Check desde la 1.3.2. Cada envío
+ * pide un token de uso limitado nuevo: el backend lo consume, y un token reusado
+ * cuenta como replay (docs/decisions/appcheck-replay-protection.md). Por eso no
+ * sirve el token cacheado de `getAppCheckToken`.
+ *
+ * @param tokenProvider devuelve el token o null si no se pudo obtener. Es
+ *   inyectable para testear el camino sin token sin depender de Firebase.
  */
-class HttpMetricsUploader : MetricsUploader {
+class HttpMetricsUploader(
+    private val tokenProvider: suspend () -> String? = { fetchLimitedUseAppCheckToken() },
+) : MetricsUploader {
 
     override suspend fun post(endpoint: String, json: String): UploadOutcome {
-        val token = fetchAppCheckToken()
+        val token = tokenProvider()
             ?: return UploadOutcome.Transient(null, "appcheck_token_unavailable")
 
         val conn = try {
@@ -105,20 +113,27 @@ class HttpMetricsUploader : MetricsUploader {
         null
     }
 
-    private fun fetchAppCheckToken(): String? = try {
-        Tasks.await(
-            FirebaseAppCheck.getInstance().getAppCheckToken(false),
-            APPCHECK_TIMEOUT_SECONDS, TimeUnit.SECONDS
-        ).token
-    } catch (_: Exception) {
-        null
-    }
-
     companion object {
         private const val CONNECT_TIMEOUT_MS = 10_000
         private const val READ_TIMEOUT_MS = 15_000
         private const val APPCHECK_TIMEOUT_SECONDS = 15L
         private const val MAX_BODY_CHARS = 300
+
+        /**
+         * Token de App Check de uso limitado, o null si no se pudo obtener a tiempo.
+         * `Tasks.await` bloquea, así que corre en `Dispatchers.IO`.
+         */
+        suspend fun fetchLimitedUseAppCheckToken(): String? = withContext(Dispatchers.IO) {
+            try {
+                Tasks.await(
+                    FirebaseAppCheck.getInstance().limitedUseAppCheckToken,
+                    APPCHECK_TIMEOUT_SECONDS, TimeUnit.SECONDS
+                ).token
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                null
+            }
+        }
 
         /**
          * Clasificación de códigos HTTP. Extraída del cliente para poder testearla

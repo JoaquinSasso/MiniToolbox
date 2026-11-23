@@ -1,5 +1,6 @@
 package com.joasasso.minitoolbox.metrics.uploader
 
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -34,6 +35,32 @@ class MetricsUploaderTest {
     fun `classify clasifica rechazo permanente 400 por payload invalido`() {
         val outcome = HttpMetricsUploader.classify(400, "Bad Request: invalid key")
         assertTrue(outcome is UploadOutcome.PermanentReject && outcome.code == 400)
+    }
+
+    @Test
+    fun `post sin token de App Check es transitorio y no sale a la red`() = runTest {
+        var tokenRequests = 0
+        val uploader = HttpMetricsUploader(tokenProvider = { tokenRequests++; null })
+
+        // Un endpoint inválido: si post intentara conectar, el resultado traería la
+        // excepción de red como causa en lugar del motivo del token.
+        val outcome = uploader.post("http://invalid.invalid/ingest", "{}")
+
+        assertEquals(UploadOutcome.Transient(null, "appcheck_token_unavailable"), outcome)
+        assertEquals(1, tokenRequests)
+    }
+
+    @Test
+    fun `cada post pide un token nuevo`() = runTest {
+        // El backend consume cada token: reusar uno haría que el segundo envío
+        // figure como replay. El proveedor tiene que consultarse en cada post.
+        var tokenRequests = 0
+        val uploader = HttpMetricsUploader(tokenProvider = { tokenRequests++; null })
+
+        uploader.post("http://invalid.invalid/ingest", "{}")
+        uploader.post("http://invalid.invalid/ingest", "{}")
+
+        assertEquals(2, tokenRequests)
     }
 
     @Test

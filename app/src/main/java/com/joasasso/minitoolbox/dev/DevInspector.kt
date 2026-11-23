@@ -2,8 +2,6 @@ package com.joasasso.minitoolbox.dev
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit
-import com.google.android.gms.tasks.Tasks
-import com.google.firebase.appcheck.FirebaseAppCheck
 import com.joasasso.minitoolbox.metrics.appOpen
 import com.joasasso.minitoolbox.metrics.isMetricsEnabled
 import com.joasasso.minitoolbox.metrics.storage.AggregatesRepository
@@ -12,6 +10,7 @@ import com.joasasso.minitoolbox.metrics.storage.MetricsKeys
 import com.joasasso.minitoolbox.metrics.storage.metricsDataStore
 import com.joasasso.minitoolbox.metrics.toolUse
 import com.joasasso.minitoolbox.metrics.MetricsConfig
+import com.joasasso.minitoolbox.metrics.uploader.HttpMetricsUploader
 import com.joasasso.minitoolbox.metrics.uploader.UploadMetricsWorker
 import com.joasasso.minitoolbox.metrics.uploader.UploadScheduler
 import kotlinx.coroutines.CancellationException
@@ -25,7 +24,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.UUID
-import java.util.concurrent.TimeUnit
 
 /** Vista neutral para mostrar deltas sin depender de la data class interna del repositorio. */
 data class DayDeltaView(
@@ -106,12 +104,9 @@ suspend fun testDirectConnection(context: Context): Result<String> = withContext
         return@withContext Result.failure(Exception("Endpoint no configurado"))
     }
 
-    val appCheckToken = try {
-        Tasks.await(
-            FirebaseAppCheck.getInstance().getAppCheckToken(false),
-            15, TimeUnit.SECONDS
-        ).token
-    } catch (_: Exception) { null }
+    // Mismo token de uso limitado que el uploader: el backend consume cada token,
+    // así que uno cacheado figuraría como replay.
+    val appCheckToken = HttpMetricsUploader.fetchLimitedUseAppCheckToken()
 
     if (appCheckToken == null) {
         return@withContext Result.failure(Exception("No se pudo obtener token de App Check"))

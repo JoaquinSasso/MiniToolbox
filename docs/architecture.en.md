@@ -84,7 +84,7 @@ flowchart TD
     end
 
     subgraph Backend [Cloud Functions, TypeScript]
-        UP -->|"POST JSON<br/>X-Firebase-AppCheck"| ING["ingest<br/>verifyToken + validateBody"]
+        UP -->|"POST JSON<br/>X-Firebase-AppCheck"| ING["ingest<br/>verifyToken (consume) + validateBody"]
         ING -->|"transaction, dedup by batch_id"| FS[(Firestore)]
         FS --> RD["metricsDaily<br/>metricsSummary<br/>metricsAuth"]
     end
@@ -106,7 +106,7 @@ flowchart TD
 | `metrics_auth/{month}` | Monthly rollup of accepted batches and pipeline health ([ADR](decisions/appcheck-only-ingest.md), Spanish) |
 | `metrics_ingest_logs` | Per-batch log |
 
-**Authentication.** Ingest accepts App Check tokens only (Play Integrity in release, the debug provider in debug). Reads accept `READ_METRICS_API_KEY` only.
+**Authentication.** Ingest accepts App Check tokens only (Play Integrity in release, the debug provider in debug). The client requests a limited-use token for each upload and the backend consumes it; for now a reused token is logged as `appcheck_replay` but accepted ([ADR](decisions/appcheck-replay-protection.md), Spanish). `ingest` has `maxInstances: 10` as a cost ceiling. Reads accept `READ_METRICS_API_KEY` only.
 
 **Known asymmetry.** The dashboard requests `metricsAuth` at `/api/metricsAuth`, but `dashboard/firebase.json` only has rewrites for `metricsSummary`, `metricsDaily` and `ingest`. When served from Hosting, that path falls into the `**` rewrite and returns `index.html`. It is tracked in the backlog (`dashboard-metricsauth-rewrite`).
 

@@ -128,6 +128,7 @@ Este documento define la semántica exacta de los contadores utilizados en el si
 - **Estado:** La ingesta acepta solo App Check (`docs/decisions/appcheck-only-ingest.md`), así que el campo dejó de escribirse en `metrics_ingest_batches` y `metrics_ingest_logs`.
 - **Rollup `metrics_auth`:** Conserva el nombre y la forma por continuidad. Desde el cambio, `appcheck` y `by_version.<versión>.appcheck` equivalen a lotes aceptados. Los meses anteriores también tienen `api_key`, que queda en Firestore pero `metricsAuth` ya no devuelve. Para un total de lotes aceptados que valga también para esos meses, usar `batches`.
 - **Lotes rechazados:** No se cuentan en Firestore. Se ven en Cloud Logging como `ingest_unauthorized`, con la `app_version` declarada.
+- **Tokens reusados:** Un lote con un token de App Check ya consumido se registra en Cloud Logging como `appcheck_replay`, con la `app_version` y el campo `rejected`. Mientras `rejected` sea `false`, esos lotes se aceptan y suman en `metrics_auth` como cualquier otro (`docs/decisions/appcheck-replay-protection.md`).
 
 ---
 

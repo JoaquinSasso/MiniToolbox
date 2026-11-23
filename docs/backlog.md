@@ -7,7 +7,8 @@ Las líneas citan el estado de `master @ 58105f5` (2026-10-02). Antes de trabaja
 
 ## P0: corregir antes del próximo release
 
-- [ ] `backend-read-credential`: la lectura ya acepta solo `READ_METRICS_API_KEY`, pero esa clave no se rotó y `ingest` no tiene rate limiting. Evidencia: `isReadAuthorized` en `backend/functions/src/index.ts`; `ingest` no limita por origen. Hecho: clave de lectura rotada (con el dashboard reconfigurado) y rate limiting en `ingest`.
+- [ ] `backend-read-credential`: la lectura acepta solo `READ_METRICS_API_KEY`, pero esa clave no se rotó. Evidencia: `isReadAuthorized` en `backend/functions/src/index.ts`. Hecho (manual, autor): `firebase functions:secrets:set READ_METRICS_API_KEY`, deploy de `metricsDaily`, `metricsSummary` y `metricsAuth`, y la clave nueva cargada en el dashboard.
+- [ ] `appcheck-replay-enforce`: la ingesta consume cada token de App Check pero acepta los reusados (`REJECT_REPLAYED_APPCHECK = false` en `backend/functions/src/index.ts`), así que el límite por origen todavía no rige. Evidencia: `docs/decisions/appcheck-replay-protection.md`. Hecho: deploy de `ingest` y release de la app con tokens de uso limitado, sin `appcheck_consume_failed` en Cloud Logging, conteo de `appcheck_replay` por `app_version` y la constante en `true` según el criterio del ADR.
 
 ## P1: calidad de datos de telemetría
 
@@ -44,6 +45,8 @@ Las líneas citan el estado de `master @ 58105f5` (2026-10-02). Antes de trabaja
 - [ ] `auto-backup`: el manifest no declara `allowBackup` ni `dataExtractionRules`, y los XML de reglas son plantillas sin usar. Evidencia: `AndroidManifest.xml`, `res/xml/data_extraction_rules.xml`. Hecho: una decisión explícita sobre qué se respalda (como mínimo, excluir el estado de métricas).
 - [ ] `ar-ruler-typo`: el nombre en inglés de la regla AR dice "Aumented Reality Ruler". Evidencia: `app/src/main/res/values/strings_tools.xml:18`. Hecho: "Augmented Reality Ruler".
 - [ ] `accessibility`: los instrumentos dibujados con `Canvas` no tienen semántica. Evidencia: `git grep -n "semantics"` devuelve un solo uso (`ui/components/Stepper.kt:35`). Hecho: `semantics` en brújula, nivel, regla y lupa, verificado con TalkBack.
+- [ ] `ingest-value-bounds`: la validación no acota los contadores ni la cantidad de items por lote, así que un dispositivo atestado puede mandar un lote con valores inflados (por ejemplo, `app_open` de un millón). Evidencia: `safeCount` en `backend/functions/src/validate.ts:159-161` acepta cualquier entero no negativo, y `validateBody` (`validate.ts:191`) no limita `body.items`. Hecho: topes definidos a partir de lo que el cliente puede generar, saneando en lugar de rechazar con 400 (un rechazo determinista congela al cliente, ver la cabecera de `validateBody`), con tests si para entonces existe `backend-tests`.
+- [ ] `architecture-metricsauth-stale`: la "Asimetría conocida" de la arquitectura dice que falta el rewrite de `/api/metricsAuth`, pero ya está. Evidencia: `docs/architecture.md:111` y `docs/architecture.en.md:111` contra `dashboard/firebase.json:21`. Hecho: el párrafo se borra o se reduce a lo que sigue pendiente de `dashboard-metricsauth-rewrite` (el deploy de Hosting).
 
 
 ## Producto (requiere decisión del autor)
