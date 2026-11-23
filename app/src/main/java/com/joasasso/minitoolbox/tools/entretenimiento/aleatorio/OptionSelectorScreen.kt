@@ -70,7 +70,13 @@ fun OptionSelectorScreen(onBack: () -> Unit) {
     val itemHeight = 80.dp
 
     Scaffold(
-        topBar = { TopBarReusable(stringResource(R.string.tool_option_selector), onBack) { showInfo = true } }
+        topBar = {
+            TopBarReusable(
+                title = stringResource(R.string.tool_option_selector),
+                onBack = onBack,
+                onShowInfo = { showInfo = true }
+            )
+        }
     ) { padding ->
         Column(
             Modifier
