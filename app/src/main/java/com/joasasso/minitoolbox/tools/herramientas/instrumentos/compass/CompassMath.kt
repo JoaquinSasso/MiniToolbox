@@ -19,7 +19,7 @@ object CompassMath {
     const val TILT_WARNING_DEG = 30f
 
     /** Margen a cada lado del rumbo fijado dentro del cual se considera que el usuario va "en rumbo". */
-    const val ON_COURSE_TOLERANCE_DEG = 5f
+    const val ON_COURSE_TOLERANCE_DEG = 3f
 
     /** Lleva cualquier ángulo al rango [0, 360). */
     fun normalize(deg: Float): Float {

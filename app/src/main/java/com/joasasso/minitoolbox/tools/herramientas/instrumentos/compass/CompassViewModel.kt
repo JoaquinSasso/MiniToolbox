@@ -116,7 +116,7 @@ class CompassViewModel @JvmOverloads constructor(
         const val KEY_TARGET_BEARING = "compass_target_bearing"
 
         /** Desvío a partir del cual se considera que el usuario dejó el rumbo. */
-        const val OFF_COURSE_DEG = 10f
+        const val OFF_COURSE_DEG = 6f
 
         fun reduce(state: CompassUiState, reading: CompassReading): CompassUiState = when (reading) {
             is CompassReading.Accuracy ->

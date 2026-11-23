@@ -205,16 +205,39 @@ class CompassViewModelTest {
         sensor.readings.emit(flat(91f))
         assertTrue("fijar el rumbo no debe vibrar", events.isEmpty())
 
-        // Desvío leve (dentro de la histéresis): no arma el aviso.
-        sensor.readings.emit(flat(97f))
+        // Desvío leve, del tamaño del temblor del sensor (dentro de la histéresis): no arma el aviso.
+        sensor.readings.emit(flat(95f))
         sensor.readings.emit(flat(90f))
         assertTrue(events.isEmpty())
 
         // Se aleja y vuelve: un solo aviso, aunque siga en rumbo.
         sensor.readings.emit(flat(130f))
-        sensor.readings.emit(flat(93f))
+        sensor.readings.emit(flat(92f))
         sensor.readings.emit(flat(90f))
         assertEquals(listOf<CompassEvent>(CompassEvent.BackOnCourse), events)
+    }
+
+    @Test
+    fun correccionChica_vuelveAVibrar() = runTest {
+        // Reportado en el teléfono: con 5°/10° había que salirse mucho para que volviera a
+        // vibrar al corregir. Con 3°/6°, un desvío de 7° ya cuenta como salirse del rumbo.
+        val sensor = FakeCompassSensor()
+        val model = CompassViewModel(app, SavedStateHandle(), sensor)
+        vm = model
+        mantenerSuscripto(model.uiState)
+        val events = mutableListOf<CompassEvent>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.events.collect { events += it } }
+
+        sensor.readings.emit(flat(90f))
+        model.lockBearing()
+
+        sensor.readings.emit(flat(97f))
+        assertFalse(model.uiState.value.isOnCourse)
+        sensor.readings.emit(flat(91f))
+        sensor.readings.emit(flat(83f))
+        sensor.readings.emit(flat(89f))
+
+        assertEquals(2, events.size)
     }
 
     @Test
